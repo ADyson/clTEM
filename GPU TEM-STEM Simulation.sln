@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPU TEM-STEM Simulation", "GPU TEM-STEM Simulation\GPU TEM-STEM Simulation.csproj", "{09034F72-8AC9-43C6-9D03-B3B62051811D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCL Simulation Code", "OpenCL Simulation Code\OpenCL Simulation Code.vcxproj", "{90B30484-B6EF-4C45-915D-1B5560C5468C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|Win32.ActiveCfg = Release|Any CPU
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|x64.ActiveCfg = Release|x64
+		{09034F72-8AC9-43C6-9D03-B3B62051811D}.Release|x64.Build.0 = Release|x64
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|Win32.Build.0 = Debug|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|x64.ActiveCfg = Debug|x64
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Debug|x64.Build.0 = Debug|x64
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Any CPU.ActiveCfg = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Any CPU.Build.0 = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Win32.ActiveCfg = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|Win32.Build.0 = Release|Win32
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|x64.ActiveCfg = Release|x64
+		{90B30484-B6EF-4C45-915D-1B5560C5468C}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
