@@ -22,7 +22,7 @@ namespace ManagedOpenCLWrapper
 		std::string cfilename = marshalString<E_ANSI>(filepath);
 		_UMOpenCL->SetupStructure(cfilename);
 	};
-
+	
 	void ManagedOpenCL::GetStructureDetails(Int32% Len, float% MinX, float% MinY, float% MinZ, float% MaxX, float% MaxY, float% MaxZ )
 	{
 		// Probably unnecessary to do this way...

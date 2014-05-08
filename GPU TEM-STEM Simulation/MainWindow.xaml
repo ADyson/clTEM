@@ -115,12 +115,12 @@
         <TabControl HorizontalAlignment="Left" Height="600" Margin="30,25,0,0" Grid.Row="1" VerticalAlignment="Top" Width="600">
             <TabItem Header="CTEM">
                 <Grid Background="#FFE5E5E5">
-                    <Image Name="CTEMImageDisplay" Height="500" Width="500"/>
+                    <Image Name="CTEMImageDisplay" Height="512" Width="512"/>
                 </Grid>
             </TabItem>
             <TabItem Header="EW">
                 <Grid Background="#FFE5E5E5">
-                    <Image Height="500" Width="500"/>
+                    <Image Height="512" Width="512"/>
                 </Grid>
             </TabItem>
         </TabControl>
@@ -128,7 +128,7 @@
         <TabControl Height="600" Margin="0,25,30,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="600">
             <TabItem Header="Diffraction">
                 <Grid Background="#FFE5E5E5">
-                    <Image Height="500" Width="500" Margin="-15,34,105,34"/>
+                    <Image Height="500" Width="500" />
                 </Grid>
             </TabItem>
             <TabItem Header="N/A" IsEnabled="False">

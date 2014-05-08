@@ -158,15 +158,15 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (nm): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (nm): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (nm): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    PixelScaleLabel.Content = "Pixel Size (nm): " + (BiggestSize / Resolution).ToString();
+                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString();
                 }
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
@@ -243,13 +243,13 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (nm): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (nm): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (nm): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                PixelScaleLabel.Content ="Pixel Size (nm): "+ (BiggestSize / Resolution).ToString();
+                PixelScaleLabel.Content ="Pixel Size (A): "+ (BiggestSize / Resolution).ToString();
             }
         }
 
