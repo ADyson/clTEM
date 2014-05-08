@@ -59,6 +59,9 @@ public:
 	clQueue* clq;
 
 	size_t kernelsize;
+
+	// for chainloading setArgT
+	int iter;
 	
 
 	//clKernel(const char* codestring, cl_context &context, cl_uint &numdevices, cl_device_id* &devices, std::string kernelname,cl_command_queue &commandQueue);
@@ -104,7 +107,25 @@ public:
 		}
 	}
 
-	// Operater chained for slightly cleaner openCL argument setting
+	// Operater method chaining for slightly cleaner openCL argument setting.
+	// MUST USE <= FIRST to set iterator to 0, then use <<
+	// Currently needs support for 'skipping' values when they do no need to be changed
+
+	template<typename T>
+	clKernel& operator<=(T value){
+		iter = 0;
+		SetArgT(iter,value);
+		iter++;
+		return *this;
+	}
+
+	// completely untested and a guess
+	template<typename T>
+	clKernel& operator<<(){
+		iter++;
+		return *this;
+	}
+
 	template<typename T>
 	clKernel& operator<<(T value){
 		SetArgT(iter,value);
