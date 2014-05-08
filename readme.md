@@ -7,3 +7,6 @@
 1. Supports TDS
 1. Not use CUDA
 
+```Python
+import weAreShit
+```
