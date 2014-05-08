@@ -6,7 +6,3 @@
 1. Conventional multislice and improved version with no slice thickness limitations
 1. Supports TDS
 1. Not use CUDA
-
-```Python
-import weAreShit
-```
