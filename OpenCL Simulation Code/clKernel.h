@@ -104,6 +104,12 @@ public:
 		}
 	}
 
-
+	// Operater chained for slightly cleaner openCL argument setting
+	template<typename T>
+	clKernel& operator<<(T value){
+		SetArgT(iter,value);
+		iter++;
+		return *this;
+	}
 
 };
