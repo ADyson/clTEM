@@ -192,24 +192,6 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	ComplexMultiply->SetArgT(4,resolution);
 
 	clFinish(clq->cmdQueue);
-
-
-	// Extra shit for test in clFinish works...
-
-	GeneratePropagator->SetArgT(0,clPropagator);
-	GeneratePropagator->SetArgT(1,clXFrequencies);
-	GeneratePropagator->SetArgT(2,clYFrequencies);
-	GeneratePropagator->SetArgT(3,resolution);
-	GeneratePropagator->SetArgT(4,resolution);
-	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
-	GeneratePropagator->SetArgT(6,wavelength);
-	GeneratePropagator->SetArgT(7,bandwidthkmax);
-
-	GeneratePropagator->Enqueue(WorkSize);
-
-	clFinish(clq->cmdQueue);
-
-
 };
 
 void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure)
