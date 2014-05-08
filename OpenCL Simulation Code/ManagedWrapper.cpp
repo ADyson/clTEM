@@ -125,4 +125,14 @@ namespace ManagedOpenCLWrapper
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->GetCTEMImage(pdata,resolution);
 	};
+
+	float ManagedOpenCL::GetIMMax()
+	{	
+		return _UMOpenCL->TS->imagemax;
+	};
+
+	float ManagedOpenCL::GetIMMin()
+	{	
+		return _UMOpenCL->TS->imagemin;
+	};
 }

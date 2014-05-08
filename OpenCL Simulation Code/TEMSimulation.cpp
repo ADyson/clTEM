@@ -88,11 +88,17 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clXFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clYFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clEnqueueWriteBuffer(clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
-	clEnqueueWriteBuffer(clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
+	clEnqueueWriteBuffer(clq->cmdQueue,clYFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
+	
+
+
+	clFinish(clq->cmdQueue);
 	
 	// Setup Fourier Transforms
 	FourierTrans = new clFourier(context, clq);
 	FourierTrans->Setup(resolution,resolution);
+
+	clFinish(clq->cmdQueue);
 
 	// Initialise Wavefunctions and Create other buffers...
 	clWaveFunction1 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -105,6 +111,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	// Set initial wavefunction to 1+0i
 	clKernel* InitialiseWavefunction = new clKernel(InitialiseWavefunctionSource,context,cldev,"clInitialiseWavefunction",clq);
 	InitialiseWavefunction->BuildKernelOld();
+
+	clFinish(clq->cmdQueue);
 
 	float InitialValue = 1.0f;
 	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
@@ -120,6 +128,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	InitialiseWavefunction->Enqueue(WorkSize);
 
+	clFinish(clq->cmdQueue);
 
 	BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
 	//BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
@@ -154,6 +163,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	BinnedAtomicPotential->SetArgT(22,loadblocksz);
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 
+	clFinish(clq->cmdQueue);
 	
 	// Also need to generate propagator.
 	GeneratePropagator = new clKernel(context,cldev,"clGeneratePropagator",clq);
@@ -171,6 +181,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	GeneratePropagator->Enqueue(WorkSize);
 	
+
+	clFinish(clq->cmdQueue);
 	// And multiplication kernel
 	ComplexMultiply = new clKernel(context,cldev,"clComplexMultiply",clq);
 	ComplexMultiply->loadProgSource("Multiply.cl");
@@ -180,6 +192,24 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	ComplexMultiply->SetArgT(4,resolution);
 
 	clFinish(clq->cmdQueue);
+
+
+	// Extra shit for test in clFinish works...
+
+	GeneratePropagator->SetArgT(0,clPropagator);
+	GeneratePropagator->SetArgT(1,clXFrequencies);
+	GeneratePropagator->SetArgT(2,clYFrequencies);
+	GeneratePropagator->SetArgT(3,resolution);
+	GeneratePropagator->SetArgT(4,resolution);
+	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	GeneratePropagator->SetArgT(6,wavelength);
+	GeneratePropagator->SetArgT(7,bandwidthkmax);
+
+	GeneratePropagator->Enqueue(WorkSize);
+
+	clFinish(clq->cmdQueue);
+
+
 };
 
 void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure)
@@ -350,6 +380,8 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	ComplexMultiply->SetArgT(3,resolution);
 	ComplexMultiply->SetArgT(4,resolution);
+
+	clFinish(clq->cmdQueue);
 };
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
@@ -437,6 +469,8 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 		
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+
+	clFinish(clq->cmdQueue);
 	
 };
 
@@ -448,10 +482,23 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 
 	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Just get real part [0] = real, [1] = imag
+		
 		data[i] = compdata[i].s[0];
+
+		
+		// Find max,min
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
 	}
 
+	imagemin = min;
+	imagemax = max;
 };

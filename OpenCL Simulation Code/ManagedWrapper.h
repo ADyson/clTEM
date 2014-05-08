@@ -26,6 +26,8 @@ namespace ManagedOpenCLWrapper {
 		void InitialiseSimulation(int resolution);
 		void MultisliceStep(int stepno, int steps);
 		void GetCTEMImage(array<float>^ data, int resolution);
+		float GetIMMax();
+		float GetIMMin();
 		ManagedOpenCL();
 		~ManagedOpenCL();
 
