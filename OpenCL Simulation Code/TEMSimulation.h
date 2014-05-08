@@ -44,4 +44,8 @@ public:
 
 	void GetCTEMImage(float* data, int resolution);
 
+	// Image contrast limits (technically ew atm)
+	float imagemin;
+	float imagemax;
+
 };

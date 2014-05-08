@@ -1,13 +1,13 @@
 #pragma once
 
 const char* InitialiseWavefunctionSource = 
-	"__kernel void clInitialiseWavefunction(__global float2* InputWavefunction, int width, int height, float value) \n"
+"__kernel void clInitialiseWavefunction(__global float2* InputWavefunction, int width, int height, float value) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
 "	int yid = get_global_id(1);	\n"
 "	if(xid < width && yid < height) \n"
 "	{	\n"
-"		int Index = xid * width*yid; \n"
+"		int Index = xid + width*yid; \n"
 "		InputWavefunction[Index].x = value; \n"
 "		InputWavefunction[Index].y = 0; \n"
 "	}	\n"

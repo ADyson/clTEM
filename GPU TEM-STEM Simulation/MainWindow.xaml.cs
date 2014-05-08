@@ -304,10 +304,10 @@ namespace GPUTEMSTEMSimulation
                 mCL.GetNumberSlices(ref NumberOfSlices);
                 // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
-                //for (int i = 1; i <= NumberOfSlices; i++)
-                //{
-                    mCL.MultisliceStep(5, NumberOfSlices);
-                //}
+                for (int i = 1; i <= NumberOfSlices; i++)
+                {
+                    mCL.MultisliceStep(i, NumberOfSlices);
+                }
                 // Cleanup
 
                 //System.Threading.Thread.Sleep(2);
@@ -336,8 +336,8 @@ namespace GPUTEMSTEMSimulation
                 var arraySize = stride * _CTEMImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
-                float min = -0.3f;
-                float max = 0.7f;
+                float min = mCL.GetIMMin();
+                float max = mCL.GetIMMax();
 
                 for (int row = 0; row < _CTEMImg.PixelHeight; row++)
                     for (int col = 0; col < _CTEMImg.PixelWidth; col++)
