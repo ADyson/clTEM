@@ -1,4 +1,4 @@
-#clTEM Jon Branch
+#clTEM
 
 ####OpenCL TEM/STEM/Diffraction/EW image simulation software
 
