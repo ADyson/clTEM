@@ -1,4 +1,4 @@
-#clTEM
+#clTEM - development branch
 
 ####OpenCL TEM/STEM/Diffraction/EW image simulation software
 
