@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ using System.Windows.Threading;
 using System.Threading;
 using Microsoft.Win32;
 using ManagedOpenCLWrapper;
+using BitMiracle.LibTiff.Classic;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -55,6 +57,14 @@ namespace GPUTEMSTEMSimulation
             set { MainWindow.CTEMImg = value; }
         }
 
+        private static WriteableBitmap EWImg;
+        public static WriteableBitmap _EWImg
+        {
+            get { return MainWindow.EWImg; }
+            set { MainWindow.EWImg = value; }
+        }
+
+
         private static WriteableBitmap DiffImg;
         public static WriteableBitmap _DiffImg
         {
@@ -86,6 +96,8 @@ namespace GPUTEMSTEMSimulation
 
         // Arrays to store image data
         float[] CTEMImage;
+        float[] EWImage;
+        float[] DiffImage;
 
 
 
@@ -307,6 +319,7 @@ namespace GPUTEMSTEMSimulation
                 for (int i = 1; i <= NumberOfSlices; i++)
                 {
                     mCL.MultisliceStep(i, NumberOfSlices);
+
                 }
                 // Cleanup
 
@@ -318,40 +331,78 @@ namespace GPUTEMSTEMSimulation
             // This runs on UI Thread so can access UI, probably better way of doing image though.
             SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
             {
-                _CTEMImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
-                CTEMImageDisplay.Source = _CTEMImg;
+                _EWImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                EWImageDisplay.Source = _EWImg;
 
                 // When its completed we want to get data to c# for displaying in an image...
-                CTEMImage = new float[Resolution * Resolution];
-                mCL.GetCTEMImage(CTEMImage, Resolution);
+                EWImage = new float[Resolution * Resolution];
+                mCL.GetCTEMImage(EWImage, Resolution);
 
                 // Calculate the number of bytes per pixel (should be 4 for this format). 
-                var bytesPerPixel = (_CTEMImg.Format.BitsPerPixel + 7) / 8;
+                var bytesPerPixel = (_EWImg.Format.BitsPerPixel + 7) / 8;
 
                 // Stride is bytes per pixel times the number of pixels.
                 // Stride is the byte width of a single rectangle row.
-                var stride = _CTEMImg.PixelWidth * bytesPerPixel;
+                var stride = _EWImg.PixelWidth * bytesPerPixel;
 
                 // Create a byte array for a the entire size of bitmap.
-                var arraySize = stride * _CTEMImg.PixelHeight;
+                var arraySize = stride * _EWImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
                 float min = mCL.GetIMMin();
                 float max = mCL.GetIMMax();
 
-                for (int row = 0; row < _CTEMImg.PixelHeight; row++)
-                    for (int col = 0; col < _CTEMImg.PixelWidth; col++)
+                for (int row = 0; row < _EWImg.PixelHeight; row++)
+                    for (int col = 0; col < _EWImg.PixelWidth; col++)
                     {
-                        pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-                        pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-                        pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-                        pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 3] = 0;
+                        pixelArray[(row * _EWImg.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                        pixelArray[(row * _EWImg.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                        pixelArray[(row * _EWImg.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                        pixelArray[(row * _EWImg.PixelWidth + col) * bytesPerPixel + 3] = 0;
                     }
 
 
-                Int32Rect rect = new Int32Rect(0, 0, _CTEMImg.PixelWidth, _CTEMImg.PixelHeight);
+                Int32Rect rect = new Int32Rect(0, 0, _EWImg.PixelWidth, _EWImg.PixelHeight);
 
-                _CTEMImg.WritePixels(rect, pixelArray, stride, 0);
+                _EWImg.WritePixels(rect, pixelArray, stride, 0);
+
+
+                _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                DiffImageDisplay.Source = _DiffImg;
+
+                // When its completed we want to get data to c# for displaying in an image...
+                DiffImage = new float[Resolution * Resolution];
+                mCL.GetDiffImage(DiffImage, Resolution);
+
+                // Calculate the number of bytes per pixel (should be 4 for this format). 
+                var bytesPerPixel2 = (_DiffImg.Format.BitsPerPixel + 7) / 8;
+
+                // Stride is bytes per pixel times the number of pixels.
+                // Stride is the byte width of a single rectangle row.
+                var stride2 = _DiffImg.PixelWidth * bytesPerPixel;
+
+                // Create a byte array for a the entire size of bitmap.
+                var arraySize2 = stride2 * _DiffImg.PixelHeight;
+                var pixelArray2 = new byte[arraySize2];
+
+                float min2 = mCL.GetDiffMin();
+                float max2 = mCL.GetDiffMax();
+
+                for (int row = 0; row < _DiffImg.PixelHeight; row++)
+                    for (int col = 0; col < _DiffImg.PixelWidth; col++)
+                    {
+                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+                    }
+
+
+                Int32Rect rect2 = new Int32Rect(0, 0, _DiffImg.PixelWidth, _DiffImg.PixelHeight);
+
+                _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
+
+                SaveImageButton.IsEnabled = true;
             };
 
             SimWorker.RunWorkerAsync();
@@ -453,6 +504,52 @@ namespace GPUTEMSTEMSimulation
         {
             string temporarytext = ProbeAperture.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
+        }
+
+        private void SaveImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Ideally want to check tab and use information to save either EW or CTEM....
+
+              // File saving dialog
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+            
+            saveDialog.Title = "Save Output Image";
+            saveDialog.DefaultExt = ".tiff";                     // Default file extension
+            saveDialog.Filter = "TIFF Image (.tiff)|*.tiff"; // Filter files by extension
+
+            Nullable<bool> result = saveDialog.ShowDialog();
+
+            if (result == true)
+            {
+                string filename = saveDialog.FileName;
+                using (Tiff output = Tiff.Open(filename, "w"))
+                {
+                    output.SetField(TiffTag.IMAGEWIDTH, Resolution);
+                    output.SetField(TiffTag.IMAGELENGTH, Resolution);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                    output.SetField(TiffTag.SAMPLEFORMAT, 3);
+                    output.SetField(TiffTag.BITSPERSAMPLE, 32);
+                    output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+                    output.SetField(TiffTag.ROWSPERSTRIP, Resolution);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                    output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                    output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                    for (int i = 0; i < Resolution; ++i)
+                    {
+                        float[] buf = new float[Resolution];
+                        byte[] buf2 = new byte[4 * Resolution];
+                        for (int j = 0; j < Resolution; ++j)
+                        {
+                              buf[j] = EWImage[j+Resolution*i];
+                        }
+                        Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
+                        output.WriteScanline(buf2, i);
+                    }
+                }
+            }
+
         }
     }
 }

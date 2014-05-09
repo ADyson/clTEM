@@ -135,4 +135,20 @@ namespace ManagedOpenCLWrapper
 	{	
 		return _UMOpenCL->TS->imagemin;
 	};
+
+	void ManagedOpenCL::GetDiffImage(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->GetDiffImage(pdata,resolution);
+	};
+
+	float ManagedOpenCL::GetDiffMax()
+	{	
+		return _UMOpenCL->TS->diffmax;
+	};
+
+	float ManagedOpenCL::GetDiffMin()
+	{	
+		return _UMOpenCL->TS->diffmin;
+	};
 }

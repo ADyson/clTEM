@@ -12,6 +12,8 @@ public:
 	clKernel* BinnedAtomicPotential;
 	clKernel* GeneratePropagator;
 	clKernel* ComplexMultiply;
+	clKernel* BandLimit;
+	clKernel* fftShift;
 
 	cl_context context;
 	clQueue* clq;
@@ -43,9 +45,12 @@ public:
 	void MultisliceStep(int stepno, int steps);
 
 	void GetCTEMImage(float* data, int resolution);
+	void GetDiffImage(float* data, int resolution);
 
 	// Image contrast limits (technically ew atm)
 	float imagemin;
 	float imagemax;
+	float diffmin;
+	float diffmax;
 
 };

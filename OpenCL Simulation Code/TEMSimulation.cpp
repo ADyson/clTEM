@@ -81,6 +81,9 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 		bandwidthkmax = kmaxx;
 	};
 
+	// k not k^2.
+	bandwidthkmax = sqrt(bandwidthkmax);
+
 	// Bandlimit by FDdz size
 
 	// Upload to device
@@ -108,13 +111,29 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clKernel* InitialiseWavefunction = new clKernel(InitialiseWavefunctionSource,context,cldev,"clInitialiseWavefunction",clq);
 	InitialiseWavefunction->BuildKernelOld();
 
-	clFinish(clq->cmdQueue);
+	BandLimit = new clKernel(BandLimitSource,context,cldev,"clBandLimit",clq);
+	BandLimit->BuildKernelOld();
+
+	fftShift = new clKernel(fftShiftSource,context,cldev,"clfftShift",clq);
+	fftShift->BuildKernelOld();
+
+	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(1,clWaveFunction3);
+	fftShift->SetArgT(2,resolution);
+	fftShift->SetArgT(3,resolution);
 
 	float InitialValue = 1.0f;
 	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
 	InitialiseWavefunction->SetArgT(1,resolution);
 	InitialiseWavefunction->SetArgT(2,resolution);
 	InitialiseWavefunction->SetArgT(3,InitialValue);
+
+	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(1,resolution);
+	BandLimit->SetArgT(2,resolution);
+	BandLimit->SetArgT(3,bandwidthkmax);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
 
@@ -130,9 +149,9 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(sqrtf(9.0f)/AtomicStructure->dz);
+	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -403,7 +422,8 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	int slice = stepno - 1;
 	int slices = steps;
 
-	float currentz = AtomicStructure->MaximumZ - slice * AtomicStructure->dz;
+	// Didn't have MinimumZ so it wasnt correctly rescaled z-axis from 0 to SizeZ...
+	float currentz = AtomicStructure->MaximumZ - AtomicStructure->MinimumZ - slice * AtomicStructure->dz;
 
 	BinnedAtomicPotential->SetArgT(9,slice);
 	BinnedAtomicPotential->SetArgT(10,slices);
@@ -433,6 +453,10 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	// Propagate
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
+
+	// BandLimit OK here?
+
+	BandLimit->Enqueue(Work);
 
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
@@ -471,4 +495,39 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 
 	imagemin = min;
 	imagemax = max;
+};
+
+void TEMSimulation::GetDiffImage(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->Enqueue(Work);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
 };

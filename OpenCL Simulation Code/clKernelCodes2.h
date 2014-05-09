@@ -131,3 +131,58 @@ const char* BinnedAtomicPotentialSource2 =
 "	}	\n"
 "}	\n"
 ;
+
+
+
+
+const char* BandLimitSource = 
+"__kernel void clBandLimit(__global float2* InputWavefunction, int width, int height, float kmax, __global float* kx, __global float* ky) \n"
+"{		\n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1);	\n"
+"	if(xid < width && yid < height) \n"
+"	{	\n"
+"		int Index = xid + width*yid; \n"
+"		float k = hypot(kx[xid],ky[yid]); \n"
+"		InputWavefunction[Index].x *= (k<=kmax); \n"
+"		InputWavefunction[Index].y *= (k<=kmax); \n"
+"	}	\n"
+"}		\n"
+;
+
+const char* fftShiftSource = 
+"__kernel void clfftShift(__global const float2* Input, __global float2* Output, int width, int height) \n"
+"{        \n"
+"    //Get the work items ID \n"
+"    int xid = get_global_id(0);    \n"
+"    int yid = get_global_id(1); \n"
+"    if(xid < width && yid < height) \n"
+"    {    \n"
+"        int Index = xid + yid*width; \n"
+"        int Yshift = width*height/2; \n"
+"        int Xshift = width/2; \n"
+"        int Xmid = width/2; \n"
+"        int Ymid = height/2; \n"
+"        if( xid < Xmid && yid < Ymid ) \n"
+"        { \n"
+"            Output[Index+Yshift+Xshift].x = Input[Index].x; \n"
+"            Output[Index+Yshift+Xshift].y = Input[Index].y; \n"    
+"        } \n"
+"        else if( xid >= Xmid && yid < Ymid ) \n"
+"        { \n"
+"            Output[Index+Yshift-Xshift].x = Input[Index].x; \n"
+"            Output[Index+Yshift-Xshift].y = Input[Index].y; \n"    
+"        } \n"
+"        else if( xid < Xmid && yid >= Ymid ) \n"
+"        { \n"
+"            Output[Index-Yshift+Xshift].x = Input[Index].x; \n"
+"            Output[Index-Yshift+Xshift].y = Input[Index].y; \n"    
+"        } \n"
+"        else if( xid >= Xmid && yid >= Ymid ) \n"
+"        { \n"
+"            Output[Index-Yshift-Xshift].x = Input[Index].x; \n"
+"            Output[Index-Yshift-Xshift].y = Input[Index].y; \n"    
+"        } \n"    
+"    }    \n"
+"}    \n"
+;

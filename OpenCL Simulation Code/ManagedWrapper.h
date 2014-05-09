@@ -28,6 +28,9 @@ namespace ManagedOpenCLWrapper {
 		void GetCTEMImage(array<float>^ data, int resolution);
 		float GetIMMax();
 		float GetIMMin();
+		void GetDiffImage(array<float>^ data, int resolution);
+		float GetDiffMax();
+		float GetDiffMin();
 		ManagedOpenCL();
 		~ManagedOpenCL();
 
