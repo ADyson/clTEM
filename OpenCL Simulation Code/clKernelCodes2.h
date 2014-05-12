@@ -216,3 +216,35 @@ const char* imagingKernelSource =
 "	} \n"
 "} \n"
 ;
+
+
+__global__ void STEMinitializingKernel(cuComplex * in1, float* xFrequencies, float* yFrequencies, int posx, int posy, float apert, float pixelscale, float df, float Cs, float wavel)
+{
+
+	int xIndex = threadIdx.x + blockIdx.x * blockDim.x;
+	int yIndex = threadIdx.y + blockIdx.y * blockDim.y;
+	
+	if (xIndex >= res[0] || yIndex >= res[1])
+		return ;
+		
+	int Index = (yIndex * res[0] + xIndex);
+
+	float k0x = xFrequencies[xIndex];
+	float k0y = yFrequencies[yIndex];
+	float k = sqrtf(k0x*k0x + k0y*k0y) ;
+	float Pi = 3.14159265f;
+	
+	if( k < apert)
+	{
+		//in1[Index].x 	= cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
+		//in1[Index].y 	= -sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
+		in1[Index].x 	= cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))  + sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)) ;
+		in1[Index].y 	= -cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))*sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df)) + cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
+	}
+	else
+	{
+		in1[Index].x 	= 0.0f;
+		in1[Index].y 	= 0.0f;
+	}
+	
+  }

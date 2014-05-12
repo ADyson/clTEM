@@ -280,14 +280,17 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 		bandwidthkmax = kmaxx;
 	};
 
+	// k not k^2.
+	bandwidthkmax = sqrt(bandwidthkmax);
+
 	// Bandlimit by FDdz size
 
 	// Upload to device
-
 	clXFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clYFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clEnqueueWriteBuffer(clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
 	clEnqueueWriteBuffer(clq->cmdQueue,clYFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
+	
 	
 	// Setup Fourier Transforms
 	FourierTrans = new clFourier(context, clq);
@@ -297,19 +300,53 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clWaveFunction1 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction2 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction3 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clWaveFunction4 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clImageWaveFunction = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	
 	clPropagator = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clPotential = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 
 	// Set initial wavefunction to 1+0i
-	clKernel* InitialiseWavefunction = new clKernel(InitialiseWavefunctionSource,context,cldev,"clInitialiseWavefunction",clq);
+	clKernel* InitialiseSTEMWavefunction = new clKernel(InitialiseSTEMWavefunctionSource,context,cldev,"clInitialiseSTEMWavefunction",clq);
 	InitialiseWavefunction->BuildKernelOld();
 
+	BandLimit = new clKernel(BandLimitSource,context,cldev,"clBandLimit",clq);
+	BandLimit->BuildKernelOld();
+
+	fftShift = new clKernel(fftShiftSource,context,cldev,"clfftShift",clq);
+	fftShift->BuildKernelOld();
+
+	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(1,clWaveFunction3);
+	fftShift->SetArgT(2,resolution);
+	fftShift->SetArgT(3,resolution);
+
+
+
+
+	// change this bit
 	float InitialValue = 1.0f;
-	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
-	InitialiseWavefunction->SetArgT(1,resolution);
-	InitialiseWavefunction->SetArgT(2,resolution);
-	InitialiseWavefunction->SetArgT(3,InitialValue);
+
+	*InitialiseSTEMWavefunction << clWaveFunction1 && clXFrequencies 
+								&& clYFrequencies && posx && posy 
+								&& STEMParams->aperturesizemrad && pixelscale 
+								&& STEMParams->defocus && STEMParams->spherical 
+								&& wavelength;
+
+	// TEMParams->defocus
+
+	// InitialiseSTEMWavefunction->SetArgT(0,clWaveFunction1);
+	// InitialiseSTEMWavefunction->SetArgT(1,resolution);
+	// InitialiseSTEMWavefunction->SetArgT(2,resolution);
+	// InitialiseSTEMWavefunction->SetArgT(3,InitialValue);
+
+
+	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(1,resolution);
+	BandLimit->SetArgT(2,resolution);
+	BandLimit->SetArgT(3,bandwidthkmax);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
 
@@ -319,16 +356,16 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	InitialiseWavefunction->Enqueue(WorkSize);
 
-
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
 	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
 	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
 	BinnedAtomicPotential->BuildKernel();
+	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(sqrtf(9.0f)/AtomicStructure->dz);
+	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -352,7 +389,6 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->SetArgT(21,loadblocksy);
 	BinnedAtomicPotential->SetArgT(22,loadblocksz);
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
-
 	
 	// Also need to generate propagator.
 	GeneratePropagator = new clKernel(context,cldev,"clGeneratePropagator",clq);
@@ -364,7 +400,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	GeneratePropagator->SetArgT(2,clYFrequencies);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
-	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz?
+	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
 	GeneratePropagator->SetArgT(6,wavelength);
 	GeneratePropagator->SetArgT(7,bandwidthkmax);
 
@@ -377,6 +413,11 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	ComplexMultiply->SetArgT(3,resolution);
 	ComplexMultiply->SetArgT(4,resolution);
+
+	// And the imaging kernel
+	ImagingKernel = new clKernel(imagingKernelSource,context,cldev,"clImagingKernel",clq);
+	ImagingKernel->BuildKernelOld();
+
 
 	clFinish(clq->cmdQueue);
 };
