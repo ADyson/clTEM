@@ -306,7 +306,7 @@ namespace GPUTEMSTEMSimulation
 
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
            
-                if (TEMRadioButton.Checked)
+                if (TEMRadioButton.IsChecked == true)
                 {
                     mCL.InitialiseSimulation(Resolution);
 
@@ -320,7 +320,7 @@ namespace GPUTEMSTEMSimulation
                         mCL.MultisliceStep(i, NumberOfSlices);
                     }
                 } 
-                else if (STEMRadioButton.Checked)
+                else if (STEMRadioButton.IsChecked == true)
                 {
                     int posx = 1;
                     int posy = 1;

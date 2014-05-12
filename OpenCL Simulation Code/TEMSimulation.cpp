@@ -308,7 +308,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 
 	// Set initial wavefunction to 1+0i
 	clKernel* InitialiseSTEMWavefunction = new clKernel(InitialiseSTEMWavefunctionSource,context,cldev,"clInitialiseSTEMWavefunction",clq);
-	InitialiseWavefunction->BuildKernelOld();
+	InitialiseSTEMWavefunction->BuildKernelOld();
 
 	BandLimit = new clKernel(BandLimitSource,context,cldev,"clBandLimit",clq);
 	BandLimit->BuildKernelOld();
@@ -342,7 +342,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	InitialiseWavefunction->Enqueue(WorkSize);
+	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
 	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
