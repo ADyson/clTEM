@@ -14,6 +14,7 @@ public:
 	clKernel* ComplexMultiply;
 	clKernel* BandLimit;
 	clKernel* fftShift;
+	clKernel* ImagingKernel;
 
 	cl_context context;
 	clQueue* clq;
@@ -26,6 +27,8 @@ public:
 	cl_mem clWaveFunction1;
 	cl_mem clWaveFunction2;
 	cl_mem clWaveFunction3;
+	cl_mem clWaveFunction4;
+	cl_mem clImageWaveFunction;
 
 	cl_mem clPropagator;
 	cl_mem clPotential;
@@ -45,11 +48,19 @@ public:
 	void MultisliceStep(int stepno, int steps);
 
 	void GetCTEMImage(float* data, int resolution);
+	// Diff of EW
 	void GetDiffImage(float* data, int resolution);
+	// Diff of Im
+	void GetImDiffImage(float* data, int resolution);
+	void GetEWImage(float* data, int resolution);
+
+	void SimulateCTEM();
 
 	// Image contrast limits (technically ew atm)
 	float imagemin;
 	float imagemax;
+	float ewmin;
+	float ewmax;
 	float diffmin;
 	float diffmax;
 

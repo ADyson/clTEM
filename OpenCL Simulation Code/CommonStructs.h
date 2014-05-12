@@ -10,6 +10,10 @@ struct TEMParameters
 	float beta;
 	float delta;
 	float aperturesizemrad;
+	float astig2mag;
+	float astig2ang;
+	float b2mag;
+	float b2ang;
 };
 
 struct STEMParameters

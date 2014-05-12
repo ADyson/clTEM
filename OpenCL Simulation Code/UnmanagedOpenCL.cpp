@@ -66,7 +66,7 @@ void UnmanagedOpenCL::MultisliceStep(int stepnumber, int steps)
 	TS->MultisliceStep(stepnumber,steps);
 };
 
-void UnmanagedOpenCL::SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
+void UnmanagedOpenCL::SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
 {
 	temparams->defocus = df;
 	temparams->astigmag = astigmag;
@@ -76,6 +76,11 @@ void UnmanagedOpenCL::SetParamsTEM(float df, float astigmag, float astigang, flo
 	temparams->beta = beta;
 	temparams->delta = delta;
 	temparams->aperturesizemrad = aperture;
+	temparams->astig2mag = astig2mag;
+	temparams->astig2ang = astig2ang;
+	temparams->b2mag = b2mag;
+	temparams->b2ang = b2ang;
+
 };
 
 void UnmanagedOpenCL::SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)

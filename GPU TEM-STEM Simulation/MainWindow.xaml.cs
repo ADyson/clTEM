@@ -299,7 +299,7 @@ namespace GPUTEMSTEMSimulation
             {
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
-                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad);
+                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
                 mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical,
                                     ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
@@ -336,7 +336,7 @@ namespace GPUTEMSTEMSimulation
 
                 // When its completed we want to get data to c# for displaying in an image...
                 EWImage = new float[Resolution * Resolution];
-                mCL.GetCTEMImage(EWImage, Resolution);
+                mCL.GetEWImage(EWImage, Resolution);
 
                 // Calculate the number of bytes per pixel (should be 4 for this format). 
                 var bytesPerPixel = (_EWImg.Format.BitsPerPixel + 7) / 8;
@@ -349,8 +349,8 @@ namespace GPUTEMSTEMSimulation
                 var arraySize = stride * _EWImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
-                float min = mCL.GetIMMin();
-                float max = mCL.GetIMMax();
+                float min = mCL.GetEWMin();
+                float max = mCL.GetEWMax();
 
                 for (int row = 0; row < _EWImg.PixelHeight; row++)
                     for (int col = 0; col < _EWImg.PixelWidth; col++)
@@ -403,6 +403,7 @@ namespace GPUTEMSTEMSimulation
                 _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
 
                 SaveImageButton.IsEnabled = true;
+                SimulateImageButton.IsEnabled = true;
             };
 
             SimWorker.RunWorkerAsync();
@@ -422,15 +423,15 @@ namespace GPUTEMSTEMSimulation
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.spherical);
         }
 
-        private void ImagingA2_TextChanged(object sender, TextChangedEventArgs e)
+        private void ImagingA1_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ImagingA2.Text;
+            string temporarytext = ImagingA1.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigmag);
         }
 
-        private void ImagingA2theta_TextChanged(object sender, TextChangedEventArgs e)
+        private void ImagingA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ImagingA2theta.Text;
+            string temporarytext = ImagingA1theta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
         }
 
@@ -549,6 +550,112 @@ namespace GPUTEMSTEMSimulation
                     }
                 }
             }
+
+        }
+
+        private void ImagingB2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string temporarytext = ImagingAperture.Text;
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2mag);
+        }
+
+        private void ImagingB2Phi_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string temporarytext = ImagingAperture.Text;
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2ang);
+        }
+
+        private void ImagingA2Phi_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string temporarytext = ImagingAperture.Text;
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2ang);
+        }
+
+        private void ImagingA2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string temporarytext = ImagingAperture.Text;
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2mag);
+        }
+
+        private void Button_Click_SimImage(object sender, RoutedEventArgs e)
+        {
+            mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
+                                   ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
+
+            mCL.SimulateCTEMImage();
+
+            //Update the displays
+
+            _CTEMImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+            CTEMImageDisplay.Source = _CTEMImg;
+
+            // When its completed we want to get data to c# for displaying in an image...
+            CTEMImage = new float[Resolution * Resolution];
+            mCL.GetCTEMImage(CTEMImage, Resolution);
+
+            // Calculate the number of bytes per pixel (should be 4 for this format). 
+            var bytesPerPixel = (_CTEMImg.Format.BitsPerPixel + 7) / 8;
+
+            // Stride is bytes per pixel times the number of pixels.
+            // Stride is the byte width of a single rectangle row.
+            var stride = _CTEMImg.PixelWidth * bytesPerPixel;
+
+            // Create a byte array for a the entire size of bitmap.
+            var arraySize = stride * _CTEMImg.PixelHeight;
+            var pixelArray = new byte[arraySize];
+
+            float min = mCL.GetIMMin();
+            float max = mCL.GetIMMax();
+
+            for (int row = 0; row < _CTEMImg.PixelHeight; row++)
+                for (int col = 0; col < _CTEMImg.PixelWidth; col++)
+                {
+                    pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 3] = 0;
+                }
+
+
+            Int32Rect rect = new Int32Rect(0, 0, _CTEMImg.PixelWidth, _CTEMImg.PixelHeight);
+
+            _CTEMImg.WritePixels(rect, pixelArray, stride, 0);
+
+
+            _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+            DiffImageDisplay.Source = _DiffImg;
+
+            // When its completed we want to get data to c# for displaying in an image...
+            DiffImage = new float[Resolution * Resolution];
+            mCL.GetDiffImage(DiffImage, Resolution);
+
+            // Calculate the number of bytes per pixel (should be 4 for this format). 
+            var bytesPerPixel2 = (_DiffImg.Format.BitsPerPixel + 7) / 8;
+
+            // Stride is bytes per pixel times the number of pixels.
+            // Stride is the byte width of a single rectangle row.
+            var stride2 = _DiffImg.PixelWidth * bytesPerPixel;
+
+            // Create a byte array for a the entire size of bitmap.
+            var arraySize2 = stride2 * _DiffImg.PixelHeight;
+            var pixelArray2 = new byte[arraySize2];
+
+            float min2 = mCL.GetDiffMin();
+            float max2 = mCL.GetDiffMax();
+
+            for (int row = 0; row < _DiffImg.PixelHeight; row++)
+                for (int col = 0; col < _DiffImg.PixelWidth; col++)
+                {
+                    pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((DiffImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+                }
+
+
+            Int32Rect rect2 = new Int32Rect(0, 0, _DiffImg.PixelWidth, _DiffImg.PixelHeight);
+
+            _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
 
         }
     }

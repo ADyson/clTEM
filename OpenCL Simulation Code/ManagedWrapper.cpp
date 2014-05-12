@@ -80,9 +80,9 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::SetTemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
+	void ManagedOpenCL::SetTemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
 	{
-		_UMOpenCL->SetParamsTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
+		_UMOpenCL->SetParamsTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture, astig2mag, astig2ang, b2mag, b2ang);
 	};
 
 	void ManagedOpenCL::SetStemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
@@ -126,6 +126,12 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->GetCTEMImage(pdata,resolution);
 	};
 
+	void ManagedOpenCL::GetEWImage(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->GetEWImage(pdata,resolution);
+	};
+
 	float ManagedOpenCL::GetIMMax()
 	{	
 		return _UMOpenCL->TS->imagemax;
@@ -134,6 +140,16 @@ namespace ManagedOpenCLWrapper
 	float ManagedOpenCL::GetIMMin()
 	{	
 		return _UMOpenCL->TS->imagemin;
+	};
+
+	float ManagedOpenCL::GetEWMax()
+	{	
+		return _UMOpenCL->TS->ewmax;
+	};
+
+	float ManagedOpenCL::GetEWMin()
+	{	
+		return _UMOpenCL->TS->ewmin;
 	};
 
 	void ManagedOpenCL::GetDiffImage(array<float>^ data, int resolution)
@@ -150,5 +166,10 @@ namespace ManagedOpenCLWrapper
 	float ManagedOpenCL::GetDiffMin()
 	{	
 		return _UMOpenCL->TS->diffmin;
+	};
+
+	void ManagedOpenCL::SimulateCTEMImage()
+	{	
+		_UMOpenCL->TS->SimulateCTEM();
 	};
 }
