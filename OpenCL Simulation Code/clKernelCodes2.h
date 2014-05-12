@@ -132,9 +132,6 @@ const char* BinnedAtomicPotentialSource2 =
 "}	\n"
 ;
 
-
-
-
 const char* BandLimitSource = 
 "__kernel void clBandLimit(__global float2* InputWavefunction, int width, int height, float kmax, __global float* kx, __global float* ky) \n"
 "{		\n"

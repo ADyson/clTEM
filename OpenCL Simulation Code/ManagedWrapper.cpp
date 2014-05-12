@@ -105,6 +105,21 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
+	void ManagedOpenCL::InitialiseSimulation(int resolution, int posx, int posy)
+	{
+		try
+		{
+			_UMOpenCL->InitialiseSTEMSimulation(resolution, posx, posy);
+		}
+		catch(std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	};
+
 	void ManagedOpenCL::MultisliceStep(int stepno, int steps)
 	{
 		try

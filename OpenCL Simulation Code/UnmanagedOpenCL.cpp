@@ -55,10 +55,10 @@ void UnmanagedOpenCL::InitialiseSimulation(int resolution)
 };
 
 // Calls different initialiser to make a probe wavefunction instead of plane wave
-void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution)
+void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution, int posx, int posy)
 {
 	TS = new TEMSimulation(context,clq,cldev,temparams,stemparams);
-	TS->InitialiseSTEM(resolution,Structure);
+	TS->InitialiseSTEM(resolution, posx, posy, Structure);
 };
 
 void UnmanagedOpenCL::MultisliceStep(int stepnumber, int steps)

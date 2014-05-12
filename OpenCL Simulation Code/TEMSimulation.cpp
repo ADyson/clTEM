@@ -209,7 +209,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clFinish(clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure)
+void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, MultisliceStructure* Structure)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;

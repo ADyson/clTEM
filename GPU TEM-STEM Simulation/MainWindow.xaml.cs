@@ -306,21 +306,43 @@ namespace GPUTEMSTEMSimulation
 
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
            
-                
-                
-                // Setup pre simulation (make frequencies and create databuffers and kernels
-                mCL.InitialiseSimulation(Resolution);
-
-                // Use Background worker to progress through each step
-                int NumberOfSlices = 0;
-                mCL.GetNumberSlices(ref NumberOfSlices);
-                // Seperate into setup, loop over slices and final steps to allow for progress reporting.
-
-                for (int i = 1; i <= NumberOfSlices; i++)
+                if (TEMRadioButton.Checked)
                 {
-                    mCL.MultisliceStep(i, NumberOfSlices);
+                    mCL.InitialiseSimulation(Resolution);
 
+                    // Use Background worker to progress through each step
+                    int NumberOfSlices = 0;
+                    mCL.GetNumberSlices(ref NumberOfSlices);
+                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                    for (int i = 1; i <= NumberOfSlices; i++)
+                    {
+                        mCL.MultisliceStep(i, NumberOfSlices);
+                    }
+                } 
+                else if (STEMRadioButton.Checked)
+                {
+                    int posx = 1;
+                    int posy = 1;
+                    // for ()
+                    // {
+                        mCL.InitialiseSimulation(Resolution, posx, posy);
+
+                        // Use Background worker to progress through each step
+                        int NumberOfSlices = 0;
+                        mCL.GetNumberSlices(ref NumberOfSlices);
+                        // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                        for (int i = 1; i <= NumberOfSlices; i++)
+                        {
+                            mCL.MultisliceStep(i, NumberOfSlices);
+                        }                       
+                    // }
                 }
+
+                // needs looping if in STEM mode
+
+
                 // Cleanup
 
                 //System.Threading.Thread.Sleep(2);
