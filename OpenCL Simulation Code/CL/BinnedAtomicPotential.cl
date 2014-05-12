@@ -14,6 +14,7 @@ __kernel void clBinnedAtomicPotential(__global float2* Potential, __global float
 			topz = 0;
 		if(bottomz >= slices )
 			bottomz = slices-1;
+
 		for(int k = topz; k <= bottomz; k++)
 		{
 			for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale/ ( MaxY-MinY )) - loadBlocksY ); j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale/ ( MaxY - MinY )) + loadBlocksY); j++)
@@ -32,10 +33,14 @@ __kernel void clBinnedAtomicPotential(__global float2* Potential, __global float
 								for (int h = 0; h < 10; h++)
 								{
 									float rad = sqrt((xid*pixelscale-clAtomXPos[l] + MinX)*(xid*pixelscale-clAtomXPos[l] + MinX) + (yid*pixelscale-clAtomYPos[l] + MinY)*(yid*pixelscale-clAtomYPos[l] + MinY) + (z - (h*(dz/10.0f))-clAtomZPos[l])*(z - (h*(dz/10.0f))-clAtomZPos[l]));
+
+									if(rad < 0.25f * pixelscale)
+										rad = 0.25f * pixelscale;
+
 									int ZNum = clAtomZNum[l];
-									if( rad < sqrt(5.0f)) // Should also make sure is not too small
+									if( rad < 5.0f) // Should also make sure is not too small
 									{
-										sumz += (dz/10.0f)*(150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+1])));
+										sumz += (dz/10.0f)*(150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12  ]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+1  ])));
 										sumz += (dz/10.0f)*(150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12+2]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+2+1])));
 										sumz += (dz/10.0f)*(150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12+4]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+4+1])));
 										sumz += (dz/10.0f)*(266.5157269f * clfParams[(ZNum-1)*12+6] * exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * sqrt(clfParams[(ZNum-1)*12+6+1])/(clfParams[(ZNum-1)*12+6+1]*clfParams[(ZNum-1)*12+6+1]*clfParams[(ZNum-1)*12+6+1]));

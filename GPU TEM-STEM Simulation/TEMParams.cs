@@ -17,6 +17,10 @@ namespace GPUTEMSTEMSimulation
         public float beta;
         public float delta;
         public float aperturemrad;
+        public float astig2mag;
+        public float astig2ang;
+        public float b2mag;
+        public float b2ang;
 
         public TEMParams()
         {
@@ -28,6 +32,10 @@ namespace GPUTEMSTEMSimulation
             beta = 0;
             delta = 0;
             aperturemrad = 0;
+            astig2mag = 0;
+            astig2ang = 0;
+            b2mag = 0;
+            b2ang = 0;
         }
     }
 }

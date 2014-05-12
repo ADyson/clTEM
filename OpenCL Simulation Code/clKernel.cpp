@@ -96,7 +96,7 @@ void clKernel::BuildKernelOld()
 	if(!status==0)
 	{
 		std::string error = t_to_string(status);
-		std::string message = "Problem with Kernel Building" + error;
+		std::string message = this->kernelname + " Problem with Kernel Building" + error;
 		throw std::exception (message.c_str());
 	}
 

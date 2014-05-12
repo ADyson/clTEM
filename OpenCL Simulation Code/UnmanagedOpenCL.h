@@ -30,7 +30,7 @@ public:
 	int SetupStructure(std::string filepath);
 	int UploadParameterisation();
 
-	void SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
+	void SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang);
 	void SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 
 	void InitialiseSimulation(int resolution);

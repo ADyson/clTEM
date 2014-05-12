@@ -81,29 +81,28 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 		bandwidthkmax = kmaxx;
 	};
 
+	// k not k^2.
+	bandwidthkmax = sqrt(bandwidthkmax);
+
 	// Bandlimit by FDdz size
 
 	// Upload to device
-
 	clXFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clYFrequencies = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
 	clEnqueueWriteBuffer(clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
 	clEnqueueWriteBuffer(clq->cmdQueue,clYFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
 	
-
-
-	clFinish(clq->cmdQueue);
 	
 	// Setup Fourier Transforms
 	FourierTrans = new clFourier(context, clq);
 	FourierTrans->Setup(resolution,resolution);
 
-	clFinish(clq->cmdQueue);
-
 	// Initialise Wavefunctions and Create other buffers...
 	clWaveFunction1 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction2 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction3 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clWaveFunction4 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clImageWaveFunction = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	
 	clPropagator = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clPotential = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -112,13 +111,29 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clKernel* InitialiseWavefunction = new clKernel(InitialiseWavefunctionSource,context,cldev,"clInitialiseWavefunction",clq);
 	InitialiseWavefunction->BuildKernelOld();
 
-	clFinish(clq->cmdQueue);
+	BandLimit = new clKernel(BandLimitSource,context,cldev,"clBandLimit",clq);
+	BandLimit->BuildKernelOld();
+
+	fftShift = new clKernel(fftShiftSource,context,cldev,"clfftShift",clq);
+	fftShift->BuildKernelOld();
+
+	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(1,clWaveFunction3);
+	fftShift->SetArgT(2,resolution);
+	fftShift->SetArgT(3,resolution);
 
 	float InitialValue = 1.0f;
 	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
 	InitialiseWavefunction->SetArgT(1,resolution);
 	InitialiseWavefunction->SetArgT(2,resolution);
 	InitialiseWavefunction->SetArgT(3,InitialValue);
+
+	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(1,resolution);
+	BandLimit->SetArgT(2,resolution);
+	BandLimit->SetArgT(3,bandwidthkmax);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
 
@@ -128,17 +143,16 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	InitialiseWavefunction->Enqueue(WorkSize);
 
-	clFinish(clq->cmdQueue);
-
-	BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
-	//BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
-	//BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
-	BinnedAtomicPotential->BuildKernelOld();
+	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
+	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
+	BinnedAtomicPotential->BuildKernel();
+	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(sqrtf(5.0f)/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(sqrtf(5.0f)/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(sqrtf(5.0f)/AtomicStructure->dz);
+	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -162,8 +176,6 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	BinnedAtomicPotential->SetArgT(21,loadblocksy);
 	BinnedAtomicPotential->SetArgT(22,loadblocksz);
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
-
-	clFinish(clq->cmdQueue);
 	
 	// Also need to generate propagator.
 	GeneratePropagator = new clKernel(context,cldev,"clGeneratePropagator",clq);
@@ -181,8 +193,6 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	GeneratePropagator->Enqueue(WorkSize);
 	
-
-	clFinish(clq->cmdQueue);
 	// And multiplication kernel
 	ComplexMultiply = new clKernel(context,cldev,"clComplexMultiply",clq);
 	ComplexMultiply->loadProgSource("Multiply.cl");
@@ -190,6 +200,11 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	ComplexMultiply->SetArgT(3,resolution);
 	ComplexMultiply->SetArgT(4,resolution);
+
+	// And the imaging kernel
+	ImagingKernel = new clKernel(imagingKernelSource,context,cldev,"clImagingKernel",clq);
+	ImagingKernel->BuildKernelOld();
+
 
 	clFinish(clq->cmdQueue);
 };
@@ -311,9 +326,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->BuildKernel();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(sqrtf(5.0f)/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(sqrtf(5.0f)/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(sqrtf(5.0f)/AtomicStructure->dz);
+	int loadblocksx = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(sqrtf(9.0f)/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(sqrtf(9.0f)/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -368,44 +383,6 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
 {
-	/*	
-		float dz = 1;
-
-		//TODO: If ever change change everywhere...
-		dim3 dimBlock(32,8,1);
-		dim3 dimGrid((resolutionX + dimBlock.x-1)/dimBlock.x,(resolutionY + dimBlock.y-1)/dimBlock.y,1);
-		dim3 dimGridbig((2*resolutionX + dimBlock.x-1)/dimBlock.x,(2*resolutionY + dimBlock.y-1)/dimBlock.y,1);
-
-	
-		float currentz = MaximumZ - MinimumZ - dz*iteration;
-			
-		// NOTE getting some NaN's in Psi.
-
-		binnedAtomPKernel<<<dimGrid,dimBlock>>>(devV,PixelScale,atomMemories.fparamsdev,atomMemories.devAtomZPos,atomMemories.devAtomXPos,atomMemories.devAtomYPos,atomMemories.devAtomZNum,atomMemories.devBlockStartPositions,dz,currentz,ceil((MaximumZ-MinimumZ)/dz),sigma2);
-		
-		if(iteration==1)
-		{
-			multiplicationKernel<<<dimGrid,dimBlock>>>(devV,PsiMinus,PsiPlus,1); // Think initialized psi with one not psiminus
-		}
-		else
-		{
-			multiplicationKernel<<<dimGrid,dimBlock>>>(devV,Psi,PsiPlus,1);
-		}
-
-		//  cudaMemcpy(checkval,&devV[40000],1*sizeof(cuComplex),cudaMemcpyDeviceToHost);
-		//	cout << checkval[0].x <<" , " << checkval[0].y << endl;
-		
-		if(iteration==1)
-			CreatePropsKernel<<<dimGrid,dimBlock>>>(xFrequencies,yFrequencies,dz,wavel,PsiMinus,kmax);
-		
-		cufftExecC2C(plan,PsiPlus,Psi,CUFFT_FORWARD);
-		multiplicationKernel<<<dimGrid,dimBlock>>>(Psi,PsiMinus,PsiPlus,normalisingfactor);
-		cufftExecC2C(plan,PsiPlus,Psi,CUFFT_INVERSE);
-		normalisingKernel<<<dimGrid,dimBlock>>>(Psi,normalisingfactor);
-		
-		*/
-
-
 	// Work out current z position based on step size and current step
 	// Should be one set of bins for each individual slice
 	
@@ -413,7 +390,8 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	int slice = stepno - 1;
 	int slices = steps;
 
-	float currentz = AtomicStructure->MaximumZ - slice * AtomicStructure->dz;
+	// Didn't have MinimumZ so it wasnt correctly rescaled z-axis from 0 to SizeZ...
+	float currentz = AtomicStructure->MaximumZ - AtomicStructure->MinimumZ - slice * AtomicStructure->dz;
 
 	BinnedAtomicPotential->SetArgT(9,slice);
 	BinnedAtomicPotential->SetArgT(10,slices);
@@ -435,7 +413,7 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	// Now for the rest of the multislice steps
 
-	// Multiply with wavefunction
+	//Multiply with wavefunction
 	ComplexMultiply->SetArgT(0,clPotential);
 	ComplexMultiply->SetArgT(1,clWaveFunction1);
 	ComplexMultiply->SetArgT(2,clWaveFunction2);
@@ -443,6 +421,10 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	// Propagate
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
+
+	// BandLimit OK here?
+
+	BandLimit->Enqueue(Work);
 
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
@@ -469,12 +451,10 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 
 	for(int i = 0; i < resolution * resolution; i++)
 	{
-		// Just get real part [0] = real, [1] = imag
-		
-		data[i] = compdata[i].s[0];
-
-		
-		// Find max,min
+		// Get absolute value for display...	
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
 		if(data[i] > max)
 			max = data[i];
 		if(data[i] < min)
@@ -483,4 +463,141 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 
 	imagemin = min;
 	imagemax = max;
+};
+
+void TEMSimulation::GetEWImage(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	ewmin = min;
+	ewmax = max;
+};
+
+void TEMSimulation::GetDiffImage(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->Enqueue(Work);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] = log(sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1])+0.0001f);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
+};
+
+void TEMSimulation::GetImDiffImage(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->SetArgT(0,clWaveFunction4);
+	fftShift->Enqueue(Work);
+
+	// reset! probably unecessary
+	fftShift->SetArgT(0,clWaveFunction2);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] = log(sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1])+0.0001f);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
+};
+
+void TEMSimulation::SimulateCTEM()
+{
+	// Set arguments for imaging kernel
+	ImagingKernel->SetArgT(0,clWaveFunction2);
+	ImagingKernel->SetArgT(1,clImageWaveFunction);
+	ImagingKernel->SetArgT(2,resolution);
+	ImagingKernel->SetArgT(3,resolution);
+	ImagingKernel->SetArgT(4,TEMParams->spherical);
+	ImagingKernel->SetArgT(5,TEMParams->defocus);
+	ImagingKernel->SetArgT(6,TEMParams->astigmag);
+	ImagingKernel->SetArgT(7,TEMParams->astigang);
+	ImagingKernel->SetArgT(8,TEMParams->astig2mag);
+	ImagingKernel->SetArgT(9,TEMParams->astig2ang);
+	ImagingKernel->SetArgT(10,TEMParams->aperturesizemrad);
+	ImagingKernel->SetArgT(11,wavelength);
+	ImagingKernel->SetArgT(12,clXFrequencies);
+	ImagingKernel->SetArgT(13,clYFrequencies);
+	ImagingKernel->SetArgT(14,TEMParams->beta);
+	ImagingKernel->SetArgT(15,TEMParams->delta);
+
+	size_t* Work = new size_t[3];
+	
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	ImagingKernel->Enqueue(Work);
+
+	// Now get and display absolute value
+	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1,CLFFT_BACKWARD);
+
+	// Maybe update diffractogram image also...
+	clEnqueueCopyBuffer(clq->cmdQueue,clImageWaveFunction,clWaveFunction4,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+
 };

@@ -59,12 +59,12 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 			minZ=i;
 	};
 
-	MaximumX = Atoms[maxX].x + 2;
-	MinimumX = Atoms[minX].x - 2;
-	MaximumY = Atoms[maxY].y + 2;
-	MinimumY = Atoms[minY].y - 2;
-	MaximumZ = Atoms[maxZ].z + 2;
-	MinimumZ = Atoms[minZ].z - 2;
+	MaximumX = Atoms[maxX].x + 5;
+	MinimumX = Atoms[minX].x - 5;
+	MaximumY = Atoms[maxY].y + 5;
+	MinimumY = Atoms[minY].y - 5;
+	MaximumZ = Atoms[maxZ].z + 5;
+	MinimumZ = Atoms[minZ].z - 5;
 
 	Length = Atoms.size();
 };
@@ -221,7 +221,8 @@ int MultisliceStructure::SortAtoms()
 };
 
 int MultisliceStructure::GetZNum(std::string atomSymbol) {
-	if (atomSymbol == "H")
+		 
+		 if (atomSymbol == "H")
 		return 1;
 	else if (atomSymbol == "He")
 		return 2;
@@ -259,10 +260,18 @@ int MultisliceStructure::GetZNum(std::string atomSymbol) {
 		return 19;
 	else if (atomSymbol == "Ca")
 		return 20;
+	else if (atomSymbol == "Sr")
+		return 38;
+	else if (atomSymbol == "Ru")
+		return 44;
 	else if (atomSymbol == "Br")
 		return 35;
 	else if (atomSymbol == "Fe")
 		return 26;
+	else if (atomSymbol == "La")
+		return 57;
+	else if (atomSymbol == "Sm")
+		return 62;
 	else if (atomSymbol == "Ta")
 		return 73;
 	else if (atomSymbol == "W")
