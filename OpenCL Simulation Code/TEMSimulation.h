@@ -42,7 +42,7 @@ public:
 	TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams);
 
 	void Initialise(int resolution, MultisliceStructure* Structure);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure);
+	void InitialiseSTEM(int resolution, int posx, int posy, MultisliceStructure* Structure);
 
 
 	void MultisliceStep(int stepno, int steps);
