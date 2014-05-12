@@ -4,6 +4,10 @@
 #include <iostream>
 #include <vector>
 
+// define dummy type to overload template
+typedef bool dummy_CL;
+const dummy_CL CL_SKIP = false;
+
 enum clTypes
 {
 	clFloat = 0,
@@ -59,6 +63,9 @@ public:
 	clQueue* clq;
 
 	size_t kernelsize;
+
+	// for chaining setArgT
+	int iter;
 	
 
 	//clKernel(const char* codestring, cl_context &context, cl_uint &numdevices, cl_device_id* &devices, std::string kernelname,cl_command_queue &commandQueue);
@@ -104,6 +111,28 @@ public:
 		}
 	}
 
+	// Operater method chaining for slightly cleaner openCL argument setting.
+	// MUST USE << FIRST to set iterator to 0, then use &&
+	// Currently needs support for 'skipping' values when they do no need to be changed
 
+	template<typename T>
+	clKernel& operator<<(T value){
+		iter = 0;
+		SetArgT(iter,value);
+		iter++;
+		return *this;
+	}
 
+	// http://msdn.microsoft.com/en-us/library/kwyxac18.aspx
+	clKernel& operator&&(dummy_CL na){
+		iter++;
+		return *this;
+	}
+
+	template<typename T>
+	clKernel& operator&&(T value){
+		SetArgT(iter,value);
+		iter++;
+		return *this;
+	}
 };
