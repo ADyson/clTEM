@@ -322,23 +322,11 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	fftShift->SetArgT(3,resolution);
 
 
-
-
-	// change this bit
-	float InitialValue = 1.0f;
-
-	*InitialiseSTEMWavefunction << clWaveFunction1 && clXFrequencies 
-								&& clYFrequencies && posx && posy 
+	*InitialiseSTEMWavefunction << clWaveFunction1 && resolution && resolution 
+								&&clXFrequencies && clYFrequencies && posx && posy 
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
-
-	// TEMParams->defocus
-
-	// InitialiseSTEMWavefunction->SetArgT(0,clWaveFunction1);
-	// InitialiseSTEMWavefunction->SetArgT(1,resolution);
-	// InitialiseSTEMWavefunction->SetArgT(2,resolution);
-	// InitialiseSTEMWavefunction->SetArgT(3,InitialValue);
 
 
 	BandLimit->SetArgT(0,clWaveFunction3);

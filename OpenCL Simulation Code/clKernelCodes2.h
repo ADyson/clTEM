@@ -217,34 +217,29 @@ const char* imagingKernelSource =
 "} \n"
 ;
 
-
-__global__ void STEMinitializingKernel(cuComplex * in1, float* xFrequencies, float* yFrequencies, int posx, int posy, float apert, float pixelscale, float df, float Cs, float wavel)
-{
-
-	int xIndex = threadIdx.x + blockIdx.x * blockDim.x;
-	int yIndex = threadIdx.y + blockIdx.y * blockDim.y;
-	
-	if (xIndex >= res[0] || yIndex >= res[1])
-		return ;
-		
-	int Index = (yIndex * res[0] + xIndex);
-
-	float k0x = xFrequencies[xIndex];
-	float k0y = yFrequencies[yIndex];
-	float k = sqrtf(k0x*k0x + k0y*k0y) ;
-	float Pi = 3.14159265f;
-	
-	if( k < apert)
-	{
-		//in1[Index].x 	= cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
-		//in1[Index].y 	= -sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
-		in1[Index].x 	= cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))  + sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)) ;
-		in1[Index].y 	= -cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))*sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df)) + cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale));
-	}
-	else
-	{
-		in1[Index].x 	= 0.0f;
-		in1[Index].y 	= 0.0f;
-	}
-	
-  }
+const char* InitialiseSTEMWavefunctionSource = 
+"__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height, __global const float* clXFrequencies, __global const float* clYFrequencies, int posx, int posy, float apert, float pixelscale, float df, float Cs, float wavel) \n"
+"{ \n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0); \n"
+"	int yid = get_global_id(1); \n"
+"	if(xid < width && yid < height) \n"
+"	{ \n"
+"		int Index = xid + yid*width; \n"
+"		float apert2 = (((apert * 0.001f) / wavel ) * (( apert * 0.001f ) / wavel )); \n"
+"		float k0x = xFrequencies[xIndex]; \n"
+"		float k0y = yFrequencies[yIndex]; \n"
+"		float k = sqrtf(k0x*k0x + k0y*k0y); \n"
+"		float Pi = 3.14159265f; \n"
+"		if( k < apert2) \n"
+"		{ \n"
+"			Output[Index].x 	= cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))  + sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)) ; \n"
+"			Output[Index].y 	= -cosf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))*sinf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df)) + cosf(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sinf(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)); \n"
+"		} \n"
+"		else \n"
+"		{ \n"
+"			Output[Index].x 	= 0.0f; \n"
+"			Output[Index].y 	= 0.0f; \n"
+"		} \n"
+"} \n"
+;
