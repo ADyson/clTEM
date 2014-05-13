@@ -477,9 +477,6 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
-	std::vector<cl_float2> test(resolution*resolution);
-	clEnqueueReadBuffer(clq->cmdQueue,clPotential,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&test[0],0,0,0);
-
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
