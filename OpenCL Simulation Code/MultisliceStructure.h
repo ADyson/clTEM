@@ -31,7 +31,7 @@ public:
 	cl_mem clAtomz;
 	cl_mem clAtomZ;
 	cl_mem clBlockStartPositions;
-
+	
 	// OpenCL Memory
 	cl_mem AtomicStructureParameterisation;
 
