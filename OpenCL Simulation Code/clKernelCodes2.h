@@ -298,3 +298,25 @@ const char* multiplySource =
 "	}	\n"
 "}	\n"
 ;
+
+const char* bandPassSource = 
+"__kernel void clBandPass(__global float2* Input, int width, int height, float inner, float outer)	\n"
+"{	\n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+"	\n"
+"	if(xid<width && yid<height) \n"
+"	{	\n"
+"		int Index = xid + yid*width; \n"
+"		float centX = width/2; \n"
+"		float centY = height/2; \n"
+"		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n"
+"		if(radius > outer || radius < inner) \n"
+"		{	\n"
+"			Input[Index].x = 0; \n"
+"			Input[Index].y = 0; \n"	
+"		} \n"
+"	}	\n"
+"}	\n"
+;
