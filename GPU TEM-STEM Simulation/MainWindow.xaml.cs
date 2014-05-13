@@ -338,7 +338,9 @@ namespace GPUTEMSTEMSimulation
                     {
                         mCL.MultisliceStep(i, NumberOfSlices);
                     }
-                    // }
+
+                    //call some function here to measure the pixel value?
+
                 }
 
                 // needs looping if in STEM mode

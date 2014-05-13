@@ -443,9 +443,47 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	ImagingKernel = new clKernel(imagingKernelSource,context,cldev,"clImagingKernel",clq);
 	ImagingKernel->BuildKernelOld();
 
-
 	clFinish(clq->cmdQueue);
 };
+
+void TEMSimulation::MeasureSTEMPixel()
+{
+	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
+
+	size_t* WorkSize = new size_t[3];
+
+	WorkSize[0] = resolution;
+	WorkSize[1] = resolution;
+	WorkSize[2] = 1;
+
+	clKernel* MaskingKernel = new clKernel(bandPassSource,context,cldev,"clBandPass",clq);
+	MaskingKernel->BuildKernelOld();
+
+	float inner = 5;
+	float outer = 10;
+
+	*MaskingKernel << clWaveFunction3 && resolution && resolution && inner && outer;
+
+	MaskingKernel->Enqueue(WorkSize);
+
+	int totalSize = resolution*resolution;
+	int nGroups = totalSize / 256;
+
+	size_t* globalSizeSum = new size_t[3];
+	size_t* localSizeSum = new size_t[3];
+
+	globalSizeSum[0] = totalSize;
+	globalSizeSum[1] = 1;
+	globalSizeSum[2] = 1;
+	localSizeSum[0] = 256;
+	localSizeSum[1] = 1;
+	localSizeSum[2] = 1;
+
+	float sumRed = SumReduction(clWaveFunction3, globalSizeSum, localSizeSum, nGroups, totalSize);
+
+	// need to store this pixel somewhere, to be read off later when forming image.
+	
+}
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
 {

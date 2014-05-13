@@ -47,6 +47,8 @@ public:
 
 	void MultisliceStep(int stepno, int steps);
 
+	void MeasureSTEMPixel();
+
 	void GetCTEMImage(float* data, int resolution);
 	// Diff of EW
 	void GetDiffImage(float* data, int resolution);
@@ -55,8 +57,6 @@ public:
 	void GetEWImage(float* data, int resolution);
 
 	void SimulateCTEM();
-
-	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	// Image contrast limits (technically ew atm)
 	float imagemin;
