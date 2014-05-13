@@ -322,12 +322,14 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	fftShift->SetArgT(3,resolution);
 
 
-	*InitialiseSTEMWavefunction << clWaveFunction1 && resolution && resolution 
+	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
 								&&clXFrequencies && clYFrequencies && posx && posy 
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
 
+	// IFFT
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
 	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);

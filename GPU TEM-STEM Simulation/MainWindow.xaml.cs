@@ -322,22 +322,22 @@ namespace GPUTEMSTEMSimulation
                 } 
                 else if (STEMRadioButton.IsChecked == true)
                 {
-                    int posx = 1;
-                    int posy = 1;
-                    // for ()
-                    // {
-                        mCL.InitialiseSimulation(Resolution, posx, posy);
+                   int posx = 1;
+                   int posy = 1;
+                   // for ()
+                   // {
+                       mCL.InitialiseSimulation(Resolution, posx, posy);
 
-                        // Use Background worker to progress through each step
-                        int NumberOfSlices = 0;
-                        mCL.GetNumberSlices(ref NumberOfSlices);
-                        // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+                       // Use Background worker to progress through each step
+                       int NumberOfSlices = 0;
+                       mCL.GetNumberSlices(ref NumberOfSlices);
+                       // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
-                        for (int i = 1; i <= NumberOfSlices; i++)
-                        {
-                            mCL.MultisliceStep(i, NumberOfSlices);
-                        }                       
-                    // }
+                       for (int i = 1; i <= NumberOfSlices; i++)
+                       {
+                           mCL.MultisliceStep(i, NumberOfSlices);
+                       }                       
+                   // }
                 }
 
                 // needs looping if in STEM mode
