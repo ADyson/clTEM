@@ -140,8 +140,8 @@ int MultisliceStructure::SortAtoms()
 	clAtomSort->Enqueue(SortSize);
 	
 	//Malloc HBlockStuff
-	int* HostBlockIDs = new int [Atoms.size()];
-	int* HostZIDs = new int [Atoms.size()];
+	std::vector<int> HostBlockIDs (Atoms.size());
+	std::vector<int> HostZIDs (Atoms.size());
 
 	clEnqueueReadBuffer(clq->cmdQueue,clBlockIDs,CL_FALSE,0,Atoms.size()*sizeof(float),&HostBlockIDs[0],0,NULL,NULL);
 	clEnqueueReadBuffer(clq->cmdQueue,clZIDs,CL_TRUE,0,Atoms.size()*sizeof(float),&HostZIDs[0],0,NULL,NULL);

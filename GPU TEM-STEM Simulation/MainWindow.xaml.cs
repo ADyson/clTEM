@@ -292,7 +292,8 @@ namespace GPUTEMSTEMSimulation
             // Changed to alternate model of progress reporting
             //worker.WorkerReportsProgress = true;
             SimWorker.WorkerSupportsCancellation = true;
-
+            bool select_TEM = TEMRadioButton.IsChecked == true;
+            bool select_STEM = STEMRadioButton.IsChecked == true;
 
 
             SimWorker.DoWork += delegate(object s, DoWorkEventArgs args)
@@ -305,22 +306,44 @@ namespace GPUTEMSTEMSimulation
                                     ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
-           
-                
-                
-                // Setup pre simulation (make frequencies and create databuffers and kernels
-                mCL.InitialiseSimulation(Resolution);
 
-                // Use Background worker to progress through each step
-                int NumberOfSlices = 0;
-                mCL.GetNumberSlices(ref NumberOfSlices);
-                // Seperate into setup, loop over slices and final steps to allow for progress reporting.
-
-                for (int i = 1; i <= NumberOfSlices; i++)
+                if (select_TEM)
                 {
-                    mCL.MultisliceStep(i, NumberOfSlices);
+                    mCL.InitialiseSimulation(Resolution);
 
+                    // Use Background worker to progress through each step
+                    int NumberOfSlices = 0;
+                    mCL.GetNumberSlices(ref NumberOfSlices);
+                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                    for (int i = 1; i <= NumberOfSlices; i++)
+                    {
+                        mCL.MultisliceStep(i, NumberOfSlices);
+                    }
                 }
+                else if (select_STEM)
+                {
+                    int posx = Resolution/2;
+                    int posy = Resolution/2;
+                    // for ()
+                    // {
+                    mCL.InitialiseSimulation(Resolution, posx, posy);
+
+                    // Use Background worker to progress through each step
+                    int NumberOfSlices = 0;
+                    mCL.GetNumberSlices(ref NumberOfSlices);
+                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                    for (int i = 1; i <= NumberOfSlices; i++)
+                    {
+                        mCL.MultisliceStep(i, NumberOfSlices);
+                    }
+                    // }
+                }
+
+                // needs looping if in STEM mode
+
+
                 // Cleanup
 
                 //System.Threading.Thread.Sleep(2);
@@ -349,8 +372,8 @@ namespace GPUTEMSTEMSimulation
                 var arraySize = stride * _EWImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
-                float min = mCL.GetEWMin();
-                float max = mCL.GetEWMax();
+                float min = mCL.GetEWMin() -.01f;
+                float max = mCL.GetEWMax() + 0.01f;
 
                 for (int row = 0; row < _EWImg.PixelHeight; row++)
                     for (int col = 0; col < _EWImg.PixelWidth; col++)
@@ -543,7 +566,7 @@ namespace GPUTEMSTEMSimulation
                         byte[] buf2 = new byte[4 * Resolution];
                         for (int j = 0; j < Resolution; ++j)
                         {
-                              buf[j] = EWImage[j+Resolution*i];
+                              buf[j] = DiffImage[j+Resolution*i];
                         }
                         Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
                         output.WriteScanline(buf2, i);

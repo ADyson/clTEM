@@ -42,7 +42,7 @@ public:
 	TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams);
 
 	void Initialise(int resolution, MultisliceStructure* Structure);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure);
+	void InitialiseSTEM(int resolution, int posx, int posy, MultisliceStructure* Structure);
 
 
 	void MultisliceStep(int stepno, int steps);
@@ -55,6 +55,8 @@ public:
 	void GetEWImage(float* data, int resolution);
 
 	void SimulateCTEM();
+
+	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	// Image contrast limits (technically ew atm)
 	float imagemin;

@@ -132,9 +132,6 @@ const char* BinnedAtomicPotentialSource2 =
 "}	\n"
 ;
 
-
-
-
 const char* BandLimitSource = 
 "__kernel void clBandLimit(__global float2* InputWavefunction, int width, int height, float kmax, __global float* kx, __global float* ky) \n"
 "{		\n"
@@ -215,4 +212,89 @@ const char* imagingKernelSource =
 "		} \n"
 "	} \n"
 "} \n"
+;
+
+const char* InitialiseSTEMWavefunctionSource = 
+"__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height, __global const float* clXFrequencies, __global const float* clYFrequencies, int posx, int posy, float apert, float pixelscale, float df, float Cs, float wavel) \n"
+"{ \n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0); \n"
+"	int yid = get_global_id(1); \n"
+"	if(xid < width && yid < height) \n"
+"	{ \n"
+"		int Index = xid + yid*width; \n"
+"		float apert2 = ((apert * 0.001f) / wavel ); \n"
+"		float k0x = clXFrequencies[xid]; \n"
+"		float k0y = clYFrequencies[yid]; \n"
+"		float k = sqrt(k0x*k0x + k0y*k0y); \n"
+"		float Pi = 3.14159265f; \n"
+"		if( k < apert2) \n"
+"		{ \n"
+"			Output[Index].x = cos(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*cos(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))  + sin(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sin(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)) ; \n"
+"			Output[Index].y = -cos(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale))*sin(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df)) + cos(Pi*wavel*k*k*(Cs*wavel*wavel*k*k*0.5f + df))*sin(2*Pi*(k0x*posx*pixelscale + k0y*posy*pixelscale)); \n"
+"		} \n"
+"		else \n"
+"		{ \n"
+"			Output[Index].x 	= 0.0f; \n"
+"			Output[Index].y 	= 0.0f; \n"
+"		} \n"
+"	} \n"
+"} \n"
+;
+
+const char* sumReductionsource2 = 
+"__kernel void clSumReduction(__global const float2* input, __global float2* output, const unsigned int size, __local float2* buffer)	\n"
+"{																																		\n"
+"	//Get the work items ID																												\n"
+"	size_t idx = get_local_id(0);																										\n"
+"	size_t stride = get_global_size(0);																									\n"
+"	buffer[idx] = 0;																													\n"
+"																																		\n"
+"	for(size_t pos = get_global_id(0); pos < size; pos += stride )																		\n"
+"		buffer[idx] += input[pos];																										\n"
+"																																		\n"
+"	barrier(CLK_LOCAL_MEM_FENCE);																										\n"
+"																																		\n"
+"	float2 sum = 0;																														\n"
+"	if(!idx) {																															\n"
+"		for(size_t i = 1; i < get_local_size(0); ++i)																					\n"
+"			sum += buffer[i];																											\n"
+"																																		\n"
+"		output[get_group_id(0)] = sum;																									\n"
+"	}																																	\n"
+"}																																		\n"
+;
+
+const char* abssource2 = 
+"__kernel void clAbs(__global float2* clEW, int sizeX, int sizeY)	\n"
+"{	\n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+"	\n"
+"	if(xid<sizeX&&yid<sizeY) \n"
+"	{	\n"
+"		int Index = xid + yid*sizeX; \n"
+"		float real = clEW[Index].x + 1;	\n"
+"		float imag = clEW[Index].y;	\n"
+"		clEW[Index].x = hypot(real,imag);	\n"
+"		clEW[Index].y = 0;	\n"
+"	}	\n"
+"}	\n"
+;
+
+const char* multiplySource = 
+"__kernel void clMultiply(__global float2* Input, float factor, int sizeX, int sizeY)	\n"
+"{	\n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+"	\n"
+"	if(xid<sizeX&&yid<sizeY) \n"
+"	{	\n"
+"		int Index = xid + yid*sizeX; \n"
+"		Input[Index].x *= factor; \n"
+"		Input[Index].y *= factor; \n"
+"	}	\n"
+"}	\n"
 ;

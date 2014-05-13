@@ -34,7 +34,7 @@ public:
 	void SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 
 	void InitialiseSimulation(int resolution);
-	void InitialiseSTEMSimulation(int resolution);
+	void InitialiseSTEMSimulation(int resolution, int posx, int posy);
 	void MultisliceStep(int stepno, int steps);
 
 
