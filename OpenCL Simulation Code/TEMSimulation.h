@@ -56,6 +56,8 @@ public:
 
 	void SimulateCTEM();
 
+	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
+
 	// Image contrast limits (technically ew atm)
 	float imagemin;
 	float imagemax;

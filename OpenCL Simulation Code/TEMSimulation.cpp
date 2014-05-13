@@ -228,7 +228,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	float SimSizeY = SimSizeX;
 
 	float	Pi		= 3.1415926f;	
-	float	V		= TEMParams->kilovoltage;
+	float	V		= STEMParams->kilovoltage;
 	float	a0		= 52.9177e-012f;
 	float	a0a		= a0*1e+010f;
 	float	echarge	= 1.6e-019f;
@@ -323,13 +323,12 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 
 
 	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
-								&&clXFrequencies && clYFrequencies && posx && posy 
+								&& clXFrequencies && clYFrequencies && posx && posy 
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
 
-	// IFFT
-	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+	
 
 	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);
@@ -345,6 +344,42 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	WorkSize[2] = 1;
 
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
+
+	// IFFT
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+
+	// so both cl mem things have the wavefunction (gonna edit one in a sec)
+	clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+
+	clKernel* WFabsolute = new clKernel(abssource2,context,cldev,"clAbs",clq);
+	WFabsolute->BuildKernelOld();
+
+	*WFabsolute << clWaveFunction2 && resolution && resolution;
+
+	WFabsolute->Enqueue(WorkSize);
+
+	int totalSize = resolution*resolution;
+	int nGroups = totalSize / 256;
+
+	size_t* globalSizeSum = new size_t[3];
+	size_t* localSizeSum = new size_t[3];
+
+	globalSizeSum[0] = totalSize;
+	globalSizeSum[1] = 1;
+	globalSizeSum[2] = 1;
+	localSizeSum[0] = 256;
+	localSizeSum[1] = 1;
+	localSizeSum[2] = 1;
+
+	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
+	float inverseSum = 1/sumRed;
+
+	clKernel* MultiplyCL = new clKernel(multiplySource,context,cldev,"clMultiply",clq);
+	MultiplyCL->BuildKernelOld();
+
+	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
+
+	MultiplyCL->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
 	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
@@ -442,6 +477,9 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
+	std::vector<cl_float2> test(resolution*resolution);
+	clEnqueueReadBuffer(clq->cmdQueue,clPotential,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&test[0],0,0,0);
+
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
@@ -449,6 +487,8 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	ComplexMultiply->SetArgT(1,clWaveFunction1);
 	ComplexMultiply->SetArgT(2,clWaveFunction2);
 	ComplexMultiply->Enqueue(Work);
+
+
 
 	// Propagate
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
@@ -545,7 +585,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] = log(sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1])+0.0001f);
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)
@@ -632,3 +672,39 @@ void TEMSimulation::SimulateCTEM()
 	clEnqueueCopyBuffer(clq->cmdQueue,clImageWaveFunction,clWaveFunction4,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 
 };
+
+float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+{
+	clKernel* SumReduction = new clKernel(sumReductionsource2,context,cldev,"clSumReduction",clq);
+	SumReduction->BuildKernelOld();
+
+	cl_mem outArray = clCreateBuffer(context, CL_MEM_READ_WRITE, nGroups * sizeof( cl_float2 ), 0, &status);
+
+	// Create host array to store reduction results.
+	std::vector< std::complex< float > > sums( nGroups );
+
+	SumReduction->SetArgT(0,Array);
+
+	// Only really need to do these 3 once...
+	SumReduction->SetArgT(1,outArray);
+	SumReduction->SetArgT(2,totalSize);
+	SumReduction->SetArgLocalMemory(3,256,clFloat2);
+
+	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
+
+	// Now copy back 
+	clEnqueueReadBuffer( clq->cmdQueue, outArray, CL_TRUE, 0, nGroups*sizeof(cl_float2), &sums[0], 0, NULL, NULL );
+
+	// Find out which numbers to read back
+	float sum = 0;
+
+	for(int i = 0 ; i < nGroups; i++)
+	{
+		sum += sums[i].real();
+	}
+
+	clReleaseMemObject(outArray);
+
+	return sum;
+
+}

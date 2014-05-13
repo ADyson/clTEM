@@ -32,7 +32,7 @@ __kernel void clBinnedAtomicPotential(__global float2* Potential, __global float
 							{
 								for (int h = 0; h < 10; h++)
 								{
-									float rad = sqrt((xid*pixelscale-clAtomXPos[l] + MinX)*(xid*pixelscale-clAtomXPos[l] + MinX) + (yid*pixelscale-clAtomYPos[l] + MinY)*(yid*pixelscale-clAtomYPos[l] + MinY) + (z - (h*(dz/10.0f))-clAtomZPos[l])*(z - (h*(dz/10.0f))-clAtomZPos[l]));
+									float rad = sqrt((xid*pixelscale-clAtomXPos[l])*(xid*pixelscale-clAtomXPos[l]) + (yid*pixelscale-clAtomYPos[l])*(yid*pixelscale-clAtomYPos[l]) + (z - (h*(dz/10.0f))-clAtomZPos[l])*(z - (h*(dz/10.0f))-clAtomZPos[l]));
 
 									if(rad < 0.25f * pixelscale)
 										rad = 0.25f * pixelscale;
