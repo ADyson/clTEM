@@ -131,6 +131,11 @@
                     <Image Name="EWImageDisplay" Height="512" Width="512"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="BF">
+                <Grid Background="#FFE5E5E5">
+                    <Image Name="BFImageDisplay" Height="512" Width="512"/>
+                </Grid>
+            </TabItem>
         </TabControl>
         <!-- Right Image Tab Control-->
         <TabControl Height="600" Margin="0,25,58,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="600">

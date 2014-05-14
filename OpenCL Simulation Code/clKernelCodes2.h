@@ -300,7 +300,7 @@ const char* multiplySource =
 ;
 
 const char* bandPassSource = 
-"__kernel void clBandPass(__global float2* Input, int width, int height, float inner, float outer)	\n"
+"__kernel void clBandPass(__global float2* Output, __global const float2* Input, int width, int height, float inner, float outer)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -311,11 +311,16 @@ const char* bandPassSource =
 "		int Index = xid + yid*width; \n"
 "		float centX = width/2; \n"
 "		float centY = height/2; \n"
-"		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n"
-"		if(radius > outer || radius < inner) \n"
+"		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n" // hypot?
+"		if(radius < outer && radius > inner) \n"
 "		{	\n"
-"			Input[Index].x = 0; \n"
-"			Input[Index].y = 0; \n"	
+"			Output[Index].x = Input[Index].x; \n"
+"			Output[Index].y = Input[Index].y; \n"	
+"		} \n"
+"		else \n"
+"		{	\n"
+"			Output[Index].x = 0; \n"
+"			Output[Index].y = 0; \n"	
 "		} \n"
 "	}	\n"
 "}	\n"

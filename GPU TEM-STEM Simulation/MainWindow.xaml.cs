@@ -99,7 +99,7 @@ namespace GPUTEMSTEMSimulation
         float[] EWImage;
         float[] DiffImage;
 
-
+        float[] STEMimage;
 
 
         ///<summary>
@@ -323,24 +323,38 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
-                    int posx = Resolution/2;
-                    int posy = Resolution/2;
-                    // for ()
-                    // {
-                    mCL.InitialiseSimulation(Resolution, posx, posy);
+                    int maxX = 127;// Resolution;
+                    int minX = 125;
 
-                    // Use Background worker to progress through each step
-                    int NumberOfSlices = 0;
-                    mCL.GetNumberSlices(ref NumberOfSlices);
-                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+                    int maxY = 127;// Resolution;
+                    int minY = 125;
 
-                    for (int i = 1; i <= NumberOfSlices; i++)
+                    STEMimage = new float[Resolution * Resolution];
+
+                    mCL.InitialiseSTEMSimulation(Resolution);
+
+                    for (int posY = minY; posY < maxY; posY++)
                     {
-                        mCL.MultisliceStep(i, NumberOfSlices);
+                        for (int posX = minX; posX < maxX; posX++)
+                        {
+                            mCL.MakeSTEMWaveFunction(posX, posY);
+
+                            // Use Background worker to progress through each step
+                            int NumberOfSlices = 0;
+                            mCL.GetNumberSlices(ref NumberOfSlices);
+                            // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                            for (int i = 1; i <= NumberOfSlices; i++)
+                            {
+                                mCL.MultisliceStep(i, NumberOfSlices);
+                            }
+
+                            STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
+                        }
                     }
 
                     //call some function here to measure the pixel value?
-
+                    minX = 0;
                 }
 
                 // needs looping if in STEM mode
@@ -356,6 +370,46 @@ namespace GPUTEMSTEMSimulation
             // This runs on UI Thread so can access UI, probably better way of doing image though.
             SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
             {
+
+                if (select_STEM)
+                {
+
+                    _STEMBFImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                    BFImageDisplay.Source = _STEMBFImg;
+
+                    // Calculate the number of bytes per pixel (should be 4 for this format). 
+                    var bytesPerPixelBF = (_STEMBFImg.Format.BitsPerPixel + 7) / 8;
+
+                    // Stride is bytes per pixel times the number of pixels.
+                    // Stride is the byte width of a single rectangle row.
+                    var strideBF = _STEMBFImg.PixelWidth * bytesPerPixelBF;
+
+                    // Create a byte array for a the entire size of bitmap.
+                    var arraySizeBF = strideBF * _STEMBFImg.PixelHeight;
+                    var pixelArrayBF = new byte[arraySizeBF];
+
+                    //float min = mCL.GetEWMin();
+                    //float max = mCL.GetEWMax();
+
+                    float minBF = STEMimage.Min();
+                    float maxBF = STEMimage.Max();
+
+                    for (int row = 0; row < _STEMBFImg.PixelHeight; row++)
+                        for (int col = 0; col < _STEMBFImg.PixelWidth; col++)
+                        {
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
+                        }
+
+
+                    Int32Rect rectBF = new Int32Rect(0, 0, _STEMBFImg.PixelWidth, _STEMBFImg.PixelHeight);
+
+                    _STEMBFImg.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
+
+                }
+
                 _EWImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                 EWImageDisplay.Source = _EWImg;
 
@@ -363,6 +417,7 @@ namespace GPUTEMSTEMSimulation
                 EWImage = new float[Resolution * Resolution];
                 mCL.GetEWImage(EWImage, Resolution);
 
+          
                 // Calculate the number of bytes per pixel (should be 4 for this format). 
                 var bytesPerPixel = (_EWImg.Format.BitsPerPixel + 7) / 8;
 
@@ -374,8 +429,8 @@ namespace GPUTEMSTEMSimulation
                 var arraySize = stride * _EWImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
-                float min = mCL.GetEWMin() -.01f;
-                float max = mCL.GetEWMax() + 0.01f;
+                float min = mCL.GetEWMin();
+                float max = mCL.GetEWMax();
 
                 for (int row = 0; row < _EWImg.PixelHeight; row++)
                     for (int col = 0; col < _EWImg.PixelWidth; col++)

@@ -105,11 +105,26 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, int posx, int posy)
+	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSTEMSimulation(resolution, posx, posy);
+			_UMOpenCL->InitialiseSTEMSimulation(resolution);
+		}
+		catch(std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	};
+
+	void ManagedOpenCL::MakeSTEMWaveFunction(int posx, int posy)
+	{
+		try
+		{
+			_UMOpenCL->MakeSTEMWaveFunction(posx, posy);
 		}
 		catch(std::exception ex)
 		{
@@ -186,5 +201,10 @@ namespace ManagedOpenCLWrapper
 	void ManagedOpenCL::SimulateCTEMImage()
 	{	
 		_UMOpenCL->TS->SimulateCTEM();
+	};
+
+	float ManagedOpenCL::GetSTEMPixel()
+	{
+		return _UMOpenCL->TS->MeasureSTEMPixel();
 	};
 }

@@ -16,6 +16,11 @@ public:
 	clKernel* fftShift;
 	clKernel* ImagingKernel;
 
+	clKernel* InitialiseSTEMWavefunction;
+	clKernel* WFabsolute;
+	clKernel* MultiplyCL;
+	clKernel* MaskingKernel;
+
 	cl_context context;
 	clQueue* clq;
 	clDevice* cldev;
@@ -42,12 +47,13 @@ public:
 	TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams);
 
 	void Initialise(int resolution, MultisliceStructure* Structure);
-	void InitialiseSTEM(int resolution, int posx, int posy, MultisliceStructure* Structure);
-
+	void InitialiseSTEM(int resolution, MultisliceStructure* Structure);
+	void MakeSTEMWaveFunction(int posx, int posy);
 
 	void MultisliceStep(int stepno, int steps);
 
-	void MeasureSTEMPixel();
+	float MeasureSTEMPixel();
+	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	void GetCTEMImage(float* data, int resolution);
 	// Diff of EW

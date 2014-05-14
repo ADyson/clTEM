@@ -209,7 +209,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clFinish(clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, MultisliceStructure* Structure)
+void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
@@ -307,7 +307,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	clPotential = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 
 	// Set initial wavefunction to 1+0i
-	clKernel* InitialiseSTEMWavefunction = new clKernel(InitialiseSTEMWavefunctionSource,context,cldev,"clInitialiseSTEMWavefunction",clq);
+	InitialiseSTEMWavefunction = new clKernel(InitialiseSTEMWavefunctionSource,context,cldev,"clInitialiseSTEMWavefunction",clq);
 	InitialiseSTEMWavefunction->BuildKernelOld();
 
 	BandLimit = new clKernel(BandLimitSource,context,cldev,"clBandLimit",clq);
@@ -321,14 +321,11 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	fftShift->SetArgT(2,resolution);
 	fftShift->SetArgT(3,resolution);
 
-
-	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
-								&& clXFrequencies && clYFrequencies && posx && posy 
-								&& STEMParams->aperturesizemrad && pixelscale 
-								&& STEMParams->defocus && STEMParams->spherical 
-								&& wavelength;
-
+	MultiplyCL = new clKernel(multiplySource,context,cldev,"clMultiply",clq);
+	MultiplyCL->BuildKernelOld();
 	
+	MaskingKernel = new clKernel(bandPassSource,context,cldev,"clBandPass",clq);
+	MaskingKernel->BuildKernelOld();
 
 	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);
@@ -343,43 +340,8 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	InitialiseSTEMWavefunction->Enqueue(WorkSize);
-
-	// IFFT
-	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
-
-	// so both cl mem things have the wavefunction (gonna edit one in a sec)
-	clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
-
-	clKernel* WFabsolute = new clKernel(abssource2,context,cldev,"clAbs",clq);
+	WFabsolute = new clKernel(abssource2,context,cldev,"clAbs",clq);
 	WFabsolute->BuildKernelOld();
-
-	*WFabsolute << clWaveFunction2 && resolution && resolution;
-
-	WFabsolute->Enqueue(WorkSize);
-
-	int totalSize = resolution*resolution;
-	int nGroups = totalSize / 256;
-
-	size_t* globalSizeSum = new size_t[3];
-	size_t* localSizeSum = new size_t[3];
-
-	globalSizeSum[0] = totalSize;
-	globalSizeSum[1] = 1;
-	globalSizeSum[2] = 1;
-	localSizeSum[0] = 256;
-	localSizeSum[1] = 1;
-	localSizeSum[2] = 1;
-
-	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
-	float inverseSum = 1/sumRed;
-
-	clKernel* MultiplyCL = new clKernel(multiplySource,context,cldev,"clMultiply",clq);
-	MultiplyCL->BuildKernelOld();
-
-	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
-
-	MultiplyCL->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
 	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
@@ -446,7 +408,55 @@ void TEMSimulation::InitialiseSTEM(int resolution, int posx, int posy, Multislic
 	clFinish(clq->cmdQueue);
 };
 
-void TEMSimulation::MeasureSTEMPixel()
+void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
+{
+	size_t* WorkSize = new size_t[3];
+
+	WorkSize[0] = resolution;
+	WorkSize[1] = resolution;
+	WorkSize[2] = 1;
+
+	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
+								&& clXFrequencies && clYFrequencies && posx && posy 
+								&& STEMParams->aperturesizemrad && pixelscale 
+								&& STEMParams->defocus && STEMParams->spherical 
+								&& wavelength;
+
+	InitialiseSTEMWavefunction->Enqueue(WorkSize);
+
+	// IFFT
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+
+	// so both cl mem things have the wavefunction (gonna edit one in a sec)
+	clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+
+	*WFabsolute << clWaveFunction2 && resolution && resolution;
+
+	WFabsolute->Enqueue(WorkSize);
+
+	int totalSize = resolution*resolution;
+	int nGroups = totalSize / 256;
+
+	size_t* globalSizeSum = new size_t[3];
+	size_t* localSizeSum = new size_t[3];
+
+	globalSizeSum[0] = totalSize;
+	globalSizeSum[1] = 1;
+	globalSizeSum[2] = 1;
+	localSizeSum[0] = 256;
+	localSizeSum[1] = 1;
+	localSizeSum[2] = 1;
+
+	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
+	float inverseSum = 1/sumRed;
+
+	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
+
+	MultiplyCL->Enqueue(WorkSize);
+}
+
+
+float TEMSimulation::MeasureSTEMPixel()
 {
 	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
 
@@ -456,13 +466,13 @@ void TEMSimulation::MeasureSTEMPixel()
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	clKernel* MaskingKernel = new clKernel(bandPassSource,context,cldev,"clBandPass",clq);
-	MaskingKernel->BuildKernelOld();
+	fftShift->Enqueue(WorkSize); // looking at GetDiffImage, should put into clWaveFunction3 (can set manually)
 
+	//to be set by user later
 	float inner = 5;
 	float outer = 10;
 
-	*MaskingKernel << clWaveFunction3 && resolution && resolution && inner && outer;
+	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && inner && outer;
 
 	MaskingKernel->Enqueue(WorkSize);
 
@@ -479,10 +489,7 @@ void TEMSimulation::MeasureSTEMPixel()
 	localSizeSum[1] = 1;
 	localSizeSum[2] = 1;
 
-	float sumRed = SumReduction(clWaveFunction3, globalSizeSum, localSizeSum, nGroups, totalSize);
-
-	// need to store this pixel somewhere, to be read off later when forming image.
-	
+	return SumReduction(clWaveFunction4, globalSizeSum, localSizeSum, nGroups, totalSize);
 }
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
