@@ -22,6 +22,7 @@ using System.Threading;
 using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
+using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -136,6 +137,30 @@ namespace GPUTEMSTEMSimulation
             IsResolutionSet = false;
             HaveStructure = false;
             IsSorted = false;
+
+            // Set Default Values
+            ImagingAperture.Text = "30";
+            ImagingCs.Text = "10000";
+            ImagingkV.Text = "200";
+            ImagingA1.Text = "0";
+            ImagingA1theta.Text = "0";
+            ImagingB2.Text = "0";
+            ImagingB2Phi.Text = "0";
+            Imagingbeta.Text = "0.005";
+            Imagingdelta.Text = "3";
+            ImagingDf.Text = "0";
+            ImagingA2.Text = "0";
+            ImagingA2Phi.Text = "0";
+
+            ProbeAperture.Text = "5";
+            ProbeCs.Text = "10000";
+            ProbekV.Text = "200";
+            ProbeA1.Text = "0";
+            ProbeA1theta.Text = "0";
+            Probebeta.Text = "0.005";
+            Probedelta.Text = "3";
+            ProbeDf.Text = "0";
+
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
@@ -323,10 +348,10 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 127;// Resolution;
+                    int maxX = 126;// Resolution;
                     int minX = 125;
 
-                    int maxY = 127;// Resolution;
+                    int maxY = 126;// Resolution;
                     int minY = 125;
 
                     STEMimage = new float[Resolution * Resolution];
@@ -408,6 +433,8 @@ namespace GPUTEMSTEMSimulation
 
                     _STEMBFImg.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
 
+                    BFTab.IsSelected = true;
+
                 }
 
                 _EWImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
@@ -446,6 +473,7 @@ namespace GPUTEMSTEMSimulation
 
                 _EWImg.WritePixels(rect, pixelArray, stride, 0);
 
+                EWTab.IsSelected = true;
 
                 _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                 DiffImageDisplay.Source = _DiffImg;
@@ -483,6 +511,7 @@ namespace GPUTEMSTEMSimulation
                 _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
 
                 SaveImageButton.IsEnabled = true;
+                SaveImageButton2.IsEnabled = true;
                 SimulateImageButton.IsEnabled = true;
             };
 
@@ -551,15 +580,15 @@ namespace GPUTEMSTEMSimulation
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
         }
 
-        private void ProbeA2_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProbeA1_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ProbeA2.Text;
+            string temporarytext = ProbeA1.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
         }
 
-        private void ProbeA2theta_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProbeA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ProbeA2theta.Text;
+            string temporarytext = ProbeA1theta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
         }
 
@@ -621,10 +650,78 @@ namespace GPUTEMSTEMSimulation
                     {
                         float[] buf = new float[Resolution];
                         byte[] buf2 = new byte[4 * Resolution];
-                        for (int j = 0; j < Resolution; ++j)
+                        if (EWTab.IsSelected == true)
                         {
-                              buf[j] = DiffImage[j+Resolution*i];
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = EWImage[j + Resolution * i];
+                            }
                         }
+                        else if (BFTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = STEMimage[j + Resolution * i];
+                            }
+                        }
+                        else if (CTEMTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = CTEMImage[j + Resolution * i];
+                            }
+                        }
+
+                        Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
+                        output.WriteScanline(buf2, i);
+                    }
+                }
+            }
+
+        }
+
+        private void SaveImageButton2_Click(object sender, RoutedEventArgs e)
+        {
+            // Ideally want to check tab and use information to save either EW or CTEM....
+
+            // File saving dialog
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+
+            saveDialog.Title = "Save Output Image";
+            saveDialog.DefaultExt = ".tiff";                     // Default file extension
+            saveDialog.Filter = "TIFF Image (.tiff)|*.tiff"; // Filter files by extension
+
+            Nullable<bool> result = saveDialog.ShowDialog();
+
+            if (result == true)
+            {
+                string filename = saveDialog.FileName;
+                using (Tiff output = Tiff.Open(filename, "w"))
+                {
+                    output.SetField(TiffTag.IMAGEWIDTH, Resolution);
+                    output.SetField(TiffTag.IMAGELENGTH, Resolution);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                    output.SetField(TiffTag.SAMPLEFORMAT, 3);
+                    output.SetField(TiffTag.BITSPERSAMPLE, 32);
+                    output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+                    output.SetField(TiffTag.ROWSPERSTRIP, Resolution);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                    output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                    output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                    for (int i = 0; i < Resolution; ++i)
+                    {
+                        float[] buf = new float[Resolution];
+                        byte[] buf2 = new byte[4 * Resolution];
+                        if (DiffTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = DiffImage[j + Resolution * i];
+                            }
+                        }
+
                         Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
                         output.WriteScanline(buf2, i);
                     }

@@ -79,6 +79,7 @@
     </ApplicationDefinition>
     <Compile Include="Masking.Cs" />
     <Compile Include="TEMParams.cs" />
+    <Compile Include="ZoomBorder.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -1,20 +1,21 @@
 ﻿<Window x:Name="Multislice_Simulation" x:Class="GPUTEMSTEMSimulation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Multislice Simulation" Height="848" Width="1419" ResizeMode="NoResize">
+        xmlns:local="clr-namespace:PanAndZoom"
+        Title="Multislice Simulation" MinWidth ="1360" MinHeight="850" Height="791.5" Width="1283.5">
     <!--xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"-->
-    <Grid>
+    <Grid Margin="0,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="120"/>
             <RowDefinition Height="120*"/>
         </Grid.RowDefinitions>
-        <GroupBox Header="Import Structure" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="120" Width="130">
+        <GroupBox Grid.Row="0" Header="Import Structure" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="120" Width="130">
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid HorizontalAlignment="Left" Height="97.04" VerticalAlignment="Top" Width="120" Margin="0,0,-2,0">
                 <Button Content="Import Structure" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,10,0,0" Click="ImportStructureButton"/>
-                <Button Content="Import Unit Cell" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,46.04,0,0" Click="ImportUnitCellButton"/>
+                <Button IsEnabled="False" Content="Import Unit Cell" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,46.04,0,0" Click="ImportUnitCellButton"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Structure Information" HorizontalAlignment="Left" Height="120" Margin="139,0,0,0" VerticalAlignment="Top" Width="208.5">
@@ -67,15 +68,15 @@
                 <Label Content="df:" HorizontalAlignment="Left" Margin="7,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ProbeCs" HorizontalAlignment="Left" Height="22" Margin="43,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeCs_TextChanged"/>
                 <Label Content="Cs:" HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeA2" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA2_TextChanged"/>
-                <Label Content="A2:" HorizontalAlignment="Left" Margin="7,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeA2theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA2theta_TextChanged"/>
-                <Label Content="A2 θ:" HorizontalAlignment="Left" Margin="3,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ProbeA1" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA1_TextChanged"/>
+                <Label Content="A1:" HorizontalAlignment="Left" Margin="7,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ProbeA1theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA1theta_TextChanged"/>
+                <Label Content="A1 θ:" HorizontalAlignment="Left" Margin="3,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ProbekV" HorizontalAlignment="Left" Height="22" Margin="138,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbekV_TextChanged"/>
                 <Label Content="kV:" HorizontalAlignment="Left" Margin="102,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Probebeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probebeta_TextChanged"/>
+                <TextBox IsEnabled="False" Name="Probebeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probebeta_TextChanged"/>
                 <Label Content="β:" HorizontalAlignment="Left" Margin="102,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Probedelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probedelta_TextChanged"/>
+                <TextBox IsEnabled="False" Name="Probedelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probedelta_TextChanged"/>
                 <Label Content="Δ:" HorizontalAlignment="Left" Margin="102,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ProbeAperture" HorizontalAlignment="Left" Height="22" Margin="138,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeAperture_TextChanged"/>
                 <Label Content="Aper:" HorizontalAlignment="Left" Margin="98,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
@@ -116,51 +117,92 @@
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
-            <Button Content="Simulate EW" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_1"/>
+            <Grid>
+                <Button Content="Simulate EW" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_1"/>
+                <Button Name ="SimulateImageButton" IsEnabled="False" Content="Simulate Image" HorizontalAlignment="Left" Height="39" Margin="10,55,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_SimImage"/>
+            </Grid>
         </GroupBox>
+        <Grid Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width=".5*"></ColumnDefinition>
+                <ColumnDefinition Width=".5*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <!-- Left Image Tab Control-->
+            <TabControl Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="50,10,50,80" Grid.Row="1" >
+                <TabItem Header="CTEM" Name="CTEMTab">
+                    <Grid Background="#FFE5E5E5">
+                        <local:ZoomBorder ClipToBounds="True">
+                            <Image Name="CTEMImageDisplay" Height="Auto" Width="Auto"/>
+                        </local:ZoomBorder>
+                    </Grid>
+                </TabItem>
+                <TabItem Name="EWTab" Header="EW">
+                    <Grid Background="#FFE5E5E5" Width="Auto" Height="Auto" Margin="0,0,0,0">
+                        <local:ZoomBorder ClipToBounds="True">
+                            <Image Name="EWImageDisplay" Height="Auto" Width="Auto" />
+                        </local:ZoomBorder>
+                    </Grid>
+                </TabItem>
+                <TabItem Name="BFTab" Header="BF">
+                    <Grid Background="#FFE5E5E5">
+                        <local:ZoomBorder ClipToBounds="True">
+                            <Image Name="BFImageDisplay" Height="Auto" Width="Auto"/>
+                        </local:ZoomBorder>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <!-- Right Image Tab Control-->
+            <TabControl Margin="50,10,50,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TabItem Header="Diffraction" Name="DiffTab">
+                    <Grid Background="#FFE5E5E5">
+                        <local:ZoomBorder ClipToBounds="True">
+                            <Image Name="DiffImageDisplay" Height="Auto" Width="Auto" />
+                        </local:ZoomBorder>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="N/A" IsEnabled="False">
+                    <Grid Background="#FFE5E5E5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="11*"/>
+                            <ColumnDefinition Width="580*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="1" Height="500" Width="500"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <Button Name="SaveImageButton" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Click="SaveImageButton_Click" IsEnabled="False"/>
+            <Button Name="SaveImageButton2" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Grid.Column="1" Click="SaveImageButton2_Click" IsEnabled="False"/>
 
-        <!-- Left Image Tab Control-->
-        <TabControl HorizontalAlignment="Left" Height="600" Margin="58,25,0,0" Grid.Row="1" VerticalAlignment="Top" Width="600">
-            <TabItem Header="CTEM">
-                <Grid Background="#FFE5E5E5">
-                    <Image Name="CTEMImageDisplay" Height="512" Width="512"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="EW">
-                <Grid Background="#FFE5E5E5">
-                    <Image Name="EWImageDisplay" Height="512" Width="512"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="BF">
-                <Grid Background="#FFE5E5E5">
-                    <Image Name="BFImageDisplay" Height="512" Width="512"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-        <!-- Right Image Tab Control-->
-        <TabControl Height="600" Margin="0,25,58,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="600">
-            <TabItem Header="Diffraction">
-                <Grid Background="#FFE5E5E5">
-                    <Image Name="DiffImageDisplay" Height="512" Width="512" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="N/A" IsEnabled="False">
-                <Grid Background="#FFE5E5E5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="11*"/>
-                        <ColumnDefinition Width="580*"/>
-                    </Grid.ColumnDefinitions>
-                    <Image Grid.Column="1" Height="500" Width="500"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
 
-        <StatusBar HorizontalAlignment="Right" Height="34" Margin="0,666,0,0" Grid.Row="1" VerticalAlignment="Top" Width="1413" BorderThickness="0,1,0,0" BorderBrush="#FFC1C1C1">
-            <Label Name="atomNumberLabel" Content="--" Width="934" HorizontalContentAlignment="Right" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" Foreground="#FF575757" FontSize="11"/>
-            <Label Name="fileNameLabel" Content="no structure loaded" Width="470" HorizontalContentAlignment="Right" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" Foreground="#FF575757" FontSize="11" RenderTransformOrigin="0.612,0.5"/>
-
-        </StatusBar>
-        <Button Name="SaveImageButton" Content="Save Image" HorizontalAlignment="Left" Height="31" VerticalAlignment="Top" Width="103" Margin="527,629,0,0" Grid.Row="1" Click="SaveImageButton_Click" IsEnabled="False"/>
-        <Button Name ="SimulateImageButton" Content="Simulate Image" HorizontalAlignment="Left" Height="39" Margin="1215,71,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_SimImage"/>
+            <StatusBar HorizontalAlignment="Stretch" Height="34" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" BorderThickness="0,1,0,0" BorderBrush="#FFC1C1C1" HorizontalContentAlignment="Right">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                    </StatusBar.ItemsPanel>
+                <StatusBarItem>
+                        <Label Margin="10,0,0,0" Name="atomNumberLabel" Grid.Column="0" Content="--" Width="100" HorizontalContentAlignment="Left" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" Foreground="#FF575757" FontSize="11"/>
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="1">
+                    <Label Content="status message goes here..."></Label>
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="2">
+                    <ProgressBar Value="30" Width="250" Height="18"/>
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="3" HorizontalAlignment="Right">
+                    <Label Name="fileNameLabel" Grid.Column="1" Content="no structure loaded" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" HorizontalAlignment="Right" Foreground="#FF575757" FontSize="11" />
+                </StatusBarItem>                     
+            </StatusBar>
+        </Grid>
     </Grid>
 </Window>
