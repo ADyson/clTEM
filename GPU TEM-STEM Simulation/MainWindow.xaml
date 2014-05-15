@@ -137,7 +137,7 @@
                     </Grid>
                 </TabItem>
                 <TabItem Name="EWTab" Header="EW">
-                    <Grid Background="#FFE5E5E5" Width="Auto" Height="Auto" Margin="0,0,0,0">
+                    <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">
                             <Image Name="EWImageDisplay" Height="Auto" Width="Auto" />
                         </local:ZoomBorder>
@@ -161,13 +161,6 @@
                     </Grid>
                 </TabItem>
                 <TabItem Header="N/A" IsEnabled="False">
-                    <Grid Background="#FFE5E5E5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="11*"/>
-                            <ColumnDefinition Width="580*"/>
-                        </Grid.ColumnDefinitions>
-                        <Image Grid.Column="1" Height="500" Width="500"/>
-                    </Grid>
                 </TabItem>
             </TabControl>
             <Button Name="SaveImageButton" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Click="SaveImageButton_Click" IsEnabled="False"/>
@@ -189,9 +182,9 @@
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
-                    </StatusBar.ItemsPanel>
+                </StatusBar.ItemsPanel>
                 <StatusBarItem>
-                        <Label Margin="10,0,0,0" Name="atomNumberLabel" Grid.Column="0" Content="--" Width="100" HorizontalContentAlignment="Left" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" Foreground="#FF575757" FontSize="11"/>
+                    <Label Margin="10,0,0,0" Name="atomNumberLabel" Grid.Column="0" Content="--" Width="100" HorizontalContentAlignment="Left" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" Foreground="#FF575757" FontSize="11"/>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="1">
                     <Label Content="status message goes here..."></Label>
@@ -201,7 +194,7 @@
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="3" HorizontalAlignment="Right">
                     <Label Name="fileNameLabel" Grid.Column="1" Content="no structure loaded" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" HorizontalAlignment="Right" Foreground="#FF575757" FontSize="11" />
-                </StatusBarItem>                     
+                </StatusBarItem>
             </StatusBar>
         </Grid>
     </Grid>

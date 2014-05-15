@@ -348,11 +348,11 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 126;// Resolution;
-                    int minX = 125;
+                    int maxX = 180;// Resolution;
+                    int minX = 120;
 
-                    int maxY = 126;// Resolution;
-                    int minY = 125;
+                    int maxY = 133;// Resolution;
+                    int minY = 127;
 
                     STEMimage = new float[Resolution * Resolution];
 

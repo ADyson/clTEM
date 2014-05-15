@@ -103,7 +103,7 @@ void UnmanagedOpenCL::SetParamsSTEM(float df, float astigmag, float astigang, fl
 UnmanagedOpenCL::UnmanagedOpenCL() 
 {
 	// TODO: make this changeable
-	int PLATFORM = 0;
+	int PLATFORM = 1;
 	int DEVNUMBER = 0;
 
 	GotStruct = false;

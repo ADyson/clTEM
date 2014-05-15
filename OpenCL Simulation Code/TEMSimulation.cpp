@@ -469,8 +469,8 @@ float TEMSimulation::MeasureSTEMPixel()
 	fftShift->Enqueue(WorkSize); // looking at GetDiffImage, should put into clWaveFunction3 (can set manually)
 
 	//to be set by user later
-	float inner = 5;
-	float outer = 10;
+	float inner = 30;
+	float outer = 80;
 
 	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && inner && outer;
 
@@ -627,7 +627,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] = log(sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1])+1.000f);
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)
