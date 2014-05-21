@@ -34,9 +34,9 @@ public:
 	void SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 
 	void InitialiseSimulation(int resolution);
-	void InitialiseSTEMSimulation(int resolution, int posx, int posy);
+	void InitialiseSTEMSimulation(int resolution);
 	void MultisliceStep(int stepno, int steps);
-
+	void MakeSTEMWaveFunction(int posx, int posy);
 
 	// OpenCl Context Stuff
 	bool OpenCLAvailable;

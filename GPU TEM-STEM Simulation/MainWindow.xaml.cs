@@ -19,9 +19,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
+using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -46,9 +48,10 @@ namespace GPUTEMSTEMSimulation
         /// <summary>
         /// Worker to perform calculations in Non UI Thread.
         /// </summary>
-        BackgroundWorker SimWorker;
-        BackgroundWorker AtomSortWorker;
         ManagedOpenCL mCL;
+
+        // TaskFactory stuff
+        private CancellationTokenSource cancellationTokenSource;
 
         private static WriteableBitmap CTEMImg;
         public static WriteableBitmap _CTEMImg
@@ -98,8 +101,7 @@ namespace GPUTEMSTEMSimulation
         float[] CTEMImage;
         float[] EWImage;
         float[] DiffImage;
-
-
+        float[] STEMimage;
 
 
         ///<summary>
@@ -136,6 +138,32 @@ namespace GPUTEMSTEMSimulation
             IsResolutionSet = false;
             HaveStructure = false;
             IsSorted = false;
+
+            // Set Default Values
+            ImagingAperture.Text = "30";
+            ImagingCs.Text = "10000";
+            ImagingkV.Text = "200";
+            ImagingA1.Text = "0";
+            ImagingA1theta.Text = "0";
+            ImagingB2.Text = "0";
+            ImagingB2Phi.Text = "0";
+            Imagingbeta.Text = "0.005";
+            Imagingdelta.Text = "3";
+            ImagingDf.Text = "0";
+            ImagingA2.Text = "0";
+            ImagingA2Phi.Text = "0";
+
+            ProbeAperture.Text = "5";
+            ProbeCs.Text = "10000";
+            ProbekV.Text = "200";
+            ProbeA1.Text = "0";
+            ProbeA1theta.Text = "0";
+            Probebeta.Text = "0.005";
+            Probedelta.Text = "3";
+            ProbeDf.Text = "0";
+
+            //DataContext = this;
+
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
@@ -183,52 +211,26 @@ namespace GPUTEMSTEMSimulation
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
 
-                Cancel += CancelProcess;
-                //progressBar1.Minimum = 0;
-               // progressBar1.Maximum = 100;
 
-                System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
-                AtomSortWorker = new BackgroundWorker();
-
-                // Changed to alternate model of progress reporting
-                //worker.WorkerReportsProgress = true;
-                AtomSortWorker.WorkerSupportsCancellation = true;
-
-                
-
-                AtomSortWorker.DoWork += delegate(object s, DoWorkEventArgs args)
+                this.cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = this.cancellationTokenSource.Token;
+                var progressReporter = new ProgressReporter();
+                var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
                     mCL.SortStructure();
-                    //System.Threading.Thread.Sleep(2);
-                    //UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgress);
-                    //Dispatcher.BeginInvoke(update, i, managedMultislice.GetSlices(conventional));
-                };
+                    return 0;
+                },cancellationToken);
 
                 // This runs on UI Thread so can access UI, probably better way of doing image though.
-                AtomSortWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+                progressReporter.RegisterContinuation(task, () =>
                 {
                     IsSorted = true;
-                };
-
-                AtomSortWorker.RunWorkerAsync();
+                });
 
             }
         }
         
-        public delegate void UpdateProgressDelegate(int iteration, int maxIts);
-
-        public void UpdateProgress(int iteration, int maxIts)
-        {
-
-        }
-
-        void CancelProcess(object sender, EventArgs e)
-        {
-            AtomSortWorker.CancelAsync();
-        }
-
-
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
@@ -282,21 +284,23 @@ namespace GPUTEMSTEMSimulation
             }
 
             // Do Simulation in a background worker
-            Cancel += CancelProcess;
+            //Cancel += CancelProcess;
             //progressBar1.Minimum = 0;
             // progressBar1.Maximum = 100;
 
-            System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
-            SimWorker = new BackgroundWorker();
+            //System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
+            //SimWorker = new BackgroundWorker();
 
             // Changed to alternate model of progress reporting
             //worker.WorkerReportsProgress = true;
-            SimWorker.WorkerSupportsCancellation = true;
+            //SimWorker.WorkerSupportsCancellation = true;
             bool select_TEM = TEMRadioButton.IsChecked == true;
             bool select_STEM = STEMRadioButton.IsChecked == true;
 
-
-            SimWorker.DoWork += delegate(object s, DoWorkEventArgs args)
+            this.cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = this.cancellationTokenSource.Token;
+            var progressReporter = new ProgressReporter();
+            var task = Task.Factory.StartNew(() =>
             {
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
@@ -309,6 +313,7 @@ namespace GPUTEMSTEMSimulation
 
                 if (select_TEM)
                 {
+
                     mCL.InitialiseSimulation(Resolution);
 
                     // Use Background worker to progress through each step
@@ -319,26 +324,67 @@ namespace GPUTEMSTEMSimulation
                     for (int i = 1; i <= NumberOfSlices; i++)
                     {
                         mCL.MultisliceStep(i, NumberOfSlices);
+
+                        // Report progress of the work. 
+                        progressReporter.ReportProgress((val) =>
+                        {
+                            // Note: code passed to "ReportProgress" can access UI elements freely. 
+                            this.progressBar1.Value =
+                                Convert.ToInt32(100*Convert.ToSingle(i)/
+                                                Convert.ToSingle(NumberOfSlices));
+                        },i);
+                      
                     }
                 }
                 else if (select_STEM)
                 {
-                    int posx = Resolution/2;
-                    int posy = Resolution/2;
-                    // for ()
-                    // {
-                    mCL.InitialiseSimulation(Resolution, posx, posy);
+                    int maxX = 122;// Resolution;
+                    int minX = 120;
 
-                    // Use Background worker to progress through each step
-                    int NumberOfSlices = 0;
-                    mCL.GetNumberSlices(ref NumberOfSlices);
-                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+                    int maxY = 128;// Resolution;
+                    int minY = 127;
 
-                    for (int i = 1; i <= NumberOfSlices; i++)
+                    int numPix = (maxX-minX) * (maxY-minY);
+                    int pix = 0;
+
+                    STEMimage = new float[Resolution * Resolution];
+
+                    mCL.InitialiseSTEMSimulation(Resolution);
+
+                    for (int posY = minY; posY < maxY; posY++)
                     {
-                        mCL.MultisliceStep(i, NumberOfSlices);
+                        for (int posX = minX; posX < maxX; posX++)
+                        {
+                            mCL.MakeSTEMWaveFunction(posX, posY);
+
+                            // Use Background worker to progress through each step
+                            int NumberOfSlices = 0;
+                            mCL.GetNumberSlices(ref NumberOfSlices);
+                            // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+
+                            for (int i = 1; i <= NumberOfSlices; i++)
+                            {
+                                mCL.MultisliceStep(i, NumberOfSlices);
+
+                                progressReporter.ReportProgress((val) =>
+                                {
+                                    // Note: code passed to "ReportProgress" can access UI elements freely. 
+                                    this.progressBar1.Value =
+                                        Convert.ToInt32(100 * Convert.ToSingle(i) /
+                                                        Convert.ToSingle(NumberOfSlices));
+                                    this.progressBar2.Value =
+                                       Convert.ToInt32(100 * Convert.ToSingle(pix) /
+                                                       Convert.ToSingle(numPix));
+                                }, i);
+                            }
+                            pix++;
+
+                            STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
+                        }
                     }
-                    // }
+
+                    //call some function here to measure the pixel value?
+                    minX = 0;
                 }
 
                 // needs looping if in STEM mode
@@ -346,14 +392,57 @@ namespace GPUTEMSTEMSimulation
 
                 // Cleanup
 
-                //System.Threading.Thread.Sleep(2);
-                //UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgress);
-                //Dispatcher.BeginInvoke(update, i, managedMultislice.GetSlices(conventional));
-            };
+                return 0;
+            }, cancellationToken);
 
             // This runs on UI Thread so can access UI, probably better way of doing image though.
-            SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+            //SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+            progressReporter.RegisterContinuation(task, () =>
             {
+                progressBar1.Value = 100;
+                progressBar2.Value = 100;
+
+                if (select_STEM)
+                {
+
+                    _STEMBFImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                    BFImageDisplay.Source = _STEMBFImg;
+
+                    // Calculate the number of bytes per pixel (should be 4 for this format). 
+                    var bytesPerPixelBF = (_STEMBFImg.Format.BitsPerPixel + 7) / 8;
+
+                    // Stride is bytes per pixel times the number of pixels.
+                    // Stride is the byte width of a single rectangle row.
+                    var strideBF = _STEMBFImg.PixelWidth * bytesPerPixelBF;
+
+                    // Create a byte array for a the entire size of bitmap.
+                    var arraySizeBF = strideBF * _STEMBFImg.PixelHeight;
+                    var pixelArrayBF = new byte[arraySizeBF];
+
+                    //float min = mCL.GetEWMin();
+                    //float max = mCL.GetEWMax();
+
+                    float minBF = STEMimage.Min();
+                    float maxBF = STEMimage.Max();
+
+                    for (int row = 0; row < _STEMBFImg.PixelHeight; row++)
+                        for (int col = 0; col < _STEMBFImg.PixelWidth; col++)
+                        {
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
+                        }
+
+
+                    Int32Rect rectBF = new Int32Rect(0, 0, _STEMBFImg.PixelWidth, _STEMBFImg.PixelHeight);
+
+                    _STEMBFImg.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
+
+                    BFTab.IsSelected = true;
+
+                }
+
                 _EWImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                 EWImageDisplay.Source = _EWImg;
 
@@ -361,6 +450,7 @@ namespace GPUTEMSTEMSimulation
                 EWImage = new float[Resolution * Resolution];
                 mCL.GetEWImage(EWImage, Resolution);
 
+          
                 // Calculate the number of bytes per pixel (should be 4 for this format). 
                 var bytesPerPixel = (_EWImg.Format.BitsPerPixel + 7) / 8;
 
@@ -372,8 +462,8 @@ namespace GPUTEMSTEMSimulation
                 var arraySize = stride * _EWImg.PixelHeight;
                 var pixelArray = new byte[arraySize];
 
-                float min = mCL.GetEWMin() -.01f;
-                float max = mCL.GetEWMax() + 0.01f;
+                float min = mCL.GetEWMin();
+                float max = mCL.GetEWMax();
 
                 for (int row = 0; row < _EWImg.PixelHeight; row++)
                     for (int col = 0; col < _EWImg.PixelWidth; col++)
@@ -389,6 +479,7 @@ namespace GPUTEMSTEMSimulation
 
                 _EWImg.WritePixels(rect, pixelArray, stride, 0);
 
+                EWTab.IsSelected = true;
 
                 _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                 DiffImageDisplay.Source = _DiffImg;
@@ -426,12 +517,10 @@ namespace GPUTEMSTEMSimulation
                 _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
 
                 SaveImageButton.IsEnabled = true;
+                SaveImageButton2.IsEnabled = true;
                 SimulateImageButton.IsEnabled = true;
-            };
-
-            SimWorker.RunWorkerAsync();
-
-           
+            });
+        
         }
 
         private void ImagingDf_TextChanged(object sender, TextChangedEventArgs e)
@@ -494,15 +583,15 @@ namespace GPUTEMSTEMSimulation
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
         }
 
-        private void ProbeA2_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProbeA1_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ProbeA2.Text;
+            string temporarytext = ProbeA1.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
         }
 
-        private void ProbeA2theta_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProbeA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string temporarytext = ProbeA2theta.Text;
+            string temporarytext = ProbeA1theta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
         }
 
@@ -564,10 +653,78 @@ namespace GPUTEMSTEMSimulation
                     {
                         float[] buf = new float[Resolution];
                         byte[] buf2 = new byte[4 * Resolution];
-                        for (int j = 0; j < Resolution; ++j)
+                        if (EWTab.IsSelected == true)
                         {
-                              buf[j] = DiffImage[j+Resolution*i];
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = EWImage[j + Resolution * i];
+                            }
                         }
+                        else if (BFTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = STEMimage[j + Resolution * i];
+                            }
+                        }
+                        else if (CTEMTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = CTEMImage[j + Resolution * i];
+                            }
+                        }
+
+                        Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
+                        output.WriteScanline(buf2, i);
+                    }
+                }
+            }
+
+        }
+
+        private void SaveImageButton2_Click(object sender, RoutedEventArgs e)
+        {
+            // Ideally want to check tab and use information to save either EW or CTEM....
+
+            // File saving dialog
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+
+            saveDialog.Title = "Save Output Image";
+            saveDialog.DefaultExt = ".tiff";                     // Default file extension
+            saveDialog.Filter = "TIFF Image (.tiff)|*.tiff"; // Filter files by extension
+
+            Nullable<bool> result = saveDialog.ShowDialog();
+
+            if (result == true)
+            {
+                string filename = saveDialog.FileName;
+                using (Tiff output = Tiff.Open(filename, "w"))
+                {
+                    output.SetField(TiffTag.IMAGEWIDTH, Resolution);
+                    output.SetField(TiffTag.IMAGELENGTH, Resolution);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                    output.SetField(TiffTag.SAMPLEFORMAT, 3);
+                    output.SetField(TiffTag.BITSPERSAMPLE, 32);
+                    output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+                    output.SetField(TiffTag.ROWSPERSTRIP, Resolution);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                    output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                    output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                    for (int i = 0; i < Resolution; ++i)
+                    {
+                        float[] buf = new float[Resolution];
+                        byte[] buf2 = new byte[4 * Resolution];
+                        if (DiffTab.IsSelected == true)
+                        {
+                            for (int j = 0; j < Resolution; ++j)
+                            {
+                                buf[j] = DiffImage[j + Resolution * i];
+                            }
+                        }
+
                         Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
                         output.WriteScanline(buf2, i);
                     }
