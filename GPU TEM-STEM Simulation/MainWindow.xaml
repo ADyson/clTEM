@@ -190,7 +190,10 @@
                     <Label Content="status message goes here..."></Label>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="2">
-                    <ProgressBar Value="30" Width="250" Height="18"/>
+                    <Grid>
+                    <ProgressBar Name="progressBar1" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0,8,0,-8"/>
+                    <ProgressBar  Name="progressBar2" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0,-7,0,7"/>
+                    </Grid>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="3" HorizontalAlignment="Right">
                     <Label Name="fileNameLabel" Grid.Column="1" Content="no structure loaded" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Height="34" Padding="0,5,15,3" HorizontalAlignment="Right" Foreground="#FF575757" FontSize="11" />

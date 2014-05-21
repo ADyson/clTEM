@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
@@ -47,9 +48,10 @@ namespace GPUTEMSTEMSimulation
         /// <summary>
         /// Worker to perform calculations in Non UI Thread.
         /// </summary>
-        BackgroundWorker SimWorker;
-        BackgroundWorker AtomSortWorker;
         ManagedOpenCL mCL;
+
+        // TaskFactory stuff
+        private CancellationTokenSource cancellationTokenSource;
 
         private static WriteableBitmap CTEMImg;
         public static WriteableBitmap _CTEMImg
@@ -99,7 +101,6 @@ namespace GPUTEMSTEMSimulation
         float[] CTEMImage;
         float[] EWImage;
         float[] DiffImage;
-
         float[] STEMimage;
 
 
@@ -161,6 +162,8 @@ namespace GPUTEMSTEMSimulation
             Probedelta.Text = "3";
             ProbeDf.Text = "0";
 
+            //DataContext = this;
+
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
@@ -208,52 +211,26 @@ namespace GPUTEMSTEMSimulation
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
 
-                Cancel += CancelProcess;
-                //progressBar1.Minimum = 0;
-               // progressBar1.Maximum = 100;
 
-                System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
-                AtomSortWorker = new BackgroundWorker();
-
-                // Changed to alternate model of progress reporting
-                //worker.WorkerReportsProgress = true;
-                AtomSortWorker.WorkerSupportsCancellation = true;
-
-                
-
-                AtomSortWorker.DoWork += delegate(object s, DoWorkEventArgs args)
+                this.cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = this.cancellationTokenSource.Token;
+                var progressReporter = new ProgressReporter();
+                var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
                     mCL.SortStructure();
-                    //System.Threading.Thread.Sleep(2);
-                    //UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgress);
-                    //Dispatcher.BeginInvoke(update, i, managedMultislice.GetSlices(conventional));
-                };
+                    return 0;
+                },cancellationToken);
 
                 // This runs on UI Thread so can access UI, probably better way of doing image though.
-                AtomSortWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+                progressReporter.RegisterContinuation(task, () =>
                 {
                     IsSorted = true;
-                };
-
-                AtomSortWorker.RunWorkerAsync();
+                });
 
             }
         }
         
-        public delegate void UpdateProgressDelegate(int iteration, int maxIts);
-
-        public void UpdateProgress(int iteration, int maxIts)
-        {
-
-        }
-
-        void CancelProcess(object sender, EventArgs e)
-        {
-            AtomSortWorker.CancelAsync();
-        }
-
-
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
@@ -307,21 +284,23 @@ namespace GPUTEMSTEMSimulation
             }
 
             // Do Simulation in a background worker
-            Cancel += CancelProcess;
+            //Cancel += CancelProcess;
             //progressBar1.Minimum = 0;
             // progressBar1.Maximum = 100;
 
-            System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
-            SimWorker = new BackgroundWorker();
+            //System.Windows.Threading.Dispatcher mwDispatcher = this.Dispatcher;
+            //SimWorker = new BackgroundWorker();
 
             // Changed to alternate model of progress reporting
             //worker.WorkerReportsProgress = true;
-            SimWorker.WorkerSupportsCancellation = true;
+            //SimWorker.WorkerSupportsCancellation = true;
             bool select_TEM = TEMRadioButton.IsChecked == true;
             bool select_STEM = STEMRadioButton.IsChecked == true;
 
-
-            SimWorker.DoWork += delegate(object s, DoWorkEventArgs args)
+            this.cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = this.cancellationTokenSource.Token;
+            var progressReporter = new ProgressReporter();
+            var task = Task.Factory.StartNew(() =>
             {
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
@@ -334,6 +313,7 @@ namespace GPUTEMSTEMSimulation
 
                 if (select_TEM)
                 {
+
                     mCL.InitialiseSimulation(Resolution);
 
                     // Use Background worker to progress through each step
@@ -344,15 +324,28 @@ namespace GPUTEMSTEMSimulation
                     for (int i = 1; i <= NumberOfSlices; i++)
                     {
                         mCL.MultisliceStep(i, NumberOfSlices);
+
+                        // Report progress of the work. 
+                        progressReporter.ReportProgress((val) =>
+                        {
+                            // Note: code passed to "ReportProgress" can access UI elements freely. 
+                            this.progressBar1.Value =
+                                Convert.ToInt32(100*Convert.ToSingle(i)/
+                                                Convert.ToSingle(NumberOfSlices));
+                        },i);
+                      
                     }
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 180;// Resolution;
+                    int maxX = 122;// Resolution;
                     int minX = 120;
 
-                    int maxY = 133;// Resolution;
+                    int maxY = 128;// Resolution;
                     int minY = 127;
+
+                    int numPix = (maxX-minX) * (maxY-minY);
+                    int pix = 0;
 
                     STEMimage = new float[Resolution * Resolution];
 
@@ -372,7 +365,19 @@ namespace GPUTEMSTEMSimulation
                             for (int i = 1; i <= NumberOfSlices; i++)
                             {
                                 mCL.MultisliceStep(i, NumberOfSlices);
+
+                                progressReporter.ReportProgress((val) =>
+                                {
+                                    // Note: code passed to "ReportProgress" can access UI elements freely. 
+                                    this.progressBar1.Value =
+                                        Convert.ToInt32(100 * Convert.ToSingle(i) /
+                                                        Convert.ToSingle(NumberOfSlices));
+                                    this.progressBar2.Value =
+                                       Convert.ToInt32(100 * Convert.ToSingle(pix) /
+                                                       Convert.ToSingle(numPix));
+                                }, i);
                             }
+                            pix++;
 
                             STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
                         }
@@ -387,14 +392,15 @@ namespace GPUTEMSTEMSimulation
 
                 // Cleanup
 
-                //System.Threading.Thread.Sleep(2);
-                //UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgress);
-                //Dispatcher.BeginInvoke(update, i, managedMultislice.GetSlices(conventional));
-            };
+                return 0;
+            }, cancellationToken);
 
             // This runs on UI Thread so can access UI, probably better way of doing image though.
-            SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+            //SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+            progressReporter.RegisterContinuation(task, () =>
             {
+                progressBar1.Value = 100;
+                progressBar2.Value = 100;
 
                 if (select_STEM)
                 {
@@ -513,11 +519,8 @@ namespace GPUTEMSTEMSimulation
                 SaveImageButton.IsEnabled = true;
                 SaveImageButton2.IsEnabled = true;
                 SimulateImageButton.IsEnabled = true;
-            };
-
-            SimWorker.RunWorkerAsync();
-
-           
+            });
+        
         }
 
         private void ImagingDf_TextChanged(object sender, TextChangedEventArgs e)
