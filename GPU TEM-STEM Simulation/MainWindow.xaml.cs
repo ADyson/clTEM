@@ -153,15 +153,6 @@ namespace GPUTEMSTEMSimulation
             ImagingA2.Text = "0";
             ImagingA2Phi.Text = "0";
 
-            ProbeAperture.Text = "5";
-            ProbeCs.Text = "10000";
-            ProbekV.Text = "200";
-            ProbeA1.Text = "0";
-            ProbeA1theta.Text = "0";
-            Probebeta.Text = "0.005";
-            Probedelta.Text = "3";
-            ProbeDf.Text = "0";
-
             //DataContext = this;
 
         }
@@ -282,6 +273,8 @@ namespace GPUTEMSTEMSimulation
                 var result = MessageBox.Show("Resolution Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            SimulateEWButton.IsEnabled = false;
 
             // Do Simulation in a background worker
             //Cancel += CancelProcess;
@@ -519,6 +512,7 @@ namespace GPUTEMSTEMSimulation
                 SaveImageButton.IsEnabled = true;
                 SaveImageButton2.IsEnabled = true;
                 SimulateImageButton.IsEnabled = true;
+                SimulateEWButton.IsEnabled = true;
             });
         
         }
@@ -527,96 +521,90 @@ namespace GPUTEMSTEMSimulation
         {
             string temporarytext = ImagingDf.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.df);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.df);
         }
 
         private void ImagingCs_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingCs.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.spherical);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
         }
 
         private void ImagingA1_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingA1.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigmag);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
         }
 
         private void ImagingA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingA1theta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
         }
 
         private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingkV.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
         }
 
         private void Imagingbeta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingbeta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.beta);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
         }
 
         private void Imagingdelta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingdelta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.delta);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
         }
 
         private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingAperture.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.aperturemrad);
-        }
-
-        private void ProbeDf_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeDf.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.df);
-        }
-
-        private void ProbeCs_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeCs.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
-        }
-
-        private void ProbeA1_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeA1.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
-        }
-
-        private void ProbeA1theta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeA1theta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
-        }
-
-        private void ProbekV_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbekV.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
-        }
-
-        private void Probebeta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = Probebeta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
-        }
-
-        private void Probedelta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = Probedelta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
-        }
-
-        private void ProbeAperture_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeAperture.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
+        }
+
+
+
+
+        private void SimTypeRadio_Checked(Object sender, EventArgs e)
+        {
+            if (TEMRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = true;
+                ImagingA2Phi.IsEnabled = true;
+                ImagingB2.IsEnabled = true;
+                ImagingB2Phi.IsEnabled = true;
+                Imagingdelta.IsEnabled = true;
+                Imagingbeta.IsEnabled = true;
+            }
+            else if (STEMRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = false;
+                ImagingA2Phi.IsEnabled = false;
+                ImagingB2.IsEnabled = false;
+                ImagingB2Phi.IsEnabled = false;
+                Imagingdelta.IsEnabled = false;
+                Imagingbeta.IsEnabled = false;
+            }
+            else if (CBEDRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = false;
+                ImagingA2Phi.IsEnabled = false;
+                ImagingB2.IsEnabled = false;
+                ImagingB2Phi.IsEnabled = false;
+                Imagingdelta.IsEnabled = false;
+                Imagingbeta.IsEnabled = false;
+            }
         }
 
         private void SaveImageButton_Click(object sender, RoutedEventArgs e)

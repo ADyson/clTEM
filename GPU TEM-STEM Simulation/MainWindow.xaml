@@ -34,9 +34,9 @@
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid HorizontalAlignment="Left" Height="100.04" Margin="0,0,-2,-3" VerticalAlignment="Top" Width="112.5">
-                <RadioButton Name="TEMRadioButton" Content="TEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,15,0,0"/>
-                <RadioButton Name="CBEDRadioButton" Content="CBED" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,34.96,0,0"/>
-                <RadioButton Name="STEMRadioButton" Content="STEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,54.92,0,0"/>
+                <RadioButton Name="TEMRadioButton" Content="TEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,15,0,0" Checked="SimTypeRadio_Checked"/>
+                <RadioButton Name="CBEDRadioButton" Content="CBED" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,34.96,0,0" Checked="SimTypeRadio_Checked"/>
+                <RadioButton Name="STEMRadioButton" Content="STEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,54.92,0,0" Checked="SimTypeRadio_Checked"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Options" HorizontalAlignment="Left" Height="120" Margin="468,0,0,0" VerticalAlignment="Top" Width="166.5" >
@@ -57,32 +57,7 @@
 
             </Grid>
         </GroupBox>
-        <GroupBox Header="Probe" HorizontalAlignment="Left" Height="120" Margin="633.5,0,0,0" VerticalAlignment="Top" Width="238.5" >
-            <GroupBox.Foreground>
-                <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
-            </GroupBox.Foreground>
-            <!-- This next like goes in text boxs but breaks design view even tho it compiles fine -->
-            <!-- MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"-->
-            <Grid HorizontalAlignment="Left" Height="98" VerticalAlignment="Top" Width="226">
-                <TextBox  Name="ProbeDf" HorizontalAlignment="Left" Height="22" Margin="43,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeDf_TextChanged"/>
-                <Label Content="df:" HorizontalAlignment="Left" Margin="7,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeCs" HorizontalAlignment="Left" Height="22" Margin="43,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeCs_TextChanged"/>
-                <Label Content="Cs:" HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeA1" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA1_TextChanged"/>
-                <Label Content="A1:" HorizontalAlignment="Left" Margin="7,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeA1theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeA1theta_TextChanged"/>
-                <Label Content="A1 θ:" HorizontalAlignment="Left" Margin="3,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbekV" HorizontalAlignment="Left" Height="22" Margin="138,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbekV_TextChanged"/>
-                <Label Content="kV:" HorizontalAlignment="Left" Margin="102,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox IsEnabled="False" Name="Probebeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probebeta_TextChanged"/>
-                <Label Content="β:" HorizontalAlignment="Left" Margin="102,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox IsEnabled="False" Name="Probedelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Probedelta_TextChanged"/>
-                <Label Content="Δ:" HorizontalAlignment="Left" Margin="102,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ProbeAperture" HorizontalAlignment="Left" Height="22" Margin="138,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ProbeAperture_TextChanged"/>
-                <Label Content="Aper:" HorizontalAlignment="Left" Margin="98,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="Imaging" HorizontalAlignment="Left" Height="120" Margin="871,0,0,0" VerticalAlignment="Top" Width="323" >
+        <GroupBox Header="Wave Function" HorizontalAlignment="Left" Height="120" Margin="633.5,0,0,0" VerticalAlignment="Top" Width="323" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -113,12 +88,12 @@
                 <Label Content="B2 θ:" HorizontalAlignment="Left" Margin="208,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="1199,0,0,0" VerticalAlignment="Top" Width="140" >
+        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="955.5,0,0,0" VerticalAlignment="Top" Width="140" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid>
-                <Button Content="Simulate EW" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_1"/>
+                <Button Name ="SimulateEWButton" Content="Simulate EW" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_1"/>
                 <Button Name ="SimulateImageButton" IsEnabled="False" Content="Simulate Image" HorizontalAlignment="Left" Height="39" Margin="10,55,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_SimImage"/>
             </Grid>
         </GroupBox>
