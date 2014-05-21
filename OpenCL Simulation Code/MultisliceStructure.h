@@ -37,9 +37,12 @@ public:
 
 	MultisliceStructure(cl_context &context, clQueue* clq, clDevice* cldev);
 
+	bool sorted;
+
 	// Import atoms from xyz filepath
 	void ImportAtoms(std::string filepath);
-	int SortAtoms();
+	int SortAtoms(bool TDS);
+	float TDSRand();
 	void ClearStructure();
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);

@@ -20,7 +20,7 @@ namespace ManagedOpenCLWrapper {
 		void GetStructureDetails(Int32% Len, float% MinX, float% MinY, float% MinZ, float% MaxX, float% MaxY, float% MaxZ );
 		void GetNumberSlices(Int32% Slices);
 		void UploadParameterisation();
-		void SortStructure();
+		void SortStructure(bool tds);
 		void SetTemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang );
 		void SetStemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 		void InitialiseSimulation(int resolution);
@@ -33,6 +33,7 @@ namespace ManagedOpenCLWrapper {
 		float GetIMMax();
 		float GetIMMin();
 		void GetDiffImage(array<float>^ data, int resolution);
+		void AddTDSDiffImage(array<float>^ data, int resolution);
 		float GetDiffMax();
 		float GetDiffMin();
 		float GetEWMax();

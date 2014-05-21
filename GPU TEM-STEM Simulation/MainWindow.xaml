@@ -44,7 +44,7 @@
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid HorizontalAlignment="Left" Height="100" Margin="0,0,-2,-2.96" VerticalAlignment="Top" Width="156.5">
-                <CheckBox Content="Frozen Phonon" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                <CheckBox Content="Frozen Phonon" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                 <CheckBox Content="Absorptive Potential" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
                 <CheckBox Content="Full 3D Potential" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top"/>
                 <ComboBox Name="ResolutionCombo" HorizontalAlignment="Left" Margin="76,71,0,0" VerticalAlignment="Top" Width="70" SelectionChanged="ComboBox_SelectionChanged_1" SelectedValuePath="Content">

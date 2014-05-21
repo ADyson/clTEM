@@ -276,7 +276,7 @@ const char* abssource2 =
 "	if(xid<sizeX&&yid<sizeY) \n"
 "	{	\n"
 "		int Index = xid + yid*sizeX; \n"
-"		float real = clEW[Index].x + 1;	\n"
+"		float real = clEW[Index].x;	\n"
 "		float imag = clEW[Index].y;	\n"
 "		clEW[Index].x = hypot(real,imag);	\n"
 "		clEW[Index].y = 0;	\n"

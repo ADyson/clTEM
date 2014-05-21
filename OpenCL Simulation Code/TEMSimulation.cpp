@@ -18,7 +18,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
 	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
-	pixelscale = max(RealSizeX,RealSizeY)/resolution;
+	pixelscale = max(RealSizeX,RealSizeY)/(resolution);
 
 	// Work out size of each binned block of atoms
 	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
@@ -217,7 +217,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
 	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
-	pixelscale = max(RealSizeX,RealSizeY)/resolution;
+	pixelscale =max(RealSizeX,RealSizeY)/resolution;
 
 	// Work out size of each binned block of atoms
 	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
@@ -448,7 +448,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	localSizeSum[2] = 1;
 
 	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
-	float inverseSum = 1/sumRed;
+	float inverseSum = 1.0f/sumRed;
 
 	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
 
@@ -605,6 +605,43 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 	ewmax = max;
 };
 
+void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
+{
+	// Get Diff pattern and sum up into array...
+
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->Enqueue(Work);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
+};
+
 void TEMSimulation::GetDiffImage(float* data, int resolution)
 {
 	// Original data is complex so copy complex version down first
@@ -627,7 +664,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		data[i] += sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)

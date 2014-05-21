@@ -7,8 +7,18 @@ MultisliceStructure::MultisliceStructure(cl_context &context, clQueue* clq, clDe
 	this->context = context;
 	this->clq = clq;
 	this->cldev = cldev;
+	sorted = false;
 };
 
+float MultisliceStructure::TDSRand()
+{
+	double random = ((double) rand() / (RAND_MAX+1));
+	double random2 = ((double) rand() / (RAND_MAX+1));
+	double rstdnormal = sqrt(-2.0f * +log(FLT_MIN+random))*(sin(2.0f * CL_M_PI * random2));
+	float randNormal = 0.075f * rstdnormal; //random normal(mean,stdDev^2)
+
+	return randNormal;
+}
 void MultisliceStructure::ImportAtoms(std::string filepath) {
 
 	std::ifstream inputFile(filepath,std::ifstream::in);
@@ -69,20 +79,22 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 	Length = Atoms.size();
 };
 
-int MultisliceStructure::SortAtoms()
+int MultisliceStructure::SortAtoms(bool TDS)
 {
+	if(sorted)
+		ClearStructure();
 
-	int* AtomZNum = new int[Length];
-	float* AtomXPos = new float[Length];
-	float* AtomYPos = new float[Length];
-	float* AtomZPos = new float[Length];
+	std::vector<int>   AtomZNum(Length);
+	std::vector<float> AtomXPos(Length);
+	std::vector<float> AtomYPos(Length);
+	std::vector<float> AtomZPos(Length);
 
 	for(int i = 0; i < Atoms.size(); i++)
 	{
-		*(AtomZNum + i) = Atoms[i].Z;
-		*(AtomXPos + i) = Atoms[i].x;
-		*(AtomYPos + i) = Atoms[i].y;
-		*(AtomZPos + i) = Atoms[i].z;
+		AtomZNum[i] = Atoms[i].Z;
+		AtomXPos[i] = Atoms[i].x + TDS*TDSRand();
+		AtomYPos[i] = Atoms[i].y + TDS*TDSRand();
+		AtomZPos[i] = Atoms[i].z + TDS*TDSRand();
 	}
 
 	//Alloc Device Memory
@@ -193,10 +205,10 @@ int MultisliceStructure::SortAtoms()
 					for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
 					{
 						// cout <<"Block " << j <<" , " << k << endl;
-						*(AtomXPos+atomIterator) = Binnedx[j*xBlocks+k][slicei][l];
-						*(AtomYPos+atomIterator) = Binnedy[j*xBlocks+k][slicei][l];
-						*(AtomZPos+atomIterator) = Binnedz[j*xBlocks+k][slicei][l];
-						*(AtomZNum+atomIterator) = BinnedZ[j*xBlocks+k][slicei][l];
+						AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
+						AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
+						AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
+						AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
 						atomIterator++;
 					}
 				}
@@ -217,6 +229,11 @@ int MultisliceStructure::SortAtoms()
 	clEnqueueWriteBuffer( clq->cmdQueue, clBlockStartPositions, CL_TRUE, 0,(nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ 0 ], 0, NULL, NULL );
 	
 	// TODO some cleanup probably
+	clAtomSort->~clKernel();
+
+	clReleaseMemObject(clBlockIDs);
+	clReleaseMemObject(clZIDs);
+
 	return 1;
 };
 
@@ -285,5 +302,9 @@ int MultisliceStructure::GetZNum(std::string atomSymbol) {
 void MultisliceStructure::ClearStructure() {
 
 	// Clear all memory that was used to store and sort the atoms
-
+	clReleaseMemObject(clAtomx);
+	clReleaseMemObject(clAtomy);
+	clReleaseMemObject(clAtomz);
+	clReleaseMemObject(clAtomZ);
+	clReleaseMemObject(clBlockStartPositions);
 };

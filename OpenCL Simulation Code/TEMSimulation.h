@@ -62,6 +62,8 @@ public:
 	void GetImDiffImage(float* data, int resolution);
 	void GetEWImage(float* data, int resolution);
 
+	void AddTDSDiffImage(float* data, int resolution);
+
 	void SimulateCTEM();
 
 	// Image contrast limits (technically ew atm)
