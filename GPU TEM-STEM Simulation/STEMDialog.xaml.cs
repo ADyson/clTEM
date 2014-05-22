@@ -96,6 +96,20 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
+        private void DetectorListView_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (DetectorListView.Items.Count > 7) // bodged and hard coded
+            {
+                ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Visible);
+            }
+        }
+
+        private void DetectorListView_MouseLeave(object sender, MouseEventArgs e)
+        {
+            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
+            
+        }
+
     }
 
     public class DetectorArgs : EventArgs

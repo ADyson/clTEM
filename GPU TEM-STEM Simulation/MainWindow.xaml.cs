@@ -843,6 +843,7 @@ namespace GPUTEMSTEMSimulation
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
             Detectors.Add(evargs.Detector);
+            DetectorNumLabel.Content = Detectors.Count;
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
@@ -851,6 +852,7 @@ namespace GPUTEMSTEMSimulation
             {
                 Detectors.Remove(i);
             }
+            DetectorNumLabel.Content = Detectors.Count;
         }
 
     }
