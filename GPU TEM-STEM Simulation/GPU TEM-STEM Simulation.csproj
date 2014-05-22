@@ -100,6 +100,9 @@
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
     <Compile Include="TEMParams.cs" />
+    <Compile Include="STEMDialog.xaml.cs">
+      <DependentUpon>STEMDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ZoomBorder.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -116,6 +119,10 @@
     <Page Include="Simple Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="STEMDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

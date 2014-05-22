@@ -275,6 +275,7 @@ namespace GPUTEMSTEMSimulation
             }
 
             SimulateEWButton.IsEnabled = false;
+            SimulateImageButton.IsEnabled = false;
 
             // Do Simulation in a background worker
             //Cancel += CancelProcess;
@@ -825,6 +826,13 @@ namespace GPUTEMSTEMSimulation
 
             _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
 
+        }
+
+        private void STEMDet_Click(object sender, RoutedEventArgs e)
+        {
+            // open the window here
+            var window = new STEMDialog();
+            window.Show();
         }
     }
 }

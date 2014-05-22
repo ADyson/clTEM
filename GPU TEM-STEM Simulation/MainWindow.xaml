@@ -1,10 +1,13 @@
 ﻿<Window x:Name="Multislice_Simulation" x:Class="GPUTEMSTEMSimulation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
         xmlns:local="clr-namespace:PanAndZoom"
         Title="Multislice Simulation" MinWidth ="1360" MinHeight="850" Height="791.5" Width="1283.5">
-    <!--xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"-->
     <Grid Margin="0,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="120"/>
             <RowDefinition Height="120*"/>
@@ -18,7 +21,7 @@
                 <Button IsEnabled="False" Content="Import Unit Cell" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,46.04,0,0" Click="ImportUnitCellButton"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Structure Information" HorizontalAlignment="Left" Height="120" Margin="139,0,0,0" VerticalAlignment="Top" Width="208.5">
+        <GroupBox Header="Structure Information" HorizontalAlignment="Left" Height="120" Margin="145,0,0,0" VerticalAlignment="Top" Width="209">
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -29,7 +32,7 @@
                 <Label Name="PixelScaleLabel" Content="Pixel Size (A):" HorizontalAlignment="Left" VerticalAlignment="Top" Width="196.5" Margin="0,77.88,0,-6.8"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Simulation Type" HorizontalAlignment="Left" Height="120" Margin="346.5,0,0,0" VerticalAlignment="Top" Width="122.5" >
+        <GroupBox Header="Simulation Type" HorizontalAlignment="Left" Height="120" Margin="359,0,0,0" VerticalAlignment="Top" Width="123" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -39,7 +42,7 @@
                 <RadioButton Name="STEMRadioButton" Content="STEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,54.92,0,0" Checked="SimTypeRadio_Checked"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Options" HorizontalAlignment="Left" Height="120" Margin="468,0,0,0" VerticalAlignment="Top" Width="166.5" >
+        <GroupBox Header="Options" HorizontalAlignment="Left" Height="120" Margin="487,0,0,0" VerticalAlignment="Top" Width="167" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -54,41 +57,40 @@
                     <ComboBoxItem Content="2048"/>
                 </ComboBox>
                 <Label Content="Resolution" HorizontalAlignment="Left" Margin="0,70,0,0" VerticalAlignment="Top" Width="71" HorizontalContentAlignment="Right"/>
-
             </Grid>
         </GroupBox>
-        <GroupBox Header="Wave Function" HorizontalAlignment="Left" Height="120" Margin="633.5,0,0,0" VerticalAlignment="Top" Width="323" >
+        <GroupBox Header="Wave Function" HorizontalAlignment="Left" Height="120" Margin="659,0,0,0" VerticalAlignment="Top" Width="323" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid HorizontalAlignment="Left" Height="98" VerticalAlignment="Top" Width="313" Margin="0,0,-2,0">
-                <TextBox Name="ImagingDf" HorizontalAlignment="Left" Height="22" Margin="43,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingDf_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingDf" HorizontalAlignment="Left" Height="22" Margin="43,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingDf_TextChanged"/>
                 <Label Content="df:" HorizontalAlignment="Left" Margin="7,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingCs" HorizontalAlignment="Left" Height="22" Margin="43,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingCs_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingCs" HorizontalAlignment="Left" Height="22" Margin="43,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingCs_TextChanged"/>
                 <Label Content="Cs:" HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingA1" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingA1" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1_TextChanged"/>
                 <Label Content="A1:" HorizontalAlignment="Left" Margin="7,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingA1theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1theta_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingA1theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1theta_TextChanged"/>
                 <Label Content="A1 θ:" HorizontalAlignment="Left" Margin="3,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingkV" HorizontalAlignment="Left" Height="22" Margin="138,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingkV_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingkV" HorizontalAlignment="Left" Height="22" Margin="138,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingkV_TextChanged"/>
                 <Label Content="kV:" HorizontalAlignment="Left" Margin="102,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Imagingbeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingbeta_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="Imagingbeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingbeta_TextChanged"/>
                 <Label Content="β:" HorizontalAlignment="Left" Margin="102,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Imagingdelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingdelta_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="Imagingdelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingdelta_TextChanged"/>
                 <Label Content="Δ:" HorizontalAlignment="Left" Margin="102,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingAperture" HorizontalAlignment="Left" Height="22" Margin="138,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingAperture_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingAperture" HorizontalAlignment="Left" Height="22" Margin="138,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingAperture_TextChanged"/>
                 <Label Content="Aper:" HorizontalAlignment="Left" Margin="98,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingA2" HorizontalAlignment="Left" Margin="248,0,0,72" TextWrapping="Wrap" Text="" Width="55" Height="22" VerticalAlignment="Bottom" TextChanged="ImagingA2_TextChanged" />
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingA2" HorizontalAlignment="Left" Margin="248,0,0,72" TextWrapping="Wrap" Text="" Width="55" Height="22" VerticalAlignment="Bottom" TextChanged="ImagingA2_TextChanged" />
                 <Label Content="A2:" HorizontalAlignment="Left" Margin="212,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingA2Phi" HorizontalAlignment="Left" Height="22" Margin="248,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA2Phi_TextChanged" />
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingA2Phi" HorizontalAlignment="Left" Height="22" Margin="248,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA2Phi_TextChanged" />
                 <Label Content="A2 θ:" HorizontalAlignment="Left" Margin="212,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingB2" HorizontalAlignment="Left" Height="22" Margin="248,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2_TextChanged" />
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingB2" HorizontalAlignment="Left" Height="22" Margin="248,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2_TextChanged" />
                 <Label Content="B2:" HorizontalAlignment="Left" Margin="212,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingB2Phi" HorizontalAlignment="Left" Height="22" Margin="248,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
+                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingB2Phi" HorizontalAlignment="Left" Height="22" Margin="248,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
                 <Label Content="B2 θ:" HorizontalAlignment="Left" Margin="208,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="955.5,0,0,0" VerticalAlignment="Top" Width="140" >
+        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="1132,0,0,0" VerticalAlignment="Top" Width="140" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -175,5 +177,14 @@
                 </StatusBarItem>
             </StatusBar>
         </Grid>
+        <GroupBox Header="STEM" HorizontalAlignment="Left" Height="120" Margin="987,0,0,0" VerticalAlignment="Top" Width="140" >
+            <GroupBox.Foreground>
+                <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
+            </GroupBox.Foreground>
+            <Grid>
+                <Button x:Name ="STEMDetButton" Content="Edit Detectors" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="STEMDet_Click"/>
+                <Button x:Name ="STEMUnusedButton" IsEnabled="False" Content="N/A" HorizontalAlignment="Left" Height="39" Margin="10,55,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_SimImage"/>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
