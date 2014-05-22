@@ -1,6 +1,7 @@
 #include "TEMSimulation.h"
 #include "clKernelCodes2.h"
 
+
 TEMSimulation::TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams)
 {
 	this->context = context;
@@ -8,6 +9,7 @@ TEMSimulation::TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev,
 	this->cldev = cldev;
 	this->TEMParams = temparams;
 	this->STEMParams = stemparams;
+
 };
 
 void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
@@ -152,8 +154,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(3.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(3.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksx = ceil(3.0f/BlockScaleX);
+	int loadblocksy = ceil(3.0f/BlockScaleY);
 	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
@@ -354,9 +356,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(4.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(4.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(4.0f/AtomicStructure->dz);
+	int loadblocksx = ceil(3.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(3.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -452,7 +454,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	localSizeSum[2] = 1;
 
 	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
-	float inverseSum = 1.0f/sumRed;
+	float inverseSum =1.0f/sumRed;
 
 	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
 
@@ -524,12 +526,15 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	size_t* LocalWork = new size_t[3];
 
-	LocalWork[0]=32;
-	LocalWork[1]=8;
+	LocalWork[0]=16;
+	LocalWork[1]=16;
 	LocalWork[2]=1;
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
+	FourierTrans->Enqueue(clPotential,clWaveFunction3,CLFFT_FORWARD);
+	BandLimit->Enqueue(Work);
+	FourierTrans->Enqueue(clWaveFunction3,clPotential,CLFFT_BACKWARD);
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
@@ -545,7 +550,7 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	// BandLimit OK here?
 
-	BandLimit->Enqueue(Work);
+
 
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
@@ -600,7 +605,7 @@ void TEMSimulation::AddTDS()
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		clTDSx[i] += sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		clTDSx[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(clTDSx[i] > max)
@@ -630,7 +635,7 @@ void TEMSimulation::AddTDS()
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		clTDSk[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		clTDSk[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(clTDSk[i] > max)
@@ -697,7 +702,7 @@ void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		data[i] +=(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)
@@ -732,7 +737,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] += sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		data[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)

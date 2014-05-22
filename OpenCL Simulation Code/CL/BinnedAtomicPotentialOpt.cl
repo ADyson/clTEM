@@ -9,21 +9,22 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, __global fl
 	int gx = get_group_id(0);
 	int gy = get_group_id(1);
 	if(topz < 0 )
+
 		topz = 0;
 	if(bottomz >= slices )
 		bottomz = slices-1;
 
-	__local float atx[512];
-	__local float aty[512];
-	__local float atz[512];
-	__local int atZ[512];
+	__local float atx[256];
+	__local float aty[256];
+	__local float atz[256];
+	__local int atZ[256];
 
 	for(int k = topz; k <= bottomz; k++)
 	{
-		for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) - loadBlocksY ); j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) + loadBlocksY); j++)
+		for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale)/ (MaxY-MinY)) - loadBlocksY ; j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale)/ (MaxY-MinY)) + loadBlocksY; j++)
 		{
-			int si = floor((gx * get_local_size(0) * xBlocks * pixelscale / (MaxX-MinX)) - loadBlocksX );
-			int ei = ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale/ (MaxX-MinX)) + loadBlocksX);
+			int si = floor((gx * get_local_size(0) * xBlocks * pixelscale) / (MaxX-MinX)) - loadBlocksX ;
+			int ei = ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale)/ (MaxX-MinX)) + loadBlocksX;
 
 			// Check bounds to avoid unneccessarily loading blocks when at edge of sample.
 			if(0 <= j && j < yBlocks)
@@ -38,7 +39,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, __global fl
 				int start = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + si];
 				int end = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + ei + 1];
 				int lid = get_local_id(0) + get_local_size(0)*get_local_id(1);
-				int gid = start + get_local_id(0) + get_local_size(0)*get_local_id(1);
+				int gid = start + lid;
 
 				if(lid < end-start)
 				{
@@ -54,9 +55,9 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, __global fl
 				for (int l = 0; l < end-start; l++) 
 				{
 					int ZNum = atZ[l];
-					for (int h = 0; h < 10; h++)
+					for (int h = 0; h <= 10; h++)
 					{
-						float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - (h*(dz/10.0f))-atz[l])*(z - (h*(dz/10.0f))-atz[l]));
+						float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - h*dz/10.0f-atz[l])*(z - h*dz/10.0f-atz[l]));
 
 						if(rad < 0.25f * pixelscale)
 							rad = 0.25f * pixelscale;
@@ -78,6 +79,8 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, __global fl
 						}
 					}
 				}
+
+				barrier(CLK_LOCAL_MEM_FENCE);
 			}
 		}
 	}

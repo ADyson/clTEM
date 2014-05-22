@@ -506,6 +506,8 @@ namespace GPUTEMSTEMSimulation
              
                         // After a complete run if TDS need to sum up the DIFF...
                         mCL.AddTDSDiffImage(TDSImage, Resolution);
+                        // Sum it in C++ also for the stem pixel measurement...
+                        mCL.AddTDS();
 
                         progressReporter.ReportProgress((val) =>
                         {

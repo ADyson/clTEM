@@ -1,6 +1,6 @@
 #include "MultisliceStructure.h"
 #include "clKernelCodes.h"
-
+#include <ctime>
 
 MultisliceStructure::MultisliceStructure(cl_context &context, clQueue* clq, clDevice* cldev)
 {
@@ -8,6 +8,7 @@ MultisliceStructure::MultisliceStructure(cl_context &context, clQueue* clq, clDe
 	this->clq = clq;
 	this->cldev = cldev;
 	sorted = false;
+	srand(time(NULL));
 };
 
 float MultisliceStructure::TDSRand()
@@ -69,12 +70,12 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 			minZ=i;
 	};
 
-	MaximumX = Atoms[maxX].x + 5;
-	MinimumX = Atoms[minX].x - 5;
-	MaximumY = Atoms[maxY].y + 5;
-	MinimumY = Atoms[minY].y - 5;
-	MaximumZ = Atoms[maxZ].z + 5;
-	MinimumZ = Atoms[minZ].z - 5;
+	MaximumX = Atoms[maxX].x + 8;
+	MinimumX = Atoms[minX].x - 8;
+	MaximumY = Atoms[maxY].y + 8;
+	MinimumY = Atoms[minY].y - 8;
+	MaximumZ = Atoms[maxZ].z + 3;
+	MinimumZ = Atoms[minZ].z - 3;
 
 	Length = Atoms.size();
 };
@@ -96,6 +97,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		AtomYPos[i] = Atoms[i].y + TDS*TDSRand();
 		AtomZPos[i] = Atoms[i].z + TDS*TDSRand();
 	}
+
 
 	//Alloc Device Memory
 	clAtomx = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
@@ -119,8 +121,8 @@ int MultisliceStructure::SortAtoms(bool TDS)
 	// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 	// Or fix it so they are all referencing same variable.
 	int NumberOfAtoms = Atoms.size();
-	xBlocks = 50;
-	yBlocks = 50;
+	xBlocks = 80;
+	yBlocks = 80;
 	dz		= 1;
 	nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 	nSlices+=(nSlices==0);
@@ -183,8 +185,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		Binnedz[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZPos[i]-MinimumZ);
 		BinnedZ[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZNum[i]);
 	}
-	
-	
+		
 	int atomIterator(0);
 	int* blockStartPositions;
 	blockStartPositions = new int[nSlices*xBlocks*yBlocks+1];
