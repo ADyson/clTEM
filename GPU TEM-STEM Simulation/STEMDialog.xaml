@@ -6,7 +6,7 @@
         xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
         Title="STEM Detectors" Height="229" Width="320" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" SizeToContent="Height">
     <Grid>
-        <ListView x:Name="DetectorList" Margin="10,10,0,10" HorizontalAlignment="Left" Width="198">
+        <ListView x:Name="DetectorListView" Margin="10,10,0,10" HorizontalAlignment="Left" Width="198" Height="180" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
             <ListView.View>
                 <GridView x:Name="DetectorListGrid" AllowsColumnReorder="False">
                     <l:FixedWidthColumn FixedWidth ="64"  Header="Name" DisplayMemberBinding="{Binding Name}"/>
@@ -15,7 +15,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button x:Name="DeleteButton" Content="Delete" Margin="214,10,10,169"/>
+        <Button x:Name="DeleteButton" Content="Delete" Margin="214,10,10,169" Click="DeleteButton_Click"/>
         <Button x:Name="AddButton" Content="Add" Margin="214,37,10,142" Click="AddButton_Click"/>
         <t:ErrTextBox x:Name="NameTxtbx" Margin="214,80,10,98" TextWrapping="Wrap" Text="Detector1">
             <t:ErrTextBox.Triggers>
@@ -33,7 +33,7 @@
                                         Storyboard.TargetProperty="(t:ErrTextBox.Background).(SolidColorBrush.Color)"
                                         To="White"
                                         BeginTime="0:0:1.5"
-                                        Duration="0:0:2" />
+                                        Duration="0:0:0.5" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
@@ -56,7 +56,7 @@
                                 Storyboard.TargetProperty="(t:ErrTextBox.Background).(SolidColorBrush.Color)"
                                 To="White"
                                 BeginTime="0:0:1.5"
-                                Duration="0:0:2" />
+                                Duration="0:0:0.5" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
@@ -79,7 +79,7 @@
                                     Storyboard.TargetProperty="(t:ErrTextBox.Background).(SolidColorBrush.Color)"
                                     To="White"
                                     BeginTime="0:0:1.5"
-                                    Duration="0:0:2" />
+                                    Duration="0:0:0.5" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>

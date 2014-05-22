@@ -40,6 +40,8 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
+        public List<DetectorItem> Detectors = new List<DetectorItem>();
+
         /// <summary>
         /// Cancel event to halt calculation.
         /// </summary>
@@ -831,8 +833,25 @@ namespace GPUTEMSTEMSimulation
         private void STEMDet_Click(object sender, RoutedEventArgs e)
         {
             // open the window here
-            var window = new STEMDialog();
-            window.Show();
+            var window = new STEMDialog(Detectors);
+            window.Owner = this;
+            window.AddDetectorEvent += new EventHandler<DetectorArgs>(STEM_AddDetector);
+            window.RemDetectorEvent += new EventHandler<DetectorArgs>(STEM_RemoveDetector);
+            window.ShowDialog();
         }
+
+        void STEM_AddDetector(object sender, DetectorArgs evargs)
+        {
+            Detectors.Add(evargs.Detector);
+        }
+
+        void STEM_RemoveDetector(object sender, DetectorArgs evargs)
+        {
+            foreach (DetectorItem i in evargs.DetectorArr)
+            {
+                Detectors.Remove(i);
+            }
+        }
+
     }
 }

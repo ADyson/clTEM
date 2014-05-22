@@ -21,52 +21,104 @@ namespace GPUTEMSTEMSimulation
 
     public partial class STEMDialog : Window
     {
-        public STEMDialog()
+        public event EventHandler<DetectorArgs> AddDetectorEvent;
+        public event EventHandler<DetectorArgs> RemDetectorEvent;
+
+        public STEMDialog(List<DetectorItem> MainDet)
         {
             InitializeComponent();
             //DetectorListGrid.Columns[DetectorListGrid.Columns.Count - 1].Width = 100;
+            foreach (DetectorItem i in MainDet)
+            {
+                DetectorListView.Items.Add(i);
+            }
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
+            bool valid = true;
+
             string Sname = NameTxtbx.Text;
             string Sin = InnerTxtbx.Text;
             string Sout = OuterTxtbx.Text;
 
-            float Fin, Fout;
+            float Fin = 0;
+            float Fout = 0;
 
             if (Sname.Length == 0)
             {
                 NameTxtbx.RaiseTapEvent();
-                return;
+                valid = false;
+            }
+            
+            Array ListItems = DetectorListView.Items.Cast<Object>().ToArray();
+            foreach (DetectorItem i in ListItems)
+            {
+                if (i.Name.Equals(Sname))
+                {
+                    valid = false;
+                    NameTxtbx.RaiseTapEvent();
+                    break;
+                }
             }
 
-            try
-            {
-                Fin = Convert.ToSingle(Sin);
-                Fout = Convert.ToSingle(Sout);
-            }
-            catch (FormatException er)
-            {
-                return;
-            }
-            catch (OverflowException er)
-            {
-                return;
-            }
+            Fout = Convert.ToSingle(Sout);
+            Fin = Convert.ToSingle(Sin);
 
             if (Fin >= Fout)
             {
                 InnerTxtbx.RaiseTapEvent();
                 OuterTxtbx.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (!valid)
+            {
                 return;
             }
 
-            DetectorItem tits = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout };
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout };
 
-            DetectorList.Items.Add(tits);
+            // modify the mainWindow List
+            AddDetectorEvent(this, new DetectorArgs(temp));
+
+            DetectorListView.Items.Add(temp);
         }
 
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Array selected = DetectorListView.SelectedItems.Cast<Object>().ToArray();
+            if (selected.Length > 0)
+            {
+                foreach (var item in selected) DetectorListView.Items.Remove(item);
+                // modify list in mainwindow
+                RemDetectorEvent(this, new DetectorArgs(selected));
+            }
+        }
+
+    }
+
+    public class DetectorArgs : EventArgs
+    {
+        private DetectorItem msg;
+        public DetectorArgs(DetectorItem s)
+        {
+            msg = s;
+        }
+        public DetectorItem Detector
+        {
+            get { return msg; }
+        }
+
+        private Array msgArr;
+        public DetectorArgs(Array sArr)
+        {
+            msgArr = sArr;
+        }
+        public Array DetectorArr
+        {
+            get { return msgArr; }
+        }
     }
 }
 
