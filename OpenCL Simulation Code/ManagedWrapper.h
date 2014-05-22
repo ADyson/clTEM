@@ -39,6 +39,7 @@ namespace ManagedOpenCLWrapper {
 		float GetEWMax();
 		float GetEWMin();
 		float GetSTEMPixel();
+		void AddTDS();
 		ManagedOpenCL();
 		~ManagedOpenCL();
 

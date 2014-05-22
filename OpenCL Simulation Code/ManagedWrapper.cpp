@@ -214,4 +214,9 @@ namespace ManagedOpenCLWrapper
 	{
 		return _UMOpenCL->TS->MeasureSTEMPixel();
 	};
+		
+	void ManagedOpenCL::AddTDS()
+	{
+		_UMOpenCL->TS->AddTDS();
+	};
 }

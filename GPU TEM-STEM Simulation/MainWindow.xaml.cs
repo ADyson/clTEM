@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -307,6 +308,8 @@ namespace GPUTEMSTEMSimulation
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Normal;
 
+                Stopwatch timer = new Stopwatch();
+
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
                                     ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
@@ -328,8 +331,9 @@ namespace GPUTEMSTEMSimulation
 
                     for (int i = 1; i <= NumberOfSlices; i++)
                     {
+                        timer.Start();
                         mCL.MultisliceStep(i, NumberOfSlices);
-
+                        timer.Stop();
                         // Report progress of the work. 
                         progressReporter.ReportProgress((val) =>
                         {
@@ -337,22 +341,29 @@ namespace GPUTEMSTEMSimulation
                             this.progressBar1.Value =
                                 Convert.ToInt32(100*Convert.ToSingle(i)/
                                                 Convert.ToSingle(NumberOfSlices));
+                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString()+" ms.";
                         },i);
                       
                     }
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 122;// Resolution;
+                    int maxX = 180;// Resolution;
                     int minX = 120;
 
-                    int maxY = 128;// Resolution;
-                    int minY = 127;
+                    int maxY = 160;// Resolution;
+                    int minY = 120;
 
                     int numPix = (maxX-minX) * (maxY-minY);
                     int pix = 0;
 
                     STEMimage = new float[Resolution * Resolution];
+                    
+                    int runs = 1;
+                    if (TDS)
+                        runs = 10;
+
+                    
 
                     mCL.InitialiseSTEMSimulation(Resolution);
 
@@ -360,6 +371,13 @@ namespace GPUTEMSTEMSimulation
                     {
                         for (int posX = minX; posX < maxX; posX++)
                         {
+                            TDSImage = new float[Resolution * Resolution];
+
+                            for (int j = 0; j < runs; j++)
+                            {        
+                                if (TDS)
+                                    mCL.SortStructure(TDS);
+
                             mCL.MakeSTEMWaveFunction(posX, posY);
 
                             // Use Background worker to progress through each step
@@ -369,8 +387,11 @@ namespace GPUTEMSTEMSimulation
 
                             for (int i = 1; i <= NumberOfSlices; i++)
                             {
-                                mCL.MultisliceStep(i, NumberOfSlices);
 
+                                timer.Start();
+                                mCL.MultisliceStep(i, NumberOfSlices);
+                                timer.Stop();
+                               
                                 progressReporter.ReportProgress((val) =>
                                 {
                                     // Note: code passed to "ReportProgress" can access UI elements freely. 
@@ -378,16 +399,58 @@ namespace GPUTEMSTEMSimulation
                                         Convert.ToInt32(100 * Convert.ToSingle(i) /
                                                         Convert.ToSingle(NumberOfSlices));
                                     this.progressBar2.Value =
-                                       Convert.ToInt32(100 * Convert.ToSingle(pix) /
-                                                       Convert.ToSingle(numPix));
+                                        Convert.ToInt32(100 * Convert.ToSingle(pix) /
+                                                        Convert.ToSingle(numPix));
+                                    this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms.";
                                 }, i);
                             }
                             pix++;
+                                
+                            // After a complete run if TDS need to sum up the DIFF...
+                            mCL.AddTDSDiffImage(TDSImage, Resolution);
+                            // Sum it in C++ also for the stem pixel measurement...
+                            mCL.AddTDS();
+
+                            progressReporter.ReportProgress((val) =>
+                            {
+                                _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                                DiffImageDisplay.Source = _DiffImg;
+
+
+                                // Calculate the number of bytes per pixel (should be 4 for this format). 
+                                var bytesPerPixel2 = (_DiffImg.Format.BitsPerPixel + 7) / 8;
+
+                                // Stride is bytes per pixel times the number of pixels.
+                                // Stride is the byte width of a single rectangle row.
+                                var stride2 = _DiffImg.PixelWidth * bytesPerPixel2;
+
+                                // Create a byte array for a the entire size of bitmap.
+                                var arraySize2 = stride2 * _DiffImg.PixelHeight;
+                                var pixelArray2 = new byte[arraySize2];
+
+                                float min2 = mCL.GetDiffMin();
+                                float max2 = mCL.GetDiffMax();
+
+                                for (int row = 0; row < _DiffImg.PixelHeight; row++)
+                                    for (int col = 0; col < _DiffImg.PixelWidth; col++)
+                                    {
+                                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+                                        pixelArray2[(row * _DiffImg.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+                                    }
+
+
+                                Int32Rect rect2 = new Int32Rect(0, 0, _DiffImg.PixelWidth, _DiffImg.PixelHeight);
+
+                                _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
+                            },j);
+                            }
 
                             STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
                         }
-                    }
 
+                    }
                     //call some function here to measure the pixel value?
                     minX = 0;
                 }
@@ -423,8 +486,11 @@ namespace GPUTEMSTEMSimulation
 
                         for (int i = 1; i <= NumberOfSlices; i++)
                         {
+                            timer.Start();
                             mCL.MultisliceStep(i, NumberOfSlices);
+                            timer.Stop();
 
+                            // Report progress of the work. 
                             progressReporter.ReportProgress((val) =>
                             {
                                 // Note: code passed to "ReportProgress" can access UI elements freely. 
@@ -434,6 +500,7 @@ namespace GPUTEMSTEMSimulation
                                 this.progressBar2.Value =
                                     Convert.ToInt32(100 * Convert.ToSingle(j) /
                                                     Convert.ToSingle(runs));
+                                this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms.";
                             }, i);
                         }
              
@@ -475,7 +542,7 @@ namespace GPUTEMSTEMSimulation
                             _DiffImg.WritePixels(rect2, pixelArray2, stride2, 0);
                         },j);
                     }
-                }
+                  }
                 
                 // Cleanup
 

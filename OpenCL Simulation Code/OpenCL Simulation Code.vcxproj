@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="clFourier.cpp" />
     <ClCompile Include="clKernel.cpp" />
+    <None Include="CL\BinnedAtomicPotentialOpt.cl" />
     <None Include="CL\GeneratePropagator.cl" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />

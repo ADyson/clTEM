@@ -17,22 +17,24 @@ __kernel void clBinnedAtomicPotential(__global float2* Potential, __global float
 
 		for(int k = topz; k <= bottomz; k++)
 		{
-			for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale/ ( MaxY-MinY )) - loadBlocksY ); j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale/ ( MaxY - MinY )) + loadBlocksY); j++)
+			for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) - loadBlocksY ); 
+				j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) + loadBlocksY); j++)
 			{
-				for (int i = floor((gx * get_local_size(0) * xBlocks * pixelscale / (MaxX-MinX )) - loadBlocksX ); i <= ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale/ ( MaxX - MinX )) + loadBlocksX); i++)
+				for (int i = floor((gx * get_local_size(0) * xBlocks * pixelscale / (MaxX-MinX)) - loadBlocksX ); 
+					i <= ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale/ (MaxX-MinX)) + loadBlocksX); i++)
 				{
-				// Check bounds to avoid unneccessarily loading blocks when i am at edge of sample.
+					// Check bounds to avoid unneccessarily loading blocks when at edge of sample.
 					if(0 <= j && j < yBlocks)
 					{
-						// Check bounds to avoid unneccessarily loading blocks when i am at edge of sample.
+						// Check bounds to avoid unneccessarily loading blocks when at edge of sample.
 						if (0 <= i && i < xBlocks )
 						{
 							// Check if there is an atom in bin, arrays are not overwritten when there are no extra atoms so if you don't check could add contribution more than once.
 							for (int l = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + i]; l < clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + i+1]; l++)
 							{
-								for (int h = 0; h < 15; h++)
+								for (int h = 0; h < 20; h++)
 								{
-									float rad = sqrt((xid*pixelscale-clAtomXPos[l])*(xid*pixelscale-clAtomXPos[l]) + (yid*pixelscale-clAtomYPos[l])*(yid*pixelscale-clAtomYPos[l]) + (z - (h*(dz/15.0f))-clAtomZPos[l])*(z - (h*(dz/15.0f))-clAtomZPos[l]));
+									float rad = sqrt((xid*pixelscale-clAtomXPos[l])*(xid*pixelscale-clAtomXPos[l]) + (yid*pixelscale-clAtomYPos[l])*(yid*pixelscale-clAtomYPos[l]) + (z - (h*(dz/20.0f))-clAtomZPos[l])*(z - (h*(dz/15.0f))-clAtomZPos[l]));
 
 									if(rad < 0.25f * pixelscale)
 										rad = 0.25f * pixelscale;
@@ -54,7 +56,7 @@ __kernel void clBinnedAtomicPotential(__global float2* Potential, __global float
 				}
 			}
 		}
-		Potential[Index].x = cos((dz/15.0f)*sigma*sumz);
-		Potential[Index].y = sin((dz/15.0f)*sigma*sumz);
+		Potential[Index].x = cos((dz/20.0f)*sigma*sumz);
+		Potential[Index].y = sin((dz/20.0f)*sigma*sumz);
 	}
 }
