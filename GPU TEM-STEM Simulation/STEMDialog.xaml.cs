@@ -32,6 +32,8 @@ namespace GPUTEMSTEMSimulation
             {
                 DetectorListView.Items.Add(i);
             }
+            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
+
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
