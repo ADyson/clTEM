@@ -80,7 +80,7 @@
         </GroupBox>
         <GroupBox Template="{StaticResource gbox}" Grid.Column="3" Header="Options" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
             <Grid HorizontalAlignment="Left" Height="100" VerticalAlignment="Top">
-                <CheckBox Content="Frozen Phonon" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                <CheckBox Content="Frozen Phonon" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                 <CheckBox Content="Absorptive Potential" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
                 <CheckBox Content="Full 3D Potential" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top"/>
                 <ComboBox x:Name="ResolutionCombo" HorizontalAlignment="Left" Margin="76,71,0,0" VerticalAlignment="Top" Width="70" SelectionChanged="ComboBox_SelectionChanged_1" SelectedValuePath="Content">

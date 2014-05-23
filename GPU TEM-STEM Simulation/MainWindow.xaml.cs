@@ -344,6 +344,9 @@ namespace GPUTEMSTEMSimulation
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
                                     ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
+                mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical,
+                                 ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
+
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
 
                 if (select_TEM)
@@ -749,6 +752,7 @@ namespace GPUTEMSTEMSimulation
                     SimulateImageButton.IsEnabled = true;
                 }
 
+                SimulateEWButton.IsEnabled = true;
             });
         
         }
