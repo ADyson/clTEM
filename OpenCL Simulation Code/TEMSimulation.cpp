@@ -154,9 +154,9 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(3.0f/BlockScaleX);
-	int loadblocksy = ceil(3.0f/BlockScaleY);
-	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
+	int loadblocksx = ceil(5.0f/BlockScaleX);
+	int loadblocksy = ceil(5.0f/BlockScaleY);
+	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -243,7 +243,6 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	float	V2		= V*1000;
 
 	// Now we can set up frequencies and fourier transforms.
-
 	int imidx = floor(resolution/2 + 0.5);
 	int imidy = floor(resolution/2 + 0.5);
 
@@ -356,9 +355,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(3.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(3.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
+	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -434,7 +433,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
 	// so both cl mem things have the wavefunction (gonna edit one in a sec)
-	clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	/*clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 
 	*WFabsolute << clWaveFunction2 && resolution && resolution;
 
@@ -458,7 +457,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 
 	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
 
-	MultiplyCL->Enqueue(WorkSize);
+	MultiplyCL->Enqueue(WorkSize);*/
 }
 
 
@@ -549,8 +548,6 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
 
 	// BandLimit OK here?
-
-
 
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);

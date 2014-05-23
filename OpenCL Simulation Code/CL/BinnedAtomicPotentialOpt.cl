@@ -64,7 +64,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, __global fl
 
 						float p1 = 0;
 
-						if( rad < 3.0f) // Should also make sure is not too small
+						if( rad < 5.0f) // Should also make sure is not too small
 						{
 							p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
 							p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));

@@ -76,5 +76,4 @@ public:
 	float ewmax;
 	float diffmin;
 	float diffmax;
-
 };
