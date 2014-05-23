@@ -4,7 +4,7 @@
         xmlns:l="clr-namespace:FixedWidthColumnSample"
         xmlns:t="clr-namespace:ErrTextBoxSample"
         xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
-        Title="STEM Detectors" Height="229" Width="373" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" SizeToContent="Height">
+        Title="STEM Detectors" Height="229" Width="373" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" SizeToContent="Height" WindowStyle="ToolWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
