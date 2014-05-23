@@ -12,16 +12,16 @@
             <RowDefinition Height="120"/>
             <RowDefinition Height="120*"/>
         </Grid.RowDefinitions>
-        <GroupBox Grid.Row="0" Header="Import Structure" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="120" Width="130">
+        <GroupBox Grid.Row="0" Header="Import Structure" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="120" Width="140">
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
             <Grid HorizontalAlignment="Left" Height="97.04" VerticalAlignment="Top" Width="120" Margin="0,0,-2,0">
-                <Button Content="Import Structure" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,10,0,0" Click="ImportStructureButton"/>
-                <Button IsEnabled="False" Content="Import Unit Cell" HorizontalAlignment="Left" Height="31.04" VerticalAlignment="Top" Width="103" Margin="10,46.04,0,0" Click="ImportUnitCellButton"/>
+                <Button Content="Import Structure" HorizontalAlignment="Left" Height="39" VerticalAlignment="Top" Width="108" Margin="10,10,0,0" Click="ImportStructureButton"/>
+                <Button IsEnabled="False" Content="Import Unit Cell" HorizontalAlignment="Left" Height="39" VerticalAlignment="Top" Width="108" Margin="10,54,0,0" Click="ImportUnitCellButton"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Structure Information" HorizontalAlignment="Left" Height="120" Margin="145,0,0,0" VerticalAlignment="Top" Width="209">
+        <GroupBox Header="Structure Information" HorizontalAlignment="Left" Height="120" Margin="155,0,0,0" VerticalAlignment="Top" Width="209">
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -32,7 +32,7 @@
                 <Label Name="PixelScaleLabel" Content="Pixel Size (A):" HorizontalAlignment="Left" VerticalAlignment="Top" Width="196.5" Margin="0,77.88,0,-6.8"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Simulation Type" HorizontalAlignment="Left" Height="120" Margin="359,0,0,0" VerticalAlignment="Top" Width="123" >
+        <GroupBox Header="Simulation Type" HorizontalAlignment="Left" Height="120" Margin="369,0,0,0" VerticalAlignment="Top" Width="123" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -42,7 +42,7 @@
                 <RadioButton Name="STEMRadioButton" Content="STEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,54.92,0,0" Checked="SimTypeRadio_Checked"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Options" HorizontalAlignment="Left" Height="120" Margin="487,0,0,0" VerticalAlignment="Top" Width="167" >
+        <GroupBox Header="Options" HorizontalAlignment="Left" Height="120" Margin="497,0,0,0" VerticalAlignment="Top" Width="167" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -59,7 +59,7 @@
                 <Label Content="Resolution" HorizontalAlignment="Left" Margin="0,70,0,0" VerticalAlignment="Top" Width="71" HorizontalContentAlignment="Right"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Wave Function" HorizontalAlignment="Left" Height="120" Margin="659,0,0,0" VerticalAlignment="Top" Width="323" >
+        <GroupBox Header="Wave Function" HorizontalAlignment="Left" Height="120" Margin="669,0,0,0" VerticalAlignment="Top" Width="323" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -90,7 +90,7 @@
                 <Label Content="B2 θ:" HorizontalAlignment="Left" Margin="208,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="1132,0,0,0" VerticalAlignment="Top" Width="140" >
+        <GroupBox Header="Simulation" HorizontalAlignment="Left" Height="120" Margin="1142,0,0,0" VerticalAlignment="Top" Width="140" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
@@ -177,7 +177,7 @@
                 </StatusBarItem>
             </StatusBar>
         </Grid>
-        <GroupBox Header="STEM" HorizontalAlignment="Left" Height="120" Margin="987,0,0,0" VerticalAlignment="Top" Width="140" >
+        <GroupBox Header="STEM" HorizontalAlignment="Left" Height="120" Margin="997,0,0,0" VerticalAlignment="Top" Width="140" >
             <GroupBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource GroupBoxTitle}"/>
             </GroupBox.Foreground>
