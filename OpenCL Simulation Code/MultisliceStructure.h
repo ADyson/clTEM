@@ -31,9 +31,13 @@ public:
 	cl_mem clAtomz;
 	cl_mem clAtomZ;
 	cl_mem clBlockStartPositions;
+	cl_mem clConstantBlockStartPositions;
 	
 	// OpenCL Memory
 	cl_mem AtomicStructureParameterisation;
+
+	std::vector<int> blockStartPositions;
+
 
 	MultisliceStructure(cl_context &context, clQueue* clq, clDevice* cldev);
 
@@ -44,6 +48,8 @@ public:
 	int SortAtoms(bool TDS);
 	float TDSRand();
 	void ClearStructure();
+	void MultisliceStructure::UploadConstantBlock(int topz, int bottomz);
+
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);
 

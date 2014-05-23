@@ -154,9 +154,9 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(5.0f/BlockScaleX);
-	int loadblocksy = ceil(5.0f/BlockScaleY);
-	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
+	int loadblocksx = ceil(3.0f/BlockScaleX);
+	int loadblocksy = ceil(3.0f/BlockScaleY);
+	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -355,9 +355,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
-	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
+	int loadblocksx = ceil(3.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
+	int loadblocksy = ceil(3.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
@@ -512,6 +512,16 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	// Didn't have MinimumZ so it wasnt correctly rescaled z-axis from 0 to SizeZ...
 	float currentz = AtomicStructure->MaximumZ - AtomicStructure->MinimumZ - slice * AtomicStructure->dz;
+	
+	int topz = slice - ceil(3.0f/AtomicStructure->dz);
+	int bottomz = slice + ceil(3.0f/AtomicStructure->dz);
+
+	if(topz < 0 )
+		topz = 0;
+	if(bottomz >= slices )
+		bottomz = slices-1;
+
+//	AtomicStructure->UploadConstantBlock(topz,bottomz);
 
 	BinnedAtomicPotential->SetArgT(9,slice);
 	BinnedAtomicPotential->SetArgT(10,slices);

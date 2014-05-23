@@ -1,62 +1,103 @@
-__kernel void clBinnedAtomicPotential(__global float2* Potential, __global float* clAtomXPos, __global float* clAtomYPos, __global float* clAtomZPos, __global int* clAtomZNum, __constant float* clfParams, __global int* clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma)
+__kernel void clBinnedAtomicPotential(__global float2* Potential, 
+										  __global const float* restrict clAtomXPos, 
+										  __global const float* restrict clAtomYPos, 
+										  __global const float* restrict clAtomZPos, 
+										  __global const int* restrict clAtomZNum, 
+										  __constant float* clfParams, 
+										  __constant int* restrict clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma)
 {
 	int xid = get_global_id(0);
 	int yid = get_global_id(1);
-	if(xid < width && yid < height)
+	int lid = get_local_id(0) + get_local_size(0)*get_local_id(1);
+	int Index = xid + width*yid;
+	int topz = slice - loadSlicesZ;
+	int bottomz = slice + loadSlicesZ;
+	float sumz = 0.0f;
+	int gx = get_group_id(0);
+	int gy = get_group_id(1);
+	if(topz < 0 )
+		topz = 0;
+	if(bottomz >= slices )
+		bottomz = slices-1;
+
+	__local float atx[256];
+	__local float aty[256];
+	__local float atz[256];
+	__local int atZ[256];
+
+	int startj = floor((gy * get_local_size(1) * yBlocks * pixelscale)/ (MaxY-MinY)) - loadBlocksY ;
+	int endj = ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale)/ (MaxY-MinY)) + loadBlocksY;
+	int starti = floor((gx * get_local_size(0) * xBlocks * pixelscale) / (MaxX-MinX)) - loadBlocksX ;
+	int endi = ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale)/ (MaxX-MinX)) + loadBlocksX;
+
+	if(starti < 0)
+		starti = 0;
+
+	if(endi >= xBlocks)
+		endi = xBlocks-1;
+
+	if(startj < 0)
+		startj = 0;
+
+	if(endj >= yBlocks)
+		endj = yBlocks-1;
+
+
+	for(int k = 0; k <= bottomz-topz; k++)
 	{
-		int Index = xid + width*yid;
-		int topz = slice - loadSlicesZ;
-		int bottomz = slice + loadSlicesZ;
-		float sumz = 0.0f;
-		int gx = get_group_id(0);
-		int gy = get_group_id(1);
-		if(topz < 0 )
-			topz = 0;
-		if(bottomz >= slices )
-			bottomz = slices-1;
-
-		for(int k = topz; k <= bottomz; k++)
+		for (int j = startj ; j <= endj; j++)
 		{
-			for (int j = floor((gy * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) - loadBlocksY ); 
-				j <= ceil(((gy+1) * get_local_size(1) * yBlocks * pixelscale/ (MaxY-MinY)) + loadBlocksY); j++)
+			//Need list of atoms to load, so we can load in sequence
+			int start = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + starti];
+			int end = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + endi + 1];
+				
+			int gid = start + lid;
+
+			if(lid < end-start)
 			{
-				for (int i = floor((gx * get_local_size(0) * xBlocks * pixelscale / (MaxX-MinX)) - loadBlocksX ); 
-					i <= ceil(((gx+1) * get_local_size(0) * xBlocks * pixelscale/ (MaxX-MinX)) + loadBlocksX); i++)
+				atx[lid] = clAtomXPos[gid];
+				aty[lid] = clAtomYPos[gid];
+				atz[lid] = clAtomZPos[gid];
+				atZ[lid] = clAtomZNum[gid];
+			}
+
+			barrier(CLK_LOCAL_MEM_FENCE);
+
+			float p2=0;
+			for (int l = 0; l < end-start; l++) 
+			{
+				int ZNum = atZ[l];
+				for (int h = 0; h <= 10; h++)
 				{
-					// Check bounds to avoid unneccessarily loading blocks when at edge of sample.
-					if(0 <= j && j < yBlocks)
+					float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - h*dz/10.0f-atz[l])*(z - h*dz/10.0f-atz[l]));
+
+					if(rad < 0.25f * pixelscale)
+						rad = 0.25f * pixelscale;
+
+					float p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
 					{
-						// Check bounds to avoid unneccessarily loading blocks when at edge of sample.
-						if (0 <= i && i < xBlocks )
-						{
-							// Check if there is an atom in bin, arrays are not overwritten when there are no extra atoms so if you don't check could add contribution more than once.
-							for (int l = clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + i]; l < clBlockStartPositions[k*xBlocks*yBlocks + xBlocks*j + i+1]; l++)
-							{
-								for (int h = 0; h < 20; h++)
-								{
-									float rad = sqrt((xid*pixelscale-clAtomXPos[l])*(xid*pixelscale-clAtomXPos[l]) + (yid*pixelscale-clAtomYPos[l])*(yid*pixelscale-clAtomYPos[l]) + (z - (h*(dz/20.0f))-clAtomZPos[l])*(z - (h*(dz/15.0f))-clAtomZPos[l]));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
 
-									if(rad < 0.25f * pixelscale)
-										rad = 0.25f * pixelscale;
+						sumz += (h!=0) * (p1+p2)*0.5f;
+						p2 = p1;
 
-									int ZNum = clAtomZNum[l];
-									if( rad < 5.0f) // Should also make sure is not too small
-									{
-										sumz += (150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12  ]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+1  ])));
-										sumz += (150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12+2]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+2+1])));
-										sumz += (150.4121417f * (1.0f/rad) * clfParams[(ZNum-1)*12+4]* exp( -2.0f*3.141592f*rad*sqrt(clfParams[(ZNum-1)*12+4+1])));
-										sumz += (266.5157269f * clfParams[(ZNum-1)*12+6] * exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * sqrt(clfParams[(ZNum-1)*12+6+1])/(clfParams[(ZNum-1)*12+6+1]*clfParams[(ZNum-1)*12+6+1]*clfParams[(ZNum-1)*12+6+1]));
-										sumz += (266.5157269f * clfParams[(ZNum-1)*12+8] * exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * sqrt(clfParams[(ZNum-1)*12+8+1])/(clfParams[(ZNum-1)*12+8+1]*clfParams[(ZNum-1)*12+8+1]*clfParams[(ZNum-1)*12+8+1]));
-										sumz += (266.5157269f * clfParams[(ZNum-1)*12+10] * exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * sqrt(clfParams[(ZNum-1)*12+10+1])/(clfParams[(ZNum-1)*12+10+1]*clfParams[(ZNum-1)*12+10+1]*clfParams[(ZNum-1)*12+10+1]));
-									}
-								}
-							}
-						}
 					}
 				}
 			}
+
+			barrier(CLK_LOCAL_MEM_FENCE);
 		}
-		Potential[Index].x = cos((dz/20.0f)*sigma*sumz);
-		Potential[Index].y = sin((dz/20.0f)*sigma*sumz);
+	}
+	if(xid < width && yid < height)
+	{
+		Potential[Index].x = native_cos((dz/10.0f)*sigma*sumz);
+		Potential[Index].y = native_sin((dz/10.0f)*sigma*sumz);
 	}
 }
