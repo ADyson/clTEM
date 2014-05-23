@@ -41,6 +41,8 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
+        public List<DetectorItem> Detectors = new List<DetectorItem>();
+
         /// <summary>
         /// Cancel event to halt calculation.
         /// </summary>
@@ -106,9 +108,39 @@ namespace GPUTEMSTEMSimulation
         float[] TDSImage;
 
 
-        ///<summary>
-        /// hides some other PreviewTextInput with new?
-        /// </summary>
+        private void UpdateMaxMrad()
+        {
+
+            if (!HaveStructure)
+                return;
+
+            int Len = 0;
+            float MinX = 0;
+            float MinY = 0;
+            float MinZ = 0;
+            float MaxX = 0;
+            float MaxY = 0;
+            float MaxZ = 0;
+
+            mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
+
+            float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+            // Determine max mrads for reciprocal space, (need wavelength)...
+            float MaxFreq = 1 / (2 * BiggestSize / Resolution);
+
+            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
+            {
+                float echarge = 1.6e-19f;
+                float wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
+                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
+
+                float mrads = 1000 * MaxFreq * wavelength;
+
+                MaxMradsLabel.Content = "Max reciprocal (mrad): " + mrads.ToString("f2");
+            }
+
+        }
+
         new private void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowedFloatNumber(e.Text);
@@ -156,15 +188,6 @@ namespace GPUTEMSTEMSimulation
             ImagingA2.Text = "0";
             ImagingA2Phi.Text = "0";
 
-            ProbeAperture.Text = "5";
-            ProbeCs.Text = "10000";
-            ProbekV.Text = "200";
-            ProbeA1.Text = "0";
-            ProbeA1theta.Text = "0";
-            Probebeta.Text = "0.005";
-            Probedelta.Text = "3";
-            ProbeDf.Text = "0";
-
             //DataContext = this;
 
         }
@@ -201,15 +224,17 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString();
+                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString("f2");
+
+                    UpdateMaxMrad();
                 }
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
@@ -260,13 +285,15 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                PixelScaleLabel.Content ="Pixel Size (A): "+ (BiggestSize / Resolution).ToString();
+                PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString("f2");
+
+                UpdateMaxMrad();
             }
         }
 
@@ -285,6 +312,9 @@ namespace GPUTEMSTEMSimulation
                 var result = MessageBox.Show("Resolution Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            SimulateEWButton.IsEnabled = false;
+            SimulateImageButton.IsEnabled = false;
 
             // Do Simulation in a background worker
             //Cancel += CancelProcess;
@@ -313,9 +343,6 @@ namespace GPUTEMSTEMSimulation
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
                                     ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
-
-                mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical,
-                                    ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
 
@@ -721,6 +748,7 @@ namespace GPUTEMSTEMSimulation
                     SaveImageButton2.IsEnabled = true;
                     SimulateImageButton.IsEnabled = true;
                 }
+
             });
         
         }
@@ -729,96 +757,89 @@ namespace GPUTEMSTEMSimulation
         {
             string temporarytext = ImagingDf.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.df);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.df);
         }
 
         private void ImagingCs_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingCs.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.spherical);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
         }
 
         private void ImagingA1_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingA1.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigmag);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
         }
 
         private void ImagingA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingA1theta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
         }
 
         private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingkV.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
+
+            UpdateMaxMrad();
         }
 
         private void Imagingbeta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingbeta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.beta);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
         }
 
         private void Imagingdelta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingdelta.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.delta);
+            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
         }
 
         private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingAperture.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.aperturemrad);
-        }
-
-        private void ProbeDf_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeDf.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.df);
-        }
-
-        private void ProbeCs_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeCs.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
-        }
-
-        private void ProbeA1_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeA1.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
-        }
-
-        private void ProbeA1theta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeA1theta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
-        }
-
-        private void ProbekV_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbekV.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
-        }
-
-        private void Probebeta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = Probebeta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
-        }
-
-        private void Probedelta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = Probedelta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
-        }
-
-        private void ProbeAperture_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string temporarytext = ProbeAperture.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
+        }
+
+        private void SimTypeRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (TEMRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = true;
+                ImagingA2Phi.IsEnabled = true;
+                ImagingB2.IsEnabled = true;
+                ImagingB2Phi.IsEnabled = true;
+                Imagingdelta.IsEnabled = true;
+                Imagingbeta.IsEnabled = true;
+            }
+            else if (STEMRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = false;
+                ImagingA2Phi.IsEnabled = false;
+                ImagingB2.IsEnabled = false;
+                ImagingB2Phi.IsEnabled = false;
+                Imagingdelta.IsEnabled = false;
+                Imagingbeta.IsEnabled = false;
+            }
+            else if (CBEDRadioButton.IsChecked == true)
+            {
+                ImagingA2.IsEnabled = false;
+                ImagingA2Phi.IsEnabled = false;
+                ImagingB2.IsEnabled = false;
+                ImagingB2Phi.IsEnabled = false;
+                Imagingdelta.IsEnabled = false;
+                Imagingbeta.IsEnabled = false;
+            }
         }
 
         private void SaveImageButton_Click(object sender, RoutedEventArgs e)
@@ -1049,6 +1070,31 @@ namespace GPUTEMSTEMSimulation
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             TDS = false;
+        }
+
+        private void STEMDet_Click(object sender, RoutedEventArgs e)
+        {
+            // open the window here
+            var window = new STEMDialog(Detectors);
+            window.Owner = this;
+            window.AddDetectorEvent += new EventHandler<DetectorArgs>(STEM_AddDetector);
+            window.RemDetectorEvent += new EventHandler<DetectorArgs>(STEM_RemoveDetector);
+            window.ShowDialog();
+        }
+
+        void STEM_AddDetector(object sender, DetectorArgs evargs)
+        {
+            Detectors.Add(evargs.Detector);
+            DetectorNumLabel.Content = Detectors.Count;
+        }
+
+        void STEM_RemoveDetector(object sender, DetectorArgs evargs)
+        {
+            foreach (DetectorItem i in evargs.DetectorArr)
+            {
+                Detectors.Remove(i);
+            }
+            DetectorNumLabel.Content = Detectors.Count;
         }
     }
 }

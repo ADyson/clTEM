@@ -120,6 +120,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>OpenCL.lib; clAmdFft.Runtime.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\AMD APP SDK\2.9\lib\x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
