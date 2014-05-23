@@ -106,9 +106,39 @@ namespace GPUTEMSTEMSimulation
         float[] STEMimage;
 
 
-        ///<summary>
-        /// hides some other PreviewTextInput with new?
-        /// </summary>
+        private void UpdateMaxMrad()
+        {
+
+            if (!HaveStructure)
+                return;
+
+            int Len = 0;
+            float MinX = 0;
+            float MinY = 0;
+            float MinZ = 0;
+            float MaxX = 0;
+            float MaxY = 0;
+            float MaxZ = 0;
+
+            mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
+
+            float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+            // Determine max mrads for reciprocal space, (need wavelength)...
+            float MaxFreq = 1 / (2 * BiggestSize / Resolution);
+
+            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
+            {
+                float echarge = 1.6e-19f;
+                float wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
+                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
+
+                float mrads = 1000 * MaxFreq * wavelength;
+
+                MaxMradsLabel.Content = "Max reciprocal (mrad): " + mrads.ToString("f2");
+            }
+
+        }
+
         new private void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowedFloatNumber(e.Text);
@@ -191,15 +221,17 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString();
+                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString("f2");
+
+                    UpdateMaxMrad();
                 }
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
@@ -250,13 +282,15 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString();
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString();
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString();
+                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
+                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
+                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
                 atomNumberLabel.Content = Len.ToString() + " Atoms";
 
                 float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                PixelScaleLabel.Content ="Pixel Size (A): "+ (BiggestSize / Resolution).ToString();
+                PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString("f2");
+
+                UpdateMaxMrad();
             }
         }
 
@@ -301,9 +335,6 @@ namespace GPUTEMSTEMSimulation
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
                                     ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
-
-                mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical,
-                                    ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
                 // Will call different functions depending on type of simulation required, or just send flags to allow subsections to be performed differently
 
@@ -553,6 +584,8 @@ namespace GPUTEMSTEMSimulation
             string temporarytext = ImagingkV.Text;
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
+
+            UpdateMaxMrad();
         }
 
         private void Imagingbeta_TextChanged(object sender, TextChangedEventArgs e)
@@ -576,10 +609,7 @@ namespace GPUTEMSTEMSimulation
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
         }
 
-
-
-
-        private void SimTypeRadio_Checked(Object sender, EventArgs e)
+        private void SimTypeRadio_Checked(object sender, RoutedEventArgs e)
         {
             if (TEMRadioButton.IsChecked == true)
             {
@@ -855,5 +885,6 @@ namespace GPUTEMSTEMSimulation
             DetectorNumLabel.Content = Detectors.Count;
         }
 
+  
     }
 }
