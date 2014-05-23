@@ -64,12 +64,12 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::SortStructure()
+	void ManagedOpenCL::SortStructure(bool tds)
 	{
 		// This works, could handle other exception from C# with try catch also
 		try
 		{
-			_UMOpenCL->Structure->SortAtoms();
+			_UMOpenCL->Structure->SortAtoms(tds);
 		}
 		catch(std::exception ex)
 		{
@@ -188,6 +188,13 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->GetDiffImage(pdata,resolution);
 	};
 
+	void ManagedOpenCL::AddTDSDiffImage(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->AddTDSDiffImage(pdata,resolution);
+	};
+
+
 	float ManagedOpenCL::GetDiffMax()
 	{	
 		return _UMOpenCL->TS->diffmax;
@@ -206,5 +213,10 @@ namespace ManagedOpenCLWrapper
 	float ManagedOpenCL::GetSTEMPixel()
 	{
 		return _UMOpenCL->TS->MeasureSTEMPixel();
+	};
+		
+	void ManagedOpenCL::AddTDS()
+	{
+		_UMOpenCL->TS->AddTDS();
 	};
 }

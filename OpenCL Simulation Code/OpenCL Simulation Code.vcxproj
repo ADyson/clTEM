@@ -71,21 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);;C:\Program Files %28x86%29\AMD APP\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86);;C:\Program Files %28x86%29\AMD APP\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib32\import;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP\include;$(IncludePath);C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Program Files (x86)\AMD APP SDK\2.9\include</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP\lib\x86;$(LibraryPath);C:\Program Files %28x86%29\AMD APP\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib32\import;C:\Program Files (x86)\AMD APP SDK\2.9\lib\x86_64;C:\Program Files (x86)\AMD APP SDK\2.9\lib\x86</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Program Files (x86)\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;C:\Program Files (x86)\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -149,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="clFourier.cpp" />
     <ClCompile Include="clKernel.cpp" />
+    <None Include="CL\BinnedAtomicPotentialOpt.cl" />
     <None Include="CL\GeneratePropagator.cl" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />

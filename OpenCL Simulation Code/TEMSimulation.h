@@ -38,6 +38,9 @@ public:
 	cl_mem clPropagator;
 	cl_mem clPotential;
 
+	std::vector<float> clTDSx;
+	std::vector<float> clTDSk;
+
 
 	int resolution;
 	float pixelscale;
@@ -62,6 +65,8 @@ public:
 	void GetImDiffImage(float* data, int resolution);
 	void GetEWImage(float* data, int resolution);
 
+	void AddTDSDiffImage(float* data, int resolution);
+	void AddTDS();
 	void SimulateCTEM();
 
 	// Image contrast limits (technically ew atm)
@@ -71,5 +76,4 @@ public:
 	float ewmax;
 	float diffmin;
 	float diffmax;
-
 };

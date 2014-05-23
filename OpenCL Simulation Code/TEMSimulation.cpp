@@ -1,6 +1,7 @@
 #include "TEMSimulation.h"
 #include "clKernelCodes2.h"
 
+
 TEMSimulation::TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams)
 {
 	this->context = context;
@@ -8,6 +9,7 @@ TEMSimulation::TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev,
 	this->cldev = cldev;
 	this->TEMParams = temparams;
 	this->STEMParams = stemparams;
+
 };
 
 void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
@@ -18,7 +20,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
 	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
-	pixelscale = max(RealSizeX,RealSizeY)/resolution;
+	pixelscale = max(RealSizeX,RealSizeY)/(resolution);
 
 	// Work out size of each binned block of atoms
 	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
@@ -102,6 +104,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clWaveFunction2 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction3 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction4 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clTDSx.resize(resolution*resolution);
+	clTDSk.resize(resolution*resolution);
 	clImageWaveFunction = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	
 	clPropagator = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -144,14 +148,14 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	InitialiseWavefunction->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
-	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
+	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotentialOpt",clq);
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
-	int loadblocksx = ceil(5.0f/((AtomicStructure->MaximumX-AtomicStructure->MinimumX)/(AtomicStructure->xBlocks)));
-	int loadblocksy = ceil(5.0f/((AtomicStructure->MaximumY-AtomicStructure->MinimumY)/(AtomicStructure->yBlocks)));
+	int loadblocksx = ceil(5.0f/BlockScaleX);
+	int loadblocksy = ceil(5.0f/BlockScaleY);
 	int loadblocksz = ceil(5.0f/AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
@@ -217,7 +221,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
 	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
-	pixelscale = max(RealSizeX,RealSizeY)/resolution;
+	pixelscale =max(RealSizeX,RealSizeY)/resolution;
 
 	// Work out size of each binned block of atoms
 	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
@@ -239,7 +243,6 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	float	V2		= V*1000;
 
 	// Now we can set up frequencies and fourier transforms.
-
 	int imidx = floor(resolution/2 + 0.5);
 	int imidy = floor(resolution/2 + 0.5);
 
@@ -301,6 +304,8 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clWaveFunction2 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction3 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clWaveFunction4 = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clTDSx.resize(resolution*resolution);
+	clTDSk.resize(resolution*resolution);
 	clImageWaveFunction = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	
 	clPropagator = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -344,8 +349,8 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	WFabsolute->BuildKernelOld();
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,context,cldev,"clBinnedAtomicPotential",clq);
-	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotential",clq);
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
+	BinnedAtomicPotential = new clKernel(context,cldev,"clBinnedAtomicPotentialOpt",clq);
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 
@@ -428,7 +433,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
 	// so both cl mem things have the wavefunction (gonna edit one in a sec)
-	clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	/*clEnqueueCopyBuffer(clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 
 	*WFabsolute << clWaveFunction2 && resolution && resolution;
 
@@ -448,16 +453,20 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	localSizeSum[2] = 1;
 
 	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
-	float inverseSum = 1/sumRed;
+	float inverseSum =1.0f/sumRed;
 
 	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
 
-	MultiplyCL->Enqueue(WorkSize);
+	MultiplyCL->Enqueue(WorkSize);*/
 }
 
 
 float TEMSimulation::MeasureSTEMPixel()
 {
+
+	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results....
+
+
 	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
 
 	size_t* WorkSize = new size_t[3];
@@ -516,12 +525,15 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	size_t* LocalWork = new size_t[3];
 
-	LocalWork[0]=32;
-	LocalWork[1]=8;
+	LocalWork[0]=16;
+	LocalWork[1]=16;
 	LocalWork[2]=1;
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
+	FourierTrans->Enqueue(clPotential,clWaveFunction3,CLFFT_FORWARD);
+	BandLimit->Enqueue(Work);
+	FourierTrans->Enqueue(clWaveFunction3,clPotential,CLFFT_BACKWARD);
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
@@ -536,8 +548,6 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
 
 	// BandLimit OK here?
-
-	BandLimit->Enqueue(Work);
 
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
@@ -578,6 +588,64 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 	imagemax = max;
 };
 
+void TEMSimulation::AddTDS()
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		clTDSx[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(clTDSx[i] > max)
+			max = clTDSx[i];
+		if(clTDSx[i] < min)
+			min = clTDSx[i];	
+	}
+
+	ewmin = min;
+	ewmax = max;
+
+	// Original data is complex so copy complex version down first
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->Enqueue(Work);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	max = CL_FLT_MIN;
+	min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		clTDSk[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(clTDSk[i] > max)
+			max = clTDSk[i];
+		if(clTDSk[i] < min)
+			min = clTDSk[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
+};
+
+
 void TEMSimulation::GetEWImage(float* data, int resolution)
 {
 	// Original data is complex so copy complex version down first
@@ -603,6 +671,45 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 
 	ewmin = min;
 	ewmax = max;
+
+	
+};
+
+void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
+{
+	// Get Diff pattern and sum up into array...
+
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->Enqueue(Work);
+
+	clEnqueueReadBuffer(clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		data[i] +=(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	diffmin = min;
+	diffmax = max;
 };
 
 void TEMSimulation::GetDiffImage(float* data, int resolution)
@@ -627,7 +734,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 	for(int i = 0; i < resolution * resolution; i++)
 	{
 		// Get absolute value for display...	
-		data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		data[i] += (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
 	
 		// Find max,min for contrast limits
 		if(data[i] > max)
