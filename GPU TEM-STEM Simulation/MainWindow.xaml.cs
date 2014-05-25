@@ -638,11 +638,12 @@ namespace GPUTEMSTEMSimulation
                         Int32Rect rectBF = new Int32Rect(0, 0, i._ImgBMP.PixelWidth, i._ImgBMP.PixelHeight);
 
                         i._ImgBMP.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
-
-                        BFTab.IsSelected = true;
-
-                        SaveImageButton.IsEnabled = true;
                     }
+
+                    // just select the first tab for convenience
+                    LockedDetectors[0].Tab.IsSelected = true;
+
+                    SaveImageButton.IsEnabled = true;
 
                 }
                 else if (select_CBED)
