@@ -41,8 +41,6 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
-        public List<DetectorItem> Detectors = new List<DetectorItem>();
-
         /// <summary>
         /// Cancel event to halt calculation.
         /// </summary>
@@ -106,6 +104,7 @@ namespace GPUTEMSTEMSimulation
         float[] DiffImage;
         float[] STEMimage;
         float[] TDSImage;
+        public List<DetectorItem> Detectors = new List<DetectorItem>();
 
 
         private void UpdateMaxMrad()
@@ -400,9 +399,6 @@ namespace GPUTEMSTEMSimulation
                     if (TDS)
                         runs = 10;
 
-                    float RadInner = 0;
-                    float RadOuter = 30;
-
                     mCL.InitialiseSTEMSimulation(Resolution);
 
                     for (int posY = minY; posY < maxY; posY++)
@@ -485,7 +481,16 @@ namespace GPUTEMSTEMSimulation
                             },j);
                             }
 
+
+
+                            float RadInner = 0;
+                            float RadOuter = 30;
+                            // loop here over detector radii and images
                             STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel(RadInner, RadOuter);
+
+
+
+
                         }
 
                     }
@@ -1100,14 +1105,19 @@ namespace GPUTEMSTEMSimulation
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
+
             Detectors.Add(evargs.Detector);
             DetectorNumLabel.Content = Detectors.Count;
+
+            // draw the tab
+            LeftTab.Items.Add(evargs.Detector.Tab);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
             foreach (DetectorItem i in evargs.DetectorArr)
             {
+                LeftTab.Items.Remove(i.Tab);
                 Detectors.Remove(i);
             }
             DetectorNumLabel.Content = Detectors.Count;

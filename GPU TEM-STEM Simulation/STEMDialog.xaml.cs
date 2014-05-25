@@ -52,7 +52,7 @@ namespace GPUTEMSTEMSimulation
                 NameTxtbx.RaiseTapEvent();
                 valid = false;
             }
-            
+
             Array ListItems = DetectorListView.Items.Cast<Object>().ToArray();
             foreach (DetectorItem i in ListItems)
             {
@@ -79,7 +79,10 @@ namespace GPUTEMSTEMSimulation
                 return;
             }
 
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout };
+            TabItem tempTab = new TabItem();
+            tempTab.Header = Sname;
+
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab};
 
             // modify the mainWindow List
             AddDetectorEvent(this, new DetectorArgs(temp));
@@ -145,6 +148,10 @@ public class DetectorItem
     public float Inner { get; set; }
 
     public float Outer { get; set; }
+
+    public float[] Image { get; set; }
+
+    public TabItem Tab { get; set; }
 }
 
 namespace FixedWidthColumnSample
