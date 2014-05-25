@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Globalization;
+using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -84,6 +85,16 @@ namespace GPUTEMSTEMSimulation
 
             DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab};
 
+            Grid tempGrid = new Grid();
+            BrushConverter bc = new BrushConverter();
+            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
+            ZoomBorder tempZoom = new ZoomBorder();
+            temp.Image = new Image();
+
+            tempZoom.Child = temp.Image;
+            tempGrid.Children.Add(tempZoom);
+            temp.Tab.Content = tempGrid;
+
             // modify the mainWindow List
             AddDetectorEvent(this, new DetectorArgs(temp));
 
@@ -149,9 +160,19 @@ public class DetectorItem
 
     public float Outer { get; set; }
 
-    public float[] Image { get; set; }
+    public float[] ImageData { get; set; }
+
+    public Image Image { get; set; }
 
     public TabItem Tab { get; set; }
+
+    private WriteableBitmap ImgBMP;
+
+    public WriteableBitmap _ImgBMP
+    {
+        get { return ImgBMP; }
+        set { ImgBMP = value; }
+    }
 }
 
 namespace FixedWidthColumnSample
