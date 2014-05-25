@@ -902,18 +902,24 @@ namespace GPUTEMSTEMSimulation
                                 buf[j] = EWImage[j + Resolution * i];
                             }
                         }
-                        //else if (BFTab.IsSelected == true)
-                        //{
-                        //    for (int j = 0; j < Resolution; ++j)
-                        //    {
-                        //        //buf[j] = STEMimage[j + Resolution * i];
-                        //    }
-                        //}
                         else if (CTEMTab.IsSelected == true)
                         {
                             for (int j = 0; j < Resolution; ++j)
                             {
                                 buf[j] = CTEMImage[j + Resolution * i];
+                            }
+                        }
+                        else
+                        {
+                            foreach (DetectorItem d in LockedDetectors)
+                            {
+                                if (d.Tab.IsSelected == true)
+                                {
+                                    for (int j = 0; j < Resolution; ++j)
+                                    {
+                                        buf[j] = d.ImageData[j + Resolution * i];
+                                    }
+                                }
                             }
                         }
 
