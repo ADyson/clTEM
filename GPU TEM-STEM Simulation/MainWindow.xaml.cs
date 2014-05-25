@@ -386,10 +386,10 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
-                    int maxX = 103;// Resolution;
+                    int maxX = 120;// Resolution;
                     int minX = 100;
 
-                    int maxY = 101;// Resolution;
+                    int maxY = 120;// Resolution;
                     int minY = 100;
 
                     int numPix = (maxX-minX) * (maxY-minY);
@@ -489,6 +489,8 @@ namespace GPUTEMSTEMSimulation
                             // loop through and get each STEM pixel for each detector at the same time
                             foreach (DetectorItem i in LockedDetectors)
                             {
+                                // conver to pixels here?
+
                                 i.ImageData[Resolution * posY + posX] = mCL.GetSTEMPixel(i.Inner, i.Outer);
                             }
 
@@ -644,7 +646,6 @@ namespace GPUTEMSTEMSimulation
                     LockedDetectors[0].Tab.IsSelected = true;
 
                     SaveImageButton.IsEnabled = true;
-
                 }
                 else if (select_CBED)
                 {
@@ -912,6 +913,7 @@ namespace GPUTEMSTEMSimulation
                         }
                         else
                         {
+                            // this checks if the STEM images are open.
                             foreach (DetectorItem d in LockedDetectors)
                             {
                                 if (d.Tab.IsSelected == true)
