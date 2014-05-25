@@ -461,7 +461,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 }
 
 
-float TEMSimulation::MeasureSTEMPixel()
+float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 {
 
 	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results....
@@ -477,9 +477,9 @@ float TEMSimulation::MeasureSTEMPixel()
 
 	fftShift->Enqueue(WorkSize); // looking at GetDiffImage, should put into clWaveFunction3 (can set manually)
 
-	//to be set by user later
-	float inner = 30;
-	float outer = 80;
+	// to be set by user later
+	// float inner = 30;
+	// float outer = 80;
 
 	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && inner && outer;
 

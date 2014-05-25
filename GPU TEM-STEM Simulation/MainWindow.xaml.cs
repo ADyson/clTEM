@@ -378,11 +378,11 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 180;// Resolution;
-                    int minX = 120;
+                    int maxX = 140;// Resolution;
+                    int minX = 100;
 
-                    int maxY = 160;// Resolution;
-                    int minY = 120;
+                    int maxY = 140;// Resolution;
+                    int minY = 100;
 
                     int numPix = (maxX-minX) * (maxY-minY);
                     int pix = 0;
@@ -393,7 +393,8 @@ namespace GPUTEMSTEMSimulation
                     if (TDS)
                         runs = 10;
 
-                    
+                    float RadInner = 0;
+                    float RadOuter = 30;
 
                     mCL.InitialiseSTEMSimulation(Resolution);
 
@@ -477,7 +478,7 @@ namespace GPUTEMSTEMSimulation
                             },j);
                             }
 
-                            STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
+                            STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel(RadInner, RadOuter);
                         }
 
                     }
