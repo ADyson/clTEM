@@ -76,28 +76,6 @@ namespace GPUTEMSTEMSimulation
             set { MainWindow.DiffImg = value; }
         }
 
-        private static WriteableBitmap STEMADFImg;
-        public static WriteableBitmap _STEMADFImg
-        {
-            get { return MainWindow.STEMADFImg; }
-            set { MainWindow.STEMADFImg = value; }
-        }
-
-        //private static WriteableBitmap STEMBFImg;
-        //public static WriteableBitmap _STEMBFImg
-        //{
-        //    get { return MainWindow.STEMBFImg; }
-        //    set { MainWindow.STEMBFImg = value; }
-        //}
-
-        private static WriteableBitmap STEMHAADFImg;
-        public static WriteableBitmap _STEMHAADFImg
-        {
-            get { return MainWindow.STEMHAADFImg; }
-            set { MainWindow.STEMHAADFImg = value; }
-        }
-
-
         // Arrays to store image data
         float[] CTEMImage;
         float[] EWImage;
@@ -386,7 +364,7 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
-                    int maxX = 120;// Resolution;
+                    int maxX = 101;// Resolution;
                     int minX = 100;
 
                     int maxY = 120;// Resolution;

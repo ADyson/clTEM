@@ -157,14 +157,6 @@
                         </local:ZoomBorder>
                     </Grid>
                 </TabItem>
-                <TabItem x:Name="BFTab" Header="BF">
-                    <Grid Background="#FFE5E5E5">
-                        <local:ZoomBorder ClipToBounds="True">
-                            <Image x:Name="BFImageDisplay" Height="Auto" Width="Auto"/>
-                        </local:ZoomBorder>
-                    </Grid>
-                </TabItem>
-
             </TabControl>
             <!-- Right Image Tab Control-->
             <TabControl Margin="20,10,20,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

@@ -89,6 +89,7 @@ namespace GPUTEMSTEMSimulation
             BrushConverter bc = new BrushConverter();
             tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
             ZoomBorder tempZoom = new ZoomBorder();
+            tempZoom.ClipToBounds = true;
             temp.Image = new Image();
 
             tempZoom.Child = temp.Image;
