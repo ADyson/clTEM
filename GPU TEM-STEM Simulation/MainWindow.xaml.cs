@@ -378,6 +378,13 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
+
+                    if (Detectors.Count == 0)
+                    {
+                        var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return 0;
+                    }
+
                     int maxX = 140;// Resolution;
                     int minX = 100;
 
@@ -591,6 +598,10 @@ namespace GPUTEMSTEMSimulation
 
                 if (select_STEM)
                 {
+
+                    // should be OK, might need something more robust though.
+                    if (Detectors.Count == 0)
+                        return;
 
                     _STEMBFImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                     BFImageDisplay.Source = _STEMBFImg;
