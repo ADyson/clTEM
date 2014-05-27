@@ -360,6 +360,7 @@ namespace GPUTEMSTEMSimulation
 
                     if (LockedDetectors.Count == 0)
                     {
+                        SimulateEWButton.IsEnabled = true;
                         var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
                         return 0;
                     }
@@ -590,6 +591,8 @@ namespace GPUTEMSTEMSimulation
                     {
                         i._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                         i.Image.Source = i._ImgBMP;
+
+                        RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
 
                         // Calculate the number of bytes per pixel (should be 4 for this format). 
                         var bytesPerPixelBF = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;

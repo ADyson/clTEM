@@ -485,7 +485,7 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	float outerFreq = outer/(1000 * wavelength);
 	float outerPx = outerFreq*pxFreq;
 
-	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && inner && outer;
+	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && innerPx && outerPx;
 
 	MaskingKernel->Enqueue(WorkSize);
 
