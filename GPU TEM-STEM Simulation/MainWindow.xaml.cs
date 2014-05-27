@@ -364,11 +364,11 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
-                    int maxX = 101;// Resolution;
                     int minX = 100;
+                    int maxX = 200;// Resolution;
 
-                    int maxY = 120;// Resolution;
                     int minY = 100;
+                    int maxY = 200;// Resolution;
 
                     int numPix = (maxX-minX) * (maxY-minY);
                     int pix = 0;
@@ -471,7 +471,20 @@ namespace GPUTEMSTEMSimulation
                             // loop through and get each STEM pixel for each detector at the same time
                             foreach (DetectorItem i in LockedDetectors)
                             {
-                                i.ImageData[Resolution * posY + posX] = mCL.GetSTEMPixel(i.Inner, i.Outer);
+                                float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
+
+                                i.ImageData[Resolution * posY + posX] = pixelVal;
+
+                                if (pixelVal < i.Min)
+                                {
+                                    i.Min = pixelVal;
+                                }
+                                if (pixelVal > i.Max)
+                                {
+                                    i.Max = pixelVal;
+                                }
+
+
                             }
 
                             // Reset TDS arrays after pixel values retrieved...
@@ -613,15 +626,15 @@ namespace GPUTEMSTEMSimulation
                         var arraySizeBF = strideBF * i._ImgBMP.PixelHeight;
                         var pixelArrayBF = new byte[arraySizeBF];
 
-                        float minBF = i.ImageData.Min();
-                        float maxBF = i.ImageData.Max();
+                        float minBF = i.Min;
+                        float maxBF = i.Max;
 
                         for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
                             for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
                             {
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
                                 pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
                             }
 
