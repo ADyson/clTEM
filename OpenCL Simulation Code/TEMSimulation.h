@@ -20,6 +20,7 @@ public:
 	clKernel* WFabsolute;
 	clKernel* MultiplyCL;
 	clKernel* MaskingKernel;
+	clKernel* TDSMaskingKernel;
 
 	cl_context context;
 	clQueue* clq;
@@ -34,6 +35,8 @@ public:
 	cl_mem clWaveFunction3;
 	cl_mem clWaveFunction4;
 	cl_mem clImageWaveFunction;
+	cl_mem clTDSDiff;
+	cl_mem clTDSMaskDiff;
 
 	cl_mem clPropagator;
 	cl_mem clPotential;
@@ -57,7 +60,7 @@ public:
 
 	float MeasureSTEMPixel(float inner, float outer);
 	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-
+	float FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 	void GetCTEMImage(float* data, int resolution);
 	// Diff of EW
 	void GetDiffImage(float* data, int resolution);
@@ -66,7 +69,9 @@ public:
 	void GetEWImage(float* data, int resolution);
 
 	void AddTDSDiffImage(float* data, int resolution);
+
 	void AddTDS();
+	void ClearTDS();
 	void SimulateCTEM();
 
 	// Image contrast limits (technically ew atm)
@@ -76,4 +81,6 @@ public:
 	float ewmax;
 	float diffmin;
 	float diffmax;
+	float tdsmin;
+	float tdsmax;
 };

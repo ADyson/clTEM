@@ -219,4 +219,9 @@ namespace ManagedOpenCLWrapper
 	{
 		_UMOpenCL->TS->AddTDS();
 	};
+
+	void ManagedOpenCL::ClearTDS()
+	{
+		_UMOpenCL->TS->ClearTDS();
+	};
 }

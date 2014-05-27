@@ -308,6 +308,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clTDSk.resize(resolution*resolution);
 	clImageWaveFunction = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	
+	clTDSDiff = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float ), 0, &status);
+	clTDSMaskDiff = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float ), 0, &status);
+	
 	clPropagator = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 	clPotential = clCreateBuffer(context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 
@@ -331,6 +334,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	
 	MaskingKernel = new clKernel(bandPassSource,context,cldev,"clBandPass",clq);
 	MaskingKernel->BuildKernelOld();
+
+	TDSMaskingKernel = new clKernel(floatbandPassSource,context,cldev,"clFloatBandPass",clq);
+	TDSMaskingKernel->BuildKernelOld();
 
 	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);
@@ -464,7 +470,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 {
 
-	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results....
+	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
 
 
 	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
@@ -475,7 +481,7 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	fftShift->Enqueue(WorkSize); // looking at GetDiffImage, should put into clWaveFunction3 (can set manually)
+	//fftShift->Enqueue(WorkSize); // looking at GetDiffImage, should put into clWaveFunction3 (can set manually)
 
 	float pxFreq = (resolution * pixelscale);
 
@@ -485,9 +491,16 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	float outerFreq = outer/(1000 * wavelength);
 	float outerPx = outerFreq*pxFreq;
 
-	*MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && innerPx && outerPx;
+	/**MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && innerPx && outerPx;
 
-	MaskingKernel->Enqueue(WorkSize);
+	MaskingKernel->Enqueue(WorkSize);*/
+
+
+	clEnqueueWriteBuffer(clq->cmdQueue,clTDSDiff,CL_FALSE,0,resolution*resolution*sizeof(cl_float),&clTDSk[0],0,0,0);
+
+	*TDSMaskingKernel << clTDSMaskDiff && clTDSDiff && resolution && resolution && innerPx && outerPx;
+
+	TDSMaskingKernel->Enqueue(WorkSize);
 
 	int totalSize = resolution*resolution;
 	int nGroups = totalSize / 256;
@@ -502,7 +515,7 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	localSizeSum[1] = 1;
 	localSizeSum[2] = 1;
 
-	return SumReduction(clWaveFunction4, globalSizeSum, localSizeSum, nGroups, totalSize);
+	return FloatSumReduction(clTDSMaskDiff, globalSizeSum, localSizeSum, nGroups, totalSize);
 }
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
@@ -645,8 +658,15 @@ void TEMSimulation::AddTDS()
 			min = clTDSk[i];	
 	}
 
-	diffmin = min;
-	diffmax = max;
+	tdsmin = min;
+	tdsmax = max;
+};
+
+void TEMSimulation::ClearTDS()
+{
+	fill(clTDSk.begin(),clTDSk.end(),0);
+	fill(clTDSx.begin(),clTDSx.end(),0);
+
 };
 
 
@@ -854,6 +874,42 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 	for(int i = 0 ; i < nGroups; i++)
 	{
 		sum += sums[i].real();
+	}
+
+	clReleaseMemObject(outArray);
+
+	return sum;
+
+}
+
+float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+{
+	clKernel* SumReduction = new clKernel(floatSumReductionsource2,context,cldev,"clFloatSumReduction",clq);
+	SumReduction->BuildKernelOld();
+
+	cl_mem outArray = clCreateBuffer(context, CL_MEM_READ_WRITE, nGroups * sizeof( cl_float ), 0, &status);
+
+	// Create host array to store reduction results.
+	std::vector< float> sums( nGroups );
+
+	SumReduction->SetArgT(0,Array);
+
+	// Only really need to do these 3 once...
+	SumReduction->SetArgT(1,outArray);
+	SumReduction->SetArgT(2,totalSize);
+	SumReduction->SetArgLocalMemory(3,256,clFloat);
+
+	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
+
+	// Now copy back 
+	clEnqueueReadBuffer( clq->cmdQueue, outArray, CL_TRUE, 0, nGroups*sizeof(cl_float), &sums[0], 0, NULL, NULL );
+
+	// Find out which numbers to read back
+	float sum = 0;
+
+	for(int i = 0 ; i < nGroups; i++)
+	{
+		sum += sums[i];
 	}
 
 	clReleaseMemObject(outArray);
