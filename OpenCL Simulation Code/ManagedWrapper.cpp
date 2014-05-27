@@ -210,9 +210,9 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->SimulateCTEM();
 	};
 
-	float ManagedOpenCL::GetSTEMPixel()
+	float ManagedOpenCL::GetSTEMPixel(float inner, float outer)
 	{
-		return _UMOpenCL->TS->MeasureSTEMPixel();
+		return _UMOpenCL->TS->MeasureSTEMPixel(inner, outer);
 	};
 		
 	void ManagedOpenCL::AddTDS()

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Globalization;
+using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -52,7 +53,7 @@ namespace GPUTEMSTEMSimulation
                 NameTxtbx.RaiseTapEvent();
                 valid = false;
             }
-            
+
             Array ListItems = DetectorListView.Items.Cast<Object>().ToArray();
             foreach (DetectorItem i in ListItems)
             {
@@ -79,7 +80,21 @@ namespace GPUTEMSTEMSimulation
                 return;
             }
 
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout };
+            TabItem tempTab = new TabItem();
+            tempTab.Header = Sname;
+
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab};
+
+            Grid tempGrid = new Grid();
+            BrushConverter bc = new BrushConverter();
+            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
+            ZoomBorder tempZoom = new ZoomBorder();
+            tempZoom.ClipToBounds = true;
+            temp.Image = new Image();
+
+            tempZoom.Child = temp.Image;
+            tempGrid.Children.Add(tempZoom);
+            temp.Tab.Content = tempGrid;
 
             // modify the mainWindow List
             AddDetectorEvent(this, new DetectorArgs(temp));
@@ -145,6 +160,20 @@ public class DetectorItem
     public float Inner { get; set; }
 
     public float Outer { get; set; }
+
+    public float[] ImageData { get; set; }
+
+    public Image Image { get; set; }
+
+    public TabItem Tab { get; set; }
+
+    private WriteableBitmap ImgBMP;
+
+    public WriteableBitmap _ImgBMP
+    {
+        get { return ImgBMP; }
+        set { ImgBMP = value; }
+    }
 }
 
 namespace FixedWidthColumnSample

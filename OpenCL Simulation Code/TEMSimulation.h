@@ -55,7 +55,7 @@ public:
 
 	void MultisliceStep(int stepno, int steps);
 
-	float MeasureSTEMPixel();
+	float MeasureSTEMPixel(float inner, float outer);
 	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	void GetCTEMImage(float* data, int resolution);

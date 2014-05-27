@@ -41,8 +41,6 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
-        public List<DetectorItem> Detectors = new List<DetectorItem>();
-
         /// <summary>
         /// Cancel event to halt calculation.
         /// </summary>
@@ -78,34 +76,13 @@ namespace GPUTEMSTEMSimulation
             set { MainWindow.DiffImg = value; }
         }
 
-        private static WriteableBitmap STEMADFImg;
-        public static WriteableBitmap _STEMADFImg
-        {
-            get { return MainWindow.STEMADFImg; }
-            set { MainWindow.STEMADFImg = value; }
-        }
-
-        private static WriteableBitmap STEMBFImg;
-        public static WriteableBitmap _STEMBFImg
-        {
-            get { return MainWindow.STEMBFImg; }
-            set { MainWindow.STEMBFImg = value; }
-        }
-
-        private static WriteableBitmap STEMHAADFImg;
-        public static WriteableBitmap _STEMHAADFImg
-        {
-            get { return MainWindow.STEMHAADFImg; }
-            set { MainWindow.STEMHAADFImg = value; }
-        }
-
-
         // Arrays to store image data
         float[] CTEMImage;
         float[] EWImage;
         float[] DiffImage;
-        float[] STEMimage;
         float[] TDSImage;
+        public List<DetectorItem> Detectors = new List<DetectorItem>();
+        public List<DetectorItem> LockedDetectors;
 
 
         private void UpdateMaxMrad()
@@ -378,22 +355,33 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_STEM)
                 {
-                    int maxX = 180;// Resolution;
-                    int minX = 120;
 
-                    int maxY = 160;// Resolution;
-                    int minY = 120;
+                    LockedDetectors = Detectors;
+
+                    if (LockedDetectors.Count == 0)
+                    {
+                        SimulateEWButton.IsEnabled = true;
+                        var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return 0;
+                    }
+
+                    int maxX = 101;// Resolution;
+                    int minX = 100;
+
+                    int maxY = 120;// Resolution;
+                    int minY = 100;
 
                     int numPix = (maxX-minX) * (maxY-minY);
                     int pix = 0;
 
-                    STEMimage = new float[Resolution * Resolution];
+                    foreach (DetectorItem i in LockedDetectors)
+                    {
+                        i.ImageData = new float[Resolution * Resolution];
+                    }
                     
                     int runs = 1;
                     if (TDS)
                         runs = 10;
-
-                    
 
                     mCL.InitialiseSTEMSimulation(Resolution);
 
@@ -477,7 +465,14 @@ namespace GPUTEMSTEMSimulation
                             },j);
                             }
 
-                            STEMimage[Resolution*posY+posX] = mCL.GetSTEMPixel();
+                            // loop through and get each STEM pixel for each detector at the same time
+                            foreach (DetectorItem i in LockedDetectors)
+                            {
+                                // conver to pixels here?
+
+                                i.ImageData[Resolution * posY + posX] = mCL.GetSTEMPixel(i.Inner, i.Outer);
+                            }
+
                         }
 
                     }
@@ -488,8 +483,6 @@ namespace GPUTEMSTEMSimulation
                 {
                     int numPix = 1;
                     int pix = 0;
-
-                    STEMimage = new float[Resolution * Resolution];
 
                     mCL.InitialiseSTEMSimulation(Resolution);
 
@@ -591,44 +584,49 @@ namespace GPUTEMSTEMSimulation
                 if (select_STEM)
                 {
 
-                    _STEMBFImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
-                    BFImageDisplay.Source = _STEMBFImg;
+                    if (LockedDetectors.Count == 0)
+                        return;
 
-                    // Calculate the number of bytes per pixel (should be 4 for this format). 
-                    var bytesPerPixelBF = (_STEMBFImg.Format.BitsPerPixel + 7) / 8;
+                    foreach (DetectorItem i in LockedDetectors)
+                    {
+                        i._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                        i.Image.Source = i._ImgBMP;
 
-                    // Stride is bytes per pixel times the number of pixels.
-                    // Stride is the byte width of a single rectangle row.
-                    var strideBF = _STEMBFImg.PixelWidth * bytesPerPixelBF;
+                        RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
 
-                    // Create a byte array for a the entire size of bitmap.
-                    var arraySizeBF = strideBF * _STEMBFImg.PixelHeight;
-                    var pixelArrayBF = new byte[arraySizeBF];
+                        // Calculate the number of bytes per pixel (should be 4 for this format). 
+                        var bytesPerPixelBF = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;
 
-                    //float min = mCL.GetEWMin();
-                    //float max = mCL.GetEWMax();
+                        // Stride is bytes per pixel times the number of pixels.
+                        // Stride is the byte width of a single rectangle row.
+                        var strideBF = i._ImgBMP.PixelWidth * bytesPerPixelBF;
 
-                    float minBF = STEMimage.Min();
-                    float maxBF = STEMimage.Max();
+                        // Create a byte array for a the entire size of bitmap.
+                        var arraySizeBF = strideBF * i._ImgBMP.PixelHeight;
+                        var pixelArrayBF = new byte[arraySizeBF];
 
-                    for (int row = 0; row < _STEMBFImg.PixelHeight; row++)
-                        for (int col = 0; col < _STEMBFImg.PixelWidth; col++)
-                        {
-                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
-                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
-                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((STEMimage[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
-                            pixelArrayBF[(row * _STEMBFImg.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
-                        }
+                        float minBF = i.ImageData.Min();
+                        float maxBF = i.ImageData.Max();
+
+                        for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
+                            for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
+                            {
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.ImageData[col + row * Resolution] - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
+                            }
 
 
-                    Int32Rect rectBF = new Int32Rect(0, 0, _STEMBFImg.PixelWidth, _STEMBFImg.PixelHeight);
+                        Int32Rect rectBF = new Int32Rect(0, 0, i._ImgBMP.PixelWidth, i._ImgBMP.PixelHeight);
 
-                    _STEMBFImg.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
+                        i._ImgBMP.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
+                    }
 
-                    BFTab.IsSelected = true;
+                    // just select the first tab for convenience
+                    LockedDetectors[0].Tab.IsSelected = true;
 
                     SaveImageButton.IsEnabled = true;
-
                 }
                 else if (select_CBED)
                 {
@@ -887,18 +885,25 @@ namespace GPUTEMSTEMSimulation
                                 buf[j] = EWImage[j + Resolution * i];
                             }
                         }
-                        else if (BFTab.IsSelected == true)
-                        {
-                            for (int j = 0; j < Resolution; ++j)
-                            {
-                                buf[j] = STEMimage[j + Resolution * i];
-                            }
-                        }
                         else if (CTEMTab.IsSelected == true)
                         {
                             for (int j = 0; j < Resolution; ++j)
                             {
                                 buf[j] = CTEMImage[j + Resolution * i];
+                            }
+                        }
+                        else
+                        {
+                            // this checks if the STEM images are open.
+                            foreach (DetectorItem d in LockedDetectors)
+                            {
+                                if (d.Tab.IsSelected == true)
+                                {
+                                    for (int j = 0; j < Resolution; ++j)
+                                    {
+                                        buf[j] = d.ImageData[j + Resolution * i];
+                                    }
+                                }
                             }
                         }
 
@@ -1090,12 +1095,16 @@ namespace GPUTEMSTEMSimulation
         {
             Detectors.Add(evargs.Detector);
             DetectorNumLabel.Content = Detectors.Count;
+
+            // draw the tab
+            LeftTab.Items.Add(evargs.Detector.Tab);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
             foreach (DetectorItem i in evargs.DetectorArr)
             {
+                LeftTab.Items.Remove(i.Tab);
                 Detectors.Remove(i);
             }
             DetectorNumLabel.Content = Detectors.Count;
