@@ -266,6 +266,29 @@ const char* sumReductionsource2 =
 "}																																		\n"
 ;
 
+const char* floatSumReductionsource2 = 
+"__kernel void clFloatSumReduction(__global const float* input, __global float* output, const unsigned int size, __local float* buffer)	\n"
+"{																																		\n"
+"	//Get the work items ID																												\n"
+"	size_t idx = get_local_id(0);																										\n"
+"	size_t stride = get_global_size(0);																									\n"
+"	buffer[idx] = 0;																													\n"
+"																																		\n"
+"	for(size_t pos = get_global_id(0); pos < size; pos += stride )																		\n"
+"		buffer[idx] += input[pos];																										\n"
+"																																		\n"
+"	barrier(CLK_LOCAL_MEM_FENCE);																										\n"
+"																																		\n"
+"	float sum = 0;																														\n"
+"	if(!idx) {																															\n"
+"		for(size_t i = 1; i < get_local_size(0); ++i)																					\n"
+"			sum += buffer[i];																											\n"
+"																																		\n"
+"		output[get_group_id(0)] = sum;																								\n"
+"	}																																	\n"
+"}																																		\n"
+;
+
 const char* abssource2 = 
 "__kernel void clAbs(__global float2* clEW, int sizeX, int sizeY)	\n"
 "{	\n"

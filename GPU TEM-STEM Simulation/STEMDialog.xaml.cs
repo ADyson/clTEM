@@ -83,7 +83,7 @@ namespace GPUTEMSTEMSimulation
             TabItem tempTab = new TabItem();
             tempTab.Header = Sname;
 
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab};
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0 };
 
             Grid tempGrid = new Grid();
             BrushConverter bc = new BrushConverter();
@@ -161,6 +161,10 @@ public class DetectorItem
 
     public float Outer { get; set; }
 
+    public float Min { get; set; }
+
+    public float Max { get; set; }
+
     public float[] ImageData { get; set; }
 
     public Image Image { get; set; }
@@ -174,6 +178,12 @@ public class DetectorItem
         get { return ImgBMP; }
         set { ImgBMP = value; }
     }
+
+    public float GetClampedPixel(int index)
+    {
+        return Math.Max(Math.Min(ImageData[index], Max), Min);
+    }
+
 }
 
 namespace FixedWidthColumnSample
