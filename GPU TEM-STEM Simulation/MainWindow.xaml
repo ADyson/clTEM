@@ -129,8 +129,7 @@
         <GroupBox Grid.Column="5" Template="{StaticResource gbox}" x:Name="STEM" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
             <Grid>
                 <Button x:Name ="STEMDetButton" Content="Edit Detectors" HorizontalAlignment="Left" Height="39" Margin="0,7,0,0" VerticalAlignment="Top" Width="108" Click="STEMDet_Click"/>
-                <Label Content="Detectors:" HorizontalAlignment="Left" Margin="0,58,0,0" VerticalAlignment="Top" Width="72" HorizontalContentAlignment="Left" RenderTransformOrigin="0.533,0.865"/>
-                <Label x:Name="DetectorNumLabel" Content="0" HorizontalAlignment="Left" Margin="55,58,0,0" VerticalAlignment="Top" Width="48" HorizontalContentAlignment="Center"/>
+                <Button x:Name ="STEMAreaButton" Content="Select Region" HorizontalAlignment="Left" Height="39" Margin="0,51,0,0" VerticalAlignment="Top" Width="108" Click="STEMArea_Click"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Column="7" Template="{StaticResource gbox}" Header="" >
