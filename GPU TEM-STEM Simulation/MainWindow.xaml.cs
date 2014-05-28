@@ -585,7 +585,7 @@ namespace GPUTEMSTEMSimulation
                         mCL.AddTDSDiffImage(TDSImage, Resolution);
                         // Sum it in C++ also for the stem pixel measurement...
                         mCL.AddTDS();
-
+                        
                         progressReporter.ReportProgress((val) =>
                         {
                             _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);

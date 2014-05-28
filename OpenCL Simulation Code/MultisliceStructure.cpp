@@ -121,9 +121,9 @@ int MultisliceStructure::SortAtoms(bool TDS)
 	// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 	// Or fix it so they are all referencing same variable.
 	int NumberOfAtoms = Atoms.size();
-	xBlocks = 80;
-	yBlocks = 80;
-	dz		= 1;
+	xBlocks = 90;
+	yBlocks = 90;
+	dz		= 1.0f;
 	nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 	nSlices+=(nSlices==0);
 
@@ -187,8 +187,8 @@ int MultisliceStructure::SortAtoms(bool TDS)
 	}
 		
 	int atomIterator(0);
-	int* blockStartPositions;
-	blockStartPositions = new int[nSlices*xBlocks*yBlocks+1];
+
+	blockStartPositions.resize(nSlices*xBlocks*yBlocks+1);
 
 
 	// Put all bins into a linear block of memory ordered by z then y then x and record start positions for every block.
@@ -217,6 +217,33 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		}
 	}
 
+	// Trying to store rows of yBlocks consecutively for faster coalesced loading in GPU
+	// Atoms still consecutive in terms of xBlock (not sure this is possible)
+	//for(int slicei = 0; slicei < nSlices; slicei++)
+	//{
+	//	for(int j = 0; j < yBlocks; j++)
+	//	{
+	//		for(int k = 0; k < xBlocks; k++)
+	//		{
+	//			blockStartPositions[slicei*xBlocks*yBlocks+ k*yBlocks + j] = atomIterator;
+
+	//			if(Binnedx[j*xBlocks+k][slicei].size() > 0)
+	//			{
+	//				for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
+	//				{
+	//					// cout <<"Block " << j <<" , " << k << endl;
+	//					AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
+	//					AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
+	//					AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
+	//					AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
+	//					atomIterator++;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+
 	// Last element indicates end of last block as total number of atoms.
 	blockStartPositions[nSlices*xBlocks*yBlocks] = Atoms.size();
 
@@ -229,6 +256,9 @@ int MultisliceStructure::SortAtoms(bool TDS)
 	clBlockStartPositions = clCreateBuffer ( context, CL_MEM_READ_WRITE, (nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 	clEnqueueWriteBuffer( clq->cmdQueue, clBlockStartPositions, CL_TRUE, 0,(nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ 0 ], 0, NULL, NULL );
 	
+	// 7 is 2 * loadzslices + 1
+	clConstantBlockStartPositions = clCreateBuffer ( context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
+
 	// TODO some cleanup probably
 	clAtomSort->~clKernel();
 
@@ -308,4 +338,9 @@ void MultisliceStructure::ClearStructure() {
 	clReleaseMemObject(clAtomz);
 	clReleaseMemObject(clAtomZ);
 	clReleaseMemObject(clBlockStartPositions);
+};
+
+void MultisliceStructure::UploadConstantBlock(int topz, int bottomz)
+{
+	clEnqueueWriteBuffer( clq->cmdQueue, clConstantBlockStartPositions, CL_TRUE, 0,((bottomz-topz)*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ topz*xBlocks*yBlocks ], 0, NULL, NULL );
 };

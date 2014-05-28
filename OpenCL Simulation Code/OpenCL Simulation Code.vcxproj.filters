@@ -79,5 +79,8 @@
     <None Include="CL\BinnedAtomicPotentialOpt.cl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="CL\BinnedAtomicPotentialOpt2.cl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
