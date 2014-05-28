@@ -490,16 +490,6 @@ namespace GPUTEMSTEMSimulation
                                         i._ImgBMP.WritePixels(rectBF, pixelArrayBF, strideBF, 0);
                                     }
 
-
-
-
-
-
-
-
-
-
-
                                     _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                                     DiffImageDisplay.Source = _DiffImg;
 
