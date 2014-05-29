@@ -12,8 +12,6 @@ int UnmanagedOpenCL::SetupStructure(std::string filepath)
 	Structure->GotDevice = GotDevice;
 	GotStruct=true;
 	
-
-	// TODO: properly implement success/failure reporting
 	return 1;
 };
 
@@ -118,13 +116,12 @@ void UnmanagedOpenCL::SetDevice(int index)
 
 	// Get new device
 	clState::SetDevice(index);
-	Structure->GotDevice = true;
 	GotDevice=true;
 
 	// reupload new structure. (and param).
 	if(GotStruct)
 	{
-		Structure->ImportAtoms(Structure->filepath);
+		Structure->GotDevice = true;
 		UploadParameterisation();
 		Structure->SortAtoms(false);
 	}

@@ -347,7 +347,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
-
+	
 	WorkSize[0] = resolution;
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
