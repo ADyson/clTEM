@@ -358,6 +358,7 @@ namespace GPUTEMSTEMSimulation
                         timer.Start();
                         mCL.MultisliceStep(i, NumberOfSlices);
                         timer.Stop();
+                        int mem = mCL.MemoryUsed();
                         // Report progress of the work. 
                         progressReporter.ReportProgress((val) =>
                         {
@@ -365,7 +366,8 @@ namespace GPUTEMSTEMSimulation
                             this.progressBar1.Value =
                                 Convert.ToInt32(100*Convert.ToSingle(i)/
                                                 Convert.ToSingle(NumberOfSlices));
-                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString()+" ms.";
+                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms."; 
+                            this.statusmessage2.Content = mem/(1024*1024) + " MB.";
                         },i);
                       
                     }

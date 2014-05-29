@@ -229,4 +229,8 @@ namespace ManagedOpenCLWrapper
 	{
 		_UMOpenCL->SetDevice(index);
 	};
+
+	int ManagedOpenCL::MemoryUsed(){
+	return _UMOpenCL->MemoryUsed();
+	}
 }

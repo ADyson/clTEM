@@ -24,5 +24,9 @@ public:
 	static clDevice* GetDevicePtr();
 	static clQueue* GetQueuePtr();
 	static void SetDevice(int index);
+	static std::vector<size_t> Allocated;
+	static int RegisterMemory(size_t size);
+	static void DeRegisterMemory(int index);
+	static size_t GetTotalSize();
 };
 

@@ -44,7 +44,7 @@ namespace ManagedOpenCLWrapper {
 
 		// For OpenCL Device Selector...
 		void SetDevice(int index);
-
+		int MemoryUsed();
 
 		ManagedOpenCL();
 		~ManagedOpenCL();

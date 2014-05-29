@@ -89,22 +89,22 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	// Bandlimit by FDdz size
 
-	// Upload to device
-	clXFrequencies = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
-	clYFrequencies = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clYFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
-	
+	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+
+	clXFrequencies->Write(k0x);
+	clYFrequencies->Write(k0y);
 	
 	// Setup Fourier Transforms
 	FourierTrans = std::unique_ptr<clFourier>(new clFourier(clState::context, clState::clq));
 	FourierTrans->Setup(resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
-	clWaveFunction1 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction2 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction3 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction4 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clWaveFunction1 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction2 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction3 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction4 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+
 	clTDSx.resize(resolution*resolution);
 	clTDSk.resize(resolution*resolution);
 	clImageWaveFunction = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -113,32 +113,32 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clPotential = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 
 	// Set initial wavefunction to 1+0i
-	clKernel* InitialiseWavefunction = new clKernel(InitialiseWavefunctionSource,clState::context,clState::cldev,"clInitialiseWavefunction",clState::clq);
+	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
 	InitialiseWavefunction->BuildKernelOld();
 
-	BandLimit = std::unique_ptr<clKernel>(new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
+	BandLimit = Kernel(new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
 	BandLimit->BuildKernelOld();
 
-	fftShift =std::unique_ptr<clKernel>( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
+	fftShift = Kernel( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
 	fftShift->BuildKernelOld();
 
-	fftShift->SetArgT(0,clWaveFunction2);
-	fftShift->SetArgT(1,clWaveFunction3);
+	fftShift->SetArgT(0,clWaveFunction2->buffer);
+	fftShift->SetArgT(1,clWaveFunction3->buffer);
 	fftShift->SetArgT(2,resolution);
 	fftShift->SetArgT(3,resolution);
 
 	float InitialValue = 1.0f;
-	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
+	InitialiseWavefunction->SetArgT(0,clWaveFunction1->buffer);
 	InitialiseWavefunction->SetArgT(1,resolution);
 	InitialiseWavefunction->SetArgT(2,resolution);
 	InitialiseWavefunction->SetArgT(3,InitialValue);
 
-	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(0,clWaveFunction3->buffer);
 	BandLimit->SetArgT(1,resolution);
 	BandLimit->SetArgT(2,resolution);
 	BandLimit->SetArgT(3,bandwidthkmax);
-	BandLimit->SetArgT(4,clXFrequencies);
-	BandLimit->SetArgT(5,clYFrequencies);
+	BandLimit->SetArgT(4,clXFrequencies->buffer);
+	BandLimit->SetArgT(5,clYFrequencies->buffer);
 
 	size_t* WorkSize = new size_t[3];
 
@@ -149,7 +149,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	InitialiseWavefunction->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
 	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
@@ -183,13 +183,13 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 	
 	// Also need to generate propagator.
-	GeneratePropagator = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
+	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
 	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
 	GeneratePropagator->BuildKernel();
 
 	GeneratePropagator->SetArgT(0,clPropagator);
-	GeneratePropagator->SetArgT(1,clXFrequencies);
-	GeneratePropagator->SetArgT(2,clYFrequencies);
+	GeneratePropagator->SetArgT(1,clXFrequencies->buffer);
+	GeneratePropagator->SetArgT(2,clYFrequencies->buffer);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
 	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
@@ -199,7 +199,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	GeneratePropagator->Enqueue(WorkSize);
 	
 	// And multiplication kernel
-	ComplexMultiply = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clComplexMultiply",clState::clq));
+	ComplexMultiply = Kernel( new clKernel(clState::context,clState::cldev,"clComplexMultiply",clState::clq));
 	ComplexMultiply->loadProgSource("Multiply.cl");
 	ComplexMultiply->BuildKernel();
 
@@ -207,7 +207,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	ComplexMultiply->SetArgT(4,resolution);
 
 	// And the imaging kernel
-	ImagingKernel = std::unique_ptr<clKernel>( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
+	ImagingKernel = Kernel( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
 	ImagingKernel->BuildKernelOld();
 
 
@@ -290,21 +290,22 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	// Bandlimit by FDdz size
 
 	// Upload to device
-	clXFrequencies = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
-	clYFrequencies = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * sizeof( cl_float ), 0, &status);
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clXFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clYFrequencies,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
-	
+	clXFrequencies->Create(resolution*sizeof(cl_float));
+	clYFrequencies->Create(resolution*sizeof(cl_float));
+
+	clEnqueueWriteBuffer(clState::clq->cmdQueue,clXFrequencies->buffer,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
+	clEnqueueWriteBuffer(clState::clq->cmdQueue,clYFrequencies->buffer,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
 	
 	// Setup Fourier Transforms
 	FourierTrans = std::unique_ptr<clFourier> (new clFourier(clState::context, clState::clq));
 	FourierTrans->Setup(resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
-	clWaveFunction1 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction2 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction3 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clWaveFunction4 = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clWaveFunction1 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction2 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction3 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction4 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+
 	clTDSx.resize(resolution*resolution);
 	clTDSk.resize(resolution*resolution);
 	clImageWaveFunction = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
@@ -316,13 +317,13 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clPotential = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
 
 	// Set initial wavefunction to 1+0i
-	InitialiseSTEMWavefunction = std::unique_ptr<clKernel>( new clKernel(InitialiseSTEMWavefunctionSource,clState::context,clState::cldev,"clInitialiseSTEMWavefunction",clState::clq));
+	InitialiseSTEMWavefunction = Kernel( new clKernel(InitialiseSTEMWavefunctionSource,clState::context,clState::cldev,"clInitialiseSTEMWavefunction",clState::clq));
 	InitialiseSTEMWavefunction->BuildKernelOld();
 
-	BandLimit = std::unique_ptr<clKernel>( new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
+	BandLimit = Kernel( new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
 	BandLimit->BuildKernelOld();
 
-	fftShift = std::unique_ptr<clKernel>( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
+	fftShift = Kernel( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
 	fftShift->BuildKernelOld();
 
 	fftShift->SetArgT(0,clWaveFunction2);
@@ -330,21 +331,21 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	fftShift->SetArgT(2,resolution);
 	fftShift->SetArgT(3,resolution);
 
-	MultiplyCL = std::unique_ptr<clKernel>( new clKernel(multiplySource,clState::context,clState::cldev,"clMultiply",clState::clq));
+	MultiplyCL = Kernel( new clKernel(multiplySource,clState::context,clState::cldev,"clMultiply",clState::clq));
 	MultiplyCL->BuildKernelOld();
 	
-	MaskingKernel = std::unique_ptr<clKernel>( new clKernel(bandPassSource,clState::context,clState::cldev,"clBandPass",clState::clq));
+	MaskingKernel = Kernel( new clKernel(bandPassSource,clState::context,clState::cldev,"clBandPass",clState::clq));
 	MaskingKernel->BuildKernelOld();
 
-	TDSMaskingKernel = std::unique_ptr<clKernel>( new clKernel(floatbandPassSource,clState::context,clState::cldev,"clFloatBandPass",clState::clq));
+	TDSMaskingKernel = Kernel( new clKernel(floatbandPassSource,clState::context,clState::cldev,"clFloatBandPass",clState::clq));
 	TDSMaskingKernel->BuildKernelOld();
 
-	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(0,clWaveFunction3->buffer);
 	BandLimit->SetArgT(1,resolution);
 	BandLimit->SetArgT(2,resolution);
 	BandLimit->SetArgT(3,bandwidthkmax);
-	BandLimit->SetArgT(4,clXFrequencies);
-	BandLimit->SetArgT(5,clYFrequencies);
+	BandLimit->SetArgT(4,clXFrequencies->buffer);
+	BandLimit->SetArgT(5,clYFrequencies->buffer);
 
 	size_t* WorkSize = new size_t[3];
 	
@@ -352,11 +353,11 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	WFabsolute = std::unique_ptr<clKernel>( new clKernel(abssource2,clState::context,clState::cldev,"clAbs",clState::clq));
+	WFabsolute = Kernel( new clKernel(abssource2,clState::context,clState::cldev,"clAbs",clState::clq));
 	WFabsolute->BuildKernelOld();
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
 	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
@@ -390,13 +391,13 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 	
 	// Also need to generate propagator.
-	GeneratePropagator = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
+	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
 	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
 	GeneratePropagator->BuildKernel();
 
 	GeneratePropagator->SetArgT(0,clPropagator);
-	GeneratePropagator->SetArgT(1,clXFrequencies);
-	GeneratePropagator->SetArgT(2,clYFrequencies);
+	GeneratePropagator->SetArgT(1,clXFrequencies->buffer);
+	GeneratePropagator->SetArgT(2,clYFrequencies->buffer);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
 	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
@@ -406,7 +407,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	GeneratePropagator->Enqueue(WorkSize);
 	
 	// And multiplication kernel
-	ComplexMultiply = std::unique_ptr<clKernel>( new clKernel(clState::context,clState::cldev,"clComplexMultiply",clState::clq));
+	ComplexMultiply = Kernel( new clKernel(clState::context,clState::cldev,"clComplexMultiply",clState::clq));
 	ComplexMultiply->loadProgSource("Multiply.cl");
 	ComplexMultiply->BuildKernel();
 
@@ -414,7 +415,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	ComplexMultiply->SetArgT(4,resolution);
 
 	// And the imaging kernel
-	ImagingKernel = std::unique_ptr<clKernel>( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
+	ImagingKernel = Kernel( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
 	ImagingKernel->BuildKernelOld();
 
 	clFinish(clState::clq->cmdQueue);
@@ -428,8 +429,8 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
-								&& clXFrequencies && clYFrequencies && posx && posy 
+	*InitialiseSTEMWavefunction << clWaveFunction2->buffer && resolution && resolution 
+								&& clXFrequencies->buffer && clYFrequencies->buffer && posx && posy 
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
@@ -437,7 +438,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 
 	// IFFT
-	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction1->buffer,CLFFT_BACKWARD);
 
 	// so both cl mem things have the wavefunction (gonna edit one in a sec)
 	/*clEnqueueCopyBuffer(clState::clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
@@ -559,31 +560,31 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
-	FourierTrans->Enqueue(clPotential,clWaveFunction3,CLFFT_FORWARD);
+	FourierTrans->Enqueue(clPotential,clWaveFunction3->buffer,CLFFT_FORWARD);
 	BandLimit->Enqueue(Work);
-	FourierTrans->Enqueue(clWaveFunction3,clPotential,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction3->buffer,clPotential,CLFFT_BACKWARD);
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
 	ComplexMultiply->SetArgT(0,clPotential);
-	ComplexMultiply->SetArgT(1,clWaveFunction1);
-	ComplexMultiply->SetArgT(2,clWaveFunction2);
+	ComplexMultiply->SetArgT(1,clWaveFunction1->buffer);
+	ComplexMultiply->SetArgT(2,clWaveFunction2->buffer);
 	ComplexMultiply->Enqueue(Work);
 
 
 
 	// Propagate
-	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
+	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction3->buffer,CLFFT_FORWARD);
 
 	// BandLimit OK here?
 
-	ComplexMultiply->SetArgT(0,clWaveFunction3);
+	ComplexMultiply->SetArgT(0,clWaveFunction3->buffer);
 	ComplexMultiply->SetArgT(1,clPropagator);
-	ComplexMultiply->SetArgT(2,clWaveFunction2);
+	ComplexMultiply->SetArgT(2,clWaveFunction2->buffer);
 	ComplexMultiply->Enqueue(Work);
 
 		
-	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction1->buffer,CLFFT_BACKWARD);
 
 	clFinish(clState::clq->cmdQueue);
 	
@@ -595,7 +596,7 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -622,7 +623,7 @@ void TEMSimulation::AddTDS()
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -652,7 +653,7 @@ void TEMSimulation::AddTDS()
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	max = CL_FLT_MIN;
 	min = CL_MAXFLOAT;
@@ -687,7 +688,7 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -726,7 +727,7 @@ void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -761,7 +762,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -794,13 +795,13 @@ void TEMSimulation::GetImDiffImage(float* data, int resolution)
 	Work[1]=resolution;
 	Work[2]=1;
 
-	fftShift->SetArgT(0,clWaveFunction4);
+	fftShift->SetArgT(0,clWaveFunction4->buffer);
 	fftShift->Enqueue(Work);
 
 	// reset! probably unecessary
-	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(0,clWaveFunction2->buffer);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -824,7 +825,7 @@ void TEMSimulation::GetImDiffImage(float* data, int resolution)
 void TEMSimulation::SimulateCTEM()
 {
 	// Set arguments for imaging kernel
-	ImagingKernel->SetArgT(0,clWaveFunction2);
+	ImagingKernel->SetArgT(0,clWaveFunction2->buffer);
 	ImagingKernel->SetArgT(1,clImageWaveFunction);
 	ImagingKernel->SetArgT(2,resolution);
 	ImagingKernel->SetArgT(3,resolution);
@@ -836,8 +837,8 @@ void TEMSimulation::SimulateCTEM()
 	ImagingKernel->SetArgT(9,TEMParams->astig2ang);
 	ImagingKernel->SetArgT(10,TEMParams->aperturesizemrad);
 	ImagingKernel->SetArgT(11,wavelength);
-	ImagingKernel->SetArgT(12,clXFrequencies);
-	ImagingKernel->SetArgT(13,clYFrequencies);
+	ImagingKernel->SetArgT(12,clXFrequencies->buffer);
+	ImagingKernel->SetArgT(13,clYFrequencies->buffer);
 	ImagingKernel->SetArgT(14,TEMParams->beta);
 	ImagingKernel->SetArgT(15,TEMParams->delta);
 
@@ -850,10 +851,10 @@ void TEMSimulation::SimulateCTEM()
 	ImagingKernel->Enqueue(Work);
 
 	// Now get and display absolute value
-	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1->buffer,CLFFT_BACKWARD);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction,clWaveFunction4,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction,clWaveFunction4->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 
 };
 

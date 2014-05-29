@@ -47,6 +47,7 @@ public:
 	void MakeSTEMWaveFunction(int posx, int posy);
 
 	void SetDevice(int index);
+	size_t MemoryUsed();
 
 	UnmanagedOpenCL();
 	~UnmanagedOpenCL();

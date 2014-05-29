@@ -113,7 +113,6 @@ void UnmanagedOpenCL::SetDevice(int index)
 			Structure->ClearStructure();
 	}
 
-
 	// Get new device
 	clState::SetDevice(index);
 	GotDevice=true;
@@ -139,7 +138,11 @@ UnmanagedOpenCL::UnmanagedOpenCL()
 	stemparams = new STEMParameters();
 };
 
+size_t UnmanagedOpenCL::MemoryUsed()
+{
+	return clState::GetTotalSize();
+}
+
 UnmanagedOpenCL::~UnmanagedOpenCL() 
 {
-
 };

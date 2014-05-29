@@ -21,6 +21,7 @@ std::vector<int> clState::deviceid;
 std::vector<int> clState::deviceplatform;
 std::vector<std::string> clState::devicenames;
 std::vector<cl_uint> clState::numdevices;
+std::vector<size_t> clState::Allocated;
 
 // Call this once somewhere during plugin load.
 void clState::Setup()
@@ -102,4 +103,25 @@ clQueue* clState::GetQueuePtr()
 cl_int clState::GetStatus()
 {
 	return status;
+}
+
+int clState::RegisterMemory(size_t size)
+{
+	Allocated.push_back(size);
+	return Allocated.size()-1;
+}
+
+void clState::DeRegisterMemory(int index)
+{
+	Allocated[index] = 0;
+}
+
+size_t clState::GetTotalSize()
+{
+	size_t sum = 0;
+	for each(size_t s in Allocated)
+	{
+		sum += s;
+	}
+	return sum;
 }

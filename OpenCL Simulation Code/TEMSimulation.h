@@ -12,30 +12,32 @@ public:
 	MultisliceStructure* AtomicStructure;
 
 	std::unique_ptr<clFourier> FourierTrans;
-	std::unique_ptr<clKernel> BinnedAtomicPotential;
-	std::unique_ptr<clKernel> GeneratePropagator;
-	std::unique_ptr<clKernel> ComplexMultiply;
-	std::unique_ptr<clKernel> BandLimit;
-	std::unique_ptr<clKernel> fftShift;
-	std::unique_ptr<clKernel> ImagingKernel;
-	std::unique_ptr<clKernel> InitialiseSTEMWavefunction;
-	std::unique_ptr<clKernel> WFabsolute;
-	std::unique_ptr<clKernel> MultiplyCL;
-	std::unique_ptr<clKernel> MaskingKernel;
-	std::unique_ptr<clKernel> TDSMaskingKernel;
+
+	Kernel BinnedAtomicPotential;
+	Kernel GeneratePropagator;
+	Kernel ComplexMultiply;
+	Kernel BandLimit;
+	Kernel fftShift;
+	Kernel ImagingKernel;
+	Kernel InitialiseSTEMWavefunction;
+	Kernel WFabsolute;
+	Kernel MultiplyCL;
+	Kernel MaskingKernel;
+	Kernel TDSMaskingKernel;
 
 	//cl_context context;
 	//clQueue* clq;
 	//clDevice* cldev;
 	cl_int status;
 
-	cl_mem clXFrequencies;
-	cl_mem clYFrequencies;
+	Buffer clXFrequencies;
+	Buffer clYFrequencies;
 
-	cl_mem clWaveFunction1;
-	cl_mem clWaveFunction2;
-	cl_mem clWaveFunction3;
-	cl_mem clWaveFunction4;
+	Buffer clWaveFunction1;
+	Buffer clWaveFunction2;
+	Buffer clWaveFunction3;
+	Buffer clWaveFunction4;
+
 	cl_mem clImageWaveFunction;
 	cl_mem clTDSDiff;
 	cl_mem clTDSMaskDiff;

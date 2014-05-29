@@ -4,6 +4,18 @@
 #include <iostream>
 #include <vector>
 
+#include <memory>
+
+class clMemory;
+class clState;
+class clQueue;
+class clKernel;
+
+using namespace std;
+
+typedef unique_ptr<clMemory> Buffer;
+typedef unique_ptr<clKernel> Kernel;
+
 // define dummy type to overload template
 typedef bool dummy_CL;
 const dummy_CL CL_SKIP = false;
@@ -15,6 +27,34 @@ enum clTypes
 	clDouble = 2,
 	clDouble2 = 3
 }; 
+
+class clMemory
+{
+private:
+	cl_context context;
+	clQueue* clq;
+	cl_int status;
+
+public:
+	cl_mem buffer;
+	int MemoryIndex;
+	bool Created;
+	void Create(size_t size);
+	void Create(size_t size, cl_mem_flags flags);
+	clMemory();
+	clMemory(size_t size);
+	clMemory(size_t size, cl_mem_flags flags);
+	~clMemory();
+
+	template<typename T>void Write(std::vector<T> &data){
+			clEnqueueWriteBuffer(clq->cmdQueue,buffer,CL_FALSE,0,data.size()*sizeof(T),&data[0],0,NULL,NULL);
+	};
+	
+	 template<typename T> void Read(std::vector<T> &data){
+			clEnqueueWriteBuffer(clq->cmdQueue,buffer,CL_TRUE,0,data.size()*sizeof(T),&data[0],0,NULL,NULL);
+	};
+
+};
 
 class clDevice
 {
@@ -91,6 +131,8 @@ public:
 	{
 			status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
 	}
+
+	void SetArgT(int position, Buffer &arg);
 
 	void SetArgLocalMemory(int position, int size, clTypes type) 
 	{
