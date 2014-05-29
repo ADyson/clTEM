@@ -1,6 +1,8 @@
 #include "CommonStructs.h"
 #include "MultisliceStructure.h"
 #include "clFourier.h"
+#include "clState.h"
+#include <memory>
 
 class TEMSimulation
 {
@@ -8,23 +10,23 @@ public:
 	TEMParameters* TEMParams;
 	STEMParameters* STEMParams;
 	MultisliceStructure* AtomicStructure;
-	clFourier* FourierTrans;
-	clKernel* BinnedAtomicPotential;
-	clKernel* GeneratePropagator;
-	clKernel* ComplexMultiply;
-	clKernel* BandLimit;
-	clKernel* fftShift;
-	clKernel* ImagingKernel;
 
-	clKernel* InitialiseSTEMWavefunction;
-	clKernel* WFabsolute;
-	clKernel* MultiplyCL;
-	clKernel* MaskingKernel;
-	clKernel* TDSMaskingKernel;
+	std::unique_ptr<clFourier> FourierTrans;
+	std::unique_ptr<clKernel> BinnedAtomicPotential;
+	std::unique_ptr<clKernel> GeneratePropagator;
+	std::unique_ptr<clKernel> ComplexMultiply;
+	std::unique_ptr<clKernel> BandLimit;
+	std::unique_ptr<clKernel> fftShift;
+	std::unique_ptr<clKernel> ImagingKernel;
+	std::unique_ptr<clKernel> InitialiseSTEMWavefunction;
+	std::unique_ptr<clKernel> WFabsolute;
+	std::unique_ptr<clKernel> MultiplyCL;
+	std::unique_ptr<clKernel> MaskingKernel;
+	std::unique_ptr<clKernel> TDSMaskingKernel;
 
-	cl_context context;
-	clQueue* clq;
-	clDevice* cldev;
+	//cl_context context;
+	//clQueue* clq;
+	//clDevice* cldev;
 	cl_int status;
 
 	cl_mem clXFrequencies;
@@ -50,7 +52,8 @@ public:
 	float wavelength;
 	float bandwidthkmax;
 
-	TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams);
+	TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams);
+	~TEMSimulation();
 
 	void Initialise(int resolution, MultisliceStructure* Structure);
 	void InitialiseSTEM(int resolution, MultisliceStructure* Structure);

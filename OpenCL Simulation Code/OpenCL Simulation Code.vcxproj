@@ -81,8 +81,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib32\import;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -142,6 +142,7 @@
     <ClInclude Include="clKernel.h" />
     <ClInclude Include="clKernelCodes.h" />
     <ClInclude Include="clKernelCodes2.h" />
+    <ClInclude Include="clState.h" />
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="ManagedWrapper.h" />
     <ClInclude Include="MultisliceStructure.h" />
@@ -154,6 +155,7 @@
     <None Include="CL\BinnedAtomicPotentialOpt.cl" />
     <None Include="CL\BinnedAtomicPotentialOpt2.cl" />
     <None Include="CL\GeneratePropagator.cl" />
+    <ClCompile Include="clState.cpp" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />
     <ClCompile Include="TEMSimulation.cpp" />

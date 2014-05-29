@@ -41,6 +41,11 @@ namespace ManagedOpenCLWrapper {
 		float GetSTEMPixel(float inner, float outer);
 		void AddTDS();
 		void ClearTDS();
+
+		// For OpenCL Device Selector...
+		void SetDevice(int index);
+
+
 		ManagedOpenCL();
 		~ManagedOpenCL();
 

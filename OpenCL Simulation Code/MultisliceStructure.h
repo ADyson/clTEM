@@ -4,6 +4,7 @@
 #include <vector>
 #include "CL\cl.h"
 #include "clKernel.h"
+#include "clState.h"
 
 #pragma once
 
@@ -21,6 +22,9 @@ class MultisliceStructure
 {
 
 public:
+	std::string filepath;
+	bool GotDevice;
+
 	cl_context context;
 	clQueue* clq;
 	clDevice* cldev;
@@ -37,10 +41,7 @@ public:
 	cl_mem AtomicStructureParameterisation;
 
 	std::vector<int> blockStartPositions;
-
-
-	MultisliceStructure(cl_context &context, clQueue* clq, clDevice* cldev);
-
+	MultisliceStructure();
 	bool sorted;
 
 	// Import atoms from xyz filepath

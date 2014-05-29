@@ -224,4 +224,9 @@ namespace ManagedOpenCLWrapper
 	{
 		_UMOpenCL->TS->ClearTDS();
 	};
+
+	void ManagedOpenCL::SetDevice(int index)
+	{
+		_UMOpenCL->SetDevice(index);
+	};
 }

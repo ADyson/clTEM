@@ -2,11 +2,8 @@
 #include "clKernelCodes.h"
 #include <ctime>
 
-MultisliceStructure::MultisliceStructure(cl_context &context, clQueue* clq, clDevice* cldev)
+MultisliceStructure::MultisliceStructure()
 {
-	this->context = context;
-	this->clq = clq;
-	this->cldev = cldev;
 	sorted = false;
 	srand(time(NULL));
 };
@@ -19,7 +16,8 @@ float MultisliceStructure::TDSRand()
 	float randNormal = 0.075f * rstdnormal; //random normal(mean,stdDev^2)
 
 	return randNormal;
-}
+};
+
 void MultisliceStructure::ImportAtoms(std::string filepath) {
 
 	std::ifstream inputFile(filepath,std::ifstream::in);
@@ -82,189 +80,193 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 
 int MultisliceStructure::SortAtoms(bool TDS)
 {
-	if(sorted)
-		ClearStructure();
-
-	std::vector<int>   AtomZNum(Length);
-	std::vector<float> AtomXPos(Length);
-	std::vector<float> AtomYPos(Length);
-	std::vector<float> AtomZPos(Length);
-
-	for(int i = 0; i < Atoms.size(); i++)
+	if(GotDevice)
 	{
-		AtomZNum[i] = Atoms[i].Z;
-		AtomXPos[i] = Atoms[i].x + TDS*TDSRand();
-		AtomYPos[i] = Atoms[i].y + TDS*TDSRand();
-		AtomZPos[i] = Atoms[i].z + TDS*TDSRand();
-	}
+		if(sorted)
+			ClearStructure();
 
+		std::vector<int>   AtomZNum(Length);
+		std::vector<float> AtomXPos(Length);
+		std::vector<float> AtomYPos(Length);
+		std::vector<float> AtomZPos(Length);
 
-	//Alloc Device Memory
-	clAtomx = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
-	clAtomy = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
-	clAtomz = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
-	clAtomZ = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
-	cl_mem clBlockIDs = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
-	cl_mem clZIDs = clCreateBuffer ( context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
-
-	
-	// Upload to device :)
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomx, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomXPos[ 0 ], 0, NULL, NULL );
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomy, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomYPos[ 0 ], 0, NULL, NULL );
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomz, CL_TRUE, 0, Atoms.size()*sizeof(cl_float), &AtomZPos[ 0 ], 0, NULL, NULL );
-
-
-	// Make Kernel and set parameters
-	clKernel* clAtomSort = new clKernel(AtomSortSource,context,cldev,"clAtomSort",clq);
-	clAtomSort->BuildKernelOld();
-
-	// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
-	// Or fix it so they are all referencing same variable.
-	int NumberOfAtoms = Atoms.size();
-	xBlocks = 90;
-	yBlocks = 90;
-	dz		= 1.0f;
-	nSlices	= ceil((MaximumZ-MinimumZ)/dz);
-	nSlices+=(nSlices==0);
-
-
-	clAtomSort->SetArgT(0,clAtomx);
-	clAtomSort->SetArgT(1,clAtomy);
-	clAtomSort->SetArgT(2,clAtomz);
-	clAtomSort->SetArgT(3,NumberOfAtoms);
-	clAtomSort->SetArgT(4,MinimumX);
-	clAtomSort->SetArgT(5,MaximumX);
-	clAtomSort->SetArgT(6,MinimumY);
-	clAtomSort->SetArgT(7,MaximumY);
-	clAtomSort->SetArgT(8,MinimumZ);
-	clAtomSort->SetArgT(9,MaximumZ);
-	clAtomSort->SetArgT(10,xBlocks);
-	clAtomSort->SetArgT(11,yBlocks);
-	clAtomSort->SetArgT(12,clBlockIDs);
-	clAtomSort->SetArgT(13,clZIDs);
-	clAtomSort->SetArgT(14,dz);
-	clAtomSort->SetArgT(15,nSlices);
-	
-	size_t* SortSize = new size_t[3];
-	SortSize[0] = NumberOfAtoms;
-	SortSize[1] = 1;
-	SortSize[2] = 1;
-
-
-	clAtomSort->Enqueue(SortSize);
-	
-	//Malloc HBlockStuff
-	std::vector<int> HostBlockIDs (Atoms.size());
-	std::vector<int> HostZIDs (Atoms.size());
-
-	clEnqueueReadBuffer(clq->cmdQueue,clBlockIDs,CL_FALSE,0,Atoms.size()*sizeof(float),&HostBlockIDs[0],0,NULL,NULL);
-	clEnqueueReadBuffer(clq->cmdQueue,clZIDs,CL_TRUE,0,Atoms.size()*sizeof(float),&HostZIDs[0],0,NULL,NULL);
-
-	vector < vector < vector < float > > > Binnedx;
-	Binnedx.resize(xBlocks*yBlocks);
-	vector < vector < vector < float > > > Binnedy;
-	Binnedy.resize(xBlocks*yBlocks);
-	vector < vector < vector < float > > > Binnedz;
-	Binnedz.resize(xBlocks*yBlocks);
-	vector < vector < vector < int > > > BinnedZ;
-	BinnedZ.resize(xBlocks*yBlocks);
-
-	
-	for(int i = 0 ; i < xBlocks*yBlocks ; i++){
-		Binnedx[i].resize(nSlices);
-		Binnedy[i].resize(nSlices);
-		Binnedz[i].resize(nSlices);
-		BinnedZ[i].resize(nSlices);
-	}
-	
-	
-	for(int i = 0; i < Atoms.size(); i++)
-	{
-		Binnedx[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomXPos[i]-MinimumX);
-		Binnedy[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomYPos[i]-MinimumY);
-		Binnedz[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZPos[i]-MinimumZ);
-		BinnedZ[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZNum[i]);
-	}
-		
-	int atomIterator(0);
-
-	blockStartPositions.resize(nSlices*xBlocks*yBlocks+1);
-
-
-	// Put all bins into a linear block of memory ordered by z then y then x and record start positions for every block.
-	
-	for(int slicei = 0; slicei < nSlices; slicei++)
-	{
-		for(int j = 0; j < yBlocks; j++)
+		for(int i = 0; i < Atoms.size(); i++)
 		{
-			for(int k = 0; k < xBlocks; k++)
-			{
-				blockStartPositions[slicei*xBlocks*yBlocks+ j*xBlocks + k] = atomIterator;
+			AtomZNum[i] = Atoms[i].Z;
+			AtomXPos[i] = Atoms[i].x + TDS*TDSRand();
+			AtomYPos[i] = Atoms[i].y + TDS*TDSRand();
+			AtomZPos[i] = Atoms[i].z + TDS*TDSRand();
+		}
 
-				if(Binnedx[j*xBlocks+k][slicei].size() > 0)
+
+		//Alloc Device Memory
+		clAtomx = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
+		clAtomy = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
+		clAtomz = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_float ), 0, &status);
+		clAtomZ = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
+		cl_mem clBlockIDs = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
+		cl_mem clZIDs = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
+
+	
+		// Upload to device :)
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomx, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomXPos[ 0 ], 0, NULL, NULL );
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomy, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomYPos[ 0 ], 0, NULL, NULL );
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomz, CL_TRUE, 0, Atoms.size()*sizeof(cl_float), &AtomZPos[ 0 ], 0, NULL, NULL );
+
+
+		// Make Kernel and set parameters
+		clKernel* clAtomSort = new clKernel(AtomSortSource,clState::context,clState::cldev,"clAtomSort",clState::clq);
+		clAtomSort->BuildKernelOld();
+
+		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
+		// Or fix it so they are all referencing same variable.
+		int NumberOfAtoms = Atoms.size();
+		xBlocks = 90;
+		yBlocks = 90;
+		dz		= 1.0f;
+		nSlices	= ceil((MaximumZ-MinimumZ)/dz);
+		nSlices+=(nSlices==0);
+
+
+		clAtomSort->SetArgT(0,clAtomx);
+		clAtomSort->SetArgT(1,clAtomy);
+		clAtomSort->SetArgT(2,clAtomz);
+		clAtomSort->SetArgT(3,NumberOfAtoms);
+		clAtomSort->SetArgT(4,MinimumX);
+		clAtomSort->SetArgT(5,MaximumX);
+		clAtomSort->SetArgT(6,MinimumY);
+		clAtomSort->SetArgT(7,MaximumY);
+		clAtomSort->SetArgT(8,MinimumZ);
+		clAtomSort->SetArgT(9,MaximumZ);
+		clAtomSort->SetArgT(10,xBlocks);
+		clAtomSort->SetArgT(11,yBlocks);
+		clAtomSort->SetArgT(12,clBlockIDs);
+		clAtomSort->SetArgT(13,clZIDs);
+		clAtomSort->SetArgT(14,dz);
+		clAtomSort->SetArgT(15,nSlices);
+	
+		size_t* SortSize = new size_t[3];
+		SortSize[0] = NumberOfAtoms;
+		SortSize[1] = 1;
+		SortSize[2] = 1;
+
+
+		clAtomSort->Enqueue(SortSize);
+	
+		//Malloc HBlockStuff
+		std::vector<int> HostBlockIDs (Atoms.size());
+		std::vector<int> HostZIDs (Atoms.size());
+
+		clEnqueueReadBuffer(clState::clq->cmdQueue,clBlockIDs,CL_FALSE,0,Atoms.size()*sizeof(float),&HostBlockIDs[0],0,NULL,NULL);
+		clEnqueueReadBuffer(clState::clq->cmdQueue,clZIDs,CL_TRUE,0,Atoms.size()*sizeof(float),&HostZIDs[0],0,NULL,NULL);
+
+		vector < vector < vector < float > > > Binnedx;
+		Binnedx.resize(xBlocks*yBlocks);
+		vector < vector < vector < float > > > Binnedy;
+		Binnedy.resize(xBlocks*yBlocks);
+		vector < vector < vector < float > > > Binnedz;
+		Binnedz.resize(xBlocks*yBlocks);
+		vector < vector < vector < int > > > BinnedZ;
+		BinnedZ.resize(xBlocks*yBlocks);
+
+	
+		for(int i = 0 ; i < xBlocks*yBlocks ; i++){
+			Binnedx[i].resize(nSlices);
+			Binnedy[i].resize(nSlices);
+			Binnedz[i].resize(nSlices);
+			BinnedZ[i].resize(nSlices);
+		}
+	
+	
+		for(int i = 0; i < Atoms.size(); i++)
+		{
+			Binnedx[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomXPos[i]-MinimumX);
+			Binnedy[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomYPos[i]-MinimumY);
+			Binnedz[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZPos[i]-MinimumZ);
+			BinnedZ[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZNum[i]);
+		}
+		
+		int atomIterator(0);
+
+		blockStartPositions.resize(nSlices*xBlocks*yBlocks+1);
+
+
+		// Put all bins into a linear block of memory ordered by z then y then x and record start positions for every block.
+	
+		for(int slicei = 0; slicei < nSlices; slicei++)
+		{
+			for(int j = 0; j < yBlocks; j++)
+			{
+				for(int k = 0; k < xBlocks; k++)
 				{
-					for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
+					blockStartPositions[slicei*xBlocks*yBlocks+ j*xBlocks + k] = atomIterator;
+
+					if(Binnedx[j*xBlocks+k][slicei].size() > 0)
 					{
-						// cout <<"Block " << j <<" , " << k << endl;
-						AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
-						AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
-						AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
-						AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
-						atomIterator++;
+						for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
+						{
+							// cout <<"Block " << j <<" , " << k << endl;
+							AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
+							AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
+							AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
+							AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
+							atomIterator++;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	// Trying to store rows of yBlocks consecutively for faster coalesced loading in GPU
-	// Atoms still consecutive in terms of xBlock (not sure this is possible)
-	//for(int slicei = 0; slicei < nSlices; slicei++)
-	//{
-	//	for(int j = 0; j < yBlocks; j++)
-	//	{
-	//		for(int k = 0; k < xBlocks; k++)
-	//		{
-	//			blockStartPositions[slicei*xBlocks*yBlocks+ k*yBlocks + j] = atomIterator;
+		// Trying to store rows of yBlocks consecutively for faster coalesced loading in GPU
+		// Atoms still consecutive in terms of xBlock (not sure this is possible)
+		//for(int slicei = 0; slicei < nSlices; slicei++)
+		//{
+		//	for(int j = 0; j < yBlocks; j++)
+		//	{
+		//		for(int k = 0; k < xBlocks; k++)
+		//		{
+		//			blockStartPositions[slicei*xBlocks*yBlocks+ k*yBlocks + j] = atomIterator;
 
-	//			if(Binnedx[j*xBlocks+k][slicei].size() > 0)
-	//			{
-	//				for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
-	//				{
-	//					// cout <<"Block " << j <<" , " << k << endl;
-	//					AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
-	//					AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
-	//					AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
-	//					AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
-	//					atomIterator++;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+		//			if(Binnedx[j*xBlocks+k][slicei].size() > 0)
+		//			{
+		//				for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
+		//				{
+		//					// cout <<"Block " << j <<" , " << k << endl;
+		//					AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
+		//					AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
+		//					AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
+		//					AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
+		//					atomIterator++;
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 
 
-	// Last element indicates end of last block as total number of atoms.
-	blockStartPositions[nSlices*xBlocks*yBlocks] = Atoms.size();
+		// Last element indicates end of last block as total number of atoms.
+		blockStartPositions[nSlices*xBlocks*yBlocks] = Atoms.size();
 
-	// Now upload the sorted atoms onto the device..
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomx, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomXPos[ 0 ], 0, NULL, NULL );
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomy, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomYPos[ 0 ], 0, NULL, NULL );
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomz, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomZPos[ 0 ], 0, NULL, NULL );
-	clEnqueueWriteBuffer( clq->cmdQueue, clAtomZ, CL_FALSE, 0, Atoms.size()*sizeof(cl_int), &AtomZNum[ 0 ], 0, NULL, NULL );
+		// Now upload the sorted atoms onto the device..
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomx, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomXPos[ 0 ], 0, NULL, NULL );
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomy, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomYPos[ 0 ], 0, NULL, NULL );
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomz, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomZPos[ 0 ], 0, NULL, NULL );
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomZ, CL_FALSE, 0, Atoms.size()*sizeof(cl_int), &AtomZNum[ 0 ], 0, NULL, NULL );
 
-	clBlockStartPositions = clCreateBuffer ( context, CL_MEM_READ_WRITE, (nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
-	clEnqueueWriteBuffer( clq->cmdQueue, clBlockStartPositions, CL_TRUE, 0,(nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ 0 ], 0, NULL, NULL );
+		clBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, (nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
+		clEnqueueWriteBuffer( clState::clq->cmdQueue, clBlockStartPositions, CL_TRUE, 0,(nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ 0 ], 0, NULL, NULL );
 	
-	// 7 is 2 * loadzslices + 1
-	clConstantBlockStartPositions = clCreateBuffer ( context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
+		// 7 is 2 * loadzslices + 1
+		clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 
-	// TODO some cleanup probably
-	clAtomSort->~clKernel();
+		// TODO some cleanup probably
+		clAtomSort->~clKernel();
 
-	clReleaseMemObject(clBlockIDs);
-	clReleaseMemObject(clZIDs);
+		clReleaseMemObject(clBlockIDs);
+		clReleaseMemObject(clZIDs);
 
+		sorted = true;
+	}
 	return 1;
 };
 
@@ -338,6 +340,7 @@ void MultisliceStructure::ClearStructure() {
 	clReleaseMemObject(clAtomz);
 	clReleaseMemObject(clAtomZ);
 	clReleaseMemObject(clBlockStartPositions);
+	sorted=false;
 };
 
 void MultisliceStructure::UploadConstantBlock(int topz, int bottomz)

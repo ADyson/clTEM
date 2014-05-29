@@ -45,6 +45,9 @@
     <ClInclude Include="clKernelCodes2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="clState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManagedWrapper.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="clFourier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

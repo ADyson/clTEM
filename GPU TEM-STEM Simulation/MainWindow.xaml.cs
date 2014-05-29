@@ -38,6 +38,8 @@ namespace GPUTEMSTEMSimulation
         bool TDS;
         int Resolution;
 
+        List<String> devices;
+
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
@@ -167,6 +169,16 @@ namespace GPUTEMSTEMSimulation
 
             //DataContext = this;
 
+            // Must be set twice
+            DeviceSelector.SelectedIndex = -1;
+            DeviceSelector.SelectedIndex = -1;
+
+            // Add fake device names for now
+            devices = new List<String>();
+            devices.Add("CPU");
+            devices.Add("GPU");
+            DeviceSelector.ItemsSource = devices;
+
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
@@ -287,6 +299,11 @@ namespace GPUTEMSTEMSimulation
             if (IsResolutionSet == false)
             {
                 var result = MessageBox.Show("Resolution Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (DeviceSelector.SelectedIndex == -1)
+            {
+                var result = MessageBox.Show("OpenCL Device Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -1166,6 +1183,12 @@ namespace GPUTEMSTEMSimulation
                 Detectors.Remove(i);
             }
             DetectorNumLabel.Content = Detectors.Count;
+        }
+
+        private void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var CB = sender as ComboBox;
+            mCL.SetDevice(CB.SelectedIndex);
         }
     }
 }

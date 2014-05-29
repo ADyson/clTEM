@@ -6,8 +6,12 @@
 #include <sstream>
 #include "TEMSimulation.h"
 #include "CommonStructs.h"
+#include "clState.h"
+#include <memory>
+
 
 #pragma unmanaged
+
 
 struct AtomParameterisation
 {
@@ -20,8 +24,12 @@ class UnmanagedOpenCL
 public:
 	// Structure Stuff
 	bool GotStruct;
+
+	bool GotDevice;
+
+
 	MultisliceStructure* Structure;
-	TEMSimulation* TS;
+	std::unique_ptr<TEMSimulation> TS;
 
 	TEMParameters* temparams;
 	STEMParameters* stemparams;
@@ -38,16 +46,7 @@ public:
 	void MultisliceStep(int stepno, int steps);
 	void MakeSTEMWaveFunction(int posx, int posy);
 
-	// OpenCl Context Stuff
-	bool OpenCLAvailable;
-	cl_command_queue cmdQueue;
-	cl_context context;
-	// Use this to check status after every API call
-	cl_int status;
-	cl_uint numDevices;
-	cl_device_id* devices;
-	clDevice* cldev;
-	clQueue* clq;
+	void SetDevice(int index);
 
 	UnmanagedOpenCL();
 	~UnmanagedOpenCL();
