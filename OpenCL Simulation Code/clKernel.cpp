@@ -197,6 +197,11 @@ void clKernel::SetArgT(int position, Buffer &arg)
 	status |= clSetKernelArg(kernel,position,sizeof(cl_mem),&arg->buffer);
 }
 
+void clKernel::SetArgT(int position, clMemory &arg)
+{
+	status |= clSetKernelArg(kernel,position,sizeof(cl_mem),&arg.buffer);
+}
+
 clDevice::clDevice(cl_uint numDevices, cl_device_id* devices)
 {
 	this->numDevices = numDevices;

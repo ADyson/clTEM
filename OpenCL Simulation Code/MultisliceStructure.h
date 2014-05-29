@@ -30,15 +30,17 @@ public:
 	clDevice* cldev;
 	cl_int status;
 
-	cl_mem clAtomx;
-	cl_mem clAtomy;
-	cl_mem clAtomz;
-	cl_mem clAtomZ;
-	cl_mem clBlockStartPositions;
-	cl_mem clConstantBlockStartPositions;
-	
+	Buffer clAtomx;
+	Buffer clAtomy;
+	Buffer clAtomz;
+	Buffer clAtomZ;
+	Buffer clBlockStartPositions;
+	Buffer clConstantBlockStartPositions;
+	Buffer clBlockIDs;
+	Buffer clZIDs;
+		
 	// OpenCL Memory
-	cl_mem AtomicStructureParameterisation;
+	Buffer AtomicStructureParameterisation;
 
 	std::vector<int> blockStartPositions;
 	MultisliceStructure();

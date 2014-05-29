@@ -51,7 +51,7 @@ public:
 	};
 	
 	 template<typename T> void Read(std::vector<T> &data){
-			clEnqueueWriteBuffer(clq->cmdQueue,buffer,CL_TRUE,0,data.size()*sizeof(T),&data[0],0,NULL,NULL);
+			clEnqueueReadBuffer(clq->cmdQueue,buffer,CL_TRUE,0,data.size()*sizeof(T),&data[0],0,NULL,NULL);
 	};
 
 };
@@ -94,21 +94,15 @@ public:
 	cl_int status;
 	cl_context* context;
 	cl_kernel kernel;
-	//cl_uint numDevices;
-	//cl_device_id* devices;
 	std::string kernelname;
-	//cl_command_queue cmdQueue;
 	size_t log;
 	clDevice* cldev;
 	clQueue* clq;
 
 	size_t kernelsize;
 
-	// for chaining setArgT
 	int iter;
 	
-
-	//clKernel(const char* codestring, cl_context &context, cl_uint &numdevices, cl_device_id* &devices, std::string kernelname,cl_command_queue &commandQueue);
 	clKernel(const char* codestring, cl_context &context, clDevice* cldev, std::string kernelname,clQueue* Queue);
 	clKernel(cl_context &context, clDevice* cldev, std::string kernelname,clQueue* Queue);
 
@@ -133,6 +127,7 @@ public:
 	}
 
 	void SetArgT(int position, Buffer &arg);
+	void SetArgT(int position, clMemory &arg);
 
 	void SetArgLocalMemory(int position, int size, clTypes type) 
 	{

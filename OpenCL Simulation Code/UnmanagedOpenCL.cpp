@@ -42,8 +42,10 @@ int UnmanagedOpenCL::UploadParameterisation()
 
 		inparams.close();
 
-		Structure->AtomicStructureParameterisation = clCreateBuffer(clState::context,CL_MEM_READ_ONLY,12*103*sizeof(float),0,&clState::status);
-		clEnqueueWriteBuffer(clState::clq->cmdQueue,Structure->AtomicStructureParameterisation,CL_TRUE,0,12*103*sizeof(float),&fparams[0],0,NULL,NULL);
+		Structure->AtomicStructureParameterisation = Buffer( new clMemory(12*103*sizeof(float),CL_MEM_READ_ONLY));
+		//clCreateBuffer(clState::context,CL_MEM_READ_ONLY,12*103*sizeof(float),0,&clState::status);
+		Structure->AtomicStructureParameterisation->Write(fparams);
+		//clEnqueueWriteBuffer(clState::clq->cmdQueue,Structure->AtomicStructureParameterisation,CL_TRUE,0,12*103*sizeof(float),&fparams[0],0,NULL,NULL);
 		fparams.clear();
 	}
 	return 0;
