@@ -1,5 +1,6 @@
 #include "TEMSimulation.h"
 #include "clKernelCodes2.h"
+#include <minmax.h>
 
 
 TEMSimulation::TEMSimulation(cl_context &context, clQueue* clq, clDevice* cldev, TEMParameters* temparams, STEMParameters* stemparams)
@@ -221,7 +222,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
 	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
-	pixelscale =max(RealSizeX,RealSizeY)/resolution;
+	pixelscale = max(RealSizeX,RealSizeY)/resolution;
 
 	// Work out size of each binned block of atoms
 	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
@@ -427,12 +428,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
-								&& clXFrequencies && clYFrequencies && posx && posy 
-								&& STEMParams->aperturesizemrad && pixelscale 
-								&& STEMParams->defocus && STEMParams->spherical 
-								&& wavelength;
-	//(*InitialiseSTEMWavefunction)(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams-&& STEMParams->defocus, STEMParams->spherical, wavelength);
+	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
 
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 

@@ -66,6 +66,7 @@ public:
 
 	// for chaining setArgT
 	int iter;
+	int viter;
 	
 
 	//clKernel(const char* codestring, cl_context &context, cl_uint &numdevices, cl_device_id* &devices, std::string kernelname,cl_command_queue &commandQueue);
@@ -87,20 +88,26 @@ public:
 
 	// Function definition has to be in header for templates...
 	// Sets arguments for clKernel
-
-
 	template <class T>
-	void SetArgT(int position, T &arg) 
+	void SetArgT(int position, const T &arg) 
 	{
-			status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
+		status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
+	}
+	
+	inline void _SetArgS(int i){}
+
+	template<typename T, typename... Args> //variadic template
+	inline void _SetArgS(int i, const T& first, const Args& ...args)
+	{
+		SetArgT(i, first);
+		_SetArgS(i+1, args...);
 	}
 
-	//template<typename... Args> //variadic template
-	//void SetArgT(Args&... an)
-	//{
-	//	//sizeof...(Args)
-	//	SetArgT(0,an...);
-	//}
+	template<typename... Args> //variadic template
+	inline void SetArgS(const Args& ...args)
+	{
+		_SetArgS(0, args...);
+	}
 
 	void SetArgLocalMemory(int position, int size, clTypes type) 
 	{
@@ -124,6 +131,8 @@ public:
 	// Operater method chaining for slightly cleaner openCL argument setting.
 	// MUST USE << FIRST to set iterator to 0, then use &&
 	// Currently needs support for 'skipping' values when they do no need to be changed
+
+	//mostly useful for non c++11 compilers (use SetArgS above if poss)
 
 	template<typename T>
 	clKernel& operator<<(T value)
