@@ -87,10 +87,20 @@ public:
 
 	// Function definition has to be in header for templates...
 	// Sets arguments for clKernel
-	template <class T> void SetArgT(int position, T &arg) 
+
+
+	template <class T>
+	void SetArgT(int position, T &arg) 
 	{
 			status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
 	}
+
+	//template<typename... Args> //variadic template
+	//void SetArgT(Args&... an)
+	//{
+	//	//sizeof...(Args)
+	//	SetArgT(0,an...);
+	//}
 
 	void SetArgLocalMemory(int position, int size, clTypes type) 
 	{
@@ -116,7 +126,8 @@ public:
 	// Currently needs support for 'skipping' values when they do no need to be changed
 
 	template<typename T>
-	clKernel& operator<<(T value){
+	clKernel& operator<<(T value)
+	{
 		iter = 0;
 		SetArgT(iter,value);
 		iter++;
@@ -124,13 +135,15 @@ public:
 	}
 
 	// http://msdn.microsoft.com/en-us/library/kwyxac18.aspx
-	clKernel& operator&&(dummy_CL na){
+	clKernel& operator&&(dummy_CL na)
+	{
 		iter++;
 		return *this;
 	}
 
 	template<typename T>
-	clKernel& operator&&(T value){
+	clKernel& operator&&(T value)
+	{
 		SetArgT(iter,value);
 		iter++;
 		return *this;

@@ -432,6 +432,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
+	//(*InitialiseSTEMWavefunction)(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams-&& STEMParams->defocus, STEMParams->spherical, wavelength);
 
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 
