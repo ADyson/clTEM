@@ -104,15 +104,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomy = Buffer(new clMemory(Atoms.size()*sizeof(float)));
 		clAtomz = Buffer(new clMemory(Atoms.size()*sizeof(float)));
 		clAtomZ = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
-
-		//cl_mem clBlockIDs = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
-		//cl_mem clZIDs = clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, Atoms.size() * sizeof( cl_int ), 0, &status);
 		
-		//clMemory clBlockIDs;
-		//clBlockIDs.Create(Atoms.size()*sizeof(int));
-		//clMemory clZIDs;
-		//clZIDs.Create(Atoms.size()*sizeof(int));
-
 		clBlockIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
 		clZIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
 
@@ -128,8 +120,8 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 		// Or fix it so they are all referencing same variable.
 		int NumberOfAtoms = Atoms.size();
-		xBlocks = 90;
-		yBlocks = 90;
+		xBlocks = 80;
+		yBlocks = 80;
 		dz		= 1.0f;
 		nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 		nSlices+=(nSlices==0);
@@ -166,9 +158,6 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clBlockIDs->Read(HostBlockIDs);
 		clZIDs->Read(HostZIDs);
 
-		//clEnqueueReadBuffer(clState::clq->cmdQueue,clBlockIDs,CL_FALSE,0,Atoms.size()*sizeof(int),&HostBlockIDs[0],0,NULL,NULL);
-		//clEnqueueReadBuffer(clState::clq->cmdQueue,clZIDs,CL_TRUE,0,Atoms.size()*sizeof(int),&HostZIDs[0],0,NULL,NULL);
-
 		vector < vector < vector < float > > > Binnedx;
 		Binnedx.resize(xBlocks*yBlocks);
 		vector < vector < vector < float > > > Binnedy;
@@ -199,7 +188,6 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 		std::vector<int> blockStartPositions;
 		blockStartPositions.resize(nSlices*xBlocks*yBlocks+1);
-
 
 		// Put all bins into a linear block of memory ordered by z then y then x and record start positions for every block.
 	
@@ -258,30 +246,17 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		blockStartPositions[nSlices*xBlocks*yBlocks] = Atoms.size();
 
 		// Now upload the sorted atoms onto the device..
-		//clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomx, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomXPos[ 0 ], 0, NULL, NULL );
-		//clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomy, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomYPos[ 0 ], 0, NULL, NULL );
-		//clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomz, CL_FALSE, 0, Atoms.size()*sizeof(cl_float), &AtomZPos[ 0 ], 0, NULL, NULL );
-		//clEnqueueWriteBuffer( clState::clq->cmdQueue, clAtomZ, CL_FALSE, 0, Atoms.size()*sizeof(cl_int), &AtomZNum[ 0 ], 0, NULL, NULL );
-
 		clAtomx->Write(AtomXPos);
 		clAtomy->Write(AtomYPos);
 		clAtomz->Write(AtomZPos);
 		clAtomZ->Write(AtomZNum);
 
 		clBlockStartPositions = Buffer( new clMemory((nSlices*xBlocks*yBlocks+1) * sizeof( cl_int )));
-		//clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, (nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 
 		clBlockStartPositions->Write(blockStartPositions);
-		//clEnqueueWriteBuffer( clState::clq->cmdQueue, clBlockStartPositions, CL_TRUE, 0,(nSlices*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ 0 ], 0, NULL, NULL );
 	
 		// 7 is 2 * loadzslices + 1
 		//clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
-
-		// TODO some cleanup probably
-		//clAtomSort->~clKernel();
-
-		//clReleaseMemObject(clBlockIDs);
-		//clReleaseMemObject(clZIDs);
 
 		clFinish(clState::clq->cmdQueue);
 		sorted = true;
@@ -354,6 +329,7 @@ int MultisliceStructure::GetZNum(std::string atomSymbol) {
 void MultisliceStructure::ClearStructure() {
 
 	// Clear all memory that was used to store and sort the atoms
+	// This would not be necessary if we just created a new structure object for each file.
 	clAtomx.release();
 	clAtomy.release();
 	clAtomz.release();
@@ -361,11 +337,6 @@ void MultisliceStructure::ClearStructure() {
 	clBlockStartPositions.release();
 	clBlockIDs.release();
 	clZIDs.release();
-	//clReleaseMemObject(clAtomx);
-	//clReleaseMemObject(clAtomy);
-	//clReleaseMemObject(clAtomz);
-	//clReleaseMemObject(clAtomZ);
-	//clReleaseMemObject(clBlockStartPositions);
 
 	sorted=false;
 };

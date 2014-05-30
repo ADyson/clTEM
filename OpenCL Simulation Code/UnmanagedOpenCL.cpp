@@ -22,7 +22,6 @@ int UnmanagedOpenCL::UploadParameterisation()
 		char inputparamsFilename[] = "fparams.dat";
 
 		// Read in fparams data for calculating projected atomic potential.
-
 		std::ifstream inparams;
 		inparams.open(inputparamsFilename , std::ios::in);
 	
@@ -34,7 +33,6 @@ int UnmanagedOpenCL::UploadParameterisation()
 			throw "Can't find atomic parameterisation file";
 		}
 	
-	
 		while ((inparams >> buffer.a >> buffer.b >> buffer.c >> buffer.d >> buffer.e >> buffer.f >> buffer.g >> buffer.h >> buffer.i >> buffer.j >> buffer.k >> buffer.l))
 		{
 			fparams.push_back (buffer);
@@ -43,9 +41,7 @@ int UnmanagedOpenCL::UploadParameterisation()
 		inparams.close();
 
 		Structure->AtomicStructureParameterisation = Buffer( new clMemory(12*103*sizeof(float),CL_MEM_READ_ONLY));
-		//clCreateBuffer(clState::context,CL_MEM_READ_ONLY,12*103*sizeof(float),0,&clState::status);
 		Structure->AtomicStructureParameterisation->Write(fparams);
-		//clEnqueueWriteBuffer(clState::clq->cmdQueue,Structure->AtomicStructureParameterisation,CL_TRUE,0,12*103*sizeof(float),&fparams[0],0,NULL,NULL);
 		fparams.clear();
 	}
 	return 0;
@@ -54,15 +50,14 @@ int UnmanagedOpenCL::UploadParameterisation()
 void UnmanagedOpenCL::InitialiseSimulation(int resolution)
 {
 	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
-	TS = std::unique_ptr<TEMSimulation>(new TEMSimulation(temparams,stemparams));
+	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
 	TS->Initialise(resolution,Structure);
 };
 
 // Calls different initialiser to make a probe wavefunction instead of plane wave
 void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution)
 {
-	//TS = new TEMSimulation(clState::context,clState::clq,clState::cldev,temparams,stemparams);
-	TS = std::unique_ptr<TEMSimulation>(new TEMSimulation(temparams,stemparams));;
+	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));;
 	TS->InitialiseSTEM(resolution, Structure);
 };
 

@@ -12,6 +12,7 @@
 
 #pragma unmanaged
 
+typedef std::unique_ptr<TEMSimulation> SimulationPtr;
 
 struct AtomParameterisation
 {
@@ -29,7 +30,7 @@ public:
 
 
 	MultisliceStructure* Structure;
-	std::unique_ptr<TEMSimulation> TS;
+	SimulationPtr TS;
 
 	TEMParameters* temparams;
 	STEMParameters* stemparams;

@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120_CTP_Nov2012</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -137,11 +137,14 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="clDevice.h" />
     <ClInclude Include="clFourier.h" />
     <ClInclude Include="clix.h" />
     <ClInclude Include="clKernel.h" />
     <ClInclude Include="clKernelCodes.h" />
     <ClInclude Include="clKernelCodes2.h" />
+    <ClInclude Include="clMemory.h" />
+    <ClInclude Include="clQueue.h" />
     <ClInclude Include="clState.h" />
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="ManagedWrapper.h" />
@@ -150,11 +153,14 @@
     <ClInclude Include="UnmanagedOpenCL.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="clDevice.cpp" />
     <ClCompile Include="clFourier.cpp" />
     <ClCompile Include="clKernel.cpp" />
     <None Include="CL\BinnedAtomicPotentialOpt.cl" />
     <None Include="CL\BinnedAtomicPotentialOpt2.cl" />
     <None Include="CL\GeneratePropagator.cl" />
+    <ClCompile Include="clMemory.cpp" />
+    <ClCompile Include="clQueue.cpp" />
     <ClCompile Include="clState.cpp" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />

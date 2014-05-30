@@ -4,6 +4,7 @@
 #include <vector>
 #include "CL\cl.h"
 #include "clKernel.h"
+#include "clMemory.h"
 #include "clState.h"
 
 #pragma once
@@ -55,7 +56,6 @@ public:
 
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);
-
 
 	std::vector<Atom> Atoms;
 

@@ -96,7 +96,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clYFrequencies->Write(k0y);
 	
 	// Setup Fourier Transforms
-	FourierTrans = std::unique_ptr<clFourier>(new clFourier(clState::context, clState::clq));
+	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
 	FourierTrans->Setup(resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
@@ -107,10 +107,10 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	clTDSx.resize(resolution*resolution);
 	clTDSk.resize(resolution*resolution);
-	clImageWaveFunction = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	
-	clPropagator = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clPotential = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+
+	clImageWaveFunction = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPropagator = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPotential = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
 
 	// Set initial wavefunction to 1+0i
 	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
@@ -122,23 +122,23 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	fftShift = Kernel( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
 	fftShift->BuildKernelOld();
 
-	fftShift->SetArgT(0,clWaveFunction2->buffer);
-	fftShift->SetArgT(1,clWaveFunction3->buffer);
+	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(1,clWaveFunction3);
 	fftShift->SetArgT(2,resolution);
 	fftShift->SetArgT(3,resolution);
 
 	float InitialValue = 1.0f;
-	InitialiseWavefunction->SetArgT(0,clWaveFunction1->buffer);
+	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
 	InitialiseWavefunction->SetArgT(1,resolution);
 	InitialiseWavefunction->SetArgT(2,resolution);
 	InitialiseWavefunction->SetArgT(3,InitialValue);
 
-	BandLimit->SetArgT(0,clWaveFunction3->buffer);
+	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);
 	BandLimit->SetArgT(2,resolution);
 	BandLimit->SetArgT(3,bandwidthkmax);
-	BandLimit->SetArgT(4,clXFrequencies->buffer);
-	BandLimit->SetArgT(5,clYFrequencies->buffer);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
 
@@ -188,8 +188,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	GeneratePropagator->BuildKernel();
 
 	GeneratePropagator->SetArgT(0,clPropagator);
-	GeneratePropagator->SetArgT(1,clXFrequencies->buffer);
-	GeneratePropagator->SetArgT(2,clYFrequencies->buffer);
+	GeneratePropagator->SetArgT(1,clXFrequencies);
+	GeneratePropagator->SetArgT(2,clYFrequencies);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
 	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
@@ -297,7 +297,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clEnqueueWriteBuffer(clState::clq->cmdQueue,clYFrequencies->buffer,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
 	
 	// Setup Fourier Transforms
-	FourierTrans = std::unique_ptr<clFourier> (new clFourier(clState::context, clState::clq));
+	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
 	FourierTrans->Setup(resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
@@ -308,13 +308,14 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	clTDSx.resize(resolution*resolution);
 	clTDSk.resize(resolution*resolution);
-	clImageWaveFunction = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+
+	clImageWaveFunction = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
 	
-	clTDSDiff = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float ), 0, &status);
-	clTDSMaskDiff = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float ), 0, &status);
+	clTDSDiff = Buffer( new clMemory(resolution*resolution*sizeof(cl_float)));
+	clTDSMaskDiff = Buffer( new clMemory(resolution*resolution*sizeof(cl_float)));
 	
-	clPropagator = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
-	clPotential = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, resolution * resolution * sizeof( cl_float2 ), 0, &status);
+	clPropagator = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPotential = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
 
 	// Set initial wavefunction to 1+0i
 	InitialiseSTEMWavefunction = Kernel( new clKernel(InitialiseSTEMWavefunctionSource,clState::context,clState::cldev,"clInitialiseSTEMWavefunction",clState::clq));
@@ -340,12 +341,12 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	TDSMaskingKernel = Kernel( new clKernel(floatbandPassSource,clState::context,clState::cldev,"clFloatBandPass",clState::clq));
 	TDSMaskingKernel->BuildKernelOld();
 
-	BandLimit->SetArgT(0,clWaveFunction3->buffer);
+	BandLimit->SetArgT(0,clWaveFunction3);
 	BandLimit->SetArgT(1,resolution);
 	BandLimit->SetArgT(2,resolution);
 	BandLimit->SetArgT(3,bandwidthkmax);
-	BandLimit->SetArgT(4,clXFrequencies->buffer);
-	BandLimit->SetArgT(5,clYFrequencies->buffer);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
 
 	size_t* WorkSize = new size_t[3];
 	
@@ -396,8 +397,8 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	GeneratePropagator->BuildKernel();
 
 	GeneratePropagator->SetArgT(0,clPropagator);
-	GeneratePropagator->SetArgT(1,clXFrequencies->buffer);
-	GeneratePropagator->SetArgT(2,clYFrequencies->buffer);
+	GeneratePropagator->SetArgT(1,clXFrequencies);
+	GeneratePropagator->SetArgT(2,clYFrequencies);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
 	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
@@ -429,8 +430,8 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	*InitialiseSTEMWavefunction << clWaveFunction2->buffer && resolution && resolution 
-								&& clXFrequencies->buffer && clYFrequencies->buffer && posx && posy 
+	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
+								&& clXFrequencies && clYFrequencies && posx && posy 
 								&& STEMParams->aperturesizemrad && pixelscale 
 								&& STEMParams->defocus && STEMParams->spherical 
 								&& wavelength;
@@ -438,7 +439,7 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 
 	// IFFT
-	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction1->buffer,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
 	// so both cl mem things have the wavefunction (gonna edit one in a sec)
 	/*clEnqueueCopyBuffer(clState::clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
@@ -497,9 +498,8 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 
 	MaskingKernel->Enqueue(WorkSize);*/
 
-
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clTDSDiff,CL_FALSE,0,resolution*resolution*sizeof(cl_float),&clTDSk[0],0,0,0);
-
+	clTDSDiff->Write(clTDSk);
+	
 	*TDSMaskingKernel << clTDSMaskDiff && clTDSDiff && resolution && resolution && innerPx && outerPx;
 
 	TDSMaskingKernel->Enqueue(WorkSize);
@@ -517,7 +517,7 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	localSizeSum[1] = 1;
 	localSizeSum[2] = 1;
 
-	return FloatSumReduction(clTDSMaskDiff, globalSizeSum, localSizeSum, nGroups, totalSize);
+	return FloatSumReduction(clTDSMaskDiff->buffer, globalSizeSum, localSizeSum, nGroups, totalSize);
 }
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
@@ -560,31 +560,31 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	BinnedAtomicPotential->Enqueue3D(Work,LocalWork);
 
-	FourierTrans->Enqueue(clPotential,clWaveFunction3->buffer,CLFFT_FORWARD);
+	FourierTrans->Enqueue(clPotential,clWaveFunction3,CLFFT_FORWARD);
 	BandLimit->Enqueue(Work);
-	FourierTrans->Enqueue(clWaveFunction3->buffer,clPotential,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction3,clPotential,CLFFT_BACKWARD);
 	// Now for the rest of the multislice steps
 
 	//Multiply with wavefunction
 	ComplexMultiply->SetArgT(0,clPotential);
-	ComplexMultiply->SetArgT(1,clWaveFunction1->buffer);
-	ComplexMultiply->SetArgT(2,clWaveFunction2->buffer);
+	ComplexMultiply->SetArgT(1,clWaveFunction1);
+	ComplexMultiply->SetArgT(2,clWaveFunction2);
 	ComplexMultiply->Enqueue(Work);
 
 
 
 	// Propagate
-	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction3->buffer,CLFFT_FORWARD);
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
 
 	// BandLimit OK here?
 
-	ComplexMultiply->SetArgT(0,clWaveFunction3->buffer);
+	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
-	ComplexMultiply->SetArgT(2,clWaveFunction2->buffer);
+	ComplexMultiply->SetArgT(2,clWaveFunction2);
 	ComplexMultiply->Enqueue(Work);
 
 		
-	FourierTrans->Enqueue(clWaveFunction2->buffer,clWaveFunction1->buffer,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
 	clFinish(clState::clq->cmdQueue);
 	
@@ -596,7 +596,7 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction1->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -623,7 +623,7 @@ void TEMSimulation::AddTDS()
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction1->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -653,7 +653,7 @@ void TEMSimulation::AddTDS()
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction3->Read(compdata);
 
 	max = CL_FLT_MIN;
 	min = CL_MAXFLOAT;
@@ -688,7 +688,7 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 	std::vector<cl_float2> compdata;
 	compdata.resize(resolution*resolution);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction1->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction1->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -727,7 +727,7 @@ void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction3->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -762,7 +762,7 @@ void TEMSimulation::GetDiffImage(float* data, int resolution)
 
 	fftShift->Enqueue(Work);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction3->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -795,13 +795,13 @@ void TEMSimulation::GetImDiffImage(float* data, int resolution)
 	Work[1]=resolution;
 	Work[2]=1;
 
-	fftShift->SetArgT(0,clWaveFunction4->buffer);
+	fftShift->SetArgT(0,clWaveFunction4);
 	fftShift->Enqueue(Work);
 
 	// reset! probably unecessary
-	fftShift->SetArgT(0,clWaveFunction2->buffer);
+	fftShift->SetArgT(0,clWaveFunction2);
 
-	clEnqueueReadBuffer(clState::clq->cmdQueue,clWaveFunction3->buffer,CL_TRUE,0,resolution*resolution*sizeof(cl_float2),&compdata[0],0,NULL,NULL);
+	clWaveFunction3->Read(compdata);
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -825,7 +825,7 @@ void TEMSimulation::GetImDiffImage(float* data, int resolution)
 void TEMSimulation::SimulateCTEM()
 {
 	// Set arguments for imaging kernel
-	ImagingKernel->SetArgT(0,clWaveFunction2->buffer);
+	ImagingKernel->SetArgT(0,clWaveFunction2);
 	ImagingKernel->SetArgT(1,clImageWaveFunction);
 	ImagingKernel->SetArgT(2,resolution);
 	ImagingKernel->SetArgT(3,resolution);
@@ -837,8 +837,8 @@ void TEMSimulation::SimulateCTEM()
 	ImagingKernel->SetArgT(9,TEMParams->astig2ang);
 	ImagingKernel->SetArgT(10,TEMParams->aperturesizemrad);
 	ImagingKernel->SetArgT(11,wavelength);
-	ImagingKernel->SetArgT(12,clXFrequencies->buffer);
-	ImagingKernel->SetArgT(13,clYFrequencies->buffer);
+	ImagingKernel->SetArgT(12,clXFrequencies);
+	ImagingKernel->SetArgT(13,clYFrequencies);
 	ImagingKernel->SetArgT(14,TEMParams->beta);
 	ImagingKernel->SetArgT(15,TEMParams->delta);
 
@@ -851,19 +851,20 @@ void TEMSimulation::SimulateCTEM()
 	ImagingKernel->Enqueue(Work);
 
 	// Now get and display absolute value
-	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1->buffer,CLFFT_BACKWARD);
+	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1,CLFFT_BACKWARD);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction,clWaveFunction4->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction->buffer,clWaveFunction4->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 
 };
 
 float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
-	clKernel* SumReduction = new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq);
+	Kernel SumReduction = Kernel(new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
 
-	cl_mem outArray = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, nGroups * sizeof( cl_float2 ), 0, &status);
+	clMemory outArray;
+	outArray.Create(nGroups*sizeof(cl_float2));
 
 	// Create host array to store reduction results.
 	std::vector< std::complex< float > > sums( nGroups );
@@ -878,7 +879,8 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
 
 	// Now copy back 
-	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray, CL_TRUE, 0, nGroups*sizeof(cl_float2), &sums[0], 0, NULL, NULL );
+
+	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray.buffer, CL_TRUE, 0, nGroups*sizeof(cl_float2), &sums[0], 0, NULL, NULL );
 
 	// Find out which numbers to read back
 	float sum = 0;
@@ -888,7 +890,41 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 		sum += sums[i].real();
 	}
 
-	clReleaseMemObject(outArray);
+	return sum;
+
+}
+
+float TEMSimulation::SumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+{
+	Kernel SumReduction = Kernel(new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq));
+	SumReduction->BuildKernelOld();
+
+	clMemory outArray;
+	outArray.Create(nGroups*sizeof(cl_float2));
+
+	// Create host array to store reduction results.
+	std::vector< std::complex< float > > sums( nGroups );
+
+	SumReduction->SetArgT(0,Array);
+
+	// Only really need to do these 3 once...
+	SumReduction->SetArgT(1,outArray);
+	SumReduction->SetArgT(2,totalSize);
+	SumReduction->SetArgLocalMemory(3,256,clFloat2);
+
+	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
+
+	// Now copy back 
+
+	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray.buffer, CL_TRUE, 0, nGroups*sizeof(cl_float2), &sums[0], 0, NULL, NULL );
+
+	// Find out which numbers to read back
+	float sum = 0;
+
+	for(int i = 0 ; i < nGroups; i++)
+	{
+		sum += sums[i].real();
+	}
 
 	return sum;
 
@@ -896,10 +932,11 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 
 float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
-	clKernel* SumReduction = new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq);
+	Kernel SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
 
-	cl_mem outArray = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, nGroups * sizeof( cl_float ), 0, &status);
+	clMemory outArray;
+	outArray.Create(nGroups*sizeof(cl_float));
 
 	// Create host array to store reduction results.
 	std::vector< float> sums( nGroups );
@@ -914,7 +951,7 @@ float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, siz
 	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
 
 	// Now copy back 
-	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray, CL_TRUE, 0, nGroups*sizeof(cl_float), &sums[0], 0, NULL, NULL );
+	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray.buffer, CL_TRUE, 0, nGroups*sizeof(cl_float), &sums[0], 0, NULL, NULL );
 
 	// Find out which numbers to read back
 	float sum = 0;
@@ -924,7 +961,40 @@ float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, siz
 		sum += sums[i];
 	}
 
-	clReleaseMemObject(outArray);
+	return sum;
+
+}
+
+float TEMSimulation::FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+{
+	Kernel SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
+	SumReduction->BuildKernelOld();
+
+	clMemory outArray;
+	outArray.Create(nGroups*sizeof(cl_float));
+
+	// Create host array to store reduction results.
+	std::vector< float> sums( nGroups );
+
+	SumReduction->SetArgT(0,Array);
+
+	// Only really need to do these 3 once...
+	SumReduction->SetArgT(1,outArray);
+	SumReduction->SetArgT(2,totalSize);
+	SumReduction->SetArgLocalMemory(3,256,clFloat);
+
+	SumReduction->Enqueue3D(globalSizeSum,localSizeSum);
+
+	// Now copy back 
+	clEnqueueReadBuffer( clState::clq->cmdQueue, outArray.buffer, CL_TRUE, 0, nGroups*sizeof(cl_float), &sums[0], 0, NULL, NULL );
+
+	// Find out which numbers to read back
+	float sum = 0;
+
+	for(int i = 0 ; i < nGroups; i++)
+	{
+		sum += sums[i];
+	}
 
 	return sum;
 

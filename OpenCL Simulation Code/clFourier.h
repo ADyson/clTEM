@@ -3,24 +3,28 @@
 #include "clAmdFft.h"
 #include <complex>
 #include "clKernel.h"
+#include "clMemory.h"
+#include <memory>
+
+class clFourier;
+
+typedef std::unique_ptr<clFourier> FourierKernel;
 
 class clFourier
 {
 public:
 	clFourier(void);
-	//clFourier(cl_context context, cl_command_queue cmdQueue);
 	clFourier(cl_context &context, clQueue* cmdQueue);
 	~clFourier(void);
 
 	cl_context* context;
-	//cl_command_queue cmdQueue;
 	clQueue* clq;
 	clAmdFftStatus fftStatus;
 	clAmdFftSetupData fftSetupData;
 	clAmdFftPlanHandle fftplan;
 
 	//intermediate buffer	
-	cl_mem clMedBuffer;
+	Buffer clMedBuffer;
 	cl_int medstatus;
 	size_t buffersize;
 
@@ -30,5 +34,6 @@ public:
 	void Setup(int width, int height);
 
 	void Enqueue(cl_mem &input, cl_mem &output, clAmdFftDirection Dir);
+	void Enqueue(Buffer &input, Buffer &output, clAmdFftDirection Dir);
 };
 

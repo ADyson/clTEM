@@ -90,12 +90,19 @@ void clFourier::Setup(int width, int height)
 		
 	if (buffersize)
 	{
-		clMedBuffer = clCreateBuffer ( *context, CL_MEM_READ_WRITE, buffersize, 0, &medstatus);
+		clMedBuffer = Buffer( new clMemory(buffersize));
+		//clCreateBuffer ( *context, CL_MEM_READ_WRITE, buffersize, 0, &medstatus);
 	}
 }
 
 void clFourier::Enqueue(cl_mem &input, cl_mem &output, clAmdFftDirection Dir)
 {
 	fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
-			&input, &output, clMedBuffer );
+			&input, &output, clMedBuffer->buffer );
+}
+
+void clFourier::Enqueue(Buffer &input, Buffer &output, clAmdFftDirection Dir)
+{
+	fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
+			&input->buffer, &output->buffer, clMedBuffer->buffer );
 }
