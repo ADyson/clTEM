@@ -108,7 +108,8 @@ cl_int clState::GetStatus()
 int clState::RegisterMemory(size_t size)
 {
 	Allocated.push_back(size);
-	return Allocated.size()-1;
+	int Index = Allocated.size()-1;
+	return Index;
 }
 
 void clState::DeRegisterMemory(int index)

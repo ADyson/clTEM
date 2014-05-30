@@ -45,7 +45,7 @@
     <ClInclude Include="clKernelCodes2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clState.h">
+    <ClInclude Include="clDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="clMemory.h">
@@ -54,7 +54,7 @@
     <ClInclude Include="clQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clDevice.h">
+    <ClInclude Include="clState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClCompile Include="clFourier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clState.cpp">
+    <ClCompile Include="clDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="clMemory.cpp">
@@ -86,7 +86,7 @@
     <ClCompile Include="clQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clDevice.cpp">
+    <ClCompile Include="clState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

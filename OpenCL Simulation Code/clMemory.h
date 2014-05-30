@@ -18,7 +18,7 @@ private:
 	cl_int status;
 
 public:
-	size_t size;
+	size_t AllocatedSize;
 	cl_mem buffer;
 	int MemoryIndex;
 	bool Created;

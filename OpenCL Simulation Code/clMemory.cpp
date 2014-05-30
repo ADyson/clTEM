@@ -21,6 +21,7 @@ clMemory::clMemory(size_t size)
 	Created=true;
 
 	MemoryIndex = clState::RegisterMemory(size);
+	AllocatedSize = size;
 }
 
 clMemory::clMemory(size_t size, cl_mem_flags flags)
@@ -34,6 +35,7 @@ clMemory::clMemory(size_t size, cl_mem_flags flags)
 	buffer = clCreateBuffer(context, flags, size, 0, &status);
 	Created=true;
 	MemoryIndex = clState::RegisterMemory(size);
+	AllocatedSize = size;
 }
 
 
@@ -46,6 +48,7 @@ void clMemory::Create(size_t size)
 	buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, size, 0, &status);
 	Created=true;
 	MemoryIndex = clState::RegisterMemory(size);
+	AllocatedSize = size;
 }
 
 void clMemory::Create(size_t size, cl_mem_flags flags)
@@ -56,6 +59,7 @@ void clMemory::Create(size_t size, cl_mem_flags flags)
 	buffer = clCreateBuffer(context, flags, size, 0, &status);
 	Created=true;
 	MemoryIndex = clState::RegisterMemory(size);
+	AllocatedSize = size;
 }
 
 clMemory::~clMemory()
@@ -65,6 +69,7 @@ clMemory::~clMemory()
 		clState::DeRegisterMemory(MemoryIndex);
 		clReleaseMemObject(buffer);
 		Created=false;
+		AllocatedSize=0;
 	}
 }
 

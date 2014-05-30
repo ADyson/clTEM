@@ -30,9 +30,7 @@ public:
 
 	cl_event outEvent;
 
-	
 	void Setup(int width, int height);
-
 	void Enqueue(cl_mem &input, cl_mem &output, clAmdFftDirection Dir);
 	void Enqueue(Buffer &input, Buffer &output, clAmdFftDirection Dir);
 };

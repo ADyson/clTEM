@@ -330,13 +330,6 @@ void MultisliceStructure::ClearStructure() {
 
 	// Clear all memory that was used to store and sort the atoms
 	// This would not be necessary if we just created a new structure object for each file.
-	clAtomx.release();
-	clAtomy.release();
-	clAtomz.release();
-	clAtomZ.release();
-	clBlockStartPositions.release();
-	clBlockIDs.release();
-	clZIDs.release();
 
 	sorted=false;
 };

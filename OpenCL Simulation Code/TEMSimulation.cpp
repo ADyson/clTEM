@@ -161,12 +161,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
-	BinnedAtomicPotential->SetArgT(1,AtomicStructure->clAtomx);
-	BinnedAtomicPotential->SetArgT(2,AtomicStructure->clAtomy);
-	BinnedAtomicPotential->SetArgT(3,AtomicStructure->clAtomz);
-	BinnedAtomicPotential->SetArgT(4,AtomicStructure->clAtomZ);
 	BinnedAtomicPotential->SetArgT(5,AtomicStructure->AtomicStructureParameterisation);
-	BinnedAtomicPotential->SetArgT(6,AtomicStructure->clBlockStartPositions);
 	BinnedAtomicPotential->SetArgT(7,resolution);
 	BinnedAtomicPotential->SetArgT(8,resolution);
 	BinnedAtomicPotential->SetArgT(12,AtomicStructure->dz);
@@ -289,13 +284,12 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	// Bandlimit by FDdz size
 
-	// Upload to device
-	clXFrequencies->Create(resolution*sizeof(cl_float));
-	clYFrequencies->Create(resolution*sizeof(cl_float));
+	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
 
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clXFrequencies->buffer,CL_FALSE,0,resolution*sizeof(cl_float),&k0x[0],0,NULL,NULL);
-	clEnqueueWriteBuffer(clState::clq->cmdQueue,clYFrequencies->buffer,CL_FALSE,0,resolution*sizeof(cl_float),&k0y[0],0,NULL,NULL);
-	
+	clXFrequencies->Write(k0x);
+	clYFrequencies->Write(k0y);
+
 	// Setup Fourier Transforms
 	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
 	FourierTrans->Setup(resolution,resolution);
@@ -370,12 +364,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	// Set some of the arguments which dont change each iteration
 	BinnedAtomicPotential->SetArgT(0,clPotential);
-	BinnedAtomicPotential->SetArgT(1,AtomicStructure->clAtomx);
-	BinnedAtomicPotential->SetArgT(2,AtomicStructure->clAtomy);
-	BinnedAtomicPotential->SetArgT(3,AtomicStructure->clAtomz);
-	BinnedAtomicPotential->SetArgT(4,AtomicStructure->clAtomZ);
 	BinnedAtomicPotential->SetArgT(5,AtomicStructure->AtomicStructureParameterisation);
-	BinnedAtomicPotential->SetArgT(6,AtomicStructure->clBlockStartPositions);
 	BinnedAtomicPotential->SetArgT(7,resolution);
 	BinnedAtomicPotential->SetArgT(8,resolution);
 	BinnedAtomicPotential->SetArgT(12,AtomicStructure->dz);
@@ -541,7 +530,11 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 		bottomz = slices-1;
 
 //	AtomicStructure->UploadConstantBlock(topz,bottomz);
-
+	BinnedAtomicPotential->SetArgT(1,AtomicStructure->clAtomx);
+	BinnedAtomicPotential->SetArgT(2,AtomicStructure->clAtomy);
+	BinnedAtomicPotential->SetArgT(3,AtomicStructure->clAtomz);
+	BinnedAtomicPotential->SetArgT(4,AtomicStructure->clAtomZ);
+	BinnedAtomicPotential->SetArgT(6,AtomicStructure->clBlockStartPositions);
 	BinnedAtomicPotential->SetArgT(9,slice);
 	BinnedAtomicPotential->SetArgT(10,slices);
 	BinnedAtomicPotential->SetArgT(11,currentz);
