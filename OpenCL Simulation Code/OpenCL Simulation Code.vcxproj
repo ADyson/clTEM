@@ -81,8 +81,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files (x86)\AMD\clAmdFft\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\AMD APP SDK\2.9\lib\x86;C:\Program Files (x86)\AMD\clAmdFft\lib32\import;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

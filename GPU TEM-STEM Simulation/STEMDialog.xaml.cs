@@ -113,6 +113,8 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
+
+        // To try and hide the scrollbar, maybe could be animated later?
         private void DetectorListView_MouseEnter(object sender, MouseEventArgs e)
         {
             if (DetectorListView.Items.Count > 7) // bodged and hard coded
