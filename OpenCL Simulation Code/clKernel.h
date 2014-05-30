@@ -103,6 +103,13 @@ public:
 		_SetArgS(i+1, args...);
 	}
 
+	template<typename T, typename... Args> //variadic template
+	inline void _SetArgS(int i, const dummy_CL& first, const Args& ...args)
+	{
+		//this is used to skip setting argument
+		_SetArgS(i+1, args...);
+	}
+
 	template<typename... Args> //variadic template
 	inline void SetArgS(const Args& ...args)
 	{
