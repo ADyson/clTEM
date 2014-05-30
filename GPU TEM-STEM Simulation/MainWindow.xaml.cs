@@ -84,7 +84,7 @@ namespace GPUTEMSTEMSimulation
         public List<DetectorItem> Detectors = new List<DetectorItem>();
         public List<DetectorItem> LockedDetectors;
 
-        public StemArea STEMRegion = new StemArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
+        public STEMArea STEMRegion = new STEMArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
 
 
         private void UpdateMaxMrad()
@@ -1155,14 +1155,13 @@ namespace GPUTEMSTEMSimulation
         {
             var window = new STEMAreaDialog(STEMRegion);
             window.Owner = this;
+            window.AddAreaEvent += new EventHandler<AreaArgs>(STEM_AddArea);
             window.ShowDialog();
         }
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
             Detectors.Add(evargs.Detector);
-            //DetectorNumLabel.Content = Detectors.Count;
-
             // draw the tab
             LeftTab.Items.Add(evargs.Detector.Tab);
         }
@@ -1174,7 +1173,11 @@ namespace GPUTEMSTEMSimulation
                 LeftTab.Items.Remove(i.Tab);
                 Detectors.Remove(i);
             }
-            //DetectorNumLabel.Content = Detectors.Count;
+        }
+
+        void STEM_AddArea(object sender, AreaArgs evargs)
+        {
+            STEMRegion = evargs.AreaParams;
         }
     }
 }

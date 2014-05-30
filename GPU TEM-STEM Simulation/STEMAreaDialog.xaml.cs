@@ -19,7 +19,9 @@ namespace GPUTEMSTEMSimulation
     /// </summary>
     public partial class STEMAreaDialog : Window
     {
-        public STEMAreaDialog(StemArea Area)
+        public event EventHandler<AreaArgs> AddAreaEvent;
+
+        public STEMAreaDialog(STEMArea Area)
         {
             InitializeComponent();
 
@@ -28,21 +30,65 @@ namespace GPUTEMSTEMSimulation
             yStartBox.Text = Area.yStart.ToString("f2");
             yFinishBox.Text = Area.yFinish.ToString("f2");
         }
+
+        private void OKButton_Click(object sender, RoutedEventArgs e)
+        {
+            float xs, xf, ys, yf;
+            int xp, yp;
+
+            try
+            {
+                xs = Convert.ToSingle(xStartBox.Text);
+                ys = Convert.ToSingle(yStartBox.Text);
+                xf = Convert.ToSingle(xFinishBox.Text);
+                yf = Convert.ToSingle(yFinishBox.Text);
+            }
+            catch
+            {
+                return;
+            }
+
+            xp = Convert.ToInt32(xPxBox.Text);
+            yp = Convert.ToInt32(yPxBox.Text);
+
+            STEMArea temp = new STEMArea { xStart = xs, xFinish = xf, yStart = ys, yFinish = yf, xPixels = xp, yPixels = yp };
+
+            AddAreaEvent(this, new AreaArgs(temp));
+
+            this.Close();
+        }
     }
 
 
-    public class StemArea
+
+
+
+    public class AreaArgs : EventArgs
     {
-        public float xStart { get; set; }
-
-        public float xFinish { get; set; }
-
-        public float yStart { get; set; }
-
-        public float yFinish { get; set; }
-
-        public int xPixels { get; set; }
-
-        public int yPixels { get; set; }
+        private STEMArea msg;
+        public AreaArgs(STEMArea s)
+        {
+            msg = s;
+        }
+        public STEMArea AreaParams
+        {
+            get { return msg; }
+        }
     }
+}
+
+
+public class STEMArea
+{
+    public float xStart { get; set; }
+
+    public float xFinish { get; set; }
+
+    public float yStart { get; set; }
+
+    public float yFinish { get; set; }
+
+    public int xPixels { get; set; }
+
+    public int yPixels { get; set; }
 }
