@@ -82,9 +82,11 @@ namespace GPUTEMSTEMSimulation
         float[] DiffImage;
         float[] TDSImage;
         public List<DetectorItem> Detectors = new List<DetectorItem>();
-        public List<DetectorItem> LockedDetectors;
+        List<DetectorItem> LockedDetectors;
 
         public STEMArea STEMRegion = new STEMArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
+        STEMArea LockedArea;
+        float pixelScale;
 
 
         private void UpdateMaxMrad()
@@ -211,7 +213,8 @@ namespace GPUTEMSTEMSimulation
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    PixelScaleLabel.Content = "Pixel Size (A): " + (BiggestSize / Resolution).ToString("f2");
+                    pixelScale = BiggestSize / Resolution;
+                    PixelScaleLabel.Content = "Pixel Size (A): " + pixelScale.ToString("f2");
 
                     UpdateMaxMrad();
                 }
@@ -359,6 +362,7 @@ namespace GPUTEMSTEMSimulation
                 {
 
                     LockedDetectors = Detectors;
+                    LockedArea = STEMRegion;
 
                     if (LockedDetectors.Count == 0)
                     {
@@ -366,18 +370,12 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
-                    int minX = 100;
-                    int maxX = 120;// Resolution;
-
-                    int minY = 100;
-                    int maxY = 120;// Resolution;
-
-                    int numPix = (maxX-minX) * (maxY-minY);
+                    int numPix = LockedArea.xPixels * LockedArea.yPixels;
                     int pix = 0;
 
                     foreach (DetectorItem i in LockedDetectors)
                     {
-                        i.ImageData = new float[Resolution * Resolution];
+                        i.ImageData = new float[numPix];
                     }
                     
                     int runs = 1;
@@ -388,9 +386,14 @@ namespace GPUTEMSTEMSimulation
 
                     mCL.InitialiseSTEMSimulation(Resolution);
 
-                    for (int posY = minY; posY < maxY; posY++)
+                    float xInterval = LockedArea.getxInterval;
+                    float yInterval = LockedArea.getyInterval;
+
+                    for (int posY = 0; posY < LockedArea.yPixels; posY++)
                     {
-                        for (int posX = minX; posX < maxX; posX++)
+                        float fCoordy = (LockedArea.yStart + posY * yInterval)/pixelScale;
+
+                        for (int posX = 0; posX < LockedArea.xPixels; posX++)
                         {
                             TDSImage = new float[Resolution * Resolution];
 
@@ -399,7 +402,9 @@ namespace GPUTEMSTEMSimulation
                                 if (TDS)
                                     mCL.SortStructure(TDS);
 
-                                mCL.MakeSTEMWaveFunction(posX, posY);
+                                float fCoordx = (LockedArea.xStart + posX * xInterval)/pixelScale;
+
+                                mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
 
                                 // Use Background worker to progress through each step
                                 int NumberOfSlices = 0;
@@ -437,7 +442,7 @@ namespace GPUTEMSTEMSimulation
                                 {
                                     float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
 
-                                    i.ImageData[Resolution * posY + posX] = pixelVal;
+                                    i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
 
                                     if (pixelVal < i.Min)
                                     {
@@ -455,7 +460,7 @@ namespace GPUTEMSTEMSimulation
 
                                     foreach (DetectorItem i in LockedDetectors)
                                     {
-                                        i._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                                        i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
                                         i.Image.Source = i._ImgBMP;
 
                                         RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
@@ -480,9 +485,9 @@ namespace GPUTEMSTEMSimulation
                                         for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
                                             for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
                                             {
-                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
-                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
-                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
+                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
+                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
+                                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
                                                 pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
                                             }
 
@@ -532,8 +537,6 @@ namespace GPUTEMSTEMSimulation
                         }
 
                     }
-                    //call some function here to measure the pixel value?
-                    minX = 0;
                 }
                 else if (select_CBED)
                 {
@@ -649,7 +652,7 @@ namespace GPUTEMSTEMSimulation
 
                     foreach (DetectorItem i in LockedDetectors)
                     {
-                        i._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+                        i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
                         i.Image.Source = i._ImgBMP;
 
                         RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
@@ -671,9 +674,9 @@ namespace GPUTEMSTEMSimulation
                         for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
                             for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
                             {
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
-                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * Resolution) - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
+                                pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - minBF) / (maxBF - minBF)) * 254.0f));
                                 pixelArrayBF[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixelBF + 3] = 0;
                             }
 

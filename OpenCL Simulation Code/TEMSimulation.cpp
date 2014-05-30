@@ -419,7 +419,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clFinish(clq->cmdQueue);
 };
 
-void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
+void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 {
 	size_t* WorkSize = new size_t[3];
 

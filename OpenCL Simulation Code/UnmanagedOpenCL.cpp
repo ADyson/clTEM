@@ -61,7 +61,7 @@ void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution)
 	TS->InitialiseSTEM(resolution, Structure);
 };
 
-void UnmanagedOpenCL::MakeSTEMWaveFunction(int posx, int posy)
+void UnmanagedOpenCL::MakeSTEMWaveFunction(float posx, float posy)
 {
 	TS->MakeSTEMWaveFunction(posx,posy);
 };

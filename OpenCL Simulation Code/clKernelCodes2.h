@@ -215,7 +215,7 @@ const char* imagingKernelSource =
 ;
 
 const char* InitialiseSTEMWavefunctionSource = 
-"__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height, __global const float* clXFrequencies, __global const float* clYFrequencies, int posx, int posy, float apert, float pixelscale, float df, float Cs, float wavel) \n"
+"__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height, __global const float* clXFrequencies, __global const float* clYFrequencies, float posx, float posy, float apert, float pixelscale, float df, float Cs, float wavel) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0); \n"

@@ -25,7 +25,7 @@ namespace ManagedOpenCLWrapper {
 		void SetStemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 		void InitialiseSimulation(int resolution);
 		void InitialiseSTEMSimulation(int resolution);
-		void MakeSTEMWaveFunction(int posx, int posy);
+		void MakeSTEMWaveFunction(float posx, float posy);
 		void MultisliceStep(int stepno, int steps);
 		void GetCTEMImage(array<float>^ data, int resolution);
 		void GetEWImage(array<float>^ data, int resolution);

@@ -54,7 +54,7 @@ public:
 
 	void Initialise(int resolution, MultisliceStructure* Structure);
 	void InitialiseSTEM(int resolution, MultisliceStructure* Structure);
-	void MakeSTEMWaveFunction(int posx, int posy);
+	void MakeSTEMWaveFunction(float posx, float posy);
 
 	void MultisliceStep(int stepno, int steps);
 
