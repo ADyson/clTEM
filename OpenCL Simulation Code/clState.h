@@ -1,6 +1,7 @@
 #pragma once
 #include "CL\cl.h"
 #include "clKernel.h"
+#include <string>
 
 class clState
 {
@@ -14,7 +15,8 @@ public:
 	static clQueue* clq;
 	static bool OpenCLAvailable;
 	static std::vector<cl_device_id*> devices;
-	static std::vector<std::string> devicenames;
+	static std::vector<std::string> devicenamesShort;
+	static std::vector<std::string> devicenamesLong;
 	static std::vector<int> deviceid;
 	static std::vector<int> deviceplatform;
 	static std::vector<cl_uint> numdevices;
@@ -28,5 +30,7 @@ public:
 	static int RegisterMemory(size_t size);
 	static void DeRegisterMemory(int index);
 	static size_t GetTotalSize();
+	static int GetNumDevices();
+	static std::string GetDeviceString(int i, bool getShort);
 };
 

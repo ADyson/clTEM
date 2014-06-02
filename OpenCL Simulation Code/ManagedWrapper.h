@@ -42,6 +42,9 @@ namespace ManagedOpenCLWrapper {
 		void AddTDS();
 		void ClearTDS();
 
+		int getCLdevCount();
+		String^ getCLdevString(int i, bool getShort);
+
 		// For OpenCL Device Selector...
 		void SetDevice(int index);
 		int MemoryUsed();

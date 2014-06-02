@@ -140,6 +140,16 @@ size_t UnmanagedOpenCL::MemoryUsed()
 	return clState::GetTotalSize();
 }
 
+int UnmanagedOpenCL::getCLdevCount()
+{
+	return clState::GetNumDevices();
+}
+
+std::string UnmanagedOpenCL::getCLdevString(int i, bool getShort)
+{
+	return clState::GetDeviceString(i, getShort);
+}
+
 UnmanagedOpenCL::~UnmanagedOpenCL() 
 {
 };

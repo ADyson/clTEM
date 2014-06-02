@@ -38,7 +38,8 @@ namespace GPUTEMSTEMSimulation
         bool TDS;
         int Resolution;
 
-        List<String> devices;
+        List<String> devicesShort;
+        List<String> devicesLong;
 
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
@@ -178,10 +179,19 @@ namespace GPUTEMSTEMSimulation
             DeviceSelector.SelectedIndex = -1;
 
             // Add fake device names for now
-            devices = new List<String>();
-            devices.Add("CPU");
-            devices.Add("GPU");
-            DeviceSelector.ItemsSource = devices;
+            devicesShort = new List<String>();
+            devicesLong = new List<String>();
+            //devices.Add("CPU");
+            //devices.Add("GPU");
+            int numDev = mCL.getCLdevCount();
+
+            for (int i = 0; i < numDev; i++)
+            {
+                devicesShort.Add(mCL.getCLdevString(i, true));
+                devicesLong.Add(mCL.getCLdevString(i, false));
+            }
+
+            DeviceSelector.ItemsSource = devicesShort;
 
         }
 
@@ -1216,8 +1226,27 @@ namespace GPUTEMSTEMSimulation
 
         private void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            //var CB = sender as ComboBox;
+            //mCL.SetDevice(CB.SelectedIndex);
+        }
+
+        private void DeviceSelector_DropDownOpened(object sender, EventArgs e)
+        {
+            DeviceSelector.ItemsSource = devicesLong;
+        }
+
+        private void DeviceSelector_DropDownClosed(object sender, EventArgs e)
+        {
             var CB = sender as ComboBox;
-            mCL.SetDevice(CB.SelectedIndex);
+
+            int index = CB.SelectedIndex;
+            CB.ItemsSource = devicesShort;
+            CB.SelectedIndex = index;
+            if (index != -1) // Later, might want to check for index the same as before
+            {
+                mCL.SetDevice(CB.SelectedIndex);
+                CB.IsEnabled = false;
+            }
         }
     }
 }

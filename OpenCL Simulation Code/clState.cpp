@@ -1,5 +1,5 @@
 #include "clState.h"
-
+#include "stringFunc.h"
 
 clState::clState(void)
 {
@@ -19,7 +19,8 @@ bool clState::OpenCLAvailable = false;
 std::vector<cl_device_id*> clState::devices;
 std::vector<int> clState::deviceid;
 std::vector<int> clState::deviceplatform;
-std::vector<std::string> clState::devicenames;
+std::vector<std::string> clState::devicenamesShort;
+std::vector<std::string> clState::devicenamesLong;
 std::vector<cl_uint> clState::numdevices;
 std::vector<size_t> clState::Allocated;
 
@@ -28,6 +29,7 @@ void clState::Setup()
 {
 	size_t valueSize;
 	char* value;
+	char* Pvalue;
 
 	//Setup OpenCL
 	context = NULL;
@@ -53,6 +55,11 @@ void clState::Setup()
         devices[i] = (cl_device_id*) malloc(sizeof(cl_device_id) * numdevices[i]);
         clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, numdevices[i], devices[i], NULL);
 
+		clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &valueSize);
+		Pvalue = (char*) malloc(valueSize);
+        clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, valueSize, Pvalue, NULL);
+		std::string pName = Pvalue;
+
         // for each device get and store name, platform, and device number
         for (int j = 0; j < numdevices[i]; j++) 
 		{
@@ -60,11 +67,14 @@ void clState::Setup()
             clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, 0, NULL, &valueSize);
             value = (char*) malloc(valueSize);
             clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, valueSize, value, NULL);
-			devicenames.push_back(value);
+			std::string dName = value;
+			devicenamesLong.push_back(std::to_string(i) + ": " + trim(pName) + ", " + std::to_string(j) + ": " + trim(dName));
+			devicenamesShort.push_back(std::to_string(i) + "," + std::to_string(j) + ": " + trim(dName));
 			deviceid.push_back(j);
 			deviceplatform.push_back(i);
             free(value);
 		}
+		free(Pvalue);
 	}
 
 	free(platforms);
@@ -74,6 +84,24 @@ void clState::Setup()
 		throw "OpenCL Error setting device/platform";
 	}
 }
+
+int clState::GetNumDevices()
+{
+		return devicenamesShort.size();
+}
+
+std::string clState::GetDeviceString(int i, bool getShort)
+{
+	if (getShort)
+	{
+		return devicenamesShort[i];
+	}
+	else
+	{
+		return devicenamesLong[i];
+	}
+}
+
 
 void clState::SetDevice(int index)
 {

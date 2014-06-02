@@ -52,4 +52,7 @@ public:
 
 	UnmanagedOpenCL();
 	~UnmanagedOpenCL();
+
+	int getCLdevCount();
+	std::string getCLdevString(int i, bool getShort);
 };
