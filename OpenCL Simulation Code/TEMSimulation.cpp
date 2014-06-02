@@ -412,7 +412,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
+void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 {
 	size_t* WorkSize = new size_t[3];
 
@@ -420,7 +420,13 @@ void TEMSimulation::MakeSTEMWaveFunction(int posx, int posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
+	// InitialiseSTEMWavefunction->SetArgS(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
+
+	*InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
+								&& clXFrequencies && clYFrequencies && posx && posy 
+								&& STEMParams->aperturesizemrad && pixelscale 
+								&& STEMParams->defocus && STEMParams->spherical 
+								&& wavelength;
 
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 

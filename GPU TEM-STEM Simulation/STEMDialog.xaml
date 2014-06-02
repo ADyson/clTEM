@@ -32,7 +32,7 @@
         </ListView>
         <Button x:Name="DeleteButton" Content="Delete" Margin="267,10,10,169" Click="DeleteButton_Click"/>
         <Button x:Name="AddButton" Content="Add" Margin="267,37,10,142" Click="AddButton_Click"/>
-        <t:ErrTextBox x:Name="NameTxtbx" Margin="267,80,10,98" TextWrapping="NoWrap" Text="Detector1">
+        <t:ErrTextBox x:Name="NameTxtbx" Margin="267,80,10,98" TextWrapping="NoWrap" Text="Detector1" GotFocus="tBox_GotFocus">
             <t:ErrTextBox.Triggers>
                 <EventTrigger RoutedEvent="t:ErrTextBox.Tap">
                     <BeginStoryboard>
@@ -55,7 +55,7 @@
             </t:ErrTextBox.Triggers>
         </t:ErrTextBox>
         <TextBlock Margin="267,108,10,77" TextWrapping="Wrap" Text="Inner Radius:"/>
-        <t:ErrTextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" x:Name="InnerTxtbx" Margin="267,124,10,54" TextWrapping="NoWrap" Text="0">
+        <t:ErrTextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" x:Name="InnerTxtbx" Margin="267,124,10,54" TextWrapping="NoWrap" Text="0" GotFocus="tBox_GotFocus">
             <t:ErrTextBox.Triggers>
                 <EventTrigger RoutedEvent="t:ErrTextBox.Tap">
                     <BeginStoryboard>
@@ -78,7 +78,7 @@
             </t:ErrTextBox.Triggers>
         </t:ErrTextBox>
         <TextBlock Margin="267,152,10,33" TextWrapping="Wrap" Text="Outer Radius:"/>
-        <t:ErrTextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" x:Name="OuterTxtbx" Margin="267,168,10,10" TextWrapping="NoWrap" Text="30">
+        <t:ErrTextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" x:Name="OuterTxtbx" Margin="267,168,10,10" TextWrapping="NoWrap" Text="30" GotFocus="tBox_GotFocus">
             <t:ErrTextBox.Triggers>
                 <EventTrigger RoutedEvent="t:ErrTextBox.Tap">
                     <BeginStoryboard>

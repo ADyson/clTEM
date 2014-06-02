@@ -120,7 +120,7 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::MakeSTEMWaveFunction(int posx, int posy)
+	void ManagedOpenCL::MakeSTEMWaveFunction(float posx, float posy)
 	{
 		try
 		{
