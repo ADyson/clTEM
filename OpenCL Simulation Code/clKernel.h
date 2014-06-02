@@ -45,6 +45,7 @@ public:
 
 	size_t kernelsize;
 	int iter;
+	int viter;
 	
 	clKernel(const char* codestring, cl_context &context, clDevice* cldev, std::string kernelname,clQueue* Queue);
 	clKernel(cl_context &context, clDevice* cldev, std::string kernelname,clQueue* Queue);
@@ -64,9 +65,32 @@ public:
 
 	// Function definition has to be in header for templates...
 	// Sets arguments for clKernel
-	template <class T> void SetArgT(int position, T &arg) 
+	template <class T>
+	void SetArgT(int position, const T &arg) 
 	{
-			status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
+		status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
+	}
+	
+	inline void _SetArgS(int i){}
+
+	template<typename T, typename... Args> //variadic template
+	inline void _SetArgS(int i, const T& first, const Args& ...args)
+	{
+		SetArgT(i, first);
+		_SetArgS(i+1, args...);
+	}
+
+	template<typename T, typename... Args> //variadic template
+	inline void _SetArgS(int i, const dummy_CL& first, const Args& ...args)
+	{
+		//this is used to skip setting argument
+		_SetArgS(i+1, args...);
+	}
+
+	template<typename... Args> //variadic template
+	inline void SetArgS(const Args& ...args)
+	{
+		_SetArgS(0, args...);
 	}
 
 	void SetArgT(int position, Buffer &arg);
@@ -96,21 +120,26 @@ public:
 	// Currently needs support for 'skipping' values when they do no need to be changed
 	// http://msdn.microsoft.com/en-us/library/kwyxac18.aspx
 
+	//mostly useful for non c++11 compilers (use SetArgS above if poss)
+
 	template<typename T>
-	clKernel& operator<<(T &value){
+	clKernel& operator<<(T &value)
+	{
 		iter = 0;
 		SetArgT(iter,value);
 		iter++;
 		return *this;
 	}
 
-	clKernel& operator&&(dummy_CL na){
+	clKernel& operator&&(dummy_CL na)
+	{
 		iter++;
 		return *this;
 	}
 
 	template<typename T>
-	clKernel& operator&&(T &value){
+	clKernel& operator&&(T &value)
+	{
 		SetArgT(iter,value);
 		iter++;
 		return *this;
