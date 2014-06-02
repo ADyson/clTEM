@@ -71,24 +71,24 @@ public:
 		status |= clSetKernelArg(kernel,position,sizeof(T),&arg);
 	}
 	
-	inline void _SetArgS(int i){}
+	void _SetArgS(int i){}
 
 	template<typename T, typename... Args> //variadic template
-	inline void _SetArgS(int i, const T& first, const Args& ...args)
+	void _SetArgS(int i, T& first, Args& ...args)
 	{
 		SetArgT(i, first);
 		_SetArgS(i+1, args...);
 	}
 
 	template<typename T, typename... Args> //variadic template
-	inline void _SetArgS(int i, const dummy_CL& first, const Args& ...args)
+	void _SetArgS(int i, dummy_CL& first, Args& ...args)
 	{
 		//this is used to skip setting argument
 		_SetArgS(i+1, args...);
 	}
 
 	template<typename... Args> //variadic template
-	inline void SetArgS(const Args& ...args)
+	void SetArgS(Args& ...args)
 	{
 		_SetArgS(0, args...);
 	}
