@@ -1,4 +1,5 @@
 #include "ManagedWrapper.h"
+#include "clix.h"
 //#include <msclr\marshal_cppstd.h>
 
 
@@ -230,7 +231,19 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->SetDevice(index);
 	};
 
-	int ManagedOpenCL::MemoryUsed(){
-	return _UMOpenCL->MemoryUsed();
+	int ManagedOpenCL::MemoryUsed()
+	{
+		return _UMOpenCL->MemoryUsed();
+	}
+
+	int ManagedOpenCL::getCLdevCount()
+	{
+		return _UMOpenCL->getCLdevCount();
+	}
+
+	String^ ManagedOpenCL::getCLdevString(int i, bool getShort)
+	{
+		std::string UMstring = _UMOpenCL->getCLdevString(i, getShort);
+		return clix::marshalString<clix::E_ANSI>(UMstring);
 	}
 }

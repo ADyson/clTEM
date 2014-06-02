@@ -57,6 +57,9 @@
     <ClInclude Include="clState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stringFunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManagedWrapper.cpp">
