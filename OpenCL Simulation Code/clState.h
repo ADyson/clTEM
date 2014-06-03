@@ -3,6 +3,7 @@
 #include "clKernel.h"
 #include <string>
 
+
 class clState
 {
 private:

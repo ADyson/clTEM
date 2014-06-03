@@ -157,6 +157,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 		clBlockIDs->Read(HostBlockIDs);
 		clZIDs->Read(HostZIDs);
+		cl_float3 aas;
 
 		vector < vector < vector < float > > > Binnedx;
 		Binnedx.resize(xBlocks*yBlocks);

@@ -40,7 +40,7 @@ int UnmanagedOpenCL::UploadParameterisation()
 
 		inparams.close();
 
-		Structure->AtomicStructureParameterisation = Buffer( new clMemory(12*103*sizeof(float),CL_MEM_READ_ONLY));
+		Structure->AtomicStructureParameterisation = Buffer( new clMemory(12*103*sizeof(float),CL_MEM_READ_WRITE));
 		Structure->AtomicStructureParameterisation->Write(fparams);
 		fparams.clear();
 	}

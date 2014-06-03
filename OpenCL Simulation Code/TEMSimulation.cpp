@@ -52,7 +52,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	std::vector<float> k0y;
 
 	float temp;
-
+	
 	for(int i=1 ; i <= resolution ; i++)
 	{
 		if ((i - 1) > imidx)
@@ -150,8 +150,8 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	InitialiseWavefunction->Enqueue(WorkSize);
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
+	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq));
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotential.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 

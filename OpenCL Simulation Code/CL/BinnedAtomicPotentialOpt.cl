@@ -3,7 +3,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 										  __global const float* restrict clAtomYPos, 
 										  __global const float* restrict clAtomZPos, 
 										  __global const int* restrict clAtomZNum, 
-										  __constant float* clfParams, 
+										  __global const float* restrict clfParams, 
 										  __global const int* restrict clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma)
 {
 	int xid = get_global_id(0);
@@ -49,19 +49,34 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 			}
 
 			barrier(CLK_LOCAL_MEM_FENCE);
+			
+			float rad = 0;
+			float p2 = 0;
+			float p1 = 0;
 
-			float p2=0;
 			for (int l = 0; l < end-start; l++) 
 			{
 				int ZNum = atZ[l];
-				for (int h = 0; h <= 15; h++)
-				{
-					float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - h*dz/15.0f-atz[l])*(z - h*dz/15.0f-atz[l]));
+				float subrad = (xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]);
 
-					if(rad < 0.25f * pixelscale)
-						rad = 0.25f * pixelscale;
+					rad = fmax(native_sqrt(subrad + (z - 0*dz/10.0f-atz[l])*(z - 0*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
 
-					float p1 = 0;
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						float nrrad = native_recip(rad);
+						p1 += (150.4121417f * nrrad * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * nrrad * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * nrrad * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 1*dz/10.0f-atz[l])*(z - 1*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
 
 					if( rad < 3.0f) // Should also make sure is not too small
 					{
@@ -72,11 +87,154 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
 						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
 
-						sumz += (h!=0) * (p1+p2)*0.5f;
+						sumz += (p1+p2)*0.5f;
 						p2 = p1;
-
 					}
-				}
+
+					rad = fmax(native_sqrt(subrad + (z - 2*dz/10.0f-atz[l])*(z - 2*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 3*dz/10.0f-atz[l])*(z - 3*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 4*dz/10.0f-atz[l])*(z - 4*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 5*dz/10.0f-atz[l])*(z - 5*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 6*dz/10.0f-atz[l])*(z - 6*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 7*dz/10.0f-atz[l])*(z - 7*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 8*dz/10.0f-atz[l])*(z - 8*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz += (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 9*dz/10.0f-atz[l])*(z - 9*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
+					rad = fmax(native_sqrt(subrad + (z - 10*dz/10.0f-atz[l])*(z - 10*dz/10.0f-atz[l])),0.25f*pixelscale);
+					p1 = 0;
+
+					if( rad < 3.0f) // Should also make sure is not too small
+					{
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12  ]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+1  ])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+2]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+2+1])));
+						p1 += (150.4121417f * native_recip(rad) * clfParams[(ZNum-1)*12+4]* native_exp( -2.0f*3.141592f*rad*native_sqrt(clfParams[(ZNum-1)*12+4+1])));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+6] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+6+1]) * native_powr(clfParams[(ZNum-1)*12+6+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
+						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
+
+						sumz +=  (p1+p2)*0.5f;
+						p2 = p1;
+					}
+
 			}
 
 			barrier(CLK_LOCAL_MEM_FENCE);
@@ -84,7 +242,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 	}
 	if(xid < width && yid < height)
 	{
-		Potential[Index].x = native_cos((dz/15.0f)*sigma*sumz);
-		Potential[Index].y = native_sin((dz/15.0f)*sigma*sumz);
+		Potential[Index].x = native_cos((dz/10.0f)*sigma*sumz);
+		Potential[Index].y = native_sin((dz/10.0f)*sigma*sumz);
 	}
 }
