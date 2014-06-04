@@ -132,6 +132,69 @@
             </Grid.ColumnDefinitions>
             <!-- Left Image Tab Control-->
             <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,10,20,80" Grid.Row="1" >
+                <TabItem Header="Model" x:Name="ModelTab">
+                    <Grid Background="#FFE5E5E5">
+
+
+
+
+                        <!--<Viewport3D Name="mainViewport" 
+                                    Grid.Column="1" 
+                                    Grid.Row="0"
+                                    ClipToBounds = "False"  
+                                    IsHitTestVisible="false"
+                                    RenderOptions.EdgeMode="Aliased">
+                            <Viewport3D.Camera>
+                                <PerspectiveCamera LookDirection="0,0,-20" UpDirection="0,1,0" Position="0,0,100" />
+                            </Viewport3D.Camera>
+                            <ModelVisual3D>
+                                <ModelVisual3D.Content>
+                                    <Model3DGroup x:Name="group3d">
+                                        <SpotLight Position="50,50,50" x:Name="mySpotLight" Color="White"  InnerConeAngle="100" OuterConeAngle="1000" Range="100" />
+                                    </Model3DGroup>
+                                </ModelVisual3D.Content>
+                            </ModelVisual3D>
+                        </Viewport3D>-->
+                        <Viewport3D Name="mainViewport" 
+                                    Grid.Column="1" 
+                                    Grid.Row="0"
+                                    ClipToBounds = "False"  
+                                    IsHitTestVisible="false"
+                                    RenderOptions.EdgeMode="Aliased">
+                            <Viewport3D.Camera>
+                                <OrthographicCamera x:Name="camera" Width="2"
+                                                    FarPlaneDistance="10"
+	                                                NearPlaneDistance="1" 
+	                                                LookDirection="0,0,-1"
+	                                                UpDirection="0,1,0"
+	                                                Position="0,0,2" />
+                            </Viewport3D.Camera>
+                            <Viewport3D.Children>
+                                <ModelVisual3D x:Name="Light1">
+                                    <ModelVisual3D.Content>
+                                        <DirectionalLight Color="White" Direction="1, 1, -1" />
+                                    </ModelVisual3D.Content>
+                                </ModelVisual3D>
+                                <ModelVisual3D x:Name="Light2">
+                                    <ModelVisual3D.Content>
+                                        <DirectionalLight Color="White" Direction="-1, 1, -1" />
+                                    </ModelVisual3D.Content>
+                                </ModelVisual3D>
+                                <ModelVisual3D x:Name="Light3">
+                                    <ModelVisual3D.Content>
+                                        <DirectionalLight Color="White" Direction="0,-1,-0.5" />
+                                    </ModelVisual3D.Content>
+                                </ModelVisual3D>
+                            </Viewport3D.Children>
+                        </Viewport3D>
+                        <Canvas x:Name="canvasOn3D" Grid.Column="1" Grid.Row="0" Background="Transparent" Margin="0,0,0,0"
+                                MouseUp="OnViewportMouseUp"  MouseDown="OnViewportMouseDown" MouseMove="OnViewportMouseMove"/>
+                        
+                        
+                        
+
+                    </Grid>
+                </TabItem>
                 <TabItem Header="CTEM" x:Name="CTEMTab">
                     <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">

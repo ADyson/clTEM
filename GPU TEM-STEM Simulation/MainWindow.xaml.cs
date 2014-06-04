@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -20,10 +21,13 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Threading;
+//using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
 using PanAndZoom;
+using WPFChart3D;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -92,6 +96,30 @@ namespace GPUTEMSTEMSimulation
         float pixelScale;
 
 
+
+
+
+
+
+
+
+
+        //private List<ModelVisual3D> sphereModels = new List<ModelVisual3D>();
+
+        private WPFChart3D.Chart3D m_3dChart;
+
+        public WPFChart3D.TransformMatrix m_transformMatrix = new WPFChart3D.TransformMatrix();
+        public int m_nChartModelIndex = -1;
+
+
+
+
+
+
+
+
+
+
         private void UpdateMaxMrad()
         {
 
@@ -142,6 +170,7 @@ namespace GPUTEMSTEMSimulation
 
         public MainWindow()
         {
+
             InitializeComponent();
             // Start in TEM mode.
             TEMRadioButton.IsChecked = true;
@@ -192,6 +221,89 @@ namespace GPUTEMSTEMSimulation
             }
 
             DeviceSelector.ItemsSource = devicesShort;
+
+
+
+
+
+
+            int nDotNo = 100;
+
+            // 1. set scatter chart data no.
+            m_3dChart = new ScatterChart3D();
+            m_3dChart.SetDataNo(nDotNo); //number of objects/shapes
+
+            // 2. set property of each dot (size, position, shape, color)
+            Random randomObject = new Random();
+            int nDataRange = 200;
+            for (int i = 0; i < nDotNo; i++)
+            {
+                ScatterPlotItem plotItem = new ScatterPlotItem();
+
+                plotItem.w = 4;
+                plotItem.h = 6;
+
+                plotItem.x = (float)randomObject.Next(nDataRange);
+                plotItem.y = (float)randomObject.Next(nDataRange);
+                plotItem.z = (float)randomObject.Next(nDataRange);
+
+                plotItem.shape = randomObject.Next(4);
+
+                Byte nR = (Byte)randomObject.Next(256);
+                Byte nG = (Byte)randomObject.Next(256);
+                Byte nB = (Byte)randomObject.Next(256);
+
+                plotItem.color = Color.FromRgb(nR, nG, nB);
+                ((ScatterChart3D)m_3dChart).SetVertex(i, plotItem);
+            }
+
+            // 3. set the axes
+            m_3dChart.GetDataRange();
+            m_3dChart.SetAxes();
+
+            // 4. get Mesh3D array from the scatter plot
+            ArrayList meshs = ((ScatterChart3D)m_3dChart).GetMeshes();
+
+            // 6. display scatter plot in Viewport3D
+            WPFChart3D.Model3D model3d = new WPFChart3D.Model3D();
+            m_nChartModelIndex = model3d.UpdateModel(meshs, null, m_nChartModelIndex, this.mainViewport);
+
+            // 7. set projection matrix
+            float viewRange = (float)nDataRange;
+            m_transformMatrix.CalculateProjectionMatrix(0, viewRange, 0, viewRange, 0, viewRange, 0.5);
+
+            TransformChart();
+
+
+
+            //Point3D sphere1 = new Point3D(0, 0, 30);
+            //Point3D sphere2 = new Point3D(0, 20, -30);
+            //Point3D sphere3 = new Point3D(20, -5, 0);
+            //Point3D sphere4 = new Point3D(-100, -100, -100);
+
+            //sphereModels.Add(CreateSphere(sphere1, 10, 20, 20, Colors.Brown));
+            //sphereModels.Add(CreateSphere(sphere2, 10, 20, 20, Colors.MediumVioletRed));
+            //sphereModels.Add(CreateSphere(sphere3, 10, 20, 20, Colors.LightSeaGreen));
+            //sphereModels.Add(CreateSphere(sphere4, 10, 20, 20, Colors.LightSeaGreen));
+
+            //sphereModels.ForEach(x => mainViewport.Children.Add(x));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         }
 
@@ -1248,5 +1360,72 @@ namespace GPUTEMSTEMSimulation
                 CB.IsEnabled = false;
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public void OnViewportMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs args)
+        {
+            Point pt = args.GetPosition(mainViewport);
+
+            if (args.ChangedButton == MouseButton.Left)// rotate or drag 3d model
+            {
+                m_transformMatrix.OnLBtnDown(pt);
+            }
+            //else if (args.ChangedButton == MouseButton.Right)
+            //{
+            //}
+        }
+
+        public void OnViewportMouseMove(object sender, System.Windows.Input.MouseEventArgs args)
+        {
+            Point pt = args.GetPosition(mainViewport);
+
+            if (args.LeftButton == MouseButtonState.Pressed)                // rotate or drag 3d model
+            {
+                m_transformMatrix.OnMouseMove(pt, mainViewport);
+                TransformChart();
+            }
+        }
+
+        public void OnViewportMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs args)
+        {
+            Point pt = args.GetPosition(mainViewport);
+
+            if (args.ChangedButton == MouseButton.Left)
+            {
+                m_transformMatrix.OnLBtnUp();
+            }
+        }
+
+        private void TransformChart()
+        {
+            if (m_nChartModelIndex == -1) return;
+            ModelVisual3D visual3d = (ModelVisual3D)(this.mainViewport.Children[m_nChartModelIndex]);
+            if (visual3d.Content == null) return;
+            Transform3DGroup group1 = visual3d.Content.Transform as Transform3DGroup;
+            group1.Children.Clear();
+            group1.Children.Add(new MatrixTransform3D(m_transformMatrix.m_totalMatrix));
+        }
+
     }
 }

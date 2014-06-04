@@ -53,6 +53,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -100,6 +101,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Draw3D.cs" />
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
     <Compile Include="STEMAreaDialog.xaml.cs">
@@ -109,6 +111,24 @@
       <DependentUpon>STEMDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="TEMParams.cs" />
+    <Compile Include="WPFChart3D\Bar3D.cs" />
+    <Compile Include="WPFChart3D\Chart3D.cs" />
+    <Compile Include="WPFChart3D\ColorMesh3D.cs" />
+    <Compile Include="WPFChart3D\Cone3D.cs" />
+    <Compile Include="WPFChart3D\Cylinder3D.cs" />
+    <Compile Include="WPFChart3D\Ellipse3D.cs" />
+    <Compile Include="WPFChart3D\Mesh3D.cs" />
+    <Compile Include="WPFChart3D\Model3D.cs" />
+    <Compile Include="WPFChart3D\Pyramid3D.cs" />
+    <Compile Include="WPFChart3D\ScatterChart3D.cs" />
+    <Compile Include="WPFChart3D\ScatterPlotItem.cs" />
+    <Compile Include="WPFChart3D\SurfaceChart3D.cs" />
+    <Compile Include="WPFChart3D\TextureMapping.cs" />
+    <Compile Include="WPFChart3D\TransformMatrix.cs" />
+    <Compile Include="WPFChart3D\Triangle3D.cs" />
+    <Compile Include="WPFChart3D\UniformSurfaceChart3D.cs" />
+    <Compile Include="WPFChart3D\Vertex3D.cs" />
+    <Compile Include="WPFChart3D\ViewportRect.cs" />
     <Compile Include="ZoomBorder.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
