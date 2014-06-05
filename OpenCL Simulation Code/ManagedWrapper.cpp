@@ -247,11 +247,12 @@ namespace ManagedOpenCLWrapper
 		return clix::marshalString<clix::E_ANSI>(UMstring);
 	}
 
-	void ManagedOpenCL::GetAtomCoords(array<float>^ x,array<float>^ y, array<float>^ z, int length)
+	void ManagedOpenCL::GetAtomCoords(array<float>^ x,array<float>^ y, array<float>^ z, array<int>^ a, int length)
 	{
 		pin_ptr<float> px = &x[0];
 		pin_ptr<float> py = &y[0];
 		pin_ptr<float> pz = &z[0];
-		_UMOpenCL->GetAtomCoords(px,py,pz,length);
+		pin_ptr<int> pa = &a[0];
+		_UMOpenCL->GetAtomCoords(px,py,pz,pa,length);
 	};
 }

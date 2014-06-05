@@ -264,9 +264,9 @@ int MultisliceStructure::SortAtoms(bool TDS)
 	return 1;
 };
 
-int MultisliceStructure::GetZNum(std::string atomSymbol) {
-		 
-		 if (atomSymbol == "H")
+int MultisliceStructure::GetZNum(std::string atomSymbol)
+{
+	if (atomSymbol == "H")
 		return 1;
 	else if (atomSymbol == "He")
 		return 2;
@@ -304,23 +304,172 @@ int MultisliceStructure::GetZNum(std::string atomSymbol) {
 		return 19;
 	else if (atomSymbol == "Ca")
 		return 20;
-	else if (atomSymbol == "Sr")
-		return 38;
-	else if (atomSymbol == "Ru")
-		return 44;
-	else if (atomSymbol == "Br")
-		return 35;
+	else if (atomSymbol == "Sc")
+		return 21;
+	else if (atomSymbol == "Ti")
+		return 22;
+	else if (atomSymbol == "V")
+		return 23;
+	else if (atomSymbol == "Cr")
+		return 24;
+	else if (atomSymbol == "Mn")
+		return 25;
 	else if (atomSymbol == "Fe")
 		return 26;
+	else if (atomSymbol == "Co")
+		return 27;
+	else if (atomSymbol == "Ni")
+		return 28;
+	else if (atomSymbol == "Cu")
+		return 29;
+	else if (atomSymbol == "Zn")
+		return 30;
+	else if (atomSymbol == "Ga")
+		return 31;
+	else if (atomSymbol == "Ge")
+		return 32;
+	else if (atomSymbol == "As")
+		return 33;
+	else if (atomSymbol == "Se")
+		return 34;
+	else if (atomSymbol == "Br")
+		return 35;
+	else if (atomSymbol == "Kr")
+		return 36;
+	else if (atomSymbol == "Rb")
+		return 37;
+	else if (atomSymbol == "Sr")
+		return 38;
+	else if (atomSymbol == "Y")
+		return 39;
+	else if (atomSymbol == "Zr")
+		return 40;
+	else if (atomSymbol == "Nb")
+		return 41;
+	else if (atomSymbol == "Mo")
+		return 42;
+	else if (atomSymbol == "Tc")
+		return 43;
+	else if (atomSymbol == "Ru")
+		return 44;
+	else if (atomSymbol == "Rh")
+		return 45;
+	else if (atomSymbol == "Pd")
+		return 46;
+	else if (atomSymbol == "Ag")
+		return 47;
+	else if (atomSymbol == "Cd")
+		return 48;
+	else if (atomSymbol == "In")
+		return 49;
+	else if (atomSymbol == "Sn")
+		return 50;
+	else if (atomSymbol == "Sb")
+		return 51;
+	else if (atomSymbol == "Te")
+		return 52;
+	else if (atomSymbol == "I")
+		return 53;
+	else if (atomSymbol == "Xe")
+		return 54;
+	else if (atomSymbol == "Cs")
+		return 55;
+	else if (atomSymbol == "Ba")
+		return 56;
 	else if (atomSymbol == "La")
 		return 57;
+	else if (atomSymbol == "Ce")
+		return 58;
+	else if (atomSymbol == "Pr")
+		return 59;
+	else if (atomSymbol == "Nd")
+		return 60;
+	else if (atomSymbol == "Pm")
+		return 61;
 	else if (atomSymbol == "Sm")
 		return 62;
+	else if (atomSymbol == "Eu")
+		return 63;
+	else if (atomSymbol == "Gd")
+		return 64;
+	else if (atomSymbol == "Tb")
+		return 65;
+	else if (atomSymbol == "Dy")
+		return 66;
+	else if (atomSymbol == "Ho")
+		return 67;
+	else if (atomSymbol == "Er")
+		return 68;
+	else if (atomSymbol == "Tm")
+		return 69;
+	else if (atomSymbol == "Yb")
+		return 70;
+	else if (atomSymbol == "Lu")
+		return 71;
+	else if (atomSymbol == "Hf")
+		return 72;
 	else if (atomSymbol == "Ta")
 		return 73;
 	else if (atomSymbol == "W")
 		return 74;
-
+	else if (atomSymbol == "Re")
+		return 75;
+	else if (atomSymbol == "Os")
+		return 76;
+	else if (atomSymbol == "Ir")
+		return 77;
+	else if (atomSymbol == "Pt")
+		return 78;
+	else if (atomSymbol == "Au")
+		return 79;
+	else if (atomSymbol == "Hg")
+		return 80;
+	else if (atomSymbol == "Tl")
+		return 81;
+	else if (atomSymbol == "Pb")
+		return 82;
+	else if (atomSymbol == "Bi")
+		return 83;
+	else if (atomSymbol == "Po")
+		return 84;
+	else if (atomSymbol == "At")
+		return 85;
+	else if (atomSymbol == "Rn")
+		return 86;
+	else if (atomSymbol == "Fr")
+		return 87;
+	else if (atomSymbol == "Ra")
+		return 88;
+	else if (atomSymbol == "Ac")
+		return 89;
+	else if (atomSymbol == "Th")
+		return 90;
+	else if (atomSymbol == "Pa")
+		return 91;
+	else if (atomSymbol == "U")
+		return 92;
+	else if (atomSymbol == "Np")
+		return 93;
+	else if (atomSymbol == "Pu")
+		return 94;
+	else if (atomSymbol == "Am")
+		return 95;
+	else if (atomSymbol == "Cm")
+		return 96;
+	else if (atomSymbol == "Bk")
+		return 97;
+	else if (atomSymbol == "Cf")
+		return 98;
+	else if (atomSymbol == "Es")
+		return 99;
+	else if (atomSymbol == "Fm")
+		return 100;
+	else if (atomSymbol == "Md")
+		return 101;
+	else if (atomSymbol == "No")
+		return 102;
+	else if (atomSymbol == "Lr")
+		return 103;
 	// Should actually include messages for when I have an input i don't recognise
 	else return 1;
 

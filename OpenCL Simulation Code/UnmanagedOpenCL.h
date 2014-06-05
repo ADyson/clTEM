@@ -47,7 +47,7 @@ public:
 	void MultisliceStep(int stepno, int steps);
 	void MakeSTEMWaveFunction(float posx, float posy);
 
-	void GetAtomCoords(float* x, float* y, float* z, int length);
+	void GetAtomCoords(float* x, float* y, float* z, int* a, int length);
 	void SetDevice(int index);
 	size_t MemoryUsed();
 

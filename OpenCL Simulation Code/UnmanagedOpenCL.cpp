@@ -154,12 +154,13 @@ UnmanagedOpenCL::~UnmanagedOpenCL()
 {
 };
 
-void UnmanagedOpenCL::GetAtomCoords(float* x, float* y, float* z, int length)
+void UnmanagedOpenCL::GetAtomCoords(float* x, float* y, float* z, int* a, int length)
 {
 	for(int i = 0; i < length; i++)
 	{
 		x[i] = Structure->Atoms[i].x;
 		y[i] = Structure->Atoms[i].y;
 		z[i] = Structure->Atoms[i].z;
+		a[i] = Structure->Atoms[i].Z;
 	}
 }
