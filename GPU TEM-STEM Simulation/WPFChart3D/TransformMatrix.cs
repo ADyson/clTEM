@@ -27,6 +27,13 @@ namespace WPFChart3D
         public void ResetView()
         {
             m_viewMatrix.SetIdentity();
+            m_totalMatrix = Matrix3D.Multiply(m_projMatrix, m_viewMatrix);
+        }
+
+        public void DirView(Matrix3D dir)
+        {
+            m_viewMatrix = dir;
+            m_totalMatrix = Matrix3D.Multiply(m_projMatrix, m_viewMatrix);
         }
 
         public void OnLBtnDown(Point pt)

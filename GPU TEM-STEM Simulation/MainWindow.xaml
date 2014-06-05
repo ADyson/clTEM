@@ -135,32 +135,11 @@
                 <TabItem Header="Model" x:Name="ModelTab">
                     <Grid Background="#FFE5E5E5">
 
-
-
-
-                        <!--<Viewport3D Name="mainViewport" 
-                                    Grid.Column="1" 
-                                    Grid.Row="0"
-                                    ClipToBounds = "False"  
-                                    IsHitTestVisible="false"
-                                    RenderOptions.EdgeMode="Aliased">
-                            <Viewport3D.Camera>
-                                <PerspectiveCamera LookDirection="0,0,-20" UpDirection="0,1,0" Position="0,0,100" />
-                            </Viewport3D.Camera>
-                            <ModelVisual3D>
-                                <ModelVisual3D.Content>
-                                    <Model3DGroup x:Name="group3d">
-                                        <SpotLight Position="50,50,50" x:Name="mySpotLight" Color="White"  InnerConeAngle="100" OuterConeAngle="1000" Range="100" />
-                                    </Model3DGroup>
-                                </ModelVisual3D.Content>
-                            </ModelVisual3D>
-                        </Viewport3D>-->
                         <Viewport3D Name="mainViewport" 
-                                    Grid.Column="1" 
                                     Grid.Row="0"
                                     ClipToBounds = "True"  
                                     IsHitTestVisible="false"
-                                    RenderOptions.EdgeMode="Aliased">
+                                    RenderOptions.EdgeMode="Aliased"  Margin="0,0,0,35">
                             <Viewport3D.Camera>
                                 <OrthographicCamera x:Name="camera" Width="2"
                                                     FarPlaneDistance="10"
@@ -187,8 +166,13 @@
                                 </ModelVisual3D>
                             </Viewport3D.Children>
                         </Viewport3D>
-                        <Canvas x:Name="canvasOn3D" Grid.Column="1" Grid.Row="0" Background="Transparent" Margin="0,0,0,0"
-                                MouseUp="OnViewportMouseUp"  MouseDown="OnViewportMouseDown" MouseMove="OnViewportMouseMove"/>
+                        <Canvas x:Name="canvasOn3D" Grid.Row="0" Background="Transparent"
+                                MouseUp="OnViewportMouseUp"  MouseDown="OnViewportMouseDown" MouseMove="OnViewportMouseMove" Height="521" VerticalAlignment="Top"/>
+                        <Button x:Name="Model100button" Content="[100]" Margin="5,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" Height="25" Click="Model100button_Click"/>
+                        <Button x:Name="Model010Button" Content="[010]" Margin="85,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" Height="25" Click="Model010Button_Click"/>
+                        <Button x:Name="Model001Button" Content="[001]" Margin="165,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" RenderTransformOrigin="2.289,0.683" Height="25" Click="Model001Button_Click"/>
+
+
                     </Grid>
                 </TabItem>
                 <TabItem Header="CTEM" x:Name="CTEMTab">
@@ -244,7 +228,7 @@
                     <ComboBox Name="DeviceSelector" Width="250" SelectionChanged="DeviceSelector_SelectionChanged" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed"/>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="2">
-                    <Label x:Name="statusmessage" Content=""/> 
+                    <Label x:Name="statusmessage" Content=""/>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="3">
                     <Label HorizontalContentAlignment="Right" Width="Auto" HorizontalAlignment="Right" x:Name="statusmessage2" Content=""/>

@@ -1605,5 +1605,27 @@ namespace GPUTEMSTEMSimulation
 
         }
 
+        private void Model100button_Click(object sender, RoutedEventArgs e)
+        {
+            Matrix3D test = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+            m_transformMatrix.DirView(test);
+            TransformChart();
+        }
+
+        private void Model010Button_Click(object sender, RoutedEventArgs e)
+        {
+            Matrix3D test = new Matrix3D(-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+            test.Rotate(new Quaternion(new Vector3D(1, 0, 0), 90));
+            m_transformMatrix.DirView(test);
+            TransformChart();
+        }
+
+        private void Model001Button_Click(object sender, RoutedEventArgs e)
+        {
+            Matrix3D test = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+            test.Rotate(new Quaternion(new Vector3D(0, 1, 0), 90));
+            m_transformMatrix.DirView(test);
+            TransformChart();
+        }
     }
 }
