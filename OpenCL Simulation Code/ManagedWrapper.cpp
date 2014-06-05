@@ -246,4 +246,12 @@ namespace ManagedOpenCLWrapper
 		std::string UMstring = _UMOpenCL->getCLdevString(i, getShort);
 		return clix::marshalString<clix::E_ANSI>(UMstring);
 	}
+
+	void ManagedOpenCL::GetAtomCoords(array<float>^ x,array<float>^ y, array<float>^ z, int length)
+	{
+		pin_ptr<float> px = &x[0];
+		pin_ptr<float> py = &y[0];
+		pin_ptr<float> pz = &z[0];
+		_UMOpenCL->GetAtomCoords(px,py,pz,length);
+	};
 }

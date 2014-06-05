@@ -47,6 +47,22 @@ namespace WPFChart3D
 
             if (Keyboard.IsKeyDown(Key.LeftCtrl)|| Keyboard.IsKeyDown(Key.RightCtrl))
             {
+				 double shiftX = (pt.X - m_movePoint.X) /( width);
+				 double shiftY = (pt.Y - m_movePoint.Y)/( height);
+				 double angle = Math.Atan2(shiftY, shiftX);
+				 double distance = Math.Sqrt(shiftX * shiftX + shiftY * shiftY);
+				double scale = 1;
+				if (angle < Math.PI / 2)
+				{
+					scale = 1.1;
+				}
+				else
+				{
+					scale = 1.0 / (1.1);
+				}
+				
+				m_viewMatrix.Scale(new Vector3D(scale,scale,scale));
+				m_movePoint = pt;
             }
             else if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
             {

@@ -54,7 +54,7 @@ namespace WPFChart3D
                         dot = new Cylinder3D(w, w, h, 7);
                         break;
                     case (int)SHAPE.ELLIPSE:
-                        dot = new Ellipse3D(w, w, h, 7);
+                        dot = new Ellipse3D(w, w, h, 5);
                         break;
                     case (int)SHAPE.PYRAMID:
                         dot = new Pyramid3D(w, w, h);

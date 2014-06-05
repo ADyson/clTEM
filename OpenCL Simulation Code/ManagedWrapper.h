@@ -41,6 +41,7 @@ namespace ManagedOpenCLWrapper {
 		float GetSTEMPixel(float inner, float outer);
 		void AddTDS();
 		void ClearTDS();
+		void GetAtomCoords(array<float>^ x,array<float>^ y, array<float>^ z, int length);
 
 		int getCLdevCount();
 		String^ getCLdevString(int i, bool getShort);

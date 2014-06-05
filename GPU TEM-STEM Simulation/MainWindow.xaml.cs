@@ -95,30 +95,13 @@ namespace GPUTEMSTEMSimulation
         STEMArea LockedArea;
         float pixelScale;
 
-
-
-
-
-
-
-
-
-
         //private List<ModelVisual3D> sphereModels = new List<ModelVisual3D>();
 
         private WPFChart3D.Chart3D m_3dChart;
+		private ArrayList meshs;
 
         public WPFChart3D.TransformMatrix m_transformMatrix = new WPFChart3D.TransformMatrix();
         public int m_nChartModelIndex = -1;
-
-
-
-
-
-
-
-
-
 
         private void UpdateMaxMrad()
         {
@@ -223,91 +206,9 @@ namespace GPUTEMSTEMSimulation
             DeviceSelector.ItemsSource = devicesShort;
 
 
-
-
-
-
-            int nDotNo = 100;
-
-            // 1. set scatter chart data no.
-            m_3dChart = new ScatterChart3D();
-            m_3dChart.SetDataNo(nDotNo); //number of objects/shapes
-
-            // 2. set property of each dot (size, position, shape, color)
-            Random randomObject = new Random();
-            int nDataRange = 200;
-            for (int i = 0; i < nDotNo; i++)
-            {
-                ScatterPlotItem plotItem = new ScatterPlotItem();
-
-                plotItem.w = 4;
-                plotItem.h = 6;
-
-                plotItem.x = (float)randomObject.Next(nDataRange);
-                plotItem.y = (float)randomObject.Next(nDataRange);
-                plotItem.z = (float)randomObject.Next(nDataRange);
-
-                plotItem.shape = randomObject.Next(4);
-
-                Byte nR = (Byte)randomObject.Next(256);
-                Byte nG = (Byte)randomObject.Next(256);
-                Byte nB = (Byte)randomObject.Next(256);
-
-                plotItem.color = Color.FromRgb(nR, nG, nB);
-                ((ScatterChart3D)m_3dChart).SetVertex(i, plotItem);
-            }
-
-            // 3. set the axes
-            m_3dChart.GetDataRange();
-            m_3dChart.SetAxes();
-
-            // 4. get Mesh3D array from the scatter plot
-            ArrayList meshs = ((ScatterChart3D)m_3dChart).GetMeshes();
-
-            // 6. display scatter plot in Viewport3D
-            WPFChart3D.Model3D model3d = new WPFChart3D.Model3D();
-            m_nChartModelIndex = model3d.UpdateModel(meshs, null, m_nChartModelIndex, this.mainViewport);
-
-            // 7. set projection matrix
-            float viewRange = (float)nDataRange;
-            m_transformMatrix.CalculateProjectionMatrix(0, viewRange, 0, viewRange, 0, viewRange, 0.5);
-
-            TransformChart();
-
-
-
-            //Point3D sphere1 = new Point3D(0, 0, 30);
-            //Point3D sphere2 = new Point3D(0, 20, -30);
-            //Point3D sphere3 = new Point3D(20, -5, 0);
-            //Point3D sphere4 = new Point3D(-100, -100, -100);
-
-            //sphereModels.Add(CreateSphere(sphere1, 10, 20, 20, Colors.Brown));
-            //sphereModels.Add(CreateSphere(sphere2, 10, 20, 20, Colors.MediumVioletRed));
-            //sphereModels.Add(CreateSphere(sphere3, 10, 20, 20, Colors.LightSeaGreen));
-            //sphereModels.Add(CreateSphere(sphere4, 10, 20, 20, Colors.LightSeaGreen));
-
-            //sphereModels.ForEach(x => mainViewport.Children.Add(x));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
-        private void ImportStructureButton(object sender, RoutedEventArgs e)
+		private async void ImportStructureButton(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openDialog = new Microsoft.Win32.OpenFileDialog();
 
@@ -322,56 +223,55 @@ namespace GPUTEMSTEMSimulation
             {
                 fileNameLabel.Content = openDialog.FileName;
                 
-                // Now pass filename through to unmanaged where atoms can be imported inside structure class...
-                mCL.ImportStructure(openDialog.FileName);
-                mCL.UploadParameterisation();
-
-                // Update some dialogs if everything went OK.
-                Int32 Len = 0;
-                float MinX = 0;
-                float MinY = 0;
-                float MinZ = 0;
-                float MaxX = 0;
-                float MaxY = 0;
-                float MaxZ = 0;
-
-                mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
-
-                HaveStructure = true;
-
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
-                atomNumberLabel.Content = Len.ToString() + " Atoms";
-
-                if (IsResolutionSet)
-                {
-                    float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    pixelScale = BiggestSize / Resolution;
-                    PixelScaleLabel.Content = "Pixel Size (A): " + pixelScale.ToString("f2");
-
-                    UpdateMaxMrad();
-                }
-
-                // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
-
-
-                this.cancellationTokenSource = new CancellationTokenSource();
+				this.cancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = this.cancellationTokenSource.Token;
                 var progressReporter = new ProgressReporter();
-                var task = Task.Factory.StartNew(() =>
-                {
-                    // This is where we start sorting the atoms in the background ready to be processed later...
-                    mCL.SortStructure(TDS);
-                    return 0;
-                },cancellationToken);
 
-                // This runs on UI Thread so can access UI, probably better way of doing image though.
-                progressReporter.RegisterContinuation(task, () =>
-                {
-                    IsSorted = true;
-                });
+				var task = Task.Factory.StartNew(() =>
+				{
+					 // Now pass filename through to unmanaged where atoms can be imported inside structure class...
+					 mCL.ImportStructure(openDialog.FileName);
+					 mCL.UploadParameterisation();
+				}, cancellationToken).ContinueWith((sort) => 
+				{
+					mCL.SortStructure(TDS);
+				},cancellationToken,TaskContinuationOptions.LongRunning,TaskScheduler.Default);
 
+				Task.Factory.ContinueWhenAll(new[] {task}, ts =>
+				{
+					IsSorted = true;
+
+					// Update some dialogs if everything went OK.
+					Int32 Len = 0;
+					float MinX = 0;
+					float MinY = 0;
+					float MinZ = 0;
+					float MaxX = 0;
+					float MaxY = 0;
+					float MaxZ = 0;
+
+					mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
+
+					HaveStructure = true;
+
+					WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
+					HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
+					DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
+					atomNumberLabel.Content = Len.ToString() + " Atoms";
+
+					if (IsResolutionSet)
+					{
+						float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+						pixelScale = BiggestSize / Resolution;
+						PixelScaleLabel.Content = "Pixel Size (A): " + pixelScale.ToString("f2");
+
+						UpdateMaxMrad();
+					}
+
+					DrawAtoms();
+				},cancellationToken,TaskContinuationOptions.None,TaskScheduler.FromCurrentSynchronizationContext());
+
+				
             }
         }
         
@@ -512,7 +412,7 @@ namespace GPUTEMSTEMSimulation
                     if (LockedDetectors.Count == 0)
                     {
                         var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return 0;
+                        //return 0;
                     }
 
                     int numPix = LockedArea.xPixels * LockedArea.yPixels;
@@ -783,8 +683,8 @@ namespace GPUTEMSTEMSimulation
                 
                 // Cleanup
 
-                return 0;
-            }, cancellationToken);
+                //return 0;
+			}, cancellationToken,TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             // This runs on UI Thread so can access UI, probably better way of doing image though.
             //SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
@@ -1362,25 +1262,83 @@ namespace GPUTEMSTEMSimulation
         }
 
 
+		public void DrawAtoms()
+		{
+			m_3dChart = new ScatterChart3D();
 
+			int Len = 0;
+			float MinX = 0;
+			float MinY = 0;
+			float MinZ = 0;
+			float MaxX = 0;
+			float MaxY = 0;
+			float MaxZ = 0;
 
+			mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
 
+			WPFChart3D.Model3D model3d = new WPFChart3D.Model3D();
 
+			// Now we want to sorting the atoms ready for the simulation process do this in a background worker...
+			this.cancellationTokenSource = new CancellationTokenSource();
+			var cancellationToken = this.cancellationTokenSource.Token;
 
+			var task2 = Task.Factory.StartNew(LenAtoms =>
+			{
+				Thread.CurrentThread.Priority = ThreadPriority.Normal;
 
+				int nDotNo = (int)LenAtoms;
+				// 1. set scatter chart data no.
 
+				m_3dChart.SetDataNo(nDotNo); //number of objects/shapes
 
+				float[] xcoord = new float[nDotNo];
+				float[] ycoord = new float[nDotNo];
+				float[] zcoord = new float[nDotNo];
 
+				mCL.GetAtomCoords(xcoord, ycoord, zcoord, nDotNo);
 
+				// 2. set property of each dot (size, position, shape, color)
+				//Random randomObject = new Random();
+				//int nDataRange = 1500;
+				for (int i = 0; i < nDotNo; i++)
+				{
+					ScatterPlotItem plotItem = new ScatterPlotItem();
 
+					plotItem.w = 0.3f;
+					plotItem.h = 0.3f;
 
+					plotItem.x = xcoord[i];
+					plotItem.y = ycoord[i];
+					plotItem.z = zcoord[i];
 
+					plotItem.shape = (int)WPFChart3D.Chart3D.SHAPE.ELLIPSE;
 
+					Byte nR = (Byte)128;
+					Byte nG = (Byte)128;
+					Byte nB = (Byte)128;
 
+					plotItem.color = Color.FromRgb(nR, nG, nB);
+					((ScatterChart3D)m_3dChart).SetVertex(i, plotItem);
+				}
 
+				// 3. set the axes
+				m_3dChart.GetDataRange();
+				m_3dChart.SetAxes();
+				
+				meshs = new ArrayList(((ScatterChart3D)m_3dChart).GetMeshes());
+				
+			}, Len, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).ContinueWith((plot) =>
+				{
+					// 6. display scatter plot in Viewport3D
+					m_nChartModelIndex = model3d.UpdateModel(meshs, null, m_nChartModelIndex, this.mainViewport);
 
+					double largestdim = Math.Max(Math.Max(MaxX - MinX, MaxY - MinY), MaxZ - MinZ);
+					// 7. set projection matrix
+					m_transformMatrix.CalculateProjectionMatrix(MinX, MinX + largestdim, MinY, MinY + largestdim, MinZ, MinZ + largestdim, 0.8);
 
-
+					TransformChart();
+				}, cancellationToken, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+		}
 
 
         public void OnViewportMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs args)
@@ -1391,9 +1349,8 @@ namespace GPUTEMSTEMSimulation
             {
                 m_transformMatrix.OnLBtnDown(pt);
             }
-            //else if (args.ChangedButton == MouseButton.Right)
-            //{
-            //}
+
+
         }
 
         public void OnViewportMouseMove(object sender, System.Windows.Input.MouseEventArgs args)
