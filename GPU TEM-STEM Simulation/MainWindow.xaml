@@ -167,11 +167,16 @@
                             </Viewport3D.Children>
                         </Viewport3D>
                         <Canvas x:Name="canvasOn3D" Grid.Row="0" Background="Transparent"
-                                MouseUp="OnViewportMouseUp"  MouseDown="OnViewportMouseDown" MouseMove="OnViewportMouseMove" Height="521" VerticalAlignment="Top"/>
+                                MouseUp="OnViewportMouseUp"  MouseDown="OnViewportMouseDown" MouseMove="OnViewportMouseMove" Margin="0,0,0,35"/>
                         <Button x:Name="Model100button" Content="[100]" Margin="5,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" Height="25" Click="Model100button_Click"/>
                         <Button x:Name="Model010Button" Content="[010]" Margin="85,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" Height="25" Click="Model010Button_Click"/>
                         <Button x:Name="Model001Button" Content="[001]" Margin="165,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" RenderTransformOrigin="2.289,0.683" Height="25" Click="Model001Button_Click"/>
+                        
+                        <Button x:Name="ModeluvwButton_Copy" Content="Go" Margin="0,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="50" RenderTransformOrigin="2.289,0.683" Height="25" Click="ModeluvwButton_Click"/>
 
+                        <TextBox x:Name="uTextBox" MaskNameSpace:Masking.Mask="^[0-9]*$" HorizontalAlignment="Right" Margin="0,0,130,5" TextWrapping="Wrap" Text="0" Width="30" TextAlignment="Center" Height="25" VerticalAlignment="Bottom"/>
+                        <TextBox x:Name="vTextBox" MaskNameSpace:Masking.Mask="^[0-9]*$" HorizontalAlignment="Right" Margin="0,0,95,5" TextWrapping="Wrap" Text="0" Width="30" TextAlignment="Center" Height="25" VerticalAlignment="Bottom"/>
+                        <TextBox x:Name="wTextBox" MaskNameSpace:Masking.Mask="^[0-9]*$" HorizontalAlignment="Right" Margin="0,0,60,5" TextWrapping="Wrap" Text="1" Width="30" TextAlignment="Center" Height="25" VerticalAlignment="Bottom"/>
 
                     </Grid>
                 </TabItem>

@@ -1389,226 +1389,117 @@ namespace GPUTEMSTEMSimulation
         {
             switch (aNo)
             {
-                case 1: return Color.FromRgb(255,255,255);
-                    break;
-                case 2: return Color.FromRgb(217,255,255);
-                    break;
-                case 3: return Color.FromRgb(204,128,255);
-                    break;
-                case 4: return Color.FromRgb(194,255,0);
-                    break;
+                case 1: return Color.FromRgb(255, 255, 255);
+                case 2: return Color.FromRgb(217, 255, 255);
+                case 3: return Color.FromRgb(204, 128, 255);
+                case 4: return Color.FromRgb(194, 255, 0);
                 case 5: return Color.FromRgb(255, 181, 181);
-                    break;
                 case 6: return Color.FromRgb(144, 144, 144);
-                    break;
                 case 7: return Color.FromRgb(48, 80, 248);
-                    break;
                 case 8: return Color.FromRgb(255, 13, 13);
-                    break;
                 case 9: return Color.FromRgb(144, 224, 80);
-                    break;
                 case 10: return Color.FromRgb(179, 227, 245);
-                    break;
                 case 11: return Color.FromRgb(171, 92, 242);
-                    break;
                 case 12: return Color.FromRgb(138, 255, 0);
-                    break;
                 case 13: return Color.FromRgb(191, 166, 166);
-                    break;
                 case 14: return Color.FromRgb(240, 200, 160);
-                    break;
                 case 15: return Color.FromRgb(255, 128, 0);
-                    break;
                 case 16: return Color.FromRgb(255, 255, 48);
-                    break;
                 case 17: return Color.FromRgb(31, 240, 31);
-                    break;
                 case 18: return Color.FromRgb(128, 209, 227);
-                    break;
                 case 19: return Color.FromRgb(143, 64, 212);
-                    break;
                 case 20: return Color.FromRgb(61, 255, 0);
-                    break;
                 case 21: return Color.FromRgb(230, 230, 230);
-                    break;
                 case 22: return Color.FromRgb(191, 194, 199);
-                    break;
                 case 23: return Color.FromRgb(166, 166, 171);
-                    break;
                 case 24: return Color.FromRgb(138, 153, 199);
-                    break;
                 case 25: return Color.FromRgb(156, 122, 199);
-                    break;
                 case 26: return Color.FromRgb(224, 102, 51);
-                    break;
                 case 27: return Color.FromRgb(240, 144, 160);
-                    break;
                 case 28: return Color.FromRgb(80, 208, 80);
-                    break;
                 case 29: return Color.FromRgb(200, 128, 51);
-                    break;
                 case 30: return Color.FromRgb(125, 128, 176);
-                    break;
                 case 31: return Color.FromRgb(194, 143, 143);
-                    break;
                 case 32: return Color.FromRgb(102, 143, 143);
-                    break;
                 case 33: return Color.FromRgb(189, 128, 227);
-                    break;
                 case 34: return Color.FromRgb(255, 161, 0);
-                    break;
                 case 35: return Color.FromRgb(166, 41, 41);
-                    break;
                 case 36: return Color.FromRgb(92, 184, 209);
-                    break;
                 case 37: return Color.FromRgb(112, 46, 176);
-                    break;
                 case 38: return Color.FromRgb(0, 255, 0);
-                    break;
                 case 39: return Color.FromRgb(148, 255, 255);
-                    break;
                 case 40: return Color.FromRgb(148, 224, 224);
-                    break;
                 case 41: return Color.FromRgb(115, 194, 201);
-                    break;
                 case 42: return Color.FromRgb(84, 181, 181);
-                    break;
                 case 43: return Color.FromRgb(59, 158, 158);
-                    break;
                 case 44: return Color.FromRgb(36, 143, 143);
-                    break;
                 case 45: return Color.FromRgb(10, 125, 140);
-                    break;
                 case 46: return Color.FromRgb(0, 105, 133);
-                    break;
                 case 47: return Color.FromRgb(192, 192, 192);
-                    break;
                 case 48: return Color.FromRgb(255, 217, 143);
-                    break;
                 case 49: return Color.FromRgb(166, 117, 115);
-                    break;
                 case 50: return Color.FromRgb(102, 128, 128);
-                    break;
                 case 51: return Color.FromRgb(158, 99, 181);
-                    break;
                 case 52: return Color.FromRgb(212, 122, 0);
-                    break;
                 case 53: return Color.FromRgb(148, 0, 148);
-                    break;
                 case 54: return Color.FromRgb(66, 158, 176);
-                    break;
                 case 55: return Color.FromRgb(87, 23, 143);
-                    break;
                 case 56: return Color.FromRgb(0, 201, 0);
-                    break;
                 case 57: return Color.FromRgb(112, 212, 255);
-                    break;
                 case 58: return Color.FromRgb(255, 255, 199);
-                    break;
                 case 59: return Color.FromRgb(217, 255, 199);
-                    break;
                 case 60: return Color.FromRgb(199, 255, 199);
-                    break;
                 case 61: return Color.FromRgb(163, 255, 199);
-                    break;
                 case 62: return Color.FromRgb(143, 255, 199);
-                    break;
                 case 63: return Color.FromRgb(97, 255, 199);
-                    break;
                 case 64: return Color.FromRgb(69, 255, 199);
-                    break;
                 case 65: return Color.FromRgb(48, 255, 199);
-                    break;
                 case 66: return Color.FromRgb(31, 255, 199);
-                    break;
                 case 67: return Color.FromRgb(0, 255, 156);
-                    break;
                 case 68: return Color.FromRgb(0, 230, 117);
-                    break;
                 case 69: return Color.FromRgb(0, 212, 82);
-                    break;
                 case 70: return Color.FromRgb(0, 191, 56);
-                    break;
                 case 71: return Color.FromRgb(0, 171, 36);
-                    break;
                 case 72: return Color.FromRgb(77, 194, 255);
-                    break;
                 case 73: return Color.FromRgb(77, 166, 255);
-                    break;
                 case 74: return Color.FromRgb(33, 148, 214);
-                    break;
                 case 75: return Color.FromRgb(38, 125, 171);
-                    break;
                 case 76: return Color.FromRgb(38, 102, 150);
-                    break;
                 case 77: return Color.FromRgb(23, 84, 135);
-                    break;
                 case 78: return Color.FromRgb(208, 208, 224);
-                    break;
                 case 79: return Color.FromRgb(255, 209, 35);
-                    break;
                 case 80: return Color.FromRgb(184, 184, 208);
-                    break;
                 case 81: return Color.FromRgb(166, 84, 77);
-                    break;
                 case 82: return Color.FromRgb(87, 89, 97);
-                    break;
                 case 83: return Color.FromRgb(158, 79, 181);
-                    break;
                 case 84: return Color.FromRgb(171, 92, 0);
-                    break;
                 case 85: return Color.FromRgb(117, 79, 69);
-                    break;
                 case 86: return Color.FromRgb(66, 130, 150);
-                    break;
                 case 87: return Color.FromRgb(66, 0, 102);
-                    break;
                 case 88: return Color.FromRgb(0, 125, 0);
-                    break;
                 case 89: return Color.FromRgb(112, 171, 250);
-                    break;
                 case 90: return Color.FromRgb(0, 186, 255);
-                    break;
                 case 91: return Color.FromRgb(0, 161, 255);
-                    break;
                 case 92: return Color.FromRgb(0, 143, 255);
-                    break;
                 case 93: return Color.FromRgb(0, 128, 255);
-                    break;
                 case 94: return Color.FromRgb(0, 107, 255);
-                    break;
                 case 95: return Color.FromRgb(84, 92, 242);
-                    break;
                 case 96: return Color.FromRgb(120, 92, 227);
-                    break;
                 case 97: return Color.FromRgb(138, 79, 227);
-                    break;
                 case 98: return Color.FromRgb(161, 54, 212);
-                    break;
                 case 99: return Color.FromRgb(179, 31, 212);
-                    break;
                 case 100: return Color.FromRgb(179, 31, 186);
-                    break;
                 case 101: return Color.FromRgb(179, 13, 166);
-                    break;
                 case 102: return Color.FromRgb(189, 13, 135);
-                    break;
                 case 103: return Color.FromRgb(199, 0, 102);
-                    break;
-                default: return Color.FromRgb(255,255,255);
-                    break;
+                default: return Color.FromRgb(255, 255, 255);
             }
-
-
-
-
-
         }
 
         private void Model100button_Click(object sender, RoutedEventArgs e)
         {
             Matrix3D temp = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-            temp.Rotate(new Quaternion(new Vector3D(0, 1, 0), 90));
+            temp.Rotate(new Quaternion(new Vector3D(0, -1, 0), 90));
             m_transformMatrix.DirView(temp);
             TransformChart();
         }
@@ -1616,7 +1507,7 @@ namespace GPUTEMSTEMSimulation
         private void Model010Button_Click(object sender, RoutedEventArgs e)
         {
             Matrix3D temp = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-            temp.Rotate(new Quaternion(new Vector3D(-1, 0, 0), 90));
+            temp.Rotate(new Quaternion(new Vector3D(1, 0, 0), 90));
             m_transformMatrix.DirView(temp);
             TransformChart();
         }
@@ -1627,5 +1518,83 @@ namespace GPUTEMSTEMSimulation
             m_transformMatrix.DirView(temp);
             TransformChart();
         }
+
+        private void ModeluvwButton_Click(object sender, RoutedEventArgs e)
+        {
+            float x = Convert.ToSingle(uTextBox.Text);
+            float y = Convert.ToSingle(vTextBox.Text);
+            float z = Convert.ToSingle(wTextBox.Text);
+
+            //float mag1 = (float)Math.Sqrt(u * u + v * v);
+
+            //var ang1Rad = Math.Acos(1 / u);
+            //var ang1Deg = (ang1Rad * 180) / Math.PI;
+
+            Vector3D zAxis = new Vector3D(0, 0, 1);
+            Vector3D newAxis = new Vector3D(x, y, z);
+
+            double angle = Vector3D.AngleBetween(zAxis,newAxis);
+            angle = (angle * Math.PI) / 180;
+
+            double heading, attitude, bank;
+
+            double s = Math.Sin(angle);
+            double c = Math.Cos(angle);
+            double t = 1 - c;
+            //  if axis is not already normalised then uncomment this
+            float magnitude = (float)Math.Sqrt(x*x + y*y + z*z);
+            if (magnitude==0) return;
+            x /= magnitude;
+            y /= magnitude;
+            z /= magnitude;
+            if ((x * y * t + z * s) > 0.998)
+            { // north pole singularity detected
+                heading = 2 * Math.Atan2(x * Math.Sin(angle / 2), Math.Cos(angle / 2));
+                attitude = Math.PI / 2;
+                bank = 0;
+                return;
+            }
+            if ((x * y * t + z * s) < -0.998)
+            { // south pole singularity detected
+                heading = -2 * Math.Atan2(x * Math.Sin(angle / 2), Math.Cos(angle / 2));
+                attitude = -Math.PI / 2;
+                bank = 0;
+                return;
+            }
+            heading = Math.Atan2(y * s - x * z * t, 1 - (y * y + z * z) * t);
+            attitude = Math.Asin(x * y * t + z * s);
+            bank = Math.Atan2(x * s - y * z * t, 1 - (x * x + z * z) * t);
+
+
+
+
+            //var rotx = Math.Atan2( y, z );
+            //var roty = Math.Atan2( x * Math.Cos(rotx), z );
+            //var rotz = Math.Atan2(Math.Cos(rotx), Math.Sin(rotx) * Math.Sin(roty));
+
+            var rotx = (heading * 180) / Math.PI;
+            var roty = (bank * 180) / Math.PI;
+            var rotz = (attitude * 180) / Math.PI;
+
+            //var ang2Rad = Math.Acos(1 / u);
+            //var ang2Deg = (ang1Rad * 180) / Math.PI;
+
+            Matrix3D temp = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+            temp.Rotate(new Quaternion(new Vector3D(1, 0, 0), rotx));
+            temp.Rotate(new Quaternion(new Vector3D(0, -1, 0), roty));
+            temp.Rotate(new Quaternion(new Vector3D(0, 0, 1), rotz));
+
+            m_transformMatrix.DirView(temp);
+            TransformChart();
+        }
+
+
+
+
+
+
+
+
+
     }
 }
