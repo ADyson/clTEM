@@ -1525,11 +1525,6 @@ namespace GPUTEMSTEMSimulation
             float y = Convert.ToSingle(vTextBox.Text);
             float z = Convert.ToSingle(wTextBox.Text);
 
-            //float mag1 = (float)Math.Sqrt(u * u + v * v);
-
-            //var ang1Rad = Math.Acos(1 / u);
-            //var ang1Deg = (ang1Rad * 180) / Math.PI;
-
             Vector3D zAxis = new Vector3D(0, 0, 1);
             Vector3D newAxis = new Vector3D(x, y, z);
 
@@ -1565,19 +1560,9 @@ namespace GPUTEMSTEMSimulation
             attitude = Math.Asin(x * y * t + z * s);
             bank = Math.Atan2(x * s - y * z * t, 1 - (x * x + z * z) * t);
 
-
-
-
-            //var rotx = Math.Atan2( y, z );
-            //var roty = Math.Atan2( x * Math.Cos(rotx), z );
-            //var rotz = Math.Atan2(Math.Cos(rotx), Math.Sin(rotx) * Math.Sin(roty));
-
             var rotx = (heading * 180) / Math.PI;
             var roty = (bank * 180) / Math.PI;
             var rotz = (attitude * 180) / Math.PI;
-
-            //var ang2Rad = Math.Acos(1 / u);
-            //var ang2Deg = (ang1Rad * 180) / Math.PI;
 
             Matrix3D temp = new Matrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
             temp.Rotate(new Quaternion(new Vector3D(1, 0, 0), rotx));
