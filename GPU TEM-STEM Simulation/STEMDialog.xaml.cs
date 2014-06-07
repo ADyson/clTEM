@@ -179,6 +179,35 @@ public class DetectorItem
 
     public TabItem Tab { get; set; }
 
+    public Ellipse innerEllipse { get; set; }
+
+    public Ellipse outerEllipse { get; set; }
+
+    public void updateEllipse(int res, float pxScale, float wavelength)
+    {
+        float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
+        float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+
+        float innerShift = (res) / 2 - innerRad;
+        float outerShift = (res) / 2 - outerRad;
+
+        innerEllipse = new Ellipse();
+        innerEllipse.Width = innerRad * 2;
+        innerEllipse.Height = innerRad * 2;
+        Canvas.SetTop(innerEllipse, innerShift);
+        Canvas.SetLeft(innerEllipse, innerShift);
+        innerEllipse.Stroke = Brushes.Red;
+        //innerEllipse.Visibility = System.Windows.Visibility.Hidden;
+
+        outerEllipse = new Ellipse();
+        outerEllipse.Width = outerRad * 2;
+        outerEllipse.Height = outerRad * 2;
+        Canvas.SetTop(outerEllipse, outerShift);
+        Canvas.SetLeft(outerEllipse, outerShift);
+        innerEllipse.Stroke = Brushes.Red;
+        //outerEllipse.Visibility = System.Windows.Visibility.Hidden;
+    }
+
     private WriteableBitmap ImgBMP;
 
     public WriteableBitmap _ImgBMP

@@ -24,6 +24,7 @@ using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
 using PanAndZoom;
+using ColourGenerator;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -89,8 +90,9 @@ namespace GPUTEMSTEMSimulation
 
         public STEMArea STEMRegion = new STEMArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
         STEMArea LockedArea;
-        float pixelScale;
 
+        float pixelScale;
+        float wavelength;
 
         private void UpdateMaxMrad()
         {
@@ -115,9 +117,8 @@ namespace GPUTEMSTEMSimulation
             if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
             {
                 float echarge = 1.6e-19f;
-                float wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
+                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
                     (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
-
                 float mrads = 1000 * MaxFreq * wavelength;
 
                 MaxMradsLabel.Content = "Max reciprocal (mrad): " + mrads.ToString("f2");
@@ -403,6 +404,33 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
+                    progressReporter.ReportProgress((val) =>
+                    {
+                        diffCanvas.Width = Resolution;
+                        diffCanvas.Height = Resolution;
+
+                        // enable checkbox here if it is implemented?
+                        // will also possibly change initial visibility of ellipses
+
+                        ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+                        var converter = new System.Windows.Media.BrushConverter();
+
+                        foreach (DetectorItem i in LockedDetectors)
+                        {
+                            // calculate the radii
+                            i.updateEllipse(Resolution, pixelScale, wavelength);
+                            //color setting should maybe be done when updating the ellipse?
+                            Brush dBrush = (Brush)converter.ConvertFromString("#FF" + cgen.NextColour());
+                            i.innerEllipse.Stroke = dBrush;
+                            i.outerEllipse.Stroke = dBrush;
+
+                            // add to canvas
+                            diffCanvas.Children.Add(i.innerEllipse);
+                            diffCanvas.Children.Add(i.outerEllipse);
+                        }
+                    }, 0);
+
+
                     int numPix = LockedArea.xPixels * LockedArea.yPixels;
                     int pix = 0;
 
@@ -636,7 +664,6 @@ namespace GPUTEMSTEMSimulation
                         {
                             _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                             DiffImageDisplay.Source = _DiffImg;
-
 
                             // Calculate the number of bytes per pixel (should be 4 for this format). 
                             var bytesPerPixel2 = (_DiffImg.Format.BitsPerPixel + 7) / 8;

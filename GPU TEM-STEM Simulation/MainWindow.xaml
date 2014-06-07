@@ -152,7 +152,12 @@
                 <TabItem Header="Diffraction" x:Name="DiffTab">
                     <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">
-                            <Image x:Name="DiffImageDisplay" Height="Auto" Width="Auto" />
+                            <Viewbox Stretch="Uniform">
+                                <Grid>
+                                    <Image x:Name="DiffImageDisplay" Height="Auto" Width="Auto" />
+                                    <Canvas x:Name="diffCanvas" Width="512" Height="512" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="Transparent"/>
+                                </Grid>
+                            </Viewbox>
                         </local:ZoomBorder>
                     </Grid>
                 </TabItem>
