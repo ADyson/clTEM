@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Globalization;
+
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+
 using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
@@ -25,22 +29,26 @@ namespace GPUTEMSTEMSimulation
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
 
+        public List<DetectorItem> mainDetectors;
+
         public STEMDialog(List<DetectorItem> MainDet)
         {
             InitializeComponent();
-            //DetectorListGrid.Columns[DetectorListGrid.Columns.Count - 1].Width = 100;
-            foreach (DetectorItem i in MainDet)
-            {
-                DetectorListView.Items.Add(i);
-            }
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
 
+            // make copy of the given detectors and add the to listview
+            mainDetectors = MainDet;
+            DetectorListView.ItemsSource = mainDetectors;
+
+            // needed so it doesnt default to on when too many items are selected
+            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
+            // to check if entry is valid
             bool valid = true;
 
+            // get the strings from the textboxes
             string Sname = NameTxtbx.Text;
             string Sin = InnerTxtbx.Text;
             string Sout = OuterTxtbx.Text;
@@ -48,26 +56,28 @@ namespace GPUTEMSTEMSimulation
             float Fin = 0;
             float Fout = 0;
 
+            // must have name
             if (Sname.Length == 0)
             {
                 NameTxtbx.RaiseTapEvent();
                 valid = false;
             }
 
-            Array ListItems = DetectorListView.Items.Cast<Object>().ToArray();
-            foreach (DetectorItem i in ListItems)
-            {
+            // check for duplicate names
+            foreach (DetectorItem i in mainDetectors)
                 if (i.Name.Equals(Sname))
                 {
                     valid = false;
                     NameTxtbx.RaiseTapEvent();
                     break;
                 }
-            }
 
+            // convert inputs to floats (error checking should be handled by regular expression)
             Fout = Convert.ToSingle(Sout);
             Fin = Convert.ToSingle(Sin);
 
+            // check the outer radii is bigger than the inner
+            // could just auto place the larger number as outer?
             if (Fin >= Fout)
             {
                 InnerTxtbx.RaiseTapEvent();
@@ -75,41 +85,63 @@ namespace GPUTEMSTEMSimulation
                 valid = false;
             }
 
+            // if anything went wrong above, exit here
             if (!valid)
-            {
                 return;
-            }
 
+            // create brush converter (used to get brush colours)
+            BrushConverter bc = new BrushConverter();
+
+            // create the tab and all children
             TabItem tempTab = new TabItem();
             tempTab.Header = Sname;
-
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0 };
-
             Grid tempGrid = new Grid();
-            BrushConverter bc = new BrushConverter();
             tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
             ZoomBorder tempZoom = new ZoomBorder();
             tempZoom.ClipToBounds = true;
-            temp.Image = new Image();
+            Image tImage = new Image();
 
-            tempZoom.Child = temp.Image;
+            // set children
+            tempZoom.Child = tImage;
             tempGrid.Children.Add(tempZoom);
-            temp.Tab.Content = tempGrid;
+            tempTab.Content = tempGrid;
 
-            // modify the mainWindow List
-            AddDetectorEvent(this, new DetectorArgs(temp));
+            // add everything to detector class
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0, Image = tImage, ColourIndex = mainDetectors.Count };
 
-            DetectorListView.Items.Add(temp);
+            // modify the mainWindow List by creating event
+            //AddDetectorEvent(this, new DetectorArgs(temp));
+
+            // add to the listview
+            mainDetectors.Add(temp);
+
+            DetectorListView.Items.Refresh();
+
+
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            Array selected = DetectorListView.SelectedItems.Cast<Object>().ToArray();
-            if (selected.Length > 0)
+            // get list of the selected items
+            List<DetectorItem> selected = DetectorListView.SelectedItems.Cast<Object>().OfType<DetectorItem>().ToList();
+
+            // check if anything was selected
+            if (selected.Count > 0)
             {
-                foreach (var item in selected) DetectorListView.Items.Remove(item);
-                // modify list in mainwindow
-                RemDetectorEvent(this, new DetectorArgs(selected));
+                // remove from listview
+                foreach (var item in selected) mainDetectors.Remove(item);//DetectorListView.Items.Remove(item);
+
+                // used for resetting the colour index
+                int i = 0;
+                foreach (var item in mainDetectors)
+                {
+                    item.ColourIndex = i;
+                    i++;
+                }
+
+                DetectorListView.Items.Refresh();
+
+                //RemDetectorEvent(this, new DetectorArgs(current));
             }
         }
 
@@ -158,11 +190,38 @@ namespace GPUTEMSTEMSimulation
         {
             get { return msgArr; }
         }
+
+        private List<DetectorItem> msgList;
+        public DetectorArgs(List<DetectorItem> sList)
+        {
+            msgList = sList;
+        }
+        public List<DetectorItem> DetectorList
+        {
+            get { return msgList; }
+        }
     }
 }
 
 public class DetectorItem
 {
+    public Brush ColBrush { get; set; }
+
+    public int ColourIndex
+    {
+        get 
+        {
+            return ColourIndex;
+        }
+        set
+        {
+            BrushConverter bc = new BrushConverter();
+            ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+            Brush tits = (Brush)bc.ConvertFromString("#FF" + cgen.IndexColour(value));
+            ColBrush = tits;
+        }
+    }
+
     public string Name { get; set; }
 
     public float Inner { get; set; }

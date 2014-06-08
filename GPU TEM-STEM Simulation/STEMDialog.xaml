@@ -5,6 +5,14 @@
         xmlns:t="clr-namespace:ErrTextBoxSample"
         xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
         Title="STEM Detectors" Height="229" Width="373" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" SizeToContent="Height" WindowStyle="ToolWindow">
+    <!--<Window.Resources>
+        <DataTemplate x:Key="ItemRectangle">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="10" Height="10" Fill="{Binding ColBrush}"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>-->
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -12,6 +20,18 @@
         <ListView x:Name="DetectorListView" Margin="10,10,0,10" HorizontalAlignment="Left" Width="252" Height="180" ScrollViewer.HorizontalScrollBarVisibility="Hidden" MouseEnter="DetectorListView_MouseEnter" MouseLeave="DetectorListView_MouseLeave">
             <ListView.View>
                 <GridView x:Name="DetectorListGrid" AllowsColumnReorder="False">
+
+                    <l:FixedWidthColumn FixedWidth ="25"> <!--DisplayMemberBinding="{Binding colRect}">-->
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader HorizontalContentAlignment="Center"/>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="10" Height="10" Fill="{Binding Path=ColBrush}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </l:FixedWidthColumn>
+                    
                     <l:FixedWidthColumn FixedWidth ="110" DisplayMemberBinding="{Binding Name}">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Content="Name" HorizontalContentAlignment="Left"/>

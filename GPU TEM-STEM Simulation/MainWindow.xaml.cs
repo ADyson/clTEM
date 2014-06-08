@@ -406,6 +406,8 @@ namespace GPUTEMSTEMSimulation
 
                     progressReporter.ReportProgress((val) =>
                     {
+                        diffCanvas.Children.Clear();
+
                         diffCanvas.Width = Resolution;
                         diffCanvas.Height = Resolution;
 
@@ -417,7 +419,7 @@ namespace GPUTEMSTEMSimulation
 
                         foreach (DetectorItem i in LockedDetectors)
                         {
-                            // calculate the radii
+                            // calculate the radii and eset properties
                             i.updateEllipse(Resolution, pixelScale, wavelength);
                             //color setting should maybe be done when updating the ellipse?
                             Brush dBrush = (Brush)converter.ConvertFromString("#FF" + cgen.NextColour());
@@ -738,6 +740,11 @@ namespace GPUTEMSTEMSimulation
 
                         float minBF = i.Min;
                         float maxBF = i.Max;
+
+                        if (minBF == maxBF)
+                        {
+                            minBF += 0.01f;
+                        }
 
                         for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
                             for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
@@ -1239,11 +1246,12 @@ namespace GPUTEMSTEMSimulation
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
-            foreach (DetectorItem i in evargs.DetectorArr)
-            {
-                LeftTab.Items.Remove(i.Tab);
-                Detectors.Remove(i);
-            }
+            //foreach (DetectorItem i in evargs.DetectorArr)
+            //{
+            //    LeftTab.Items.Remove(i.Tab);
+            //    Detectors.Remove(i);
+            //}
+            Detectors = evargs.DetectorList;
         }
 
         void STEM_AddArea(object sender, AreaArgs evargs)

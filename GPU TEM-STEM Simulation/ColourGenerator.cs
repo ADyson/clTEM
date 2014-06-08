@@ -14,13 +14,22 @@ namespace ColourGenerator
             index++;
             return colour;
         }
+
+        public string IndexColour(int ind)
+        {
+            index = ind;
+            string colour = string.Format(PatternGenerator.NextPattern(index),
+                intensityGenerator.IndexIntensity(index));
+            index++;
+            return colour;
+        }
     }
 
     public class PatternGenerator
     {
         public static string NextPattern(int index)
         {
-            switch (index % 7)
+            switch (index % 6)
             {
                 case 0: return "{0}0000";
                 case 1: return "00{0}00";
@@ -28,7 +37,7 @@ namespace ColourGenerator
                 case 3: return "{0}{0}00";
                 case 4: return "{0}00{0}";
                 case 5: return "00{0}{0}";
-                case 6: return "{0}{0}{0}";
+                //case 6: return "{0}{0}{0}";
                 default: throw new Exception("Math error");
             }
         }
@@ -45,7 +54,7 @@ namespace ColourGenerator
             {
                 current = 255;
             }
-            else if (index % 7 == 0)
+            else if (index % 6 == 0)
             {
                 if (walker == null)
                 {
@@ -61,6 +70,29 @@ namespace ColourGenerator
             if (currentText.Length == 1) currentText = "0" + currentText;
             return currentText;
         }
+
+        public string IndexIntensity(int index)
+        {
+            current = 255;
+            int lev = index/6;
+
+            for (int i = 0; i < lev;i++ )
+            {
+                if (walker == null)
+                {
+                    walker = new IntensityValueWalker();
+                }
+                else
+                {
+                    walker.MoveNext();
+                }
+                current = walker.Current.Value;
+            }
+            string currentText = current.ToString("X");
+            if (currentText.Length == 1) currentText = "0" + currentText;
+            return currentText;
+        }
+
     }
 
     public class IntensityValue
