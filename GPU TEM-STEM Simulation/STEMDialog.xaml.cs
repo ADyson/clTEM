@@ -109,15 +109,12 @@ namespace GPUTEMSTEMSimulation
             // add everything to detector class
             DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0, Image = tImage, ColourIndex = mainDetectors.Count };
 
-            // modify the mainWindow List by creating event
-            //AddDetectorEvent(this, new DetectorArgs(temp));
-
             // add to the listview
             mainDetectors.Add(temp);
-
             DetectorListView.Items.Refresh();
 
-
+            // modify the mainWindow List by creating event
+            AddDetectorEvent(this, new DetectorArgs(temp));
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
@@ -139,9 +136,11 @@ namespace GPUTEMSTEMSimulation
                     i++;
                 }
 
+                // update the listview
                 DetectorListView.Items.Refresh();
 
-                //RemDetectorEvent(this, new DetectorArgs(current));
+                // send changes to mainwindow
+                RemDetectorEvent(this, new DetectorArgs(selected));
             }
         }
 
@@ -181,16 +180,6 @@ namespace GPUTEMSTEMSimulation
             get { return msg; }
         }
 
-        private Array msgArr;
-        public DetectorArgs(Array sArr)
-        {
-            msgArr = sArr;
-        }
-        public Array DetectorArr
-        {
-            get { return msgArr; }
-        }
-
         private List<DetectorItem> msgList;
         public DetectorArgs(List<DetectorItem> sList)
         {
@@ -217,8 +206,7 @@ public class DetectorItem
         {
             BrushConverter bc = new BrushConverter();
             ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
-            Brush tits = (Brush)bc.ConvertFromString("#FF" + cgen.IndexColour(value));
-            ColBrush = tits;
+            ColBrush = (Brush)bc.ConvertFromString("#FF" + cgen.IndexColour(value));
         }
     }
 
@@ -242,30 +230,7 @@ public class DetectorItem
 
     public Ellipse outerEllipse { get; set; }
 
-    public void updateEllipse(int res, float pxScale, float wavelength)
-    {
-        float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
-        float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
-
-        float innerShift = (res) / 2 - innerRad;
-        float outerShift = (res) / 2 - outerRad;
-
-        innerEllipse = new Ellipse();
-        innerEllipse.Width = innerRad * 2;
-        innerEllipse.Height = innerRad * 2;
-        Canvas.SetTop(innerEllipse, innerShift);
-        Canvas.SetLeft(innerEllipse, innerShift);
-        innerEllipse.Stroke = Brushes.Red;
-        //innerEllipse.Visibility = System.Windows.Visibility.Hidden;
-
-        outerEllipse = new Ellipse();
-        outerEllipse.Width = outerRad * 2;
-        outerEllipse.Height = outerRad * 2;
-        Canvas.SetTop(outerEllipse, outerShift);
-        Canvas.SetLeft(outerEllipse, outerShift);
-        innerEllipse.Stroke = Brushes.Red;
-        //outerEllipse.Visibility = System.Windows.Visibility.Hidden;
-    }
+    public Ellipse ringEllipse { get; set; }
 
     private WriteableBitmap ImgBMP;
 
@@ -278,6 +243,68 @@ public class DetectorItem
     public float GetClampedPixel(int index)
     {
         return Math.Max(Math.Min(ImageData[index], Max), Min);
+    }
+
+    public void setEllipse(int res, float pxScale, float wavelength)
+    {
+        if (innerEllipse == null)
+            innerEllipse = new Ellipse();
+
+        if (outerEllipse == null)
+            outerEllipse = new Ellipse();
+
+        if (ringEllipse == null)
+            ringEllipse = new Ellipse();
+
+        DoubleCollection dashes = new DoubleCollection();
+        dashes.Add(4);
+        dashes.Add(4);
+
+        float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
+        float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+
+        float innerShift = (res) / 2 - innerRad;
+        float outerShift = (res) / 2 - outerRad;
+
+        innerEllipse.Width = innerRad * 2;
+        innerEllipse.Height = innerRad * 2;
+        Canvas.SetTop(innerEllipse, innerShift);
+        Canvas.SetLeft(innerEllipse, innerShift);
+        innerEllipse.Stroke = ColBrush;
+        innerEllipse.StrokeDashArray = dashes;
+
+        outerEllipse.Width = outerRad * 2;
+        outerEllipse.Height = outerRad * 2;
+        Canvas.SetTop(outerEllipse, outerShift);
+        Canvas.SetLeft(outerEllipse, outerShift);
+        outerEllipse.Stroke = ColBrush;
+        outerEllipse.StrokeDashArray = dashes;
+
+        ringEllipse.Width = outerRad * 2;
+        ringEllipse.Height = outerRad * 2;
+        Canvas.SetTop(ringEllipse, outerShift);
+        Canvas.SetLeft(ringEllipse, outerShift);
+        ringEllipse.Fill = ColBrush;
+
+        float ratio = innerRad / outerRad;
+        RadialGradientBrush LGB = new RadialGradientBrush();
+        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
+        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small different to give impression of sharp edge.
+        ringEllipse.OpacityMask = LGB;
+    }
+
+    public void AddToCanvas(Canvas destination)
+    {
+        destination.Children.Add(innerEllipse);
+        destination.Children.Add(outerEllipse);
+        destination.Children.Add(ringEllipse);
+    }
+
+    public void RemoveFromCanvas(Canvas destination)
+    {
+        destination.Children.Remove(innerEllipse);
+        destination.Children.Remove(outerEllipse);
+        destination.Children.Remove(ringEllipse);
     }
 
 }

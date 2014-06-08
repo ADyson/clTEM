@@ -190,7 +190,7 @@
                     <ComboBox Name="DeviceSelector" Width="250" SelectionChanged="DeviceSelector_SelectionChanged" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed"/>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="2">
-                    <Label x:Name="statusmessage" Content=""/> 
+                    <Label x:Name="statusmessage" Content=""/>
                 </StatusBarItem>
                 <StatusBarItem Grid.Column="3">
                     <Label HorizontalContentAlignment="Right" Width="Auto" HorizontalAlignment="Right" x:Name="statusmessage2" Content=""/>

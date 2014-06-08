@@ -419,16 +419,11 @@ namespace GPUTEMSTEMSimulation
 
                         foreach (DetectorItem i in LockedDetectors)
                         {
-                            // calculate the radii and eset properties
-                            i.updateEllipse(Resolution, pixelScale, wavelength);
-                            //color setting should maybe be done when updating the ellipse?
-                            Brush dBrush = (Brush)converter.ConvertFromString("#FF" + cgen.NextColour());
-                            i.innerEllipse.Stroke = dBrush;
-                            i.outerEllipse.Stroke = dBrush;
+                            // calculate the radii and reset properties
+                            i.setEllipse(Resolution, pixelScale, wavelength);
 
                             // add to canvas
-                            diffCanvas.Children.Add(i.innerEllipse);
-                            diffCanvas.Children.Add(i.outerEllipse);
+                            i.AddToCanvas(diffCanvas);
                         }
                     }, 0);
 
@@ -1184,7 +1179,7 @@ namespace GPUTEMSTEMSimulation
 
             // Stride is bytes per pixel times the number of pixels.
             // Stride is the byte width of a single rectangle row.
-            var stride2 = _DiffImg.PixelWidth * bytesPerPixel;
+            var stride2 = _DiffImg.PixelWidth * bytesPerPixel2;
 
             // Create a byte array for a the entire size of bitmap.
             var arraySize2 = stride2 * _DiffImg.PixelHeight;
@@ -1239,19 +1234,21 @@ namespace GPUTEMSTEMSimulation
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
-            Detectors.Add(evargs.Detector);
-            // draw the tab
             LeftTab.Items.Add(evargs.Detector.Tab);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
-            //foreach (DetectorItem i in evargs.DetectorArr)
-            //{
-            //    LeftTab.Items.Remove(i.Tab);
-            //    Detectors.Remove(i);
-            //}
-            Detectors = evargs.DetectorList;
+            foreach (DetectorItem i in evargs.DetectorList)
+            {
+                i.RemoveFromCanvas(diffCanvas);
+                LeftTab.Items.Remove(i.Tab);
+            }
+
+            foreach (DetectorItem i in Detectors)
+            {
+                i.setEllipse(Resolution, pixelScale, wavelength);
+            }
         }
 
         void STEM_AddArea(object sender, AreaArgs evargs)
