@@ -24,7 +24,7 @@
     </Window.Resources>
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="145"/>
+            <RowDefinition Height="150"/>
             <RowDefinition Height="140*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -35,95 +35,304 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
         <GroupBox Template="{StaticResource gbox}" Grid.Row="0" Grid.Column="0" Header="Import Structure" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto">
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto">
-                <Button Content="Import Structure" HorizontalAlignment="Left" Height="31" VerticalAlignment="Top" Width="103" Margin="0,7,0,0" Click="ImportStructureButton"/>
-                <Button IsEnabled="False" Content="Import Unit Cell" HorizontalAlignment="Left" Height="31" VerticalAlignment="Top" Width="103" Margin="0,43,0,0" Click="ImportUnitCellButton"/>
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <Button Content="Import Structure"
+                        Grid.Row="0" HorizontalAlignment="Left" Height="35" VerticalAlignment="Top" Width="100" Click="ImportStructureButton" Margin="2.5,2.5"/>
+
+                <Button Content="Import Unit Cell"
+                        Grid.Row="1" IsEnabled="False" HorizontalAlignment="Left" Height="35" VerticalAlignment="Top" Width="100" Click="ImportUnitCellButton" Margin="2.5,2.5"/>
             </Grid>
         </GroupBox>
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="1" Header="Structure Information" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto">
-            <Grid HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="Auto">
+        
+        <GroupBox Template="{StaticResource gbox}" Grid.Column="1" Header="Structure Information" Height="Auto" VerticalAlignment="Stretch">
+            <Grid Width="250"  Margin="2.5" HorizontalAlignment="Left">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Row="0" x:Name="WidthLabel" Content="Width (A):" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126.5" />
-                <Label Grid.Row="0" Grid.Column="2" x:Name="HeightLabel" Content="Height (A): " HorizontalAlignment="Left" VerticalAlignment="Top" Width="126.5" />
-                <Label Grid.Row="1" x:Name="DepthLabel" Content="Depth (A): " HorizontalAlignment="Left" VerticalAlignment="Top" Width="126.5" />
-                <Label Grid.Row="1" Grid.Column="2" x:Name="PixelScaleLabel" Content="Pixel Size (A):" HorizontalAlignment="Left" VerticalAlignment="Top" Width="126.5"/>
-                <Label Grid.Row="2" Grid.ColumnSpan="2" x:Name="MaxMradsLabel" Content="Max reciprocal (mrad):" HorizontalAlignment="Left" VerticalAlignment="Top" Width="253"/>
+
+                <Label Content="Width" 
+                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                <Label Content="Height" 
+                       Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                <Label Content="Depth" 
+                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                
+                <Label x:Name="WidthLabel" Content="12" 
+                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+                <Label x:Name="HeightLabel" Content="15" 
+                       Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+                <Label x:Name="DepthLabel" Content="1002" 
+                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+                
+                <Label Content="No. atoms" 
+                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                <Label Content="Pixel size" 
+                       Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                <Label Content="Max reciprocal" 
+                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1"/>
+                
+                <Label x:Name="AtomNoLabel" Content="50022324" 
+                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+                <Label x:Name="PixelScaleLabel" Content="4.025" 
+                       Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+                <Label x:Name="MaxMradsLabel" Content="20333 mrad" 
+                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
+
+                <Button x:Name="SetArea" Content="Set Area"
+                        Grid.Row="4" Grid.Column="0" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
+                <Button x:Name="Show3DButton" Content="Show 3D"
+                        Grid.Row="4" Grid.Column="1" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
             </Grid>
         </GroupBox>
+        
         <GroupBox Template="{StaticResource gbox}" Grid.Column="2" Header="Simulation Type" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
-            <Grid HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="Auto">
-                <RadioButton x:Name="TEMRadioButton" Content="TEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,15,0,0" Checked="SimTypeRadio_Checked" />
-                <RadioButton x:Name="CBEDRadioButton" Content="CBED" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,34.96,0,0" Checked="SimTypeRadio_Checked"/>
-                <RadioButton x:Name="STEMRadioButton" Content="STEM" HorizontalAlignment="Center" VerticalAlignment="Top" Height="19.96" Width="90.5" Margin="22,54.92,0,0" Checked="SimTypeRadio_Checked"/>
+            <Grid  Margin="2.5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <RadioButton x:Name="TEMRadioButton" Content="TEM"
+                             Grid.Row="0" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" />
+                <RadioButton x:Name="CBEDRadioButton" Content="CBED" 
+                             Grid.Row="1" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
+                <RadioButton x:Name="STEMRadioButton" Content="STEM" 
+                             Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
+                
+                <CheckBox Content="Full 3D Potential" 
+                          Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"/>
+
+                <Grid Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Resolution"
+                           Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                    <ComboBox x:Name="ResolutionCombo"
+                              Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="2.5,0" VerticalAlignment="Center" Width="75" SelectionChanged="ComboBox_SelectionChanged_1" SelectedValuePath="Content" Height="24">
+                        <ComboBoxItem Content="256"/>
+                        <ComboBoxItem Content="512"/>
+                        <ComboBoxItem Content="1024"/>
+                        <ComboBoxItem Content="2048"/>
+                        <ComboBoxItem Content="4096"/>
+                    </ComboBox>
+                </Grid>
+
             </Grid>
         </GroupBox>
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="3" Header="Options" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
-            <Grid HorizontalAlignment="Left" Height="100" VerticalAlignment="Top">
-                <CheckBox Content="Frozen Phonon" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-                <CheckBox Content="Absorptive Potential" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
-                <CheckBox Content="Full 3D Potential" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top"/>
-                <ComboBox x:Name="ResolutionCombo" HorizontalAlignment="Left" Margin="76,71,0,0" VerticalAlignment="Top" Width="70" SelectionChanged="ComboBox_SelectionChanged_1" SelectedValuePath="Content">
-                    <ComboBoxItem Content="256"/>
-                    <ComboBoxItem Content="512"/>
-                    <ComboBoxItem Content="1024"/>
-                    <ComboBoxItem Content="2048"/>
-                </ComboBox>
-                <Label Content="Resolution" HorizontalAlignment="Left" Margin="0,70,0,0" VerticalAlignment="Top" Width="71" HorizontalContentAlignment="Right"/>
-            </Grid>
-        </GroupBox>
+        
         <GroupBox Template="{StaticResource gbox}" Grid.Column="4" Header="Wave Function" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto">
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingDf" HorizontalAlignment="Left" Height="22" Margin="43,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingDf_TextChanged"/>
-                <Label Content="df:" HorizontalAlignment="Left" Margin="7,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingCs" HorizontalAlignment="Left" Height="22" Margin="43,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingCs_TextChanged"/>
-                <Label Content="Cs:" HorizontalAlignment="Left" Margin="7,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingA1" HorizontalAlignment="Left" Height="22" Margin="43,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1_TextChanged"/>
-                <Label Content="A1:" HorizontalAlignment="Left" Margin="7,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Name="ImagingA1theta" HorizontalAlignment="Left" Height="22" Margin="43,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA1theta_TextChanged"/>
-                <Label Content="A1 θ:" HorizontalAlignment="Left" Margin="3,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" Name="ImagingkV" HorizontalAlignment="Left" Height="22" Margin="138,4,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingkV_TextChanged"/>
-                <Label Content="kV:" HorizontalAlignment="Left" Margin="102,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" Name="Imagingbeta" HorizontalAlignment="Left" Height="22" Margin="138,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingbeta_TextChanged"/>
-                <Label Content="β:" HorizontalAlignment="Left" Margin="102,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" Name="Imagingdelta" HorizontalAlignment="Left" Height="22" Margin="138,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="Imagingdelta_TextChanged"/>
-                <Label Content="Δ:" HorizontalAlignment="Left" Margin="102,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" Name="ImagingAperture" HorizontalAlignment="Left" Height="22" Margin="138,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingAperture_TextChanged"/>
-                <Label Content="Aper:" HorizontalAlignment="Left" Margin="98,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingA2" HorizontalAlignment="Left" Margin="248,0,0,82" TextWrapping="Wrap" Text="" Width="55" Height="22" VerticalAlignment="Bottom" TextChanged="ImagingA2_TextChanged" />
-                <Label Content="A2:" HorizontalAlignment="Left" Margin="212,2,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingA2Phi" HorizontalAlignment="Left" Height="22" Margin="248,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingA2Phi_TextChanged" />
-                <Label Content="A2 θ:" HorizontalAlignment="Left" Margin="212,26,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingB2" HorizontalAlignment="Left" Height="22" Margin="248,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2_TextChanged" />
-                <Label Content="B2:" HorizontalAlignment="Left" Margin="212,50,0,0" VerticalAlignment="Top" Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" x:Name="ImagingB2Phi" HorizontalAlignment="Left" Height="22" Margin="248,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
-                <Label Content="B2 θ:" HorizontalAlignment="Left" Margin="208,73,0,-1" VerticalAlignment="Top" Width="40" HorizontalContentAlignment="Right"/>
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" Margin="2.5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="df:"
+                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingDf" Text=""
+                         Grid.Row="0" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingDf_TextChanged"/>
+
+                <Label Content="Cs:"
+                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingCs"
+                         Grid.Row="1" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" Text=""  Width="55" TextChanged="ImagingCs_TextChanged"/>
+
+                <Label Content="A1:"
+                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingA1" Text=""
+                         Grid.Row="2" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1_TextChanged"/>
+
+                <Label Content="A1 θ:"
+                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingA1theta" Text=""
+                         Grid.Row="3" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1theta_TextChanged"/>
+
+                <Label Content="kV:"
+                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingkV" Text=""
+                         Grid.Row="0" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
+
+                <Label Content="β:" 
+                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="Imagingbeta" Text=""
+                         Grid.Row="1" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingbeta_TextChanged"/>
+
+                <Label Content="Δ:" 
+                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox Name="Imagingdelta" Text=""
+                         Grid.Row="2" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingdelta_TextChanged"/>
+
+                <Label Content="Aper:" 
+                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
+                <TextBox Name="ImagingAperture" Text=""
+                         Grid.Row="3" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
+
+                <Label Content="A2:" 
+                       Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox x:Name="ImagingA2" Text=""
+                         Grid.Row="0" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="22"  TextChanged="ImagingA2_TextChanged" />
+
+                <Label Content="A2 θ:" 
+                       Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox x:Name="ImagingA2Phi" Text=""
+                         Grid.Row="1" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA2Phi_TextChanged" />
+
+                <Label Content="B2:" 
+                       Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
+                <TextBox x:Name="ImagingB2" Text=""
+                         Grid.Row="2" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2_TextChanged" />
+
+                <Label Content="B2 θ:" 
+                       Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
+                <TextBox x:Name="ImagingB2Phi" Text=""
+                         Grid.Row="3" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
+                
             </Grid>
         </GroupBox>
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="6" Header="Simulation" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
+
+        <GroupBox Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
             <Grid>
-                <Button x:Name="SimulateEWButton" Content="Simulate EW" HorizontalAlignment="Left" Height="39" Margin="2,6,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_1"/>
-                <Button x:Name ="SimulateImageButton" IsEnabled="False" Content="Simulate Image" HorizontalAlignment="Left" Height="39" Margin="2,51,0,0" VerticalAlignment="Top" Width="110" Click="Button_Click_SimImage"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name ="SimulateImageButton" Content="Simulate Image"
+                        Grid.Row="0" Height="35" Width="100" IsEnabled="False" Click="Button_Click_SimImage" Margin="2.5,2.5"/>
+
+                <Grid Grid.Row="1" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Dose:  "
+                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox x:Name="DoseBox" Text=""
+                             Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="55"/>
+                </Grid>
+
+                <Grid Grid.Row="2" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="CCD:  "
+                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="CCDCombo"
+                              Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="60" Height="24">
+                              <ComboBoxItem Content="N/A"/>
+                    </ComboBox>
+                </Grid>
+
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Column="5" Template="{StaticResource gbox}" x:Name="STEM" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
+
+        <GroupBox Grid.Column="6" Template="{StaticResource gbox}" x:Name="STEM" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
             <Grid>
-                <Button x:Name ="STEMDetButton" Content="Edit Detectors" HorizontalAlignment="Left" Height="39" Margin="0,7,0,0" VerticalAlignment="Top" Width="108" Click="STEMDet_Click"/>
-                <Button x:Name ="STEMAreaButton" Content="Select Region" HorizontalAlignment="Left" Height="39" Margin="0,51,0,0" VerticalAlignment="Top" Width="108" Click="STEMArea_Click"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name ="STEMDetButton" Content="Edit Detectors"
+                        Grid.Row="0" Height="35" VerticalAlignment="Top" Width="100" Click="STEMDet_Click" Margin="2.5,2.5"/>
+
+                <Button x:Name ="STEMAreaButton" Content="Select Region"
+                        Grid.Row="1" Height="35" VerticalAlignment="Top" Width="100" Click="STEMArea_Click" Margin="2.5,2.5"/>
+
+                <Grid Grid.Row="2" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Content="TDS:  "
+                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                    <TextBox x:Name="TDSCounts" Text=""
+                             Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
+                </Grid>
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Column="7" Template="{StaticResource gbox}" Header="" >
+
+        <GroupBox Template="{StaticResource gbox}" Grid.Column="7" Header="Simulation" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <Button x:Name="SimulateEWButton" Content="Simulate EW"
+                        Grid.Row="1" Height="35" Width="100" Click="Button_Click_1" Margin="2.5,2.5"/>
+
+            </Grid>
         </GroupBox>
+        
+        <GroupBox Grid.Column="8" Template="{StaticResource gbox}" Header="" />
 
         <Grid Grid.Row="1" Grid.ColumnSpan="8" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
