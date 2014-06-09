@@ -20,7 +20,7 @@ const char* AtomSortSource =
 ;
 // Should not have to be careful with edges as a small border is padded into the maximum and minimums.
 const char* AtomSort2Source = 
-"__kernel void clAtomSort(__global const float* xInput, __global const float* yInput, __global const float* zInput, int length, float MinX, float MaxX, float MinY, float MaxY, float MinZ, float MaxZ, int xBlocks, int yBlocks, __global int* bids, __global int* zids, float dz, int nSlices) \n"
+"__kernel void clAtomSort2(__global const float* xInput, __global const float* yInput, __global const float* zInput, int length, float MinX, float MaxX, float MinY, float MaxY, float MinZ, float MaxZ, int xBlocks, int yBlocks, __global int* bids, __global int* zids, float dz, int nSlices) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
 "	if(xid < length) \n"

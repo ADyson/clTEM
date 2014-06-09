@@ -51,22 +51,21 @@ void clState::Setup()
 		devices.push_back(NULL);
        
 		// get all devices
-        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &numdevices[i]);
+        status = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &numdevices[i]);
         devices[i] = (cl_device_id*) malloc(sizeof(cl_device_id) * numdevices[i]);
-        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, numdevices[i], devices[i], NULL);
-
-		clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &valueSize);
+		status = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, numdevices[i], devices[i], NULL);
+		status =	clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &valueSize);
 		Pvalue = (char*) malloc(valueSize);
-        clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, valueSize, Pvalue, NULL);
+		status =  clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, valueSize, Pvalue, NULL);
 		std::string pName = Pvalue;
 
         // for each device get and store name, platform, and device number
         for (int j = 0; j < numdevices[i]; j++) 
 		{
 			// get device name
-            clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, 0, NULL, &valueSize);
+			status =    clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, 0, NULL, &valueSize);
             value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, valueSize, value, NULL);
+			status =  clGetDeviceInfo(devices[i][j], CL_DEVICE_NAME, valueSize, value, NULL);
 			std::string dName = value;
 			devicenamesLong.push_back(std::to_string(i) + ": " + trim(pName) + ", " + std::to_string(j) + ": " + trim(dName));
 			devicenamesShort.push_back(std::to_string(i) + "," + std::to_string(j) + ": " + trim(dName));
@@ -107,9 +106,22 @@ void clState::SetDevice(int index)
 {
 	context = clCreateContext(NULL,numdevices[deviceplatform[index]],devices[deviceplatform[index]],NULL,NULL,&status);
 	clq = new clQueue();
-	clq->SetupQueue(context,devices[deviceplatform[index]][deviceid[index]]);
-	cldev = new clDevice(numdevices[deviceplatform[index]],devices[deviceplatform[index]]);
+	status = clq->SetupQueue(context,devices[deviceplatform[index]][deviceid[index]]);
+
+		if(status!=CL_SUCCESS)
+	{
+		throw "OpenCL Error setting device/platform";
+	}
+
+	// Rework this to pass a single device id instead of the pointer
+	//cldev = new clDevice(numdevices[deviceplatform[index]],&devices[deviceplatform[index]][deviceid[index]]);
+	cldev = new clDevice(devices[deviceplatform[index]][deviceid[index]]);
 	OpenCLAvailable = true;
+
+	if(status!=CL_SUCCESS)
+	{
+		throw "OpenCL Error setting device/platform";
+	}
 }
 
 

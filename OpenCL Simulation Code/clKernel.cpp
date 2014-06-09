@@ -53,11 +53,12 @@ clKernel::clKernel(cl_context &context, clDevice* cldev, std::string kernelname,
 
 void clKernel::BuildKernel()
 {
-	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->devices,NULL,NULL,NULL);
-	
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
+	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->DevPtr(),NULL,NULL,NULL);
+
+	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
+
 	char *buildlog = (char*)malloc(log*sizeof(char));
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
+	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
 
 	if(!status==0)
 	{
@@ -88,11 +89,12 @@ void clKernel::BuildKernelOld()
 		throw std::exception ("Problem with Kernel Source");
 	}
 
-	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->devices,NULL,NULL,NULL);
-	
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
+	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->DevPtr(),NULL,NULL,NULL);
+
+	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
+
 	char *buildlog = (char*)malloc(log*sizeof(char));
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
+	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
 
 	if(!status==0)
 	{
@@ -101,7 +103,7 @@ void clKernel::BuildKernelOld()
 		throw std::exception (message.c_str());
 	}
 
-	free(buildlog);
+	//free(buildlog);
 
 	this->kernel = clCreateKernel(kernelprogram,kernelname.c_str(),&status);
 

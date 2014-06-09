@@ -149,6 +149,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		SortSize[1] = 1;
 		SortSize[2] = 1;
 
+
 		clAtomSort->Enqueue(SortSize);
 	
 		//Malloc HBlockStuff
