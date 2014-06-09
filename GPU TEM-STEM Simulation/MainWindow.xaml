@@ -2,9 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PanAndZoom"
-    Title="Multislice Simulation" MinHeight="850" Height="850" Width="1220" MinWidth="1220"
+    Title="Multislice Simulation" MinHeight="850" Height="850" Width="1106" MinWidth="1220"
     xmlns:MaskNameSpace="clr-namespace:MaskedTextBox" Background="#FFFFFF" >
     <Window.Resources>
+        
         <ControlTemplate x:Key="gbox" TargetType="GroupBox">
             <Grid>
                 <Grid.RowDefinitions>
@@ -21,6 +22,7 @@
                 </Border>
             </Grid>
         </ControlTemplate>
+        
     </Window.Resources>
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
@@ -101,7 +103,7 @@
                 <Label x:Name="MaxMradsLabel" Content="--" 
                        Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
 
-                <Button x:Name="SetArea" Content="Set Area"
+                <Button x:Name="SetAreaButton" Content="Set Area"
                         Grid.Row="4" Grid.Column="0" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
                 <Button x:Name="Show3DButton" Content="Show 3D"
                         Grid.Row="4" Grid.Column="1" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
@@ -129,7 +131,7 @@
                 <RadioButton x:Name="STEMRadioButton" Content="STEM" 
                              Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
                 
-                <CheckBox Content="Full 3D Potential" 
+                <CheckBox x:Name="ToggleFull3D"  Content="Full 3D Potential" 
                           Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
                 <Grid Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center">
@@ -260,7 +262,7 @@
                     
                     <Label Content="Dose:  "
                              Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox x:Name="DoseBox" Text=""
+                    <TextBox x:Name="DoseTextBox" Text="1"
                              Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="59"/>
 
                     <Label Content="CCD:  "
@@ -300,9 +302,9 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox Content="TDS:  "
+                    <CheckBox x:Name="ToggleTDS" Content="TDS:  "
                               Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-                    <TextBox x:Name="TDSCounts" Text=""
+                    <TextBox x:Name="TDSCounts" Text="10"
                              Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
                 </Grid>
             </Grid>
@@ -311,8 +313,8 @@
         <GroupBox Template="{StaticResource gbox}" Grid.Column="7" Header="Simulation" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -320,7 +322,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Button x:Name="SimulateEWButton" Content="Simulate EW"
-                        Grid.Row="1" Height="35" Width="100" Click="Button_Click_1" Margin="2.5,2.5"/>
+                        Grid.Row="0" Height="35" Width="100" Click="Button_Click_1" Margin="2.5,2.5"/>
 
             </Grid>
         </GroupBox>
@@ -334,27 +336,36 @@
             </Grid.ColumnDefinitions>
             <!-- Left Image Tab Control-->
             <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,10,20,80" Grid.Row="1" >
+                
                 <TabItem Header="CTEM" x:Name="CTEMTab">
                     <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">
+                            
                             <Image x:Name="CTEMImageDisplay" Height="Auto" Width="Auto" />
+                            
                         </local:ZoomBorder>
                     </Grid>
                 </TabItem>
+                
                 <TabItem x:Name="EWTab" Header="EW">
                     <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">
+                            
                             <Image x:Name="EWImageDisplay" Height="Auto" Width="Auto" />
+                            
                         </local:ZoomBorder>
                     </Grid>
                 </TabItem>
             </TabControl>
+            
             <!-- Right Image Tab Control-->
             <TabControl Margin="20,10,20,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <TabItem Header="Diffraction" x:Name="DiffTab">
                     <Grid Background="#FFE5E5E5">
                         <local:ZoomBorder ClipToBounds="True">
-                            <Image x:Name="DiffImageDisplay" Height="Auto" Width="Auto" />
+                                
+                                <Image x:Name="DiffImageDisplay" Height="Auto" Width="Auto" Grid.Row="0"/>
+
                         </local:ZoomBorder>
                     </Grid>
                 </TabItem>
@@ -398,7 +409,7 @@
                 <StatusBarItem Grid.Column="3"/>
 
                 <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Right">
-                    <Label x:Name="statusmessage" Content="0 ms" HorizontalAlignment="Right"/>
+                    <Label x:Name="TimerMessage" Content="0 ms" HorizontalAlignment="Right"/>
                 </StatusBarItem>
 
                 <StatusBarItem Grid.Column="5">

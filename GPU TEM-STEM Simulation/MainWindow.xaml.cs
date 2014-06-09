@@ -388,7 +388,7 @@ namespace GPUTEMSTEMSimulation
                             this.progressBar1.Value =
                                 Convert.ToInt32(100*Convert.ToSingle(i)/
                                                 Convert.ToSingle(NumberOfSlices));
-                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                            this.TimerMessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
                             this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                         },i);
                       
@@ -465,7 +465,7 @@ namespace GPUTEMSTEMSimulation
                                         this.progressBar2.Value =
                                             Convert.ToInt32(100 * Convert.ToSingle(pix) /
                                                             Convert.ToSingle(numPix));
-                                        this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                                        this.TimerMessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
                                         this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                                     }, i);
                                 }
@@ -625,7 +625,7 @@ namespace GPUTEMSTEMSimulation
                                 this.progressBar2.Value =
                                     Convert.ToInt32(100 * Convert.ToSingle(j) /
                                                     Convert.ToSingle(runs));
-                                this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                                this.TimerMessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
                                 this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                             }, i);
                         }
