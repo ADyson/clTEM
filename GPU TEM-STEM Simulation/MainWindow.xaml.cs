@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,9 +119,9 @@ namespace GPUTEMSTEMSimulation
                 float wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
                     (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
 
-                float mrads = 1000 * MaxFreq * wavelength;
+                float mrads = (1000 * MaxFreq * wavelength) / 2;
 
-                MaxMradsLabel.Content = "Max reciprocal (mrad): " + mrads.ToString("f2");
+                MaxMradsLabel.Content = mrads.ToString("f2")+" mrad";
             }
 
         }
@@ -208,7 +209,9 @@ namespace GPUTEMSTEMSimulation
 
             if (result == true)
             {
-                fileNameLabel.Content = openDialog.FileName;
+                string fName = openDialog.FileName;
+                fileNameLabel.Content = System.IO.Path.GetFileName(fName);
+                fileNameLabel.ToolTip = fName;
                 
                 // Now pass filename through to unmanaged where atoms can be imported inside structure class...
                 mCL.ImportStructure(openDialog.FileName);
@@ -227,16 +230,16 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
-                atomNumberLabel.Content = Len.ToString() + " Atoms";
+                WidthLabel.Content = (MaxX - MinX).ToString("f2") + " Å";
+                HeightLabel.Content = (MaxY - MinY).ToString("f2") + " Å";
+                DepthLabel.Content = (MaxZ - MinZ).ToString("f2") + " Å";
+                AtomNoLabel.Content = Len.ToString();
 
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
                     pixelScale = BiggestSize / Resolution;
-                    PixelScaleLabel.Content = "Pixel Size (A): " + pixelScale.ToString("f2");
+                    PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
 
                     UpdateMaxMrad();
                 }
@@ -289,14 +292,14 @@ namespace GPUTEMSTEMSimulation
 
                 HaveStructure = true;
 
-                WidthLabel.Content = "Width (A): " + (MaxX - MinX).ToString("f2");
-                HeightLabel.Content = "Height (A): " + (MaxY - MinY).ToString("f2");
-                DepthLabel.Content = "Depth (A): " + (MaxZ - MinZ).ToString("f2");
-                atomNumberLabel.Content = Len.ToString() + " Atoms";
+                WidthLabel.Content = (MaxX - MinX).ToString("f2") + " Å";
+                HeightLabel.Content = (MaxY - MinY).ToString("f2") + " Å";
+                DepthLabel.Content = (MaxZ - MinZ).ToString("f2") + " Å";
+                AtomNoLabel.Content = Len.ToString();
 
                 float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
                 pixelScale = BiggestSize / Resolution;
-                PixelScaleLabel.Content = "Pixel Size (A): " + pixelScale.ToString("f2");
+                PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
 
                 UpdateMaxMrad();
             }
@@ -385,8 +388,8 @@ namespace GPUTEMSTEMSimulation
                             this.progressBar1.Value =
                                 Convert.ToInt32(100*Convert.ToSingle(i)/
                                                 Convert.ToSingle(NumberOfSlices));
-                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms."; 
-                            this.statusmessage2.Content = mem/(1024*1024) + " MB.";
+                            this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                            this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                         },i);
                       
                     }
@@ -462,8 +465,8 @@ namespace GPUTEMSTEMSimulation
                                         this.progressBar2.Value =
                                             Convert.ToInt32(100 * Convert.ToSingle(pix) /
                                                             Convert.ToSingle(numPix));
-                                        this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms.";
-										this.statusmessage2.Content = mem / (1024 * 1024) + " MB.";
+                                        this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                                        this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                                     }, i);
                                 }
                                 pix++;
@@ -622,8 +625,8 @@ namespace GPUTEMSTEMSimulation
                                 this.progressBar2.Value =
                                     Convert.ToInt32(100 * Convert.ToSingle(j) /
                                                     Convert.ToSingle(runs));
-                                this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms.";
-								this.statusmessage2.Content = mem / (1024 * 1024) + " MB.";
+                                this.statusmessage.Content = timer.ElapsedMilliseconds.ToString() + " ms";
+                                this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
                             }, i);
                         }
              
@@ -711,6 +714,11 @@ namespace GPUTEMSTEMSimulation
 
                         float minBF = i.Min;
                         float maxBF = i.Max;
+
+                        if (minBF == maxBF)
+                        {
+                            return; // throw an error maybe
+                        }
 
                         for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
                             for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
