@@ -567,13 +567,10 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 	ComplexMultiply->SetArgT(2,clWaveFunction2);
 	ComplexMultiply->Enqueue(Work);
 
-
-
 	// Propagate
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction3,CLFFT_FORWARD);
 
 	// BandLimit OK here?
-
 	ComplexMultiply->SetArgT(0,clWaveFunction3);
 	ComplexMultiply->SetArgT(1,clPropagator);
 	ComplexMultiply->SetArgT(2,clWaveFunction2);

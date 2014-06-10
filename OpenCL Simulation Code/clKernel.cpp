@@ -53,7 +53,10 @@ clKernel::clKernel(cl_context &context, clDevice* cldev, std::string kernelname,
 
 void clKernel::BuildKernel()
 {
-	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->DevPtr(),NULL,NULL,NULL);
+	// denorms now flushed to zero, and no checks for NaNs or infs, should be faster...
+	const char options[] = "-cl-finite-math-only -cl-strict-aliasing -cl-mad-enable -cl-denorms-are-zero";
+
+	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->DevPtr(),options,NULL,NULL);
 
 	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
 
