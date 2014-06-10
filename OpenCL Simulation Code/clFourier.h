@@ -1,6 +1,6 @@
 #pragma once
 #include <CL/opencl.h>
-#include "clAmdFft.h"
+#include "clFFT.h"
 #include <complex>
 #include "clKernel.h"
 #include "clMemory.h"
@@ -19,9 +19,9 @@ public:
 
 	cl_context* context;
 	clQueue* clq;
-	clAmdFftStatus fftStatus;
-	clAmdFftSetupData fftSetupData;
-	clAmdFftPlanHandle fftplan;
+	clfftStatus fftStatus;
+	clfftSetupData fftSetupData;
+	clfftPlanHandle fftplan;
 
 	//intermediate buffer	
 	Buffer clMedBuffer;
@@ -31,7 +31,7 @@ public:
 	cl_event outEvent;
 
 	void Setup(int width, int height);
-	void Enqueue(cl_mem &input, cl_mem &output, clAmdFftDirection Dir);
-	void Enqueue(Buffer &input, Buffer &output, clAmdFftDirection Dir);
+	void Enqueue(cl_mem &input, cl_mem &output, clfftDirection Dir);
+	void Enqueue(Buffer &input, Buffer &output, clfftDirection Dir);
 };
 

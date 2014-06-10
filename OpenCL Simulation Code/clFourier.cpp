@@ -9,7 +9,7 @@ clFourier::clFourier(void)
 clFourier::~clFourier(void)
 {
 	clMedBuffer.release();
-	clAmdFftDestroyPlan(&fftplan);
+	clfftDestroyPlan(&fftplan);
 }
 
 
@@ -23,8 +23,8 @@ void clFourier::Setup(int width, int height)
 {
 	// Perform setup for FFT's
 
-	clAmdFftInitSetupData(&fftSetupData);
-	fftStatus = clAmdFftSetup(&fftSetupData);
+	clfftInitSetupData(&fftSetupData);
+	fftStatus = clfftSetup(&fftSetupData);
 
 	//	Local Data
 	size_t buffSizeBytesIn = 0;
@@ -35,10 +35,10 @@ void clFourier::Setup(int width, int height)
 	cl_uint nBuffersOut = 0;
 	cl_uint profileCount = 0;
 
-	clAmdFftDim fftdim = CLFFT_2D;
-	clAmdFftResultLocation	place = CLFFT_OUTOFPLACE;
-	clAmdFftLayout inLayout  = CLFFT_COMPLEX_INTERLEAVED;
-	clAmdFftLayout outLayout = CLFFT_COMPLEX_INTERLEAVED;
+	clfftDim fftdim = CLFFT_2D;
+	clfftResultLocation	place = CLFFT_OUTOFPLACE;
+	clfftLayout inLayout  = CLFFT_COMPLEX_INTERLEAVED;
+	clfftLayout outLayout = CLFFT_COMPLEX_INTERLEAVED;
 
 	size_t clLengths[ 3 ];
 	size_t clPadding[ 3 ] = {0, 0, 0 };  // *** TODO
@@ -60,28 +60,28 @@ void clFourier::Setup(int width, int height)
 	fftBatchSize	= fftVectorSizePadded * batchSize;
 
 
-	fftStatus = clAmdFftCreateDefaultPlan( &fftplan, *context, fftdim, clLengths );
+	fftStatus = clfftCreateDefaultPlan( &fftplan, *context, fftdim, clLengths );
 
 	//	Default plan creates a plan that expects an inPlace transform with interleaved complex numbers
-	fftStatus = clAmdFftSetResultLocation( fftplan, place );
-	fftStatus = clAmdFftSetPlanPrecision(fftplan,CLFFT_SINGLE);
-	fftStatus = clAmdFftSetLayout( fftplan, inLayout, outLayout );
-	fftStatus = clAmdFftSetPlanBatchSize( fftplan, batchSize );
-	fftStatus = clAmdFftSetPlanScale (fftplan, CLFFT_FORWARD, 1/sqrtf(width * height));
-	fftStatus = clAmdFftSetPlanScale (fftplan, CLFFT_BACKWARD, 1/sqrtf(width * height));
+	fftStatus = clfftSetResultLocation( fftplan, place );
+	fftStatus = clfftSetPlanPrecision(fftplan,CLFFT_SINGLE);
+	fftStatus = clfftSetLayout( fftplan, inLayout, outLayout );
+	fftStatus = clfftSetPlanBatchSize( fftplan, batchSize );
+	fftStatus = clfftSetPlanScale (fftplan, CLFFT_FORWARD, 1/sqrtf(width * height));
+	fftStatus = clfftSetPlanScale (fftplan, CLFFT_BACKWARD, 1/sqrtf(width * height));
 
 	// Not using padding here yet
 	if ((clPadding[ 0 ] | clPadding[ 1 ] | clPadding[ 2 ]) != 0) {
-		clAmdFftSetPlanInStride  ( fftplan, fftdim, clStrides );
-		clAmdFftSetPlanOutStride ( fftplan, fftdim, clStrides );
-		clAmdFftSetPlanDistance  ( fftplan, clStrides[ fftdim ], clStrides[ fftdim ]);
+		clfftSetPlanInStride  ( fftplan, fftdim, clStrides );
+		clfftSetPlanOutStride ( fftplan, fftdim, clStrides );
+		clfftSetPlanDistance  ( fftplan, clStrides[ fftdim ], clStrides[ fftdim ]);
 	}
 
-	fftStatus = clAmdFftBakePlan( fftplan, 1, &clq->cmdQueue, NULL, NULL );
+	fftStatus = clfftBakePlan( fftplan, 1, &clq->cmdQueue, NULL, NULL );
 	
 	//get the buffersize
 	
-	fftStatus = clAmdFftGetTmpBufSize(fftplan, &buffersize );
+	fftStatus = clfftGetTmpBufSize(fftplan, &buffersize );
 		
 	if (buffersize)
 	{
@@ -90,23 +90,23 @@ void clFourier::Setup(int width, int height)
 	}
 }
 
-void clFourier::Enqueue(cl_mem &input, cl_mem &output, clAmdFftDirection Dir)
+void clFourier::Enqueue(cl_mem &input, cl_mem &output, clfftDirection Dir)
 {
 	if(buffersize)
-		fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
+		fftStatus = clfftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
 			&input, &output, clMedBuffer->buffer );
 	else
-		fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
+		fftStatus = clfftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
 			&input, &output, NULL );
 
 }
 
-void clFourier::Enqueue(Buffer &input, Buffer &output, clAmdFftDirection Dir)
+void clFourier::Enqueue(Buffer &input, Buffer &output, clfftDirection Dir)
 {
 	if(buffersize)
-		fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
+		fftStatus = clfftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
 			&input->buffer, &output->buffer, clMedBuffer->buffer );
 	else
-		fftStatus = clAmdFftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
+		fftStatus = clfftEnqueueTransform( fftplan, Dir, 1, &clq->cmdQueue, 0, NULL, NULL, 
 			&input->buffer, &output->buffer, NULL );
 }
