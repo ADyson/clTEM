@@ -14,9 +14,6 @@ clMemory::clMemory(size_t size)
 	context = clState::context;
 	clq = clState::clq;
 
-	if(Created==true)
-		throw "Tried to assign the same buffer twice";
-
 	buffer = clCreateBuffer(clState::context, CL_MEM_READ_WRITE, size, 0, &status);
 	Created=true;
 
@@ -28,9 +25,6 @@ clMemory::clMemory(size_t size, cl_mem_flags flags)
 {
 	context = clState::context;
 	clq = clState::clq;
-
-	if(Created==true)
-		throw "Tried to assign the same buffer twice";
 
 	buffer = clCreateBuffer(context, flags, size, 0, &status);
 	Created=true;
