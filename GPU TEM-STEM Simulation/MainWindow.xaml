@@ -5,8 +5,7 @@
     Title="Multislice Simulation" MinHeight="850" Height="850" Width="1194" MinWidth="1194"
     xmlns:MaskNameSpace="clr-namespace:MaskedTextBox" Background="#FFFFFF" >
     <Window.Resources>
-        
-        <ControlTemplate x:Key="gbox" TargetType="GroupBox">
+		<ControlTemplate x:Key="gbox" TargetType="GroupBox">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -174,64 +173,64 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Content="df:" ToolTip="??"
+                <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
                        Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingDf" Text="" ToolTip="??"
+				<TextBox Name="ImagingDf" Text="" ToolTip="Angstroms"
                          Grid.Row="0" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingDf_TextChanged"/>
 
-                <Label Content="Cs:" ToolTip="??"
+                <Label Content="Cs:" ToolTip="Spherical Aberration"
                        Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingCs" Text="" ToolTip="??"
+				<TextBox Name="ImagingCs" Text="" ToolTip="Angstroms"
                          Grid.Row="1" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingCs_TextChanged"/>
 
-                <Label Content="A1:"  ToolTip="??"
+                <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
                        Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingA1" Text=""  ToolTip="??"
+				<TextBox Name="ImagingA1" Text=""  ToolTip="Angstroms"
                          Grid.Row="2" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1_TextChanged"/>
 
-                <Label Content="A1 θ:"  ToolTip="??"
+                <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
                        Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingA1theta" Text=""  ToolTip="??"
+                <TextBox Name="ImagingA1theta" Text=""  ToolTip="Degrees"
                          Grid.Row="3" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1theta_TextChanged"/>
 
-                <Label Content="kV:"  ToolTip="??"
+                <Label Content="kV:"  ToolTip="Accelerating Voltage"
                        Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingkV" Text=""  ToolTip="??"
+                <TextBox Name="ImagingkV" Text=""  ToolTip="kilo Volts"
                          Grid.Row="0" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
 
-                <Label Content="β:" ToolTip="??"
+                <Label Content="β:" ToolTip="Convergence Angle"
                        Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Imagingbeta" Text="" ToolTip="??"
+                <TextBox Name="Imagingbeta" Text="" ToolTip="milliRadians"
                          Grid.Row="1" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingbeta_TextChanged"/>
 
-                <Label Content="Δ:" ToolTip="??"
+                <Label Content="Δ:" ToolTip="Defocus Spread"
                        Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox Name="Imagingdelta" Text="" ToolTip="??"
+                <TextBox Name="Imagingdelta" Text="" ToolTip="nm"
                          Grid.Row="2" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingdelta_TextChanged"/>
 
-                <Label Content="Aper:"  ToolTip="??"
+                <Label Content="Aper:"  ToolTip="Objective Aperture"
                        Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox Name="ImagingAperture" Text="" ToolTip="??"
+                <TextBox Name="ImagingAperture" Text="" ToolTip="milliRadians"
                          Grid.Row="3" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
 
-                <Label Content="A2:"  ToolTip="??"
+                <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
                        Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingA2" Text="" ToolTip="??"
+                <TextBox x:Name="ImagingA2" Text="" ToolTip="Angstroms"
                          Grid.Row="0" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="22"  TextChanged="ImagingA2_TextChanged" />
 
-                <Label Content="A2 θ:"  ToolTip="??"
+                <Label Content="A2 θ:"  ToolTip="3-fold Astimatism Angle"
                        Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingA2Phi" Text="" ToolTip="??"
+                <TextBox x:Name="ImagingA2Phi" Text="" ToolTip="Degrees"
                          Grid.Row="1" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA2Phi_TextChanged" />
 
-                <Label Content="B2:"  ToolTip="??"
+                <Label Content="B2:"  ToolTip="Coma Magnitude"
                        Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingB2" Text="" ToolTip="??"
+                <TextBox x:Name="ImagingB2" Text="" ToolTip="Angstroms"
                          Grid.Row="2" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2_TextChanged" />
 
-                <Label Content="B2 θ:"  ToolTip="??"
+                <Label Content="B2 θ:"  ToolTip="Coma Angle"
                        Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="ImagingB2Phi" Text="" ToolTip="??"
+                <TextBox x:Name="ImagingB2Phi" Text="" ToolTip="Degrees"
                          Grid.Row="3" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
                 
             </Grid>
@@ -259,13 +258,13 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <Label Content="Dose:  "
+
+					<Label Content="Dose:  " ToolTip="e/A^-2"
                              Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox x:Name="DoseTextBox" Text="1"
+					<TextBox x:Name="DoseTextBox" Text="1" ToolTip="e/A^-2"
                              Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="59"/>
 
-                    <Label Content="CCD:  "
+					<Label Content="CCD:  " ToolTip="Select a CCD to include detector characteristics for TEM image simulation"
                               Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     <ComboBox x:Name="CCDCombo"
                               Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="59" Height="24">
@@ -302,9 +301,9 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox x:Name="ToggleTDS" Content="TDS:  "
+					<CheckBox x:Name="ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
                               Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-                    <TextBox x:Name="TDSCounts" Text="10"
+					<TextBox x:Name="TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
                              Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
                 </Grid>
             </Grid>
@@ -395,8 +394,9 @@
                 </StatusBar.ItemsPanel>
 
                 <StatusBarItem Grid.Column="0">
-                    <ComboBox Name="DeviceSelector" Width="250" SelectionChanged="DeviceSelector_SelectionChanged" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed"/>
-                </StatusBarItem>
+					<ComboBox Name="DeviceSelector" HorizontalContentAlignment="Left" Width="250" SelectionChanged="DeviceSelector_SelectionChanged" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed">
+					</ComboBox>
+				</StatusBarItem>
 
                 <StatusBarItem Grid.Column="1">
                     <Label x:Name="MemUsageLabel" Content="0 MB" Width="Auto" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="0,0,10,0" />

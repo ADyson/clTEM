@@ -130,7 +130,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenCL.lib; clAmdFft.Runtime.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenCL.lib; clAmdFft.Runtime.lib; clFFT.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)CL" "$(SolutionDir)GPU TEM-STEM Simulation\bin\x64\Release\"  /s /i /y</Command>

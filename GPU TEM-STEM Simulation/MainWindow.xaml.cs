@@ -167,7 +167,7 @@ namespace GPUTEMSTEMSimulation
             ImagingA1theta.Text = "0";
             ImagingB2.Text = "0";
             ImagingB2Phi.Text = "0";
-            Imagingbeta.Text = "0.005";
+            Imagingbeta.Text = "5";
             Imagingdelta.Text = "3";
             ImagingDf.Text = "0";
             ImagingA2.Text = "0";
@@ -891,8 +891,18 @@ namespace GPUTEMSTEMSimulation
         private void ImagingA1theta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingA1theta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
+			bool ok = false;
+
+			ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
+            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
+
+			if (ok)
+			{
+				ImagingParameters.astigang *= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.astigang *= Convert.ToSingle((180 / Math.PI));
+			}
+
+			
         }
 
         private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
@@ -907,15 +917,31 @@ namespace GPUTEMSTEMSimulation
         private void Imagingbeta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingbeta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.beta);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
+			bool ok = false;
+            
+			ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.beta);
+            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
+			
+			if (ok)
+			{
+				ImagingParameters.beta /= 1000;
+				ProbeParameters.beta /= 1000;
+			}
         }
 
         private void Imagingdelta_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = Imagingdelta.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.delta);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
+			bool ok = false;
+
+            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.delta);
+            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
+
+			if (ok)
+			{
+				ImagingParameters.delta *= 10;
+				ProbeParameters.delta *= 10;
+			}
         }
 
         private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
@@ -1086,13 +1112,32 @@ namespace GPUTEMSTEMSimulation
         private void ImagingB2Phi_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingAperture.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2ang);
+			bool ok = false;
+
+			ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2ang);
+			ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.b2ang);
+
+			if (ok)
+			{
+				ImagingParameters.b2ang *= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.b2ang *= Convert.ToSingle((180 / Math.PI));
+			}
         }
 
         private void ImagingA2Phi_TextChanged(object sender, TextChangedEventArgs e)
         {
+
             string temporarytext = ImagingAperture.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2ang);
+			bool ok = false;
+
+			ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2ang);
+			ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astig2ang);
+
+			if (ok)
+			{
+				ImagingParameters.astig2ang *= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.astig2ang *= Convert.ToSingle((180 / Math.PI));
+			}
         }
 
         private void ImagingA2_TextChanged(object sender, TextChangedEventArgs e)
