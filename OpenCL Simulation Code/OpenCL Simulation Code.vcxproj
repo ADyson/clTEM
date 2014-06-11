@@ -147,6 +147,7 @@
     <ClInclude Include="clQueue.h" />
     <ClInclude Include="clState.h" />
     <ClInclude Include="CommonStructs.h" />
+    <ClInclude Include="mtf.h" />
     <ClInclude Include="stringFunc.h" />
     <ClInclude Include="ManagedWrapper.h" />
     <ClInclude Include="MultisliceStructure.h" />

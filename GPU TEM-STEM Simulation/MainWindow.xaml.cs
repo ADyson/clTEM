@@ -179,6 +179,9 @@ namespace GPUTEMSTEMSimulation
             DeviceSelector.SelectedIndex = -1;
             DeviceSelector.SelectedIndex = -1;
 
+			BinningCombo.SelectedIndex = 0;
+			CCDCombo.SelectedIndex = 0;
+
             // Add fake device names for now
             devicesShort = new List<String>();
             devicesLong = new List<String>();
@@ -1151,7 +1154,20 @@ namespace GPUTEMSTEMSimulation
             mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
-            mCL.SimulateCTEMImage();
+
+			// Calculate Dose Per Pixel
+			float dpp = Convert.ToSingle(DoseTextBox.Text) * (pixelScale * pixelScale);
+			// Get CCD and Binning
+
+			var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
+
+			int binning = Convert.ToInt32(bincombo.Content);
+			int CCD = CCDCombo.SelectedIndex;
+
+			if (CCD != 0)
+				mCL.SimulateCTEMImage(CCD,binning);
+			else
+				mCL.SimulateCTEMImage();
 
             //Update the displays
 
@@ -1160,7 +1176,11 @@ namespace GPUTEMSTEMSimulation
 
             // When its completed we want to get data to c# for displaying in an image...
             CTEMImage = new float[Resolution * Resolution];
-            mCL.GetCTEMImage(CTEMImage, Resolution);
+
+			if(CCD!=0)
+				mCL.GetCTEMImage(CTEMImage, Resolution,dpp,binning,CCD);
+			else
+				mCL.GetCTEMImage(CTEMImage, Resolution);
 
             // Calculate the number of bytes per pixel (should be 4 for this format). 
             var bytesPerPixel = (_CTEMImg.Format.BitsPerPixel + 7) / 8;

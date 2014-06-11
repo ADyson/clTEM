@@ -1,6 +1,7 @@
 #include "TEMSimulation.h"
 #include "clKernelCodes2.h"
 #include <minmax.h>
+#include "mtf.h"
 
 
 TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams)
@@ -610,6 +611,88 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution)
 	imagemax = max;
 };
 
+void TEMSimulation::GetCTEMImage(float* data, int resolution, float doseperpix, int binning, int detector)
+{
+	std::vector<float*> ntfs;
+
+	ntfs.push_back(NULL);
+	ntfs.push_back(oriusNTF);
+	ntfs.push_back(k2NTF);
+
+
+	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	Buffer ntfbuffer = Buffer(new clMemory(725*sizeof(cl_float)));
+
+	size_t* Work = new size_t[3];
+
+	Work[0] = resolution;
+	Work[1] = resolution;
+	Work[2] = 1;
+
+	Kernel NTF = Kernel(new clKernel(NTFSource,clState::context,clState::cldev,"clNTF",clState::clq));
+	NTF->BuildKernelOld();
+
+	Kernel ABS =  Kernel(new clKernel(SqAbsSource,clState::context,clState::cldev,"clSqAbs",clState::clq));
+	ABS->BuildKernelOld();
+
+
+	float conversionfactor = 8; //CCD counts per electron.
+	float Ntot = doseperpix; // Get this passed in, its dose per pixel i think.
+
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	clWaveFunction1->Read(compdata);
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		double random = ((double) rand() / (RAND_MAX+1));
+		double random2 = ((double) rand() / (RAND_MAX+1));
+		double rstdnormal = sqrt(-2.0f * +log(FLT_MIN+random))*(sin(2.0f * CL_M_PI * random2));
+
+		float val = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		// Get absolute value for display...	
+		compdata[i].s[0] = floor(Ntot * val + sqrt(fabs(Ntot*val))*rstdnormal); // Was round not floor
+		compdata[i].s[1] = 0;
+	
+	}
+
+	clWaveFunction1->Write(compdata);
+
+	FourierTrans->Enqueue(clWaveFunction1,Temp1,CLFFT_FORWARD);
+
+	clEnqueueWriteBuffer(clState::clq->cmdQueue,ntfbuffer->buffer,CL_TRUE,0,725*sizeof(float),ntfs[detector],0,NULL,NULL);
+
+	NTF->SetArgS(Temp1,ntfbuffer,resolution,resolution,binning);
+	NTF->Enqueue(Work);
+
+	FourierTrans->Enqueue(Temp1,clWaveFunction1,CLFFT_BACKWARD);
+
+
+	clWaveFunction1->Read(compdata);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+
+		float val = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+		// Get absolute value for display...	
+		data[i] = val; // Was round not floor
+	
+		// Find max,min for contrast limits
+		if(data[i] > max)
+			max = data[i];
+		if(data[i] < min)
+			min = data[i];	
+	}
+
+	imagemin = min;
+	imagemax = max;
+};
+
 void TEMSimulation::AddTDS()
 {
 	// Original data is complex so copy complex version down first
@@ -817,6 +900,84 @@ void TEMSimulation::GetImDiffImage(float* data, int resolution)
 
 void TEMSimulation::SimulateCTEM()
 {
+	// Set up some temporary memory objects for the image simulation
+	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	Buffer dqebuffer = Buffer(new clMemory(725*sizeof(cl_float)));
+
+	Kernel DQE = Kernel(new clKernel(DQESource,clState::context,clState::cldev,"clDQE",clState::clq));
+	DQE->BuildKernelOld();
+
+	Kernel ABS =  Kernel(new clKernel(SqAbsSource,clState::context,clState::cldev,"clSqAbs",clState::clq));
+	ABS->BuildKernelOld();
+
+	// Set arguments for imaging kernel
+	ImagingKernel->SetArgT(0,clWaveFunction2);
+	ImagingKernel->SetArgT(1,clImageWaveFunction);
+	ImagingKernel->SetArgT(2,resolution);
+	ImagingKernel->SetArgT(3,resolution);
+	ImagingKernel->SetArgT(4,TEMParams->spherical);
+	ImagingKernel->SetArgT(5,TEMParams->defocus);
+	ImagingKernel->SetArgT(6,TEMParams->astigmag);
+	ImagingKernel->SetArgT(7,TEMParams->astigang);
+	ImagingKernel->SetArgT(8,TEMParams->astig2mag);
+	ImagingKernel->SetArgT(9,TEMParams->astig2ang);
+	ImagingKernel->SetArgT(10,TEMParams->aperturesizemrad);
+	ImagingKernel->SetArgT(11,wavelength);
+	ImagingKernel->SetArgT(12,clXFrequencies);
+	ImagingKernel->SetArgT(13,clYFrequencies);
+	ImagingKernel->SetArgT(14,TEMParams->beta);
+	ImagingKernel->SetArgT(15,TEMParams->delta);
+
+
+	size_t* Work = new size_t[3];
+	
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	ImagingKernel->Enqueue(Work);
+
+
+	// Now get and display absolute value
+	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1,CLFFT_BACKWARD);
+
+	ABS->SetArgS(clWaveFunction1,Temp1,resolution,resolution);
+	ABS->Enqueue(Work);
+
+	FourierTrans->Enqueue(Temp1,clImageWaveFunction,CLFFT_FORWARD);
+	int binning = 1;
+	DQE->SetArgS(clImageWaveFunction,dqebuffer,resolution,resolution,binning);
+	DQE->Enqueue(Work);
+
+	FourierTrans->Enqueue(clImageWaveFunction,Temp1,CLFFT_BACKWARD);
+
+	ABS->SetArgS(Temp1,clImageWaveFunction,resolution,resolution);
+	ABS->Enqueue(Work);
+
+	// Maybe update diffractogram image also...
+	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction->buffer,clWaveFunction4->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+
+};
+
+void TEMSimulation::SimulateCTEM(int detector, int binning)
+{
+
+	std::vector<float*> dqes;
+
+	dqes.push_back(NULL);
+	dqes.push_back(oriusDQE);
+	dqes.push_back(k2DQE);
+
+	// Set up some temporary memory objects for the image simulation
+	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	Buffer dqebuffer = Buffer(new clMemory(725*sizeof(cl_float)));
+
+	Kernel DQE = Kernel(new clKernel(DQESource,clState::context,clState::cldev,"clDQE",clState::clq));
+	DQE->BuildKernelOld();
+
+	Kernel ABS =  Kernel(new clKernel(SqAbsSource,clState::context,clState::cldev,"clSqAbs",clState::clq));
+	ABS->BuildKernelOld();
+
 	// Set arguments for imaging kernel
 	ImagingKernel->SetArgT(0,clWaveFunction2);
 	ImagingKernel->SetArgT(1,clImageWaveFunction);
@@ -843,8 +1004,25 @@ void TEMSimulation::SimulateCTEM()
 
 	ImagingKernel->Enqueue(Work);
 
+
 	// Now get and display absolute value
 	FourierTrans->Enqueue(clImageWaveFunction,clWaveFunction1,CLFFT_BACKWARD);
+
+	ABS->SetArgS(clWaveFunction1,Temp1,resolution,resolution);
+	ABS->Enqueue(Work);
+
+	FourierTrans->Enqueue(Temp1,clImageWaveFunction,CLFFT_FORWARD);
+
+	clEnqueueWriteBuffer(clState::clq->cmdQueue,dqebuffer->buffer,CL_TRUE,0,725*sizeof(float),dqes[detector],0,NULL,NULL);
+	DQE->SetArgS(clImageWaveFunction,dqebuffer,resolution,resolution,binning);
+	DQE->Enqueue(Work);
+
+	FourierTrans->Enqueue(clImageWaveFunction,Temp1,CLFFT_BACKWARD);
+
+	ABS->SetArgS(Temp1,clImageWaveFunction,resolution,resolution);
+	ABS->Enqueue(Work);
+
+
 
 	// Maybe update diffractogram image also...
 	clEnqueueCopyBuffer(clState::clq->cmdQueue,clImageWaveFunction->buffer,clWaveFunction4->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
