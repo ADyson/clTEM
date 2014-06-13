@@ -901,8 +901,8 @@ namespace GPUTEMSTEMSimulation
 
 			if (ok)
 			{
-				ImagingParameters.astigang *= Convert.ToSingle((180 / Math.PI));
-				ProbeParameters.astigang *= Convert.ToSingle((180 / Math.PI));
+				ImagingParameters.astigang /= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.astigang /= Convert.ToSingle((180 / Math.PI));
 			}
 
 			
@@ -1122,8 +1122,8 @@ namespace GPUTEMSTEMSimulation
 
 			if (ok)
 			{
-				ImagingParameters.b2ang *= Convert.ToSingle((180 / Math.PI));
-				ProbeParameters.b2ang *= Convert.ToSingle((180 / Math.PI));
+				ImagingParameters.b2ang /= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.b2ang /= Convert.ToSingle((180 / Math.PI));
 			}
         }
 
@@ -1138,8 +1138,8 @@ namespace GPUTEMSTEMSimulation
 
 			if (ok)
 			{
-				ImagingParameters.astig2ang *= Convert.ToSingle((180 / Math.PI));
-				ProbeParameters.astig2ang *= Convert.ToSingle((180 / Math.PI));
+				ImagingParameters.astig2ang /= Convert.ToSingle((180 / Math.PI));
+				ProbeParameters.astig2ang /= Convert.ToSingle((180 / Math.PI));
 			}
         }
 
