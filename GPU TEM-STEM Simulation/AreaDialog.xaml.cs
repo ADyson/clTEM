@@ -15,29 +15,27 @@ using System.Windows.Shapes;
 namespace GPUTEMSTEMSimulation
 {
     /// <summary>
-    /// Interaction logic for STEMAreaDialog.xaml
+    /// Interaction logic for AreaDialog.xaml
     /// </summary>
-    public partial class STEMAreaDialog : Window
+    public partial class AreaDialog : Window
     {
-        public event EventHandler<StemAreaArgs> AddSTEMAreaEvent;
 
-        public STEMAreaDialog(STEMArea Area)
+        public event EventHandler<AreaArgs> SetAreaEvent;
+
+        public AreaDialog(SimArea Area)
         {
             InitializeComponent();
 
             xStartBox.Text = Area.xStart.ToString("f2");
-            xFinishBox.Text = Area.xFinish.ToString("f2");
+            xEndBox.Text = Area.xFinish.ToString("f2");
             yStartBox.Text = Area.yStart.ToString("f2");
-            yFinishBox.Text = Area.yFinish.ToString("f2");
+            yEndBox.Text = Area.yFinish.ToString("f2");
 
-            xPxBox.Text = Area.xPixels.ToString();
-            yPxBox.Text = Area.yPixels.ToString();
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             float xs, xf, ys, yf;
-            int xp, yp;
             bool valid = true;
 
             try
@@ -45,8 +43,8 @@ namespace GPUTEMSTEMSimulation
                 // needed?
                 xs = Convert.ToSingle(xStartBox.Text);
                 ys = Convert.ToSingle(yStartBox.Text);
-                xf = Convert.ToSingle(xFinishBox.Text);
-                yf = Convert.ToSingle(yFinishBox.Text);
+                xf = Convert.ToSingle(xEndBox.Text);
+                yf = Convert.ToSingle(yEndBox.Text);
             }
             catch
             {
@@ -56,21 +54,18 @@ namespace GPUTEMSTEMSimulation
             if (xs == xf)
             {
                 xStartBox.RaiseTapEvent();
-                xFinishBox.RaiseTapEvent();
+                xEndBox.RaiseTapEvent();
                 valid = false;
             }
             if (ys == yf)
             {
                 yStartBox.RaiseTapEvent();
-                yFinishBox.RaiseTapEvent();
+                yEndBox.RaiseTapEvent();
                 valid = false;
             }
 
             if (!valid)
                 return;
-
-            xp = Convert.ToInt32(xPxBox.Text);
-            yp = Convert.ToInt32(yPxBox.Text);
 
             // Need to decide whether to just use max/min or prompt user.
             float xmin = Math.Min(xs, xf);
@@ -78,40 +73,31 @@ namespace GPUTEMSTEMSimulation
             float ymin = Math.Min(ys, yf);
             float ymax = Math.Max(ys, yf);
 
-            STEMArea temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
+            SimArea temp = new SimArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax };
 
-            AddSTEMAreaEvent(this, new StemAreaArgs(temp));
+            SetAreaEvent(this, new AreaArgs(temp));
 
             this.Close();
         }
 
-        private void tBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            var tBox = sender as TextBox;
-            tBox.SelectAll();
-        }
     }
 
-
-
-
-
-    public class StemAreaArgs : EventArgs
+    public class AreaArgs : EventArgs
     {
-        private STEMArea msg;
-        public StemAreaArgs(STEMArea s)
+        private SimArea msg;
+        public AreaArgs(SimArea s)
         {
             msg = s;
         }
-        public STEMArea AreaParams
+        public SimArea AreaParams
         {
             get { return msg; }
         }
     }
+
 }
 
-
-public class STEMArea
+public class SimArea
 {
     public float xStart { get; set; }
 
@@ -120,18 +106,4 @@ public class STEMArea
     public float yStart { get; set; }
 
     public float yFinish { get; set; }
-
-    public int xPixels { get; set; }
-
-    public int yPixels { get; set; }
-
-    public float getxInterval
-    {
-        get { return (xFinish - xStart) / xPixels; } // maybe abs
-    }
-
-    public float getyInterval
-    {
-        get { return (yFinish - yStart) / yPixels; }
-    }
 }

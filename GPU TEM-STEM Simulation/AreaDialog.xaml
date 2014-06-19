@@ -1,0 +1,60 @@
+﻿<Window x:Class="GPUTEMSTEMSimulation.AreaDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:t="clr-namespace:ErrTextBox"
+        xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
+        Title="Set Area" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" HorizontalAlignment="Left" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight">
+    
+    <Grid Margin="5,5,10,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+
+        <Label Content="X start"
+               Grid.Column="0" Grid.Row="0"
+               HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+        <t:ErrTextBox x:Name="xStartBox" Text="0.00"
+                      Grid.Column="1" Grid.Row="0"
+                      MaskNameSpace:Masking.Mask="^[0-9]*\.?([0-9]{1,2})?$"
+                      Margin="0,2"  Width="60" Height="22">
+        </t:ErrTextBox>
+
+        <Label Content="X end"
+               Grid.Column="0" Grid.Row="1"
+               HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+        <t:ErrTextBox x:Name="xEndBox" Text="0.00"
+                      Grid.Column="1" Grid.Row="1"
+                      MaskNameSpace:Masking.Mask="^[0-9]*\.?([0-9]{1,2})?$"
+                      Margin="0,2"  Width="60" Height="22"/>
+
+        <Label Content="Y start"
+               Grid.Column="2" Grid.Row="0"
+               HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+        <t:ErrTextBox x:Name="yStartBox" Text="0.00"
+                      Grid.Column="3" Grid.Row="0"
+                      MaskNameSpace:Masking.Mask="^[0-9]*\.?([0-9]{1,2})?$"
+                      Margin="0,2" Width="60" Height="22"/>
+
+        <Label Content="Y end"
+               Grid.Column="2" Grid.Row="1"
+               HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+        <t:ErrTextBox x:Name="yEndBox" Text="0.00"
+                      Grid.Column="3" Grid.Row="1"
+                      MaskNameSpace:Masking.Mask="^[0-9]*\.?([0-9]{1,2})?$"
+                      Margin="0,2"  Width="60" Height="22"/>
+
+        <Button x:Name="OKButton" 
+                Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2"
+                Content="OK" Click="OKButton_Click" HorizontalAlignment="Right" Margin="0,2" Width="75" Height="24" VerticalAlignment="Center"/>
+
+    </Grid>
+</Window>

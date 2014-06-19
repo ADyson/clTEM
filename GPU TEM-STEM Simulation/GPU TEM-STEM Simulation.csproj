@@ -100,16 +100,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AreaDialog.xaml.cs">
+      <DependentUpon>AreaDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls.cs" />
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
     <Compile Include="STEMAreaDialog.xaml.cs">
       <DependentUpon>STEMAreaDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="STEMDialog.xaml.cs">
-      <DependentUpon>STEMDialog.xaml</DependentUpon>
+    <Compile Include="STEMDetectorDialog.xaml.cs">
+      <DependentUpon>STEMDetectorDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="TEMParams.cs" />
     <Compile Include="ZoomBorder.cs" />
+    <Page Include="AreaDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,15 +134,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Simple Styles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="STEMAreaDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="STEMDialog.xaml">
+    <Page Include="STEMDetectorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

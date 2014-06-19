@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Globalization;
 using PanAndZoom;
@@ -20,12 +21,12 @@ namespace GPUTEMSTEMSimulation
     /// Interaction logic for STEMDialog.xaml
     /// </summary>
 
-    public partial class STEMDialog : Window
+    public partial class STEMDetectorDialog : Window
     {
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
 
-        public STEMDialog(List<DetectorItem> MainDet)
+        public STEMDetectorDialog(List<DetectorItem> MainDet)
         {
             InitializeComponent();
             //DetectorListGrid.Columns[DetectorListGrid.Columns.Count - 1].Width = 100;
@@ -192,65 +193,4 @@ public class DetectorItem
         return Math.Max(Math.Min(ImageData[index], Max), Min);
     }
 
-}
-
-namespace FixedWidthColumnSample
-{
-    public class FixedWidthColumn : GridViewColumn
-    {
-        static FixedWidthColumn()
-        {
-            WidthProperty.OverrideMetadata(typeof(FixedWidthColumn),
-                new FrameworkPropertyMetadata(null, new CoerceValueCallback(OnCoerceWidth)));
-        }
-
-        public double FixedWidth
-        {
-            get { return (double)GetValue(FixedWidthProperty); }
-            set { SetValue(FixedWidthProperty, value); }
-        }
-
-        public static readonly DependencyProperty FixedWidthProperty =
-            DependencyProperty.Register(
-                "FixedWidth",
-                typeof(double),
-                typeof(FixedWidthColumn),
-                new FrameworkPropertyMetadata(double.NaN, new PropertyChangedCallback(OnFixedWidthChanged)));
-
-        private static void OnFixedWidthChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
-        {
-            FixedWidthColumn fwc = o as FixedWidthColumn;
-            if (fwc != null)
-                fwc.CoerceValue(WidthProperty);
-        }
-
-        private static object OnCoerceWidth(DependencyObject o, object baseValue)
-        {
-            FixedWidthColumn fwc = o as FixedWidthColumn;
-            if (fwc != null)
-                return fwc.FixedWidth;
-            return baseValue;
-        }
-    }
-}
-
-namespace ErrTextBoxSample
-{
-    public class ErrTextBox : TextBox
-    {
-        public static readonly RoutedEvent TapEvent = EventManager.RegisterRoutedEvent(
-        "Tap", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ErrTextBox));
-
-        public event RoutedEventHandler Tap
-        {
-            add { AddHandler(TapEvent, value); }
-            remove { RemoveHandler(TapEvent, value); }
-        }
-
-        public void RaiseTapEvent()
-        {
-            RoutedEventArgs newEventArgs = new RoutedEventArgs(ErrTextBox.TapEvent);
-            RaiseEvent(newEventArgs);
-        }
-    }
 }
