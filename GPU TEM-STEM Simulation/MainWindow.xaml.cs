@@ -25,6 +25,7 @@ using Microsoft.Win32;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
 using PanAndZoom;
+using ColourGenerator;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -90,8 +91,9 @@ namespace GPUTEMSTEMSimulation
 
         public STEMArea STEMRegion = new STEMArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
         STEMArea LockedArea;
-        float pixelScale;
 
+        float pixelScale;
+        float wavelength;
 
         private void UpdateMaxMrad()
         {
@@ -116,7 +118,7 @@ namespace GPUTEMSTEMSimulation
             if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
             {
                 float echarge = 1.6e-19f;
-                float wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
+                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
                     (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
 
                 float mrads = (1000 * MaxFreq * wavelength) / 2;
@@ -406,6 +408,30 @@ namespace GPUTEMSTEMSimulation
                         return 0;
                     }
 
+                    progressReporter.ReportProgress((val) =>
+                    {
+                        diffCanvas.Children.Clear();
+
+                        diffCanvas.Width = Resolution;
+                        diffCanvas.Height = Resolution;
+
+                        // enable checkbox here if it is implemented?
+                        // will also possibly change initial visibility of ellipses
+
+                        ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+                        var converter = new System.Windows.Media.BrushConverter();
+
+                        foreach (DetectorItem i in LockedDetectors)
+                        {
+                            // calculate the radii and reset properties
+                            i.setEllipse(Resolution, pixelScale, wavelength);
+
+                            // add to canvas
+                            i.AddToCanvas(diffCanvas);
+                        }
+                    }, 0);
+
+
                     int numPix = LockedArea.xPixels * LockedArea.yPixels;
                     int pix = 0;
 
@@ -639,7 +665,6 @@ namespace GPUTEMSTEMSimulation
                         {
                             _DiffImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
                             DiffImageDisplay.Source = _DiffImg;
-
 
                             // Calculate the number of bytes per pixel (should be 4 for this format). 
                             var bytesPerPixel2 = (_DiffImg.Format.BitsPerPixel + 7) / 8;
@@ -1203,7 +1228,7 @@ namespace GPUTEMSTEMSimulation
 
             // Stride is bytes per pixel times the number of pixels.
             // Stride is the byte width of a single rectangle row.
-            var stride2 = _DiffImg.PixelWidth * bytesPerPixel;
+            var stride2 = _DiffImg.PixelWidth * bytesPerPixel2;
 
             // Create a byte array for a the entire size of bitmap.
             var arraySize2 = stride2 * _DiffImg.PixelHeight;
@@ -1258,17 +1283,20 @@ namespace GPUTEMSTEMSimulation
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
-            Detectors.Add(evargs.Detector);
-            // draw the tab
             LeftTab.Items.Add(evargs.Detector.Tab);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
-            foreach (DetectorItem i in evargs.DetectorArr)
+            foreach (DetectorItem i in evargs.DetectorList)
             {
+                i.RemoveFromCanvas(diffCanvas);
                 LeftTab.Items.Remove(i.Tab);
-                Detectors.Remove(i);
+            }
+
+            foreach (DetectorItem i in Detectors)
+            {
+                i.setEllipse(Resolution, pixelScale, wavelength);
             }
         }
 

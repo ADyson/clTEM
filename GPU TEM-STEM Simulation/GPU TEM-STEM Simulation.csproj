@@ -100,6 +100,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColourGenerator.cs" />
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
     <Compile Include="STEMAreaDialog.xaml.cs">

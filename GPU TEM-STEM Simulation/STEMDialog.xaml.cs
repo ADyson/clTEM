@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Globalization;
+
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+
 using PanAndZoom;
 
 namespace GPUTEMSTEMSimulation
@@ -25,22 +29,29 @@ namespace GPUTEMSTEMSimulation
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
 
+        public List<DetectorItem> mainDetectors;
+        int numDet;
+
         public STEMDialog(List<DetectorItem> MainDet)
         {
             InitializeComponent();
-            //DetectorListGrid.Columns[DetectorListGrid.Columns.Count - 1].Width = 100;
-            foreach (DetectorItem i in MainDet)
-            {
-                DetectorListView.Items.Add(i);
-            }
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
 
+            // make copy of the given detectors and add the to listview
+            mainDetectors = MainDet;
+            DetectorListView.ItemsSource = mainDetectors;
+
+            numDet = mainDetectors.Count;
+
+            // needed so it doesnt default to on when too many items are selected
+            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
+            // to check if entry is valid
             bool valid = true;
 
+            // get the strings from the textboxes
             string Sname = NameTxtbx.Text;
             string Sin = InnerTxtbx.Text;
             string Sout = OuterTxtbx.Text;
@@ -48,26 +59,28 @@ namespace GPUTEMSTEMSimulation
             float Fin = 0;
             float Fout = 0;
 
+            // must have name
             if (Sname.Length == 0)
             {
                 NameTxtbx.RaiseTapEvent();
                 valid = false;
             }
 
-            Array ListItems = DetectorListView.Items.Cast<Object>().ToArray();
-            foreach (DetectorItem i in ListItems)
-            {
+            // check for duplicate names
+            foreach (DetectorItem i in mainDetectors)
                 if (i.Name.Equals(Sname))
                 {
                     valid = false;
                     NameTxtbx.RaiseTapEvent();
                     break;
                 }
-            }
 
+            // convert inputs to floats (error checking should be handled by regular expression)
             Fout = Convert.ToSingle(Sout);
             Fin = Convert.ToSingle(Sin);
 
+            // check the outer radii is bigger than the inner
+            // could just auto place the larger number as outer?
             if (Fin >= Fout)
             {
                 InnerTxtbx.RaiseTapEvent();
@@ -75,40 +88,64 @@ namespace GPUTEMSTEMSimulation
                 valid = false;
             }
 
+            // if anything went wrong above, exit here
             if (!valid)
-            {
                 return;
-            }
 
+            // create brush converter (used to get brush colours)
+            BrushConverter bc = new BrushConverter();
+
+            // create the tab and all children
             TabItem tempTab = new TabItem();
             tempTab.Header = Sname;
-
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0 };
-
             Grid tempGrid = new Grid();
-            BrushConverter bc = new BrushConverter();
             tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
             ZoomBorder tempZoom = new ZoomBorder();
             tempZoom.ClipToBounds = true;
-            temp.Image = new Image();
+            Image tImage = new Image();
 
-            tempZoom.Child = temp.Image;
+            // set children
+            tempZoom.Child = tImage;
             tempGrid.Children.Add(tempZoom);
-            temp.Tab.Content = tempGrid;
+            tempTab.Content = tempGrid;
 
-            // modify the mainWindow List
+            // add everything to detector class
+            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0, Image = tImage, ColourIndex = mainDetectors.Count };
+
+            // add to the listview
+            mainDetectors.Add(temp);
+            DetectorListView.Items.Refresh();
+            numDet = mainDetectors.Count;
+
+            NameTxtbx.Text = "Detectors" + numDet.ToString();
+
+            // modify the mainWindow List by creating event
             AddDetectorEvent(this, new DetectorArgs(temp));
-
-            DetectorListView.Items.Add(temp);
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            Array selected = DetectorListView.SelectedItems.Cast<Object>().ToArray();
-            if (selected.Length > 0)
+            // get list of the selected items
+            List<DetectorItem> selected = DetectorListView.SelectedItems.Cast<Object>().OfType<DetectorItem>().ToList();
+
+            // check if anything was selected
+            if (selected.Count > 0)
             {
-                foreach (var item in selected) DetectorListView.Items.Remove(item);
-                // modify list in mainwindow
+                // remove from listview
+                foreach (var item in selected) mainDetectors.Remove(item);//DetectorListView.Items.Remove(item);
+
+                // used for resetting the colour index
+                int i = 0;
+                foreach (var item in mainDetectors)
+                {
+                    item.ColourIndex = i;
+                    i++;
+                }
+
+                // update the listview
+                DetectorListView.Items.Refresh();
+
+                // send changes to mainwindow
                 RemDetectorEvent(this, new DetectorArgs(selected));
             }
         }
@@ -149,20 +186,36 @@ namespace GPUTEMSTEMSimulation
             get { return msg; }
         }
 
-        private Array msgArr;
-        public DetectorArgs(Array sArr)
+        private List<DetectorItem> msgList;
+        public DetectorArgs(List<DetectorItem> sList)
         {
-            msgArr = sArr;
+            msgList = sList;
         }
-        public Array DetectorArr
+        public List<DetectorItem> DetectorList
         {
-            get { return msgArr; }
+            get { return msgList; }
         }
     }
 }
 
 public class DetectorItem
 {
+    public Brush ColBrush { get; set; }
+
+    public int ColourIndex
+    {
+        get 
+        {
+            return ColourIndex;
+        }
+        set
+        {
+            BrushConverter bc = new BrushConverter();
+            ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+            ColBrush = (Brush)bc.ConvertFromString("#FF" + cgen.IndexColour(value));
+        }
+    }
+
     public string Name { get; set; }
 
     public float Inner { get; set; }
@@ -179,6 +232,12 @@ public class DetectorItem
 
     public TabItem Tab { get; set; }
 
+    public Ellipse innerEllipse { get; set; }
+
+    public Ellipse outerEllipse { get; set; }
+
+    public Ellipse ringEllipse { get; set; }
+
     private WriteableBitmap ImgBMP;
 
     public WriteableBitmap _ImgBMP
@@ -190,6 +249,68 @@ public class DetectorItem
     public float GetClampedPixel(int index)
     {
         return Math.Max(Math.Min(ImageData[index], Max), Min);
+    }
+
+    public void setEllipse(int res, float pxScale, float wavelength)
+    {
+        if (innerEllipse == null)
+            innerEllipse = new Ellipse();
+
+        if (outerEllipse == null)
+            outerEllipse = new Ellipse();
+
+        if (ringEllipse == null)
+            ringEllipse = new Ellipse();
+
+        DoubleCollection dashes = new DoubleCollection();
+        dashes.Add(4);
+        dashes.Add(4);
+
+        float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
+        float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+
+        float innerShift = (res) / 2 - innerRad;
+        float outerShift = (res) / 2 - outerRad;
+
+        innerEllipse.Width = innerRad * 2;
+        innerEllipse.Height = innerRad * 2;
+        Canvas.SetTop(innerEllipse, innerShift);
+        Canvas.SetLeft(innerEllipse, innerShift);
+        innerEllipse.Stroke = ColBrush;
+        innerEllipse.StrokeDashArray = dashes;
+
+        outerEllipse.Width = outerRad * 2;
+        outerEllipse.Height = outerRad * 2;
+        Canvas.SetTop(outerEllipse, outerShift);
+        Canvas.SetLeft(outerEllipse, outerShift);
+        outerEllipse.Stroke = ColBrush;
+        outerEllipse.StrokeDashArray = dashes;
+
+        ringEllipse.Width = outerRad * 2;
+        ringEllipse.Height = outerRad * 2;
+        Canvas.SetTop(ringEllipse, outerShift);
+        Canvas.SetLeft(ringEllipse, outerShift);
+        ringEllipse.Fill = ColBrush;
+
+        float ratio = innerRad / outerRad;
+        RadialGradientBrush LGB = new RadialGradientBrush();
+        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
+        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small different to give impression of sharp edge.
+        ringEllipse.OpacityMask = LGB;
+    }
+
+    public void AddToCanvas(Canvas destination)
+    {
+        destination.Children.Add(innerEllipse);
+        destination.Children.Add(outerEllipse);
+        destination.Children.Add(ringEllipse);
+    }
+
+    public void RemoveFromCanvas(Canvas destination)
+    {
+        destination.Children.Remove(innerEllipse);
+        destination.Children.Remove(outerEllipse);
+        destination.Children.Remove(ringEllipse);
     }
 
 }
