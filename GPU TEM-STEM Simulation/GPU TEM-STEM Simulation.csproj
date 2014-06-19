@@ -104,6 +104,7 @@
       <DependentUpon>AreaDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomControls.cs" />
+    <Compile Include="ColourGenerator.cs" />
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
     <Compile Include="STEMAreaDialog.xaml.cs">
