@@ -117,7 +117,7 @@ namespace GPUTEMSTEMSimulation
             DetectorListView.Items.Refresh();
             numDet = mainDetectors.Count;
 
-            NameTxtbx.Text = "Detectors" + numDet.ToString();
+            NameTxtbx.Text = "Detector" + (numDet+1).ToString();
 
             // modify the mainWindow List by creating event
             AddDetectorEvent(this, new DetectorArgs(temp));
