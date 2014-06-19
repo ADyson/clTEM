@@ -4,25 +4,7 @@
         xmlns:local="clr-namespace:PanAndZoom"
     Title="Multislice Simulation" MinHeight="850" Height="850" Width="1194" MinWidth="1194"
     xmlns:MaskNameSpace="clr-namespace:MaskedTextBox" Background="#FFFFFF" >
-    <Window.Resources>
-		<ControlTemplate x:Key="gbox" TargetType="GroupBox">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Border Grid.Row="0" BorderThickness="0,0,0,0" BorderBrush="#C8D2DC" Background="#C8D2DC">
-                    <Label Foreground="Black">
-                        <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
-                    </Label>
-                </Border>
-                <Border Grid.Row="1" BorderThickness="0,0,1,1" BorderBrush="#C8D2DC">
-                    <ContentPresenter Margin="4" />
-                </Border>
-            </Grid>
-        </ControlTemplate>
-        
-    </Window.Resources>
+
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"/>
@@ -103,7 +85,7 @@
                        Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0"/>
 
                 <Button x:Name="SetAreaButton" Content="Set Area"
-                        Grid.Row="4" Grid.Column="0" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
+                        Grid.Row="4" Grid.Column="0" Margin="2,1,3,1" Click="SetAreaButton_Click"/>
                 <Button x:Name="Show3DButton" Content="Show 3D"
                         Grid.Row="4" Grid.Column="1" VerticalAlignment="Bottom" Margin="2.5,1" Height="24"/>
             </Grid>

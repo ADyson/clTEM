@@ -92,6 +92,11 @@ namespace GPUTEMSTEMSimulation
         public STEMArea STEMRegion = new STEMArea { xStart = 0, xFinish = 1, yStart = 0, yFinish = 1, xPixels = 1, yPixels = 1 };
         STEMArea LockedArea;
 
+        public SimArea SimRegion = new SimArea { xStart = 0, xFinish = 10, yStart = 0, yFinish = 10};
+
+        bool userSIMarea = false;
+        bool userSTEMarea = false;
+
         float pixelScale;
         float wavelength;
 
@@ -237,6 +242,18 @@ namespace GPUTEMSTEMSimulation
                 DepthLabel.Content = (MaxZ - MinZ).ToString("f2") + " Å";
                 AtomNoLabel.Content = Len.ToString();
 
+                if (!userSTEMarea)
+                {
+                    STEMRegion.xFinish = MaxX - MinX;
+                    STEMRegion.yFinish = MaxY - MinY;
+                }
+
+                if (!userSIMarea)
+                {
+                    SimRegion.xFinish = MaxX - MinX;
+                    SimRegion.yFinish = MaxY - MinY;
+                }
+
                 if (IsResolutionSet)
                 {
                     float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
@@ -278,6 +295,12 @@ namespace GPUTEMSTEMSimulation
             Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
 
             IsResolutionSet = true;
+
+            if (!userSTEMarea)
+            {
+                STEMRegion.xPixels = Resolution;
+                STEMRegion.yPixels = Resolution;
+            }
 
             if (HaveStructure)
             {
@@ -1277,7 +1300,7 @@ namespace GPUTEMSTEMSimulation
         {
             var window = new STEMAreaDialog(STEMRegion);
             window.Owner = this;
-            window.AddAreaEvent += new EventHandler<AreaArgs>(STEM_AddArea);
+            window.AddSTEMAreaEvent += new EventHandler<StemAreaArgs>(STEM_AddArea);
             window.ShowDialog();
         }
 
@@ -1300,8 +1323,9 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
-        void STEM_AddArea(object sender, AreaArgs evargs)
+        void STEM_AddArea(object sender, StemAreaArgs evargs)
         {
+            userSTEMarea = true;
             STEMRegion = evargs.AreaParams;
         }
 
@@ -1328,6 +1352,20 @@ namespace GPUTEMSTEMSimulation
                 mCL.SetDevice(CB.SelectedIndex);
                 CB.IsEnabled = false;
             }
+        }
+
+        private void SetAreaButton_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new AreaDialog(SimRegion);
+            window.Owner = this;
+            window.SetAreaEvent += new EventHandler<AreaArgs>(SetArea);
+            window.ShowDialog();
+        }
+
+        void SetArea(object sender, AreaArgs evargs)
+        {
+            userSIMarea = true;
+            SimRegion = evargs.AreaParams;
         }
     }
 }

@@ -100,6 +100,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AreaDialog.xaml.cs">
+      <DependentUpon>AreaDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls.cs" />
     <Compile Include="ColourGenerator.cs" />
     <Compile Include="Masking.Cs" />
     <Compile Include="ProgressReporter.cs" />
@@ -111,6 +115,14 @@
     </Compile>
     <Compile Include="TEMParams.cs" />
     <Compile Include="ZoomBorder.cs" />
+    <Page Include="AreaDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -123,10 +135,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Simple Styles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="STEMAreaDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
