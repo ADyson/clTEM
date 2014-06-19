@@ -1266,7 +1266,7 @@ namespace GPUTEMSTEMSimulation
         private void STEMDet_Click(object sender, RoutedEventArgs e)
         {
             // open the window here
-            var window = new STEMDialog(Detectors);
+            var window = new STEMDetectorDialog(Detectors);
             window.Owner = this;
             window.AddDetectorEvent += new EventHandler<DetectorArgs>(STEM_AddDetector);
             window.RemDetectorEvent += new EventHandler<DetectorArgs>(STEM_RemoveDetector);

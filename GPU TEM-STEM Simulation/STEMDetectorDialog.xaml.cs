@@ -24,7 +24,7 @@ namespace GPUTEMSTEMSimulation
     /// Interaction logic for STEMDialog.xaml
     /// </summary>
 
-    public partial class STEMDialog : Window
+    public partial class STEMDetectorDialog : Window
     {
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
@@ -32,7 +32,7 @@ namespace GPUTEMSTEMSimulation
         public List<DetectorItem> mainDetectors;
         int numDet;
 
-        public STEMDialog(List<DetectorItem> MainDet)
+        public STEMDetectorDialog(List<DetectorItem> MainDet)
         {
             InitializeComponent();
 

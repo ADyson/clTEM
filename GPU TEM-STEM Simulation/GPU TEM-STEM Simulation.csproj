@@ -106,8 +106,8 @@
     <Compile Include="STEMAreaDialog.xaml.cs">
       <DependentUpon>STEMAreaDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="STEMDialog.xaml.cs">
-      <DependentUpon>STEMDialog.xaml</DependentUpon>
+    <Compile Include="STEMDetectorDialog.xaml.cs">
+      <DependentUpon>STEMDetectorDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="TEMParams.cs" />
     <Compile Include="ZoomBorder.cs" />
@@ -131,7 +131,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="STEMDialog.xaml">
+    <Page Include="STEMDetectorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
