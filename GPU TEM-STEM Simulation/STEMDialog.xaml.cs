@@ -30,6 +30,7 @@ namespace GPUTEMSTEMSimulation
         public event EventHandler<DetectorArgs> RemDetectorEvent;
 
         public List<DetectorItem> mainDetectors;
+        int numDet;
 
         public STEMDialog(List<DetectorItem> MainDet)
         {
@@ -38,6 +39,8 @@ namespace GPUTEMSTEMSimulation
             // make copy of the given detectors and add the to listview
             mainDetectors = MainDet;
             DetectorListView.ItemsSource = mainDetectors;
+
+            numDet = mainDetectors.Count;
 
             // needed so it doesnt default to on when too many items are selected
             ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
@@ -112,6 +115,9 @@ namespace GPUTEMSTEMSimulation
             // add to the listview
             mainDetectors.Add(temp);
             DetectorListView.Items.Refresh();
+            numDet = mainDetectors.Count;
+
+            NameTxtbx.Text = "Detectors" + numDet.ToString();
 
             // modify the mainWindow List by creating event
             AddDetectorEvent(this, new DetectorArgs(temp));
