@@ -400,7 +400,7 @@ namespace GPUTEMSTEMSimulation
                     mCL.GetNumberSlices(ref NumberOfSlices);
                     // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
-                    for (int i = 1; i <= NumberOfSlices; i++)
+                    for (int i = 1; i <= NumberOfSlices-20; i++)
                     {
                         timer.Start();
                         mCL.MultisliceStep(i, NumberOfSlices);
