@@ -285,7 +285,7 @@
                     </Grid.ColumnDefinitions>
 					<CheckBox x:Name="ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
                               Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-					<TextBox x:Name="TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
+					<TextBox Name="TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
                              Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
                 </Grid>
             </Grid>

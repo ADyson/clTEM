@@ -264,8 +264,10 @@ public class DetectorItem
             ringEllipse = new Ellipse();
 
         DoubleCollection dashes = new DoubleCollection();
-        dashes.Add(4);
-        dashes.Add(4);
+        dashes.Add(4); //on
+        dashes.Add(4); //off
+        //dashes.Add(2); //on
+        //dashes.Add(4); //off
 
         float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
         float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
@@ -275,22 +277,22 @@ public class DetectorItem
 
         innerEllipse.Width = innerRad * 2;
         innerEllipse.Height = innerRad * 2;
-        Canvas.SetTop(innerEllipse, innerShift);
-        Canvas.SetLeft(innerEllipse, innerShift);
+        Canvas.SetTop(innerEllipse, innerShift+0.5);
+        Canvas.SetLeft(innerEllipse, innerShift + 0.5);
         innerEllipse.Stroke = ColBrush;
         innerEllipse.StrokeDashArray = dashes;
 
         outerEllipse.Width = outerRad * 2;
         outerEllipse.Height = outerRad * 2;
-        Canvas.SetTop(outerEllipse, outerShift);
-        Canvas.SetLeft(outerEllipse, outerShift);
+        Canvas.SetTop(outerEllipse, outerShift + 0.5);
+        Canvas.SetLeft(outerEllipse, outerShift + 0.5);
         outerEllipse.Stroke = ColBrush;
         outerEllipse.StrokeDashArray = dashes;
 
         ringEllipse.Width = outerRad * 2;
         ringEllipse.Height = outerRad * 2;
-        Canvas.SetTop(ringEllipse, outerShift);
-        Canvas.SetLeft(ringEllipse, outerShift);
+        Canvas.SetTop(ringEllipse, outerShift + 0.5);
+        Canvas.SetLeft(ringEllipse, outerShift + 0.5);
         ringEllipse.Fill = ColBrush;
 
         float ratio = innerRad / outerRad;

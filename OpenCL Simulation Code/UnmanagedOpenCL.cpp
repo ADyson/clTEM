@@ -54,11 +54,18 @@ void UnmanagedOpenCL::InitialiseSimulation(int resolution)
 	TS->Initialise(resolution,Structure);
 };
 
-// Calls different initialiser to make a probe wavefunction instead of plane wave
-void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution)
+void UnmanagedOpenCL::InitialiseReSizedSimulation(int resolution,float startx, float starty ,float endx, float endy)
 {
-	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));;
-	TS->InitialiseSTEM(resolution, Structure);
+	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
+	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
+	TS->InitialiseReSized(resolution,Structure,startx,starty,endx,endy);
+};
+
+// Calls different initialiser to make a probe wavefunction instead of plane wave
+void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution,float startx, float starty ,float endx, float endy)
+{
+	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
+	TS->InitialiseSTEM(resolution,Structure,startx,starty,endx,endy);
 };
 
 void UnmanagedOpenCL::MakeSTEMWaveFunction(float posx, float posy)

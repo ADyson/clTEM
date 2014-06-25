@@ -210,19 +210,218 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure)
+void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy)
+{
+
+	this->resolution = resolution;
+	this->AtomicStructure = Structure;
+
+	// Get size of input structure
+	float RealSizeX = endx-startx;
+	float RealSizeY = endy-starty;
+	pixelscale = max(RealSizeX,RealSizeY)/(resolution);
+
+	// Work out size of each binned block of atoms
+	float BlockScaleX = (AtomicStructure->MaximumX-AtomicStructure->MinimumX)/AtomicStructure->xBlocks; 
+	float BlockScaleY = (AtomicStructure->MaximumY-AtomicStructure->MinimumY)/AtomicStructure->yBlocks;
+
+	// Work out area that is to be simulated
+	float SimSizeX = pixelscale * resolution;
+	float SimSizeY = SimSizeX;
+
+	float	Pi		= 3.1415926f;	
+	float	V		= TEMParams->kilovoltage;
+	float	a0		= 52.9177e-012f;
+	float	a0a		= a0*1e+010f;
+	float	echarge	= 1.6e-019f;
+	wavelength		= 6.63e-034f*3e+008f/sqrt((echarge*V*1000*(2*9.11e-031f*9e+016f + echarge*V*1000)))*1e+010f;
+	float	sigma	= 2 * Pi * ((511.0f + V) / (2.0f*511.0f + V)) / (V * wavelength);
+	float	sigma2	= (2*Pi/(wavelength * V * 1000)) * ((9.11e-031f*9e+016f + echarge*V*1000)/(2*9.11e-031f*9e+016f + echarge*V*1000));
+	float	fix		= 300.8242834f/(4*Pi*Pi*a0a*echarge);
+	float	V2		= V*1000;
+
+	// Now we can set up frequencies and fourier transforms.
+
+	int imidx = floor(resolution/2 + 0.5);
+	int imidy = floor(resolution/2 + 0.5);
+
+	std::vector<float> k0x;
+	std::vector<float> k0y;
+
+	float temp;
+
+	for(int i=1 ; i <= resolution ; i++)
+	{
+		if ((i - 1) > imidx)
+			temp = ((i - 1) - resolution)/SimSizeX;
+		else temp = (i - 1)/SimSizeX;
+		k0x.push_back (temp);
+	}
+
+	for(int i=1 ; i <= resolution ; i++)
+	{
+		if ((i - 1) > imidy)
+			temp = ((i - 1) - resolution)/SimSizeY;
+		else temp = (i - 1)/SimSizeY;
+		k0y.push_back (temp);
+	}
+
+	// Find maximum frequency for bandwidth limiting rule....
+
+	 bandwidthkmax=0;
+
+	float	kmaxx = pow((k0x[imidx-1]*1/2),2);
+	float	kmaxy = pow((k0y[imidy-1]*1/2),2);
+	
+	if(kmaxy <= kmaxx)
+	{
+		bandwidthkmax = kmaxy;
+	}
+	else 
+	{ 
+		bandwidthkmax = kmaxx;
+	};
+
+	// k not k^2.
+	bandwidthkmax = sqrt(bandwidthkmax);
+
+	// Bandlimit by FDdz size
+
+	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+
+	clXFrequencies->Write(k0x);
+	clYFrequencies->Write(k0y);
+	
+	// Setup Fourier Transforms
+	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
+	FourierTrans->Setup(resolution,resolution);
+
+	// Initialise Wavefunctions and Create other buffers...
+	clWaveFunction1 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction2 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction3 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	clWaveFunction4 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+
+	clTDSx.resize(resolution*resolution);
+	clTDSk.resize(resolution*resolution);
+
+	clImageWaveFunction = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPropagator = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPotential = Buffer( new clMemory(resolution*resolution*sizeof(cl_float2)));
+
+	// Set initial wavefunction to 1+0i
+	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
+	InitialiseWavefunction->BuildKernelOld();
+
+	BandLimit = Kernel(new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
+	BandLimit->BuildKernelOld();
+
+	fftShift = Kernel( new clKernel(fftShiftSource,clState::context,clState::cldev,"clfftShift",clState::clq));
+	fftShift->BuildKernelOld();
+
+	fftShift->SetArgT(0,clWaveFunction2);
+	fftShift->SetArgT(1,clWaveFunction3);
+	fftShift->SetArgT(2,resolution);
+	fftShift->SetArgT(3,resolution);
+
+	float InitialValue = 1.0f;
+	InitialiseWavefunction->SetArgT(0,clWaveFunction1);
+	InitialiseWavefunction->SetArgT(1,resolution);
+	InitialiseWavefunction->SetArgT(2,resolution);
+	InitialiseWavefunction->SetArgT(3,InitialValue);
+
+	BandLimit->SetArgT(0,clWaveFunction3);
+	BandLimit->SetArgT(1,resolution);
+	BandLimit->SetArgT(2,resolution);
+	BandLimit->SetArgT(3,bandwidthkmax);
+	BandLimit->SetArgT(4,clXFrequencies);
+	BandLimit->SetArgT(5,clYFrequencies);
+
+	size_t* WorkSize = new size_t[3];
+
+	WorkSize[0] = resolution;
+	WorkSize[1] = resolution;
+	WorkSize[2] = 1;
+
+	InitialiseWavefunction->Enqueue(WorkSize);
+
+	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
+	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+	BinnedAtomicPotential->BuildKernel();
+	//BinnedAtomicPotential->BuildKernelOld();
+
+	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
+	int loadblocksx = ceil(3.0f/BlockScaleX);
+	int loadblocksy = ceil(3.0f/BlockScaleY);
+	int loadblocksz = ceil(3.0f/AtomicStructure->dz);
+
+	// Set some of the arguments which dont change each iteration
+	BinnedAtomicPotential->SetArgT(0,clPotential);
+	BinnedAtomicPotential->SetArgT(5,AtomicStructure->AtomicStructureParameterisation);
+	BinnedAtomicPotential->SetArgT(7,resolution);
+	BinnedAtomicPotential->SetArgT(8,resolution);
+	BinnedAtomicPotential->SetArgT(12,AtomicStructure->dz);
+	BinnedAtomicPotential->SetArgT(13,pixelscale);
+	BinnedAtomicPotential->SetArgT(14,AtomicStructure->xBlocks);
+	BinnedAtomicPotential->SetArgT(15,AtomicStructure->yBlocks);
+	BinnedAtomicPotential->SetArgT(16,AtomicStructure->MaximumX);
+	BinnedAtomicPotential->SetArgT(17,AtomicStructure->MinimumX);
+	BinnedAtomicPotential->SetArgT(18,AtomicStructure->MaximumY);
+	BinnedAtomicPotential->SetArgT(19,AtomicStructure->MinimumY);
+	BinnedAtomicPotential->SetArgT(20,loadblocksx);
+	BinnedAtomicPotential->SetArgT(21,loadblocksy);
+	BinnedAtomicPotential->SetArgT(22,loadblocksz);
+	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential->SetArgT(24,startx); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential->SetArgT(25,starty); // Not sure why i am using sigma 2 and not sigma...
+	
+	// Also need to generate propagator.
+	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
+	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
+	GeneratePropagator->BuildKernel();
+
+	GeneratePropagator->SetArgT(0,clPropagator);
+	GeneratePropagator->SetArgT(1,clXFrequencies);
+	GeneratePropagator->SetArgT(2,clYFrequencies);
+	GeneratePropagator->SetArgT(3,resolution);
+	GeneratePropagator->SetArgT(4,resolution);
+	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	GeneratePropagator->SetArgT(6,wavelength);
+	GeneratePropagator->SetArgT(7,bandwidthkmax);
+
+	GeneratePropagator->Enqueue(WorkSize);
+	
+	// And multiplication kernel
+	ComplexMultiply = Kernel( new clKernel(clState::context,clState::cldev,"clComplexMultiply",clState::clq));
+	ComplexMultiply->loadProgSource("Multiply.cl");
+	ComplexMultiply->BuildKernel();
+
+	ComplexMultiply->SetArgT(3,resolution);
+	ComplexMultiply->SetArgT(4,resolution);
+
+	// And the imaging kernel
+	ImagingKernel = Kernel( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
+	ImagingKernel->BuildKernelOld();
+
+
+	clFinish(clState::clq->cmdQueue);
+};
+
+void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
 
 	// Get size of input structure
-	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
-	float RealSizeY = AtomicStructure->MaximumY-AtomicStructure->MinimumY;
+	float RealSizeX = endx-startx;
+	float RealSizeY = endy-starty;
 	pixelscale = max(RealSizeX,RealSizeY)/resolution;
 
 	// Work out size of each binned block of atoms
-	float BlockScaleX = RealSizeX/AtomicStructure->xBlocks; 
-	float BlockScaleY = RealSizeY/AtomicStructure->yBlocks;
+	float BlockScaleX = (AtomicStructure->MaximumX-AtomicStructure->MinimumX)/AtomicStructure->xBlocks; 
+	float BlockScaleY = (AtomicStructure->MaximumY-AtomicStructure->MinimumY)/AtomicStructure->yBlocks;
 
 	// Work out area that is to be simulated
 	float SimSizeX = pixelscale * resolution;
@@ -354,7 +553,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
 	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
+	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 
@@ -380,7 +579,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->SetArgT(21,loadblocksy);
 	BinnedAtomicPotential->SetArgT(22,loadblocksz);
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
-	
+	BinnedAtomicPotential->SetArgT(24,startx);
+	BinnedAtomicPotential->SetArgT(25,starty);
+
 	// Also need to generate propagator.
 	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
 	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
