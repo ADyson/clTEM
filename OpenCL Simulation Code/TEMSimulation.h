@@ -26,6 +26,7 @@ public:
 	void MultisliceStep(int stepno, int steps);
 	float MeasureSTEMPixel(float inner, float outer);
 	void GetCTEMImage(float* data, int resolution);
+	void GetCTEMImage(float* data, int resolution, float dose, int binning, int detector);
 	void GetDiffImage(float* data, int resolution);
 	void GetImDiffImage(float* data, int resolution);
 	void GetEWImage(float* data, int resolution);
@@ -34,6 +35,7 @@ public:
 	void AddTDS();
 	void ClearTDS();
 	void SimulateCTEM();
+	void SimulateCTEM(int detector, int binning);
 
 	TEMParameters* TEMParams;
 	STEMParameters* STEMParams;

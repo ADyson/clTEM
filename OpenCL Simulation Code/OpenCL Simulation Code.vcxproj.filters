@@ -60,6 +60,9 @@
     <ClInclude Include="stringFunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mtf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManagedWrapper.cpp">

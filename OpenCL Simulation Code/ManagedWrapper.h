@@ -28,8 +28,10 @@ namespace ManagedOpenCLWrapper {
 		void MakeSTEMWaveFunction(float posx, float posy);
 		void MultisliceStep(int stepno, int steps);
 		void GetCTEMImage(array<float>^ data, int resolution);
+		void GetCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector);
 		void GetEWImage(array<float>^ data, int resolution);
 		void SimulateCTEMImage();
+		void SimulateCTEMImage(int detector, int binning);
 		float GetIMMax();
 		float GetIMMin();
 		void GetDiffImage(array<float>^ data, int resolution);

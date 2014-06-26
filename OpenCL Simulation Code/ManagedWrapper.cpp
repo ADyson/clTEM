@@ -157,6 +157,12 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->GetCTEMImage(pdata,resolution);
 	};
 
+	void ManagedOpenCL::GetCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->GetCTEMImage(pdata,resolution,dose,binning,detector);
+	};
+
 	void ManagedOpenCL::GetEWImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
@@ -209,6 +215,12 @@ namespace ManagedOpenCLWrapper
 	void ManagedOpenCL::SimulateCTEMImage()
 	{	
 		_UMOpenCL->TS->SimulateCTEM();
+	};
+
+	
+	void ManagedOpenCL::SimulateCTEMImage(int detector, int binning)
+	{	
+		_UMOpenCL->TS->SimulateCTEM(detector,binning);
 	};
 
 	float ManagedOpenCL::GetSTEMPixel(float inner, float outer)
