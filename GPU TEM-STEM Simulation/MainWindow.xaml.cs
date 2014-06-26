@@ -106,15 +106,13 @@ namespace GPUTEMSTEMSimulation
             if (!HaveStructure)
                 return;
 
-            int Len = 0;
-            float MinX = 0;
-            float MinY = 0;
-            float MinZ = 0;
-            float MaxX = 0;
-            float MaxY = 0;
-            float MaxZ = 0;
+            float MinX = SimRegion.xStart;
+            float MinY = SimRegion.yStart;
 
-            mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
+            float MaxX = SimRegion.xFinish;
+            float MaxY = SimRegion.yFinish;
+
+
 
             float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
             // Determine max mrads for reciprocal space, (need wavelength)...
@@ -259,7 +257,8 @@ namespace GPUTEMSTEMSimulation
 
                 if (IsResolutionSet)
                 {
-                    float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+                    //float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+                    float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
                     pixelScale = BiggestSize / Resolution;
                     PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
 
@@ -325,7 +324,7 @@ namespace GPUTEMSTEMSimulation
                 DepthLabel.Content = (MaxZ - MinZ).ToString("f2") + " Å";
                 AtomNoLabel.Content = Len.ToString();
 
-                float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+                float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
                 pixelScale = BiggestSize / Resolution;
                 PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
 
@@ -372,6 +371,8 @@ namespace GPUTEMSTEMSimulation
             bool select_STEM = STEMRadioButton.IsChecked == true;
             bool select_CBED = CBEDRadioButton.IsChecked == true;
 
+            int TDSruns = Convert.ToInt32(TDSCounts.Text);
+
             this.cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = this.cancellationTokenSource.Token;
             var progressReporter = new ProgressReporter();
@@ -393,7 +394,7 @@ namespace GPUTEMSTEMSimulation
                 if (select_TEM)
                 {
 
-                    mCL.InitialiseSimulation(Resolution);
+                    mCL.InitialiseSimulation(Resolution,SimRegion.xStart,SimRegion.yStart,SimRegion.xFinish,SimRegion.yFinish);
 
 					// Reset atoms incase TDS has been used
 					mCL.SortStructure(false);
@@ -468,11 +469,13 @@ namespace GPUTEMSTEMSimulation
                     
                     int runs = 1;
                     if (TDS)
-                        runs = 10;
+                    {
+                        runs = TDSruns;
+                    }
 
                     numPix *= runs;
 
-                    mCL.InitialiseSTEMSimulation(Resolution);
+                    mCL.InitialiseSTEMSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
                     float xInterval = LockedArea.getxInterval;
                     float yInterval = LockedArea.getyInterval;
@@ -493,7 +496,7 @@ namespace GPUTEMSTEMSimulation
 
                                 float fCoordx = (LockedArea.xStart + posX * xInterval)/pixelScale;
 
-                                mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
+                                mCL.MakeSTEMWaveFunction(fCoordx-SimRegion.xStart, fCoordy-SimRegion.yStart);
 
                                 // Use Background worker to progress through each step
                                 int NumberOfSlices = 0;
@@ -638,7 +641,7 @@ namespace GPUTEMSTEMSimulation
                     int numPix = 1;
                     int pix = 0;
 
-                    mCL.InitialiseSTEMSimulation(Resolution);
+                    mCL.InitialiseSTEMSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
                     int posX = Resolution/2;
                     int posY = Resolution/2;
@@ -652,7 +655,9 @@ namespace GPUTEMSTEMSimulation
 
                     int runs = 1;
                     if (TDS)
-                        runs = 10;
+                    {
+                       runs = TDSruns;
+                    }
 
                     TDSImage = new float[Resolution * Resolution];
 
@@ -1088,6 +1093,7 @@ namespace GPUTEMSTEMSimulation
                             {
                                 if (d.Tab.IsSelected == true)
                                 {
+
                                     for (int j = 0; j < Resolution; ++j)
                                     {
                                         buf[j] = d.ImageData[j + Resolution * i];
@@ -1318,7 +1324,7 @@ namespace GPUTEMSTEMSimulation
 
         private void STEMArea_Click(object sender, RoutedEventArgs e)
         {
-            var window = new STEMAreaDialog(STEMRegion);
+            var window = new STEMAreaDialog(STEMRegion, SimRegion);
             window.Owner = this;
             window.AddSTEMAreaEvent += new EventHandler<StemAreaArgs>(STEM_AddArea);
             window.ShowDialog();
@@ -1384,8 +1390,47 @@ namespace GPUTEMSTEMSimulation
 
         void SetArea(object sender, AreaArgs evargs)
         {
+            bool changedx = false;
+            bool changedy = false;
             userSIMarea = true;
             SimRegion = evargs.AreaParams;
+
+            float xscale = (STEMRegion.xStart - STEMRegion.xFinish) / STEMRegion.xPixels;
+            float yscale = (STEMRegion.yStart - STEMRegion.yFinish) / STEMRegion.yPixels;
+
+            if (STEMRegion.xStart < SimRegion.xStart || STEMRegion.xStart >= SimRegion.xFinish)
+            {
+                STEMRegion.xStart = SimRegion.xStart;
+                changedx = true;
+            }
+
+            if (STEMRegion.xFinish < SimRegion.xFinish || STEMRegion.xFinish <= SimRegion.xStart)
+            {
+                STEMRegion.xFinish = SimRegion.xFinish;
+                changedx = true;
+            }
+
+            if (STEMRegion.yStart < SimRegion.yStart || STEMRegion.yStart >= SimRegion.yFinish)
+            {
+                STEMRegion.yStart = SimRegion.yStart;
+                changedy = true;
+            }
+
+            if (STEMRegion.yFinish < SimRegion.yFinish || STEMRegion.yFinish <= SimRegion.yStart)
+            {
+                STEMRegion.yFinish = SimRegion.yFinish;
+                changedy = true;
+            }
+
+            if (changedx)
+                STEMRegion.xPixels = (int)Math.Round((STEMRegion.xStart - STEMRegion.xFinish) / xscale);
+
+            if (changedy)
+                STEMRegion.yPixels = (int)Math.Round((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
+
+            //show some message saying valeus have been altered.
+
+            UpdateMaxMrad();
         }
     }
 }

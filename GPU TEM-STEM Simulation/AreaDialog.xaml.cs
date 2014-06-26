@@ -80,6 +80,12 @@ namespace GPUTEMSTEMSimulation
             this.Close();
         }
 
+        private void tBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var tBox = sender as TextBox;
+            tBox.SelectAll();
+        }
+
     }
 
     public class AreaArgs : EventArgs

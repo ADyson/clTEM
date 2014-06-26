@@ -106,11 +106,26 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSTEMSimulation(resolution);
+			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy);
+		}
+		catch(std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	};
+
+	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy)
+	{
+		try
+		{
+			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy);
 		}
 		catch(std::exception ex)
 		{
