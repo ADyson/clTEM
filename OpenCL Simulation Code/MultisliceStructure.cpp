@@ -18,12 +18,21 @@ float MultisliceStructure::TDSRand()
 	return randNormal;
 };
 
+void MultisliceStructure::CheckOcc(AtomOcc a, AtomOcc b)
+{
+
+};
+
 void MultisliceStructure::ImportAtoms(std::string filepath) {
 
-	std::ifstream inputFile(filepath,std::ifstream::in);
-	//inputFile.open(filename,ios::in);
+	//std::ifstream inputFile(filepath,std::ifstream::in);
+	std::ifstream inputFile;
+	inputFile.open(filepath,ios::in);
+	bool addatom = true;
 
 	Atom linebuffer;
+	AtomOcc thisAtom;
+	AtomOcc prevAtom;
 
 	if (!inputFile) {
 		// TODO: Do something if its gone really bad...
@@ -31,16 +40,67 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 
 	int numAtoms;
 	std::string commentline;
+	std::string commentline2;
 
 	// First two lines of .xyz, dont do anytihng with comment though
 	inputFile >> numAtoms;
-	getline(inputFile,commentline);
+	//inputFile >> commentline; // Will break if comment more than one word...
+	getline(inputFile, commentline);
+	getline(inputFile, commentline2); // Not sure why it reads this with second line?
 
-	for(int i=1; i<= numAtoms; i++) {
-		std::string atomSymbol;
-		inputFile >> atomSymbol >> linebuffer.x >> linebuffer.y >> linebuffer.z;
-		linebuffer.Z = GetZNum(atomSymbol);
-		Atoms.push_back (linebuffer);
+
+	// this branch is hardcoded to be nm for now
+	if(commentline2=="occ")
+	{
+		for(int i=1; i<= numAtoms; i++) {
+			std::string atomSymbol;
+			inputFile >> atomSymbol >> thisAtom.x >> thisAtom.y >> thisAtom.z >> thisAtom.occ;
+			thisAtom.Z = GetZNum(atomSymbol);
+
+			// Check previous atom for same position.
+			if(thisAtom.occ != 1)
+			{
+				if(i!=1)
+				{
+					if(thisAtom.x ==prevAtom.x && thisAtom.y == prevAtom.y && thisAtom.z == prevAtom.z)
+					{
+						double r = ((double) rand() / (RAND_MAX));
+
+						if(r <= prevAtom.occ)
+						{
+							addatom=false;
+							; // Don't remove any atoms, don't add next atom;
+						}
+						else
+						{
+							Atoms.pop_back();
+						}
+					}
+				}
+			}
+
+			prevAtom = thisAtom;
+			if(addatom)
+			{
+				linebuffer.x = thisAtom.x * 10;
+				linebuffer.y = thisAtom.y * 10;
+				linebuffer.z = thisAtom.z * 10;
+				linebuffer.Z = thisAtom.Z;
+
+				Atoms.push_back (linebuffer);
+			}
+
+			addatom=true;
+		}
+	}
+	else
+	{
+		for(int i=1; i<= numAtoms; i++) {
+			std::string atomSymbol;
+			inputFile >> atomSymbol >> linebuffer.x >> linebuffer.y >> linebuffer.z;
+			linebuffer.Z = GetZNum(atomSymbol);
+			Atoms.push_back (linebuffer);
+		}
 	}
 
 	inputFile.close();

@@ -17,6 +17,15 @@ struct Atom
 	float z;
 };
 
+struct AtomOcc
+{
+	int Z;
+	float x;
+	float y;
+	float z;
+	float occ;
+};
+
 using namespace std;
 
 class MultisliceStructure
@@ -56,6 +65,9 @@ public:
 
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);
+
+	// Check atoms for same position and remove one.
+	void CheckOcc(AtomOcc a, AtomOcc b);
 
 	std::vector<Atom> Atoms;
 
