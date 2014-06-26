@@ -25,8 +25,9 @@ void MultisliceStructure::CheckOcc(AtomOcc a, AtomOcc b)
 
 void MultisliceStructure::ImportAtoms(std::string filepath) {
 
-	std::ifstream inputFile(filepath,std::ifstream::in);
-	//inputFile.open(filename,ios::in);
+	//std::ifstream inputFile(filepath,std::ifstream::in);
+	std::ifstream inputFile;
+	inputFile.open(filepath,ios::in);
 	bool addatom = true;
 
 	Atom linebuffer;
@@ -39,13 +40,17 @@ void MultisliceStructure::ImportAtoms(std::string filepath) {
 
 	int numAtoms;
 	std::string commentline;
+	std::string commentline2;
 
 	// First two lines of .xyz, dont do anytihng with comment though
 	inputFile >> numAtoms;
-	inputFile >> commentline; // Will break if comment more than one word...
+	//inputFile >> commentline; // Will break if comment more than one word...
+	getline(inputFile, commentline);
+	getline(inputFile, commentline2); // Not sure why it reads this with second line?
+
 
 	// this branch is hardcoded to be nm for now
-	if(commentline=="occ")
+	if(commentline2=="occ")
 	{
 		for(int i=1; i<= numAtoms; i++) {
 			std::string atomSymbol;
