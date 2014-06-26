@@ -21,7 +21,9 @@ namespace GPUTEMSTEMSimulation
     {
         public event EventHandler<StemAreaArgs> AddSTEMAreaEvent;
 
-        public STEMAreaDialog(STEMArea Area)
+        float simxStart, simyStart, simxFinish, simyFinish;
+
+        public STEMAreaDialog(STEMArea Area, SimArea simArea)
         {
             InitializeComponent();
 
@@ -32,6 +34,11 @@ namespace GPUTEMSTEMSimulation
 
             xPxBox.Text = Area.xPixels.ToString();
             yPxBox.Text = Area.yPixels.ToString();
+
+            simxStart = simArea.xStart;
+            simxFinish = simArea.xFinish;
+            simyStart = simArea.yStart;
+            simyFinish = simArea.yFinish;
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -77,6 +84,38 @@ namespace GPUTEMSTEMSimulation
             float xmax = Math.Max(xs, xf);
             float ymin = Math.Min(ys, yf);
             float ymax = Math.Max(ys, yf);
+
+            xStartBox.Text = xmin.ToString();
+            xFinishBox.Text = xmax.ToString();
+            yStartBox.Text = ymin.ToString();
+            yFinishBox.Text = ymax.ToString();
+
+            if (xmin < simxStart || xmin > simxFinish)
+            {
+                xStartBox.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (xmax < simxStart || xmax > simxFinish)
+            {
+                xFinishBox.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (ymin < simyStart || ymin > simyFinish)
+            {
+                yStartBox.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (ymax < simyStart || ymax > simyFinish)
+            {
+                yFinishBox.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (!valid)
+                return;
 
             STEMArea temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
 

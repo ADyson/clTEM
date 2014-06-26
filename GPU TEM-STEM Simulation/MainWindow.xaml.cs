@@ -1304,7 +1304,7 @@ namespace GPUTEMSTEMSimulation
 
         private void STEMArea_Click(object sender, RoutedEventArgs e)
         {
-            var window = new STEMAreaDialog(STEMRegion);
+            var window = new STEMAreaDialog(STEMRegion, SimRegion);
             window.Owner = this;
             window.AddSTEMAreaEvent += new EventHandler<StemAreaArgs>(STEM_AddArea);
             window.ShowDialog();
@@ -1370,28 +1370,45 @@ namespace GPUTEMSTEMSimulation
 
         void SetArea(object sender, AreaArgs evargs)
         {
+            bool changedx = false;
+            bool changedy = false;
             userSIMarea = true;
             SimRegion = evargs.AreaParams;
+
+            float xscale = (STEMRegion.xStart - STEMRegion.xFinish) / STEMRegion.xPixels;
+            float yscale = (STEMRegion.yStart - STEMRegion.yFinish) / STEMRegion.yPixels;
 
             if (STEMRegion.xStart < SimRegion.xStart || STEMRegion.xStart >= SimRegion.xFinish)
             {
                 STEMRegion.xStart = SimRegion.xStart;
+                changedx = true;
             }
 
             if (STEMRegion.xFinish < SimRegion.xFinish || STEMRegion.xFinish <= SimRegion.xStart)
             {
                 STEMRegion.xFinish = SimRegion.xFinish;
+                changedx = true;
             }
 
             if (STEMRegion.yStart < SimRegion.yStart || STEMRegion.yStart >= SimRegion.yFinish)
             {
                 STEMRegion.yStart = SimRegion.yStart;
+                changedy = true;
             }
 
             if (STEMRegion.yFinish < SimRegion.yFinish || STEMRegion.yFinish <= SimRegion.yStart)
             {
                 STEMRegion.yFinish = SimRegion.yFinish;
+                changedy = true;
             }
+
+            if (changedx)
+                STEMRegion.xPixels = (int)Math.Round((STEMRegion.xStart - STEMRegion.xFinish) / xscale);
+
+            if (changedy)
+                STEMRegion.yPixels = (int)Math.Round((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
+
+            //show some message saying valeus have been altered.
 
             UpdateMaxMrad();
         }
