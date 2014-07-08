@@ -465,6 +465,8 @@ namespace GPUTEMSTEMSimulation
                     foreach (DetectorItem i in LockedDetectors)
                     {
                         i.ImageData = new float[numPix];
+                        i.Min = float.MaxValue;
+                        i.Max = float.MinValue;
                     }
                     
                     int runs = 1;
@@ -571,6 +573,7 @@ namespace GPUTEMSTEMSimulation
 							// loop through and get each STEM pixel for each detector at the same time
 							foreach (DetectorItem i in LockedDetectors)
 							{
+
 								float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
 
 								i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
