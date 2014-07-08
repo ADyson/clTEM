@@ -72,6 +72,11 @@ namespace PanAndZoom
             }
         }
 
+        public void public_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.Reset();
+        }
+
         #region Child Events
 
         private void child_MouseWheel(object sender, MouseWheelEventArgs e)

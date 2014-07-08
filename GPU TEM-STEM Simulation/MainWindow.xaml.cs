@@ -1432,5 +1432,14 @@ namespace GPUTEMSTEMSimulation
 
             UpdateMaxMrad();
         }
+
+        private void gridZoom_reset(object sender, MouseButtonEventArgs e)
+        {
+            Grid tempGrid = sender as Grid;
+
+            var child = VisualTreeHelper.GetChild(tempGrid, 0) as ZoomBorder;
+            if (child != null)
+                child.Reset();
+        }
     }
 }
