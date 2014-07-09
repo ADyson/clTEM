@@ -371,9 +371,7 @@ namespace GPUTEMSTEMSimulation
                 }
                 else if (select_CBED)
                 {
-                    DiffDisplay.ImageData = new float[Resolution * Resolution];
-                    TDSImage.CopyTo(DiffDisplay.ImageData, 0);
-					UpdateTDSImage();
+                    UpdateTDSImage();
                     SaveImageButton2.IsEnabled = true;
 
                 }
@@ -507,6 +505,10 @@ namespace GPUTEMSTEMSimulation
 			DiffDisplay._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
 			DiffDisplay.tImage.Source = DiffDisplay._ImgBMP;
 
+			DiffDisplay.xDim = Resolution;
+			DiffDisplay.yDim = Resolution;
+			DiffDisplay.ImageData = TDSImage;	
+	
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
 
@@ -606,6 +608,8 @@ namespace GPUTEMSTEMSimulation
 			foreach (DetectorItem i in LockedDetectors)
 			{
 				i.ImageData = new float[numPix];
+				i.Min = float.MaxValue;
+				i.Max = float.MinValue;
 			}
 
 			int runs = 1;
@@ -717,7 +721,7 @@ namespace GPUTEMSTEMSimulation
 			int posX = Resolution / 2;
 			int posY = Resolution / 2;
 
-			mCL.MakeSTEMWaveFunction(posX, posY);
+			
 
 			// Use Background worker to progress through each step
 			int NumberOfSlices = 0;
@@ -735,6 +739,8 @@ namespace GPUTEMSTEMSimulation
 			for (int j = 0; j < runs; j++)
 			{
 				mCL.SortStructure(TDS);
+				mCL.MakeSTEMWaveFunction(posX, posY);
+
 
 				for (int i = 1; i <= NumberOfSlices; i++)
 				{
@@ -759,7 +765,7 @@ namespace GPUTEMSTEMSimulation
 
 				progressReporter.ReportProgress((val) =>
 				{
-					UpdateDiffractionImage();
+					UpdateTDSImage();
 				}, j);
 			}
 		}
