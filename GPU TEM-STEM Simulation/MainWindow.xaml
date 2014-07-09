@@ -329,44 +329,10 @@
                 <ColumnDefinition Width=".5*"/>
             </Grid.ColumnDefinitions>
             <!-- Left Image Tab Control-->
-            <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,10,20,80" Grid.Row="1" >
-                
-                <TabItem Header="CTEM" x:Name="CTEMTab">
-                    <Grid Background="#FFE5E5E5" PreviewMouseRightButtonUp="gridZoom_reset">
-                        <local:ZoomBorder ClipToBounds="True">
-                            
-                            <Image x:Name="CTEMImageDisplay" Height="Auto" Width="Auto" />
-                            
-                        </local:ZoomBorder>
-                    </Grid>
-                </TabItem>
-                
-                <TabItem x:Name="EWTab" Header="EW">
-                    <Grid Background="#FFE5E5E5" PreviewMouseRightButtonUp="gridZoom_reset">
-                        <local:ZoomBorder ClipToBounds="True">
-                            
-                            <Image x:Name="EWImageDisplay" Height="Auto" Width="Auto" />
-                            
-                        </local:ZoomBorder>
-                    </Grid>
-                </TabItem>
-            </TabControl>
+			<TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,10,20,80" Grid.Row="1"/>
             
             <!-- Right Image Tab Control-->
-            <TabControl Margin="20,10,20,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                <TabItem Header="Diffraction" x:Name="DiffTab">
-                    <Grid Background="#FFE5E5E5" PreviewMouseRightButtonUp="gridZoom_reset">
-                        <local:ZoomBorder ClipToBounds="True">
-                            <Viewbox Stretch="Uniform">
-                                <Grid>
-                                    <Image x:Name="DiffImageDisplay" Height="Auto" Width="Auto" />
-                                    <Canvas x:Name="diffCanvas" Width="512" Height="512" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="Transparent"/>
-                                </Grid>
-                            </Viewbox>
-                        </local:ZoomBorder>
-                    </Grid>
-                </TabItem>
-            </TabControl>
+            <TabControl Name="RightTab" Margin="20,10,20,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             
             <Button x:Name="SaveImageButton" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Click="SaveImageButton_Click" IsEnabled="False"/>
             

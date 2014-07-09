@@ -227,7 +227,7 @@ namespace GPUTEMSTEMSimulation
         {
             foreach (DetectorItem i in evargs.DetectorList)
             {
-                i.RemoveFromCanvas(diffCanvas);
+                i.RemoveFromCanvas(DiffDisplay.tCanvas);
                 LeftTab.Items.Remove(i.Tab);
             }
 
