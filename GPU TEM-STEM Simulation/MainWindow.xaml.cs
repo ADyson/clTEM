@@ -146,7 +146,6 @@ namespace GPUTEMSTEMSimulation
             
         }
 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -333,7 +332,7 @@ namespace GPUTEMSTEMSimulation
         }
 
         // Simulation Button
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void SimulationButton(object sender, RoutedEventArgs e)
         {
             // Check We Have Structure
             if (HaveStructure == false)
@@ -737,44 +736,6 @@ namespace GPUTEMSTEMSimulation
 			}
 		}
 
-		private void UpdateDetectorImage(DetectorItem i)
-		{
-			i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
-			i.Image.Source = i._ImgBMP;
-
-			RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
-
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;
-			// Stride is bytes per pixel times the number of pixels.
-			// Stride is the byte width of a single rectangle row.
-			var stride = i._ImgBMP.PixelWidth * bytesPerPixel;
-
-			// Create a byte array for a the entire size of bitmap.
-			var arraySize = stride * i._ImgBMP.PixelHeight;
-			var pixelArray = new byte[arraySize];
-
-			float min = i.Min;
-			float max = i.Max;
-
-			if (min == max)
-				return;
-
-			for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
-				{
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
-				}
-
-
-			Int32Rect rect = new Int32Rect(0, 0, i._ImgBMP.PixelWidth, i._ImgBMP.PixelHeight);
-
-			i._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
-		}
-
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer)
 		{
 			int numPix = 1;
@@ -832,6 +793,88 @@ namespace GPUTEMSTEMSimulation
 			}
 		}
 
+		private void UpdateDetectorImage(DetectorItem i)
+		{
+			i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
+			i.Image.Source = i._ImgBMP;
+
+			RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
+
+			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			var bytesPerPixel = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			// Stride is bytes per pixel times the number of pixels.
+			// Stride is the byte width of a single rectangle row.
+			var stride = i._ImgBMP.PixelWidth * bytesPerPixel;
+
+			// Create a byte array for a the entire size of bitmap.
+			var arraySize = stride * i._ImgBMP.PixelHeight;
+			var pixelArray = new byte[arraySize];
+
+			float min = i.Min;
+			float max = i.Max;
+
+			if (min == max)
+				return;
+
+			for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
+				for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
+				{
+					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
+				}
+
+
+			Int32Rect rect = new Int32Rect(0, 0, i._ImgBMP.PixelWidth, i._ImgBMP.PixelHeight);
+
+			i._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
+		}
+
+		private void UpdateCTEMImage(float dpp, int binning, int CCD)
+		{
+			_CTEMImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+			CTEMImageDisplay.Source = _CTEMImg;
+
+			// When its completed we want to get data to c# for displaying in an image...
+			CTEMImage = new float[Resolution * Resolution];
+
+			if (CCD != 0)
+				mCL.GetCTEMImage(CTEMImage, Resolution, dpp, binning, CCD);
+			else
+				mCL.GetCTEMImage(CTEMImage, Resolution);
+
+			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			var bytesPerPixel = (_CTEMImg.Format.BitsPerPixel + 7) / 8;
+
+			// Stride is bytes per pixel times the number of pixels.
+			// Stride is the byte width of a single rectangle row.
+			var stride = _CTEMImg.PixelWidth * bytesPerPixel;
+
+			// Create a byte array for a the entire size of bitmap.
+			var arraySize = stride * _CTEMImg.PixelHeight;
+			var pixelArray = new byte[arraySize];
+
+			float min = mCL.GetIMMin();
+			float max = mCL.GetIMMax();
+
+			for (int row = 0; row < _CTEMImg.PixelHeight; row++)
+				for (int col = 0; col < _CTEMImg.PixelWidth; col++)
+				{
+					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 3] = 0;
+				}
+
+
+			Int32Rect rect = new Int32Rect(0, 0, _CTEMImg.PixelWidth, _CTEMImg.PixelHeight);
+
+			_CTEMImg.WritePixels(rect, pixelArray, stride, 0);
+
+			CTEMTab.IsSelected = true;
+		}
+		
 		private void UI_UpdateSimulationProgressSTEM(float ms, int numPix, int pix, int NumberOfSlices, int i, int mem)
 		{
 			this.progressBar1.Value =
@@ -1152,50 +1195,6 @@ namespace GPUTEMSTEMSimulation
 			UpdateDiffractionImage();
 
         }
-
-		private void UpdateCTEMImage(float dpp, int binning, int CCD)
-		{
-			_CTEMImg = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
-			CTEMImageDisplay.Source = _CTEMImg;
-
-			// When its completed we want to get data to c# for displaying in an image...
-			CTEMImage = new float[Resolution * Resolution];
-
-			if (CCD != 0)
-				mCL.GetCTEMImage(CTEMImage, Resolution, dpp, binning, CCD);
-			else
-				mCL.GetCTEMImage(CTEMImage, Resolution);
-
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel = (_CTEMImg.Format.BitsPerPixel + 7) / 8;
-
-			// Stride is bytes per pixel times the number of pixels.
-			// Stride is the byte width of a single rectangle row.
-			var stride = _CTEMImg.PixelWidth * bytesPerPixel;
-
-			// Create a byte array for a the entire size of bitmap.
-			var arraySize = stride * _CTEMImg.PixelHeight;
-			var pixelArray = new byte[arraySize];
-
-			float min = mCL.GetIMMin();
-			float max = mCL.GetIMMax();
-
-			for (int row = 0; row < _CTEMImg.PixelHeight; row++)
-				for (int col = 0; col < _CTEMImg.PixelWidth; col++)
-				{
-					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMImage[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * _CTEMImg.PixelWidth + col) * bytesPerPixel + 3] = 0;
-				}
-
-
-			Int32Rect rect = new Int32Rect(0, 0, _CTEMImg.PixelWidth, _CTEMImg.PixelHeight);
-
-			_CTEMImg.WritePixels(rect, pixelArray, stride, 0);
-
-			CTEMTab.IsSelected = true;
-		}
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {

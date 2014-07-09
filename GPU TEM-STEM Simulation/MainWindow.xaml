@@ -316,7 +316,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Button x:Name="SimulateEWButton" Content="Simulate EW"
-                        Grid.Row="0" Height="30" Width="100" Click="Button_Click_1" Margin="2.5,2.5"/>
+                        Grid.Row="0" Height="30" Width="100" Click="SimulationButton" Margin="2.5,2.5"/>
 
             </Grid>
         </GroupBox>
@@ -412,8 +412,8 @@
 
                 <StatusBarItem Grid.Column="5">
                     <Grid>
-                        <ProgressBar x:Name="progressBar1" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,8,0,-8"/>
-                        <ProgressBar  x:Name="progressBar2" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,-8,0,8"/>
+                        <ProgressBar x:Name="progressBar1" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,8,5,-8"/>
+                        <ProgressBar  x:Name="progressBar2" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,-8,5,8"/>
                     </Grid>
                 </StatusBarItem>
                 
