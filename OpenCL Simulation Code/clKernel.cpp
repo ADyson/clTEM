@@ -54,7 +54,7 @@ clKernel::clKernel(cl_context &context, clDevice* cldev, std::string kernelname,
 void clKernel::BuildKernel()
 {
 	// denorms now flushed to zero, and no checks for NaNs or infs, should be faster...
-	const char options[] = "-cl-finite-math-only -cl-strict-aliasing -cl-mad-enable -cl-denorms-are-zero";
+	const char options[] = "";// = "-cl-finite-math-only -cl-strict-aliasing -cl-mad-enable -cl-denorms-are-zero";
 
 	this->status = clBuildProgram(kernelprogram,cldev->numDevices,cldev->DevPtr(),options,NULL,NULL);
 

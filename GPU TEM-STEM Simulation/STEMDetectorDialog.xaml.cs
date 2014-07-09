@@ -105,6 +105,8 @@ namespace GPUTEMSTEMSimulation
             tempZoom.ClipToBounds = true;
             Image tImage = new Image();
 
+            tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+
             // set children
             tempZoom.Child = tImage;
             tempGrid.Children.Add(tempZoom);
