@@ -781,9 +781,9 @@ namespace GPUTEMSTEMSimulation
 		private void UpdateDetectorImage(DetectorItem i)
 		{
 			i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
-			i.Image.Source = i._ImgBMP;
+			i.tImage.Source = i._ImgBMP;
 
-			RenderOptions.SetBitmapScalingMode(i.Image, BitmapScalingMode.NearestNeighbor);
+			RenderOptions.SetBitmapScalingMode(i.tImage, BitmapScalingMode.NearestNeighbor);
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;

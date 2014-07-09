@@ -93,27 +93,8 @@ namespace GPUTEMSTEMSimulation
             if (!valid)
                 return;
 
-            // create brush converter (used to get brush colours)
-            BrushConverter bc = new BrushConverter();
-
-            // create the tab and all children
-            TabItem tempTab = new TabItem();
-            tempTab.Header = Sname;
-            Grid tempGrid = new Grid();
-            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
-            ZoomBorder tempZoom = new ZoomBorder();
-            tempZoom.ClipToBounds = true;
-            Image tImage = new Image();
-
-            tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
-
-            // set children
-            tempZoom.Child = tImage;
-            tempGrid.Children.Add(tempZoom);
-            tempTab.Content = tempGrid;
-
             // add everything to detector class
-            DetectorItem temp = new DetectorItem { Name = Sname, Inner = Fin, Outer = Fout, Tab = tempTab, Min = float.MaxValue, Max = 0, Image = tImage, ColourIndex = mainDetectors.Count };
+            DetectorItem temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
 
             // add to the listview
             mainDetectors.Add(temp);
@@ -201,8 +182,40 @@ namespace GPUTEMSTEMSimulation
     }
 }
 
-public class DetectorItem
+public class DisplayTab
 {
+	public int Xdim;
+
+	public int Ydim;
+
+	public Image tImage { get; set; }
+
+	public TabItem Tab { get; set; }
+
+	public DisplayTab(string tName)
+	{
+		BrushConverter bc = new BrushConverter();
+
+		Tab = new TabItem();
+		Tab.Header = tName;
+		Grid tempGrid = new Grid();
+		tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
+		ZoomBorder tempZoom = new ZoomBorder();
+		tempZoom.ClipToBounds = true;
+		tImage = new Image();
+
+		tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+
+		tempZoom.Child = tImage;
+		tempGrid.Children.Add(tempZoom);
+		Tab.Content = tempGrid;
+	}
+}
+
+public class DetectorItem : DisplayTab
+{
+    public DetectorItem(string tabName) : base(tabName){}
+
     public Brush ColBrush { get; set; }
 
     public int ColourIndex
@@ -230,10 +243,6 @@ public class DetectorItem
     public float Max { get; set; }
 
     public float[] ImageData { get; set; }
-
-    public Image Image { get; set; }
-
-    public TabItem Tab { get; set; }
 
     public Ellipse innerEllipse { get; set; }
 
@@ -300,7 +309,7 @@ public class DetectorItem
         float ratio = innerRad / outerRad;
         RadialGradientBrush LGB = new RadialGradientBrush();
         LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
-        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small different to give impression of sharp edge.
+        LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
         ringEllipse.OpacityMask = LGB;
     }
 
@@ -317,5 +326,4 @@ public class DetectorItem
         destination.Children.Remove(outerEllipse);
         destination.Children.Remove(ringEllipse);
     }
-
 }
