@@ -184,16 +184,22 @@ namespace GPUTEMSTEMSimulation
 
 public class DisplayTab
 {
-	public int Xdim;
+	public int xDim { get; set; }
 
-	public int Ydim;
+	public int yDim { get; set; }
 
 	public Image tImage { get; set; }
 
+    public float[] ImageData { get; set; }
+
 	public TabItem Tab { get; set; }
+
+    public Canvas tCanvas { get; set; }
 
 	public DisplayTab(string tName)
 	{
+		xDim = yDim = 0;
+
 		BrushConverter bc = new BrushConverter();
 
 		Tab = new TabItem();
@@ -204,12 +210,27 @@ public class DisplayTab
 		tempZoom.ClipToBounds = true;
 		tImage = new Image();
 
+        Viewbox tvBox = new Viewbox();
+        Grid temptempGrid = new Grid();
+        tCanvas = new Canvas();
+
 		tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
 
-		tempZoom.Child = tImage;
+		temptempGrid.Children.Add(tImage);
+		temptempGrid.Children.Add(tCanvas);
+		tvBox.Child = temptempGrid;
+		tempZoom.Child = tvBox;
 		tempGrid.Children.Add(tempZoom);
 		Tab.Content = tempGrid;
 	}
+
+    private WriteableBitmap ImgBMP;
+
+    public WriteableBitmap _ImgBMP
+    {
+        get { return ImgBMP; }
+        set { ImgBMP = value; }
+    }
 }
 
 public class DetectorItem : DisplayTab
@@ -242,21 +263,11 @@ public class DetectorItem : DisplayTab
 
     public float Max { get; set; }
 
-    public float[] ImageData { get; set; }
-
     public Ellipse innerEllipse { get; set; }
 
     public Ellipse outerEllipse { get; set; }
 
     public Ellipse ringEllipse { get; set; }
-
-    private WriteableBitmap ImgBMP;
-
-    public WriteableBitmap _ImgBMP
-    {
-        get { return ImgBMP; }
-        set { ImgBMP = value; }
-    }
 
     public float GetClampedPixel(int index)
     {
