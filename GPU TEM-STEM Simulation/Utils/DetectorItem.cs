@@ -66,6 +66,8 @@ namespace GPUTEMSTEMSimulation
 
         public Ellipse ringEllipse { get; set; }
 
+        private bool Added { get; set; }
+
         public float GetClampedPixel(int index)
         {
             return Math.Max(Math.Min(ImageData[index], Max), Min);
@@ -94,17 +96,17 @@ namespace GPUTEMSTEMSimulation
             float innerShift = (res) / 2 - innerRad;
             float outerShift = (res) / 2 - outerRad;
 
-            innerEllipse.Width = innerRad * 2;
-            innerEllipse.Height = innerRad * 2;
-            Canvas.SetTop(innerEllipse, innerShift+0.5);
-            Canvas.SetLeft(innerEllipse, innerShift + 0.5);
+            innerEllipse.Width = (innerRad * 2) + 0.5;
+            innerEllipse.Height = (innerRad * 2) + 0.5;
+            Canvas.SetTop(innerEllipse, innerShift + 0.25);
+            Canvas.SetLeft(innerEllipse, innerShift + 0.25);
             innerEllipse.Stroke = ColBrush;
             innerEllipse.StrokeDashArray = dashes;
 
-            outerEllipse.Width = outerRad * 2;
-            outerEllipse.Height = outerRad * 2;
-            Canvas.SetTop(outerEllipse, outerShift + 0.5);
-            Canvas.SetLeft(outerEllipse, outerShift + 0.5);
+            outerEllipse.Width = (outerRad * 2) + 0.5;
+            outerEllipse.Height = (outerRad * 2) + 0.5;
+            Canvas.SetTop(outerEllipse, outerShift + 0.25);
+            Canvas.SetLeft(outerEllipse, outerShift + 0.25);
             outerEllipse.Stroke = ColBrush;
             outerEllipse.StrokeDashArray = dashes;
 
@@ -119,6 +121,27 @@ namespace GPUTEMSTEMSimulation
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
             ringEllipse.OpacityMask = LGB;
+
+            setVisibility(false);
+        }
+
+        public void setVisibility(bool show)
+        {
+            if (!Added)
+                return;
+
+            if(show)
+            {
+                ringEllipse.Visibility = System.Windows.Visibility.Visible;
+                outerEllipse.Visibility = System.Windows.Visibility.Visible;
+                innerEllipse.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                ringEllipse.Visibility = System.Windows.Visibility.Hidden;
+                outerEllipse.Visibility = System.Windows.Visibility.Hidden;
+                innerEllipse.Visibility = System.Windows.Visibility.Hidden;
+            }
         }
 
         public void AddToCanvas(Canvas destination)
@@ -126,6 +149,7 @@ namespace GPUTEMSTEMSimulation
             destination.Children.Add(innerEllipse);
             destination.Children.Add(outerEllipse);
             destination.Children.Add(ringEllipse);
+            Added = true;
         }
 
         public void RemoveFromCanvas(Canvas destination)
@@ -133,6 +157,7 @@ namespace GPUTEMSTEMSimulation
             destination.Children.Remove(innerEllipse);
             destination.Children.Remove(outerEllipse);
             destination.Children.Remove(ringEllipse);
+            Added = false;
         }
     }
 }

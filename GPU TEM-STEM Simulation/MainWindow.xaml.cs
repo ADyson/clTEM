@@ -593,7 +593,7 @@ namespace GPUTEMSTEMSimulation
 
 				foreach (DetectorItem i in LockedDetectors)
 				{
-					// calculate the radii and reset properties
+					// calculate the radii and reset properties. Needs to be called on updating things too?
 					i.setEllipse(Resolution, pixelScale, wavelength);
 
 					// add to canvas

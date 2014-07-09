@@ -200,6 +200,22 @@ namespace GPUTEMSTEMSimulation
             TDS = false;
         }
 
+        private void Show_detectors(object sender, RoutedEventArgs e)
+        {
+            foreach (DetectorItem i in Detectors)
+            {
+                i.setVisibility(true);
+            }
+        }
+
+        private void Hide_Detectors(object sender, RoutedEventArgs e)
+        {
+            foreach (DetectorItem i in Detectors)
+            {
+                i.setVisibility(false);
+            }
+        }
+
         private void STEMDet_Click(object sender, RoutedEventArgs e)
         {
             // open the window here
