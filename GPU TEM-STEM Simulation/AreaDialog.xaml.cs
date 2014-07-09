@@ -102,14 +102,3 @@ namespace GPUTEMSTEMSimulation
     }
 
 }
-
-public class SimArea
-{
-    public float xStart { get; set; }
-
-    public float xFinish { get; set; }
-
-    public float yStart { get; set; }
-
-    public float yFinish { get; set; }
-}
