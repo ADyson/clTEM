@@ -286,38 +286,38 @@ namespace GPUTEMSTEMSimulation
             float xscale = (STEMRegion.xStart - STEMRegion.xFinish) / STEMRegion.xPixels;
             float yscale = (STEMRegion.yStart - STEMRegion.yFinish) / STEMRegion.yPixels;
 
-            if (STEMRegion.xStart < SimRegion.xStart || STEMRegion.xStart >= SimRegion.xFinish)
+            if (STEMRegion.xStart < SimRegion.xStart || STEMRegion.xStart > SimRegion.xFinish)
             {
                 STEMRegion.xStart = SimRegion.xStart;
                 changedx = true;
             }
 
-            if (STEMRegion.xFinish < SimRegion.xFinish || STEMRegion.xFinish <= SimRegion.xStart)
+            if (STEMRegion.xFinish > SimRegion.xFinish || STEMRegion.xFinish < SimRegion.xStart)
             {
                 STEMRegion.xFinish = SimRegion.xFinish;
                 changedx = true;
             }
 
-            if (STEMRegion.yStart < SimRegion.yStart || STEMRegion.yStart >= SimRegion.yFinish)
+            if (STEMRegion.yStart < SimRegion.yStart || STEMRegion.yStart > SimRegion.yFinish)
             {
                 STEMRegion.yStart = SimRegion.yStart;
                 changedy = true;
             }
 
-            if (STEMRegion.yFinish < SimRegion.yFinish || STEMRegion.yFinish <= SimRegion.yStart)
+            if (STEMRegion.yFinish > SimRegion.yFinish || STEMRegion.yFinish < SimRegion.yStart)
             {
                 STEMRegion.yFinish = SimRegion.yFinish;
                 changedy = true;
             }
 
             if (changedx)
-                STEMRegion.xPixels = (int)Math.Round((STEMRegion.xStart - STEMRegion.xFinish) / xscale);
+                STEMRegion.xPixels = (int)Math.Ceiling((STEMRegion.xStart - STEMRegion.xFinish) / xscale);
 
             if (changedy)
-                STEMRegion.yPixels = (int)Math.Round((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
+                STEMRegion.yPixels = (int)Math.Ceiling((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
 
-            //show some message saying valeus have been altered.
-
+            //var result = MessageBox.Show("STEM limits now out of bounds and have been rescaled", "", MessageBoxButton.OK, MessageBoxImage.Error);
+            
             UpdateMaxMrad();
         }
 
