@@ -37,7 +37,17 @@ namespace GPUTEMSTEMSimulation
             innerEllipse = new Ellipse();
             outerEllipse = new Ellipse();
             ringEllipse = new Ellipse();
+
+            CurrentResolution = 0;
+            CurrentPixelScale = 0;
+            CurrentWavelength = 0;
         }
+
+        private int CurrentResolution;
+
+        private float CurrentPixelScale;
+
+        private float CurrentWavelength;
 
         public Brush ColBrush { get; set; }
 
@@ -78,11 +88,34 @@ namespace GPUTEMSTEMSimulation
             return Math.Max(Math.Min(ImageData[index], Max), Min);
         }
 
+        public void setColour()
+        {
+            innerEllipse.Stroke = ColBrush;
+            outerEllipse.Stroke = ColBrush;
+            ringEllipse.Fill = ColBrush;
+        }
+
+        public void setColour(Brush userBrush)
+        {
+            innerEllipse.Stroke = userBrush;
+            outerEllipse.Stroke = userBrush;
+            ringEllipse.Fill = userBrush;
+        }
+
+
         public void setEllipse(int res, float pxScale, float wavelength, bool vis)
         {
-
+            // check image has been created, values arent constructor values
             if(res == 0 || pxScale == 0 || wavelength == 0)
                 return;
+
+            // check if detector needs to be redrawn
+            if(CurrentResolution == res && CurrentPixelScale == pxScale && CurrentWavelength == wavelength)
+                return;
+
+            CurrentResolution = res;
+            CurrentPixelScale = pxScale;
+            CurrentWavelength = wavelength;
 
             DoubleCollection dashes = new DoubleCollection();
             dashes.Add(4); //on
@@ -100,21 +133,18 @@ namespace GPUTEMSTEMSimulation
             innerEllipse.Height = (innerRad * 2) + 0.5;
             Canvas.SetTop(innerEllipse, innerShift + 0.25);
             Canvas.SetLeft(innerEllipse, innerShift + 0.25);
-            innerEllipse.Stroke = ColBrush;
             innerEllipse.StrokeDashArray = dashes;
 
             outerEllipse.Width = (outerRad * 2) + 0.5;
             outerEllipse.Height = (outerRad * 2) + 0.5;
             Canvas.SetTop(outerEllipse, outerShift + 0.25);
             Canvas.SetLeft(outerEllipse, outerShift + 0.25);
-            outerEllipse.Stroke = ColBrush;
             outerEllipse.StrokeDashArray = dashes;
 
             ringEllipse.Width = outerRad * 2;
             ringEllipse.Height = outerRad * 2;
             Canvas.SetTop(ringEllipse, outerShift + 0.5);
             Canvas.SetLeft(ringEllipse, outerShift + 0.5);
-            ringEllipse.Fill = ColBrush;
 
             float ratio = innerRad / outerRad;
             RadialGradientBrush LGB = new RadialGradientBrush();
@@ -122,14 +152,12 @@ namespace GPUTEMSTEMSimulation
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
             ringEllipse.OpacityMask = LGB;
 
+            setColour();
             setVisibility(vis);
         }
 
         public void setVisibility(bool show)
         {
-            if (!Added)
-                return;
-
             if(show)
             {
                 ringEllipse.Visibility = System.Windows.Visibility.Visible;
@@ -149,7 +177,6 @@ namespace GPUTEMSTEMSimulation
             destination.Children.Add(innerEllipse);
             destination.Children.Add(outerEllipse);
             destination.Children.Add(ringEllipse);
-            Added = true;
         }
 
         public void RemoveFromCanvas(Canvas destination)
@@ -157,7 +184,6 @@ namespace GPUTEMSTEMSimulation
             destination.Children.Remove(innerEllipse);
             destination.Children.Remove(outerEllipse);
             destination.Children.Remove(ringEllipse);
-            Added = false;
         }
     }
 }

@@ -255,7 +255,7 @@ namespace GPUTEMSTEMSimulation
 
             foreach (DetectorItem i in Detectors)
             {
-                i.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
+                i.setColour();//Ellipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
             }
         }
 
