@@ -34,10 +34,10 @@ namespace GPUTEMSTEMSimulation
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool IsResolutionSet;
-        bool HaveStructure;
-        bool IsSorted;
-        bool TDS;
+        bool IsResolutionSet = false;
+        bool HaveStructure = false;
+        bool IsSorted = false;
+        bool TDS = false;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
@@ -89,6 +89,7 @@ namespace GPUTEMSTEMSimulation
         {
             InitializeComponent();
 
+            // add constant tabs
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
 			RightTab.Items.Add(DiffDisplay.Tab);
@@ -102,11 +103,10 @@ namespace GPUTEMSTEMSimulation
             // Setup Managed Wrapper and Upload Atom Parameterisation ready for Multislice calculations.
             // Moved parameterisation, will be redone each time we get new structure now :(
             mCL = new ManagedOpenCL();
-            
-            IsResolutionSet = false;
-            HaveStructure = false;
-            IsSorted = false;
-            TDS = false;
+
+            // Must be set twice
+            DeviceSelector.SelectedIndex = -1;
+            DeviceSelector.SelectedIndex = -1;
 
             // Set Default Values
             ImagingAperture.Text = "30";
@@ -122,20 +122,13 @@ namespace GPUTEMSTEMSimulation
             ImagingA2.Text = "0";
             ImagingA2Phi.Text = "0";
 
-            //DataContext = this;
-
-            // Must be set twice
-            DeviceSelector.SelectedIndex = -1;
-            DeviceSelector.SelectedIndex = -1;
-
 			BinningCombo.SelectedIndex = 0;
 			CCDCombo.SelectedIndex = 0;
 
             // Add fake device names for now
             devicesShort = new List<String>();
             devicesLong = new List<String>();
-            //devices.Add("CPU");
-            //devices.Add("GPU");
+
             int numDev = mCL.getCLdevCount();
 
             for (int i = 0; i < numDev; i++)
@@ -145,49 +138,6 @@ namespace GPUTEMSTEMSimulation
             }
 
             DeviceSelector.ItemsSource = devicesShort;
-
-        }
-
-        private void UpdatePx()
-        {
-            if (HaveStructure && IsResolutionSet)
-            {
-                float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
-                pixelScale = BiggestSize / Resolution;
-                PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
-
-                UpdateMaxMrad();
-            }
-        }
-
-        private void UpdateMaxMrad()
-        {
-
-            if (!HaveStructure)
-                return;
-
-            float MinX = SimRegion.xStart;
-            float MinY = SimRegion.yStart;
-
-            float MaxX = SimRegion.xFinish;
-            float MaxY = SimRegion.yFinish;
-
-            float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-            // Determine max mrads for reciprocal space, (need wavelength)...
-            float MaxFreq = 1 / (2 * BiggestSize / Resolution);
-
-            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
-            {
-                float echarge = 1.6e-19f;
-                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
-                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
-
-                float mrads = (1000 * MaxFreq * wavelength) / 2; //divide by two to get mask limits
-
-                MaxMradsLabel.Content = mrads.ToString("f2")+" mrad";
-
-                HaveMaxMrad = true;
-            }
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
@@ -266,21 +216,6 @@ namespace GPUTEMSTEMSimulation
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
-        }
-
-        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
-        {
-            Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
-
-            IsResolutionSet = true;
-
-            if (!userSTEMarea)
-            {
-                STEMRegion.xPixels = Resolution;
-                STEMRegion.yPixels = Resolution;
-            }
-
-            UpdatePx();
         }
 
         // Simulation Button

@@ -32,6 +32,63 @@ namespace GPUTEMSTEMSimulation
     public partial class MainWindow : Window
     {
 
+        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+            Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
+
+            IsResolutionSet = true;
+
+            if (!userSTEMarea)
+            {
+                STEMRegion.xPixels = Resolution;
+                STEMRegion.yPixels = Resolution;
+            }
+
+            UpdatePx();
+        }
+
+        private void UpdatePx()
+        {
+            if (HaveStructure && IsResolutionSet)
+            {
+                float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
+                pixelScale = BiggestSize / Resolution;
+                PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
+
+                UpdateMaxMrad();
+            }
+        }
+
+        private void UpdateMaxMrad()
+        {
+
+            if (!HaveStructure)
+                return;
+
+            float MinX = SimRegion.xStart;
+            float MinY = SimRegion.yStart;
+
+            float MaxX = SimRegion.xFinish;
+            float MaxY = SimRegion.yFinish;
+
+            float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
+            // Determine max mrads for reciprocal space, (need wavelength)...
+            float MaxFreq = 1 / (2 * BiggestSize / Resolution);
+
+            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
+            {
+                float echarge = 1.6e-19f;
+                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
+                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
+
+                float mrads = (1000 * MaxFreq * wavelength) / 2; //divide by two to get mask limits
+
+                MaxMradsLabel.Content = mrads.ToString("f2")+" mrad";
+
+                HaveMaxMrad = true;
+            }
+        }
+
         private void ImagingDf_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingDf.Text;
