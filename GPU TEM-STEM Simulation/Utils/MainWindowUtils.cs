@@ -206,6 +206,7 @@ namespace GPUTEMSTEMSimulation
             {
                 i.setVisibility(true);
             }
+            DetectorVis = true;
         }
 
         private void Hide_Detectors(object sender, RoutedEventArgs e)
@@ -214,6 +215,7 @@ namespace GPUTEMSTEMSimulation
             {
                 i.setVisibility(false);
             }
+            DetectorVis = false;
         }
 
         private void STEMDet_Click(object sender, RoutedEventArgs e)
@@ -236,7 +238,11 @@ namespace GPUTEMSTEMSimulation
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
-            LeftTab.Items.Add(evargs.Detector.Tab);
+            var added = evargs.Detector as DetectorItem;
+            LeftTab.Items.Add(added.Tab);
+            added.AddToCanvas(DiffDisplay.tCanvas);
+            if(HaveMaxMrad)
+                added.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
@@ -249,7 +255,7 @@ namespace GPUTEMSTEMSimulation
 
             foreach (DetectorItem i in Detectors)
             {
-                i.setEllipse(Resolution, pixelScale, wavelength);
+                i.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
             }
         }
 

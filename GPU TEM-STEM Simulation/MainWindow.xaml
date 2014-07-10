@@ -339,7 +339,7 @@
             
             <CheckBox x:Name="ShowDetectors"  Content="Show Detectors" 
                       Grid.Row="1" Grid.Column="1" Margin="0,0,170,40" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="Auto" VerticalContentAlignment="Center"
-                      Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="False"/>
+                      Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="True"/>
 
             <Button x:Name="SaveImageButton2" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Grid.Column="1" Click="SaveImageButton2_Click" IsEnabled="False"/>
             

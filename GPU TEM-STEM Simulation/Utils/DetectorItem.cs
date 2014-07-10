@@ -32,7 +32,12 @@ namespace GPUTEMSTEMSimulation
 {
     public class DetectorItem : DisplayTab
     {
-        public DetectorItem(string tabName) : base(tabName){}
+        public DetectorItem(string tabName) : base(tabName)
+        {
+            innerEllipse = new Ellipse();
+            outerEllipse = new Ellipse();
+            ringEllipse = new Ellipse();
+        }
 
         public Brush ColBrush { get; set; }
 
@@ -73,16 +78,11 @@ namespace GPUTEMSTEMSimulation
             return Math.Max(Math.Min(ImageData[index], Max), Min);
         }
 
-        public void setEllipse(int res, float pxScale, float wavelength)
+        public void setEllipse(int res, float pxScale, float wavelength, bool vis)
         {
-            if (innerEllipse == null)
-                innerEllipse = new Ellipse();
 
-            if (outerEllipse == null)
-                outerEllipse = new Ellipse();
-
-            if (ringEllipse == null)
-                ringEllipse = new Ellipse();
+            if(res == 0 || pxScale == 0 || wavelength == 0)
+                return;
 
             DoubleCollection dashes = new DoubleCollection();
             dashes.Add(4); //on
@@ -122,7 +122,7 @@ namespace GPUTEMSTEMSimulation
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
             ringEllipse.OpacityMask = LGB;
 
-            setVisibility(false);
+            setVisibility(vis);
         }
 
         public void setVisibility(bool show)
