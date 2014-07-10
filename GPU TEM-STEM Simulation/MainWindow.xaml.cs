@@ -34,11 +34,17 @@ namespace GPUTEMSTEMSimulation
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool IsResolutionSet;
-        bool HaveStructure;
-        bool IsSorted;
-        bool TDS;
+        bool IsResolutionSet = false;
+        bool HaveStructure = false;
+        bool IsSorted = false;
+        bool TDS = false;
+        bool DetectorVis = false;
+        bool HaveMaxMrad = false;
+
         int Resolution;
+        int CurrentResolution = 0;
+        float CurrentPixelScale = 0;
+        float CurrentWavelength = 0;
 
         List<String> devicesShort;
         List<String> devicesLong;
@@ -83,6 +89,7 @@ namespace GPUTEMSTEMSimulation
         {
             InitializeComponent();
 
+            // add constant tabs
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
 			RightTab.Items.Add(DiffDisplay.Tab);
@@ -96,11 +103,10 @@ namespace GPUTEMSTEMSimulation
             // Setup Managed Wrapper and Upload Atom Parameterisation ready for Multislice calculations.
             // Moved parameterisation, will be redone each time we get new structure now :(
             mCL = new ManagedOpenCL();
-            
-            IsResolutionSet = false;
-            HaveStructure = false;
-            IsSorted = false;
-            TDS = false;
+
+            // Must be set twice
+            DeviceSelector.SelectedIndex = -1;
+            DeviceSelector.SelectedIndex = -1;
 
             // Set Default Values
             ImagingAperture.Text = "30";
@@ -116,20 +122,13 @@ namespace GPUTEMSTEMSimulation
             ImagingA2.Text = "0";
             ImagingA2Phi.Text = "0";
 
-            //DataContext = this;
-
-            // Must be set twice
-            DeviceSelector.SelectedIndex = -1;
-            DeviceSelector.SelectedIndex = -1;
-
 			BinningCombo.SelectedIndex = 0;
 			CCDCombo.SelectedIndex = 0;
 
             // Add fake device names for now
             devicesShort = new List<String>();
             devicesLong = new List<String>();
-            //devices.Add("CPU");
-            //devices.Add("GPU");
+
             int numDev = mCL.getCLdevCount();
 
             for (int i = 0; i < numDev; i++)
@@ -139,42 +138,13 @@ namespace GPUTEMSTEMSimulation
             }
 
             DeviceSelector.ItemsSource = devicesShort;
-
-        }
-
-        private void UpdateMaxMrad()
-        {
-
-            if (!HaveStructure)
-                return;
-
-            float MinX = SimRegion.xStart;
-            float MinY = SimRegion.yStart;
-
-            float MaxX = SimRegion.xFinish;
-            float MaxY = SimRegion.yFinish;
-
-            float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-            // Determine max mrads for reciprocal space, (need wavelength)...
-            float MaxFreq = 1 / (2 * BiggestSize / Resolution);
-
-            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
-            {
-                float echarge = 1.6e-19f;
-                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
-                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
-
-                float mrads = (1000 * MaxFreq * wavelength) / 2;
-
-                MaxMradsLabel.Content = mrads.ToString("f2")+" mrad";
-            }
         }
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openDialog = new Microsoft.Win32.OpenFileDialog();
 
-               // Set defaults for file dialog.
+            // Set defaults for file dialog.
             openDialog.FileName = "file name";                  // Default file name
             openDialog.DefaultExt = ".xyz";                     // Default file extension
             openDialog.Filter = "XYZ Coordinates (.xyz)|*.xyz"; // Filter files by extension
@@ -186,7 +156,7 @@ namespace GPUTEMSTEMSimulation
                 string fName = openDialog.FileName;
                 fileNameLabel.Content = System.IO.Path.GetFileName(fName);
                 fileNameLabel.ToolTip = fName;
-                
+
                 // Now pass filename through to unmanaged where atoms can be imported inside structure class...
                 mCL.ImportStructure(openDialog.FileName);
                 mCL.UploadParameterisation();
@@ -221,18 +191,9 @@ namespace GPUTEMSTEMSimulation
                     SimRegion.yFinish = Convert.ToSingle((MaxY - MinY).ToString("f2"));
                 }
 
-                if (IsResolutionSet)
-                {
-                    //float BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
-                    float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
-                    pixelScale = BiggestSize / Resolution;
-                    PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
-
-                    UpdateMaxMrad();
-                }
+                UpdatePx();
 
                 // Now we want to sorting the atoms ready for the simulation process do this in a background worker...
-
                 this.cancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = this.cancellationTokenSource.Token;
                 var progressReporter = new ProgressReporter();
@@ -255,46 +216,6 @@ namespace GPUTEMSTEMSimulation
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
-        }
-
-        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
-        {
-            Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
-
-            IsResolutionSet = true;
-
-            if (!userSTEMarea)
-            {
-                STEMRegion.xPixels = Resolution;
-                STEMRegion.yPixels = Resolution;
-            }
-
-            if (HaveStructure)
-            {
-                // Update some dialogs if everything went OK.
-                Int32 Len = 0;
-                float MinX = 0;
-                float MinY = 0;
-                float MinZ = 0;
-                float MaxX = 0;
-                float MaxY = 0;
-                float MaxZ = 0;
-
-                mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
-
-                HaveStructure = true;
-
-                WidthLabel.Content = (MaxX - MinX).ToString("f2") + " Å";
-                HeightLabel.Content = (MaxY - MinY).ToString("f2") + " Å";
-                DepthLabel.Content = (MaxZ - MinZ).ToString("f2") + " Å";
-                AtomNoLabel.Content = Len.ToString();
-
-                float BiggestSize = Math.Max(SimRegion.xFinish - SimRegion.xStart, SimRegion.yFinish - SimRegion.yStart);
-                pixelScale = BiggestSize / Resolution;
-                PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
-
-                UpdateMaxMrad();
-            }
         }
 
         // Simulation Button
@@ -462,6 +383,10 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateDiffractionImage()
 		{
+            CurrentResolution = Resolution;
+            CurrentPixelScale = pixelScale;
+            CurrentWavelength = wavelength;
+
 			DiffDisplay.xDim = Resolution;
 			DiffDisplay.yDim = Resolution;
 			
@@ -498,6 +423,11 @@ namespace GPUTEMSTEMSimulation
 			Int32Rect rect2 = new Int32Rect(0, 0, DiffDisplay._ImgBMP.PixelWidth, DiffDisplay._ImgBMP.PixelHeight);
 
 			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
+
+            // to update diffraction rings, show they have changed.
+            // might want to find a way of not doing this on every image change.
+            foreach (DetectorItem det in Detectors)
+                det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 		}
 
 		private void UpdateTDSImage()
@@ -590,15 +520,6 @@ namespace GPUTEMSTEMSimulation
 
 				ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
 				var converter = new System.Windows.Media.BrushConverter();
-
-				foreach (DetectorItem i in LockedDetectors)
-				{
-					// calculate the radii and reset properties
-					i.setEllipse(Resolution, pixelScale, wavelength);
-
-					// add to canvas
-					i.AddToCanvas(DiffDisplay.tCanvas);
-				}
 			}, 0);
 
 
