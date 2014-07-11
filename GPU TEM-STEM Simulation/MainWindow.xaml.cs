@@ -45,6 +45,7 @@ namespace GPUTEMSTEMSimulation
         int CurrentResolution = 0;
         float CurrentPixelScale = 0;
         float CurrentWavelength = 0;
+        float CurrentVoltage = 0;
 
         List<String> devicesShort;
         List<String> devicesLong;
@@ -239,6 +240,11 @@ namespace GPUTEMSTEMSimulation
                 return;
             }
 
+            CurrentResolution = Resolution;
+            CurrentPixelScale = pixelScale;
+            CurrentWavelength = wavelength;
+            CurrentVoltage = ImagingParameters.kilovoltage;
+
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
@@ -383,9 +389,6 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateDiffractionImage()
 		{
-            CurrentResolution = Resolution;
-            CurrentPixelScale = pixelScale;
-            CurrentWavelength = wavelength;
 
 			DiffDisplay.xDim = Resolution;
 			DiffDisplay.yDim = Resolution;
@@ -425,7 +428,6 @@ namespace GPUTEMSTEMSimulation
 			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
 
             // to update diffraction rings, show they have changed.
-            // might want to find a way of not doing this on every image change.
             foreach (DetectorItem det in Detectors)
                 det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 		}
@@ -466,6 +468,10 @@ namespace GPUTEMSTEMSimulation
 			Int32Rect rect2 = new Int32Rect(0, 0, DiffDisplay._ImgBMP.PixelWidth, DiffDisplay._ImgBMP.PixelHeight);
 
 			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
+
+            // to update diffraction rings, show they have changed.
+            foreach (DetectorItem det in Detectors)
+                det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 		}
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer)
@@ -734,19 +740,19 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateCTEMImage(float dpp, int binning, int CCD)
 		{
-			CTEMDisplay.xDim = Resolution;
-			CTEMDisplay.yDim = Resolution;
+			CTEMDisplay.xDim = CurrentResolution;
+			CTEMDisplay.yDim = CurrentResolution;
 
-			CTEMDisplay._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+			CTEMDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			CTEMDisplay.tImage.Source = CTEMDisplay._ImgBMP;
 
 			// When its completed we want to get data to c# for displaying in an image...
-			CTEMDisplay.ImageData = new float[Resolution * Resolution];
+			CTEMDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
 			if (CCD != 0)
-				mCL.GetCTEMImage(CTEMDisplay.ImageData, Resolution, dpp, binning, CCD);
+				mCL.GetCTEMImage(CTEMDisplay.ImageData, CurrentResolution, dpp, binning, CCD);
 			else
-				mCL.GetCTEMImage(CTEMDisplay.ImageData, Resolution);
+				mCL.GetCTEMImage(CTEMDisplay.ImageData, CurrentResolution);
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel = (CTEMDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
@@ -765,9 +771,9 @@ namespace GPUTEMSTEMSimulation
 			for (int row = 0; row < CTEMDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < CTEMDisplay._ImgBMP.PixelWidth; col++)
 				{
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
 					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
 				}
 
@@ -866,12 +872,11 @@ namespace GPUTEMSTEMSimulation
 
         private void Button_Click_SimImage(object sender, RoutedEventArgs e)
         {
-            mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical,
+            mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, CurrentVoltage, ImagingParameters.spherical,
                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
-
 			// Calculate Dose Per Pixel
-			float dpp = Convert.ToSingle(DoseTextBox.Text) * (pixelScale * pixelScale);
+			float dpp = Convert.ToSingle(DoseTextBox.Text) * (CurrentPixelScale * CurrentPixelScale);
 			// Get CCD and Binning
 
 			var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
