@@ -38,16 +38,16 @@ namespace GPUTEMSTEMSimulation
             outerEllipse = new Ellipse();
             ringEllipse = new Ellipse();
 
-            CurrentResolution = 0;
-            CurrentPixelScale = 0;
-            CurrentWavelength = 0;
+            _CurrentResolution = 0;
+            _CurrentPixelScale = 0;
+            _CurrentWaveLength = 0;
         }
 
-        private int CurrentResolution;
+        private int _CurrentResolution;
 
-        private float CurrentPixelScale;
+        private float _CurrentPixelScale;
 
-        private float CurrentWavelength;
+        private float _CurrentWaveLength;
 
         public Brush ColBrush { get; set; }
 
@@ -110,12 +110,12 @@ namespace GPUTEMSTEMSimulation
                 return;
 
             // check if detector needs to be redrawn
-            if(CurrentResolution == res && CurrentPixelScale == pxScale && CurrentWavelength == wavelength)
+            if(_CurrentResolution == res && _CurrentPixelScale == pxScale && _CurrentWaveLength == wavelength)
                 return;
 
-            CurrentResolution = res;
-            CurrentPixelScale = pxScale;
-            CurrentWavelength = wavelength;
+            _CurrentResolution = res;
+            _CurrentPixelScale = pxScale;
+            _CurrentWaveLength = wavelength;
 
             DoubleCollection dashes = new DoubleCollection();
             dashes.Add(4); //on

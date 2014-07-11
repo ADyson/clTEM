@@ -245,6 +245,9 @@ namespace GPUTEMSTEMSimulation
             CurrentWavelength = wavelength;
             CurrentVoltage = ImagingParameters.kilovoltage;
 
+            // DiffDisplay.tCanvas.Width = CurrentResolution;
+            // DiffDisplay.tCanvas.Height = CurrentResolution;
+
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
@@ -441,6 +444,9 @@ namespace GPUTEMSTEMSimulation
 			DiffDisplay.yDim = CurrentResolution;
 			DiffDisplay.ImageData = TDSImage;	
 	
+            DiffDisplay.tCanvas.Width = CurrentResolution;
+            DiffDisplay.tCanvas.Height = CurrentResolution;
+    
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
 
@@ -516,16 +522,19 @@ namespace GPUTEMSTEMSimulation
 
 			progressReporter.ReportProgress((val) =>
 			{
-				DiffDisplay.tCanvas.Children.Clear();
+				//DiffDisplay.tCanvas.Children.Clear();
 
-				DiffDisplay.tCanvas.Width = CurrentResolution;
-				DiffDisplay.tCanvas.Height = CurrentResolution;
+				// DiffDisplay.tCanvas.Width = CurrentResolution;
+				// DiffDisplay.tCanvas.Height = CurrentResolution;
+
+                // foreach (DetectorItem det in Detectors)
+                //     det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 
 				// enable checkbox here if it is implemented?
 				// will also possibly change initial visibility of ellipses
 
-				ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
-				var converter = new System.Windows.Media.BrushConverter();
+				// ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+				// var converter = new System.Windows.Media.BrushConverter();
 			}, 0);
 
 
