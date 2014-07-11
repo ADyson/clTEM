@@ -257,6 +257,16 @@ namespace GPUTEMSTEMSimulation
             TDS = false;
         }
 
+        private void Full3D_Checked(object sender, RoutedEventArgs e)
+        {
+            isFull3D = true;
+        }
+
+        private void Full3D_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isFull3D = false;
+        }
+
         private void Show_detectors(object sender, RoutedEventArgs e)
         {
             foreach (DetectorItem i in Detectors)

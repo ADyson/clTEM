@@ -14,7 +14,7 @@ TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparam
 
 };
 
-void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
+void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, bool Full3D)
 {
 
 	this->resolution = resolution;
@@ -150,11 +150,17 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 
 	InitialiseWavefunction->Enqueue(WorkSize);
 
-	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
+	if (Full3D)
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt.cl");
+	}
+	else
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional.cl");		
+	}
 	BinnedAtomicPotential->BuildKernel();
-	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
 	int loadblocksx = ceil(3.0f/BlockScaleX);
@@ -211,7 +217,7 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure)
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy)
+void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
 {
 
 	this->resolution = resolution;
@@ -347,11 +353,17 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 
 	InitialiseWavefunction->Enqueue(WorkSize);
 
-	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+	if (Full3D)
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+	}
+	else
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");		
+	}
 	BinnedAtomicPotential->BuildKernel();
-	//BinnedAtomicPotential->BuildKernelOld();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
 	int loadblocksx = ceil(3.0f/BlockScaleX);
@@ -410,7 +422,7 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy)
+void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
@@ -552,9 +564,16 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	WFabsolute = Kernel( new clKernel(abssource2,clState::context,clState::cldev,"clAbs",clState::clq));
 	WFabsolute->BuildKernelOld();
 
-	//BinnedAtomicPotential = new clKernel(BinnedAtomicPotentialSource,clState::context,clState::cldev,"clBinnedAtomicPotential",clState::clq);
-	BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
-	BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+	if (Full3D)
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+	}
+	else
+	{
+		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");		
+	}
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 
