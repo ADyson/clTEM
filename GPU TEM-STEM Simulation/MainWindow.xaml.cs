@@ -88,7 +88,7 @@ namespace GPUTEMSTEMSimulation
         public MainWindow()
         {
             InitializeComponent();
-
+			CancelButton.IsEnabled = false;
             // add constant tabs
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
@@ -251,6 +251,8 @@ namespace GPUTEMSTEMSimulation
             this.cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = this.cancellationTokenSource.Token;
             var progressReporter = new ProgressReporter();
+
+			CancelButton.IsEnabled = false;
             var task = Task.Factory.StartNew(() =>
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Normal;
@@ -262,7 +264,7 @@ namespace GPUTEMSTEMSimulation
 
                 mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical, ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
-				SimulationMethod(select_TEM, select_STEM, select_CBED, TDSruns, ref progressReporter, ref timer);
+				SimulationMethod(select_TEM, select_STEM, select_CBED, TDSruns, ref progressReporter, ref timer, ref cancellationToken);
                 
             }, cancellationToken);
 
@@ -270,6 +272,7 @@ namespace GPUTEMSTEMSimulation
             //SimWorker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
             progressReporter.RegisterContinuation(task, () =>
             {
+				CancelButton.IsEnabled = false;
                 progressBar1.Value = 100;
                 progressBar2.Value = 100;
 
@@ -353,19 +356,19 @@ namespace GPUTEMSTEMSimulation
 			EWDisplay._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
 		}
 
-		private void SimulationMethod(bool select_TEM, bool select_STEM, bool select_CBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer)
+		private void SimulationMethod(bool select_TEM, bool select_STEM, bool select_CBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
 			if (select_TEM)
 			{
-				SimulateTEM(ref progressReporter,ref timer);
+				SimulateTEM(ref progressReporter,ref timer, ref ct);
 			}
 			else if (select_STEM)
 			{
-				SimulateSTEM(TDSruns, ref progressReporter, ref timer);
+				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct);
 			}
 			else if (select_CBED)
 			{
-				SimulateCBED(TDSruns, ref progressReporter,ref timer);
+				SimulateCBED(TDSruns, ref progressReporter,ref timer, ref ct);
 			}
 		}	
 
@@ -468,7 +471,7 @@ namespace GPUTEMSTEMSimulation
 			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
 		}
 
-		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer)
+		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
 			mCL.InitialiseSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
@@ -480,8 +483,13 @@ namespace GPUTEMSTEMSimulation
 			mCL.GetNumberSlices(ref NumberOfSlices);
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
+			
+
 			for (int i = 1; i <= NumberOfSlices; i++)
 			{
+				if (ct.IsCancellationRequested == true)
+					break;
+
 				timer.Start();
 				mCL.MultisliceStep(i, NumberOfSlices);
 				timer.Stop();
@@ -491,13 +499,15 @@ namespace GPUTEMSTEMSimulation
 				float ms = timer.ElapsedMilliseconds;
 				progressReporter.ReportProgress((val) =>
 				{
+					CancelButton.IsEnabled = true;
 					UI_UpdateSimulationProgress(ms, NumberOfSlices, 1, 1, i, mem);
 				}, i);
 
 			}
+
 		}
-		
-		private void SimulateSTEM(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer)
+
+		private void SimulateSTEM(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
 			LockedDetectors = Detectors;
 			LockedArea = STEMRegion;
@@ -568,9 +578,11 @@ namespace GPUTEMSTEMSimulation
 						int NumberOfSlices = 0;
 						mCL.GetNumberSlices(ref NumberOfSlices);
 						// Seperate into setup, loop over slices and final steps to allow for progress reporting.
-
+						
 						for (int i = 1; i <= NumberOfSlices; i++)
 						{
+							if (ct.IsCancellationRequested == true)
+								break;
 
 							timer.Start();
 							mCL.MultisliceStep(i, NumberOfSlices);
@@ -580,11 +592,15 @@ namespace GPUTEMSTEMSimulation
 
 							progressReporter.ReportProgress((val) =>
 							{
+								CancelButton.IsEnabled = true;
 								// Note: code passed to "ReportProgress" can access UI elements freely. 
 								UI_UpdateSimulationProgressSTEM(ms, numPix, pix, NumberOfSlices, i, mem);
 							}, i);
 						}
 						pix++;
+
+						if (ct.IsCancellationRequested == true)
+							break;
 
 						// After a complete run if TDS need to sum up the DIFF...
 						mCL.AddTDSDiffImage(TDSImage, Resolution);
@@ -593,9 +609,13 @@ namespace GPUTEMSTEMSimulation
 
 						progressReporter.ReportProgress((val) =>
 						{
+							CancelButton.IsEnabled = false;
 							UpdateTDSImage();
 						}, j);
 					}
+
+					if (ct.IsCancellationRequested == true)
+						break;
 
 					// loop through and get each STEM pixel for each detector at the same time
 					foreach (DetectorItem i in LockedDetectors)
@@ -628,11 +648,12 @@ namespace GPUTEMSTEMSimulation
 					mCL.ClearTDS();
 
 				}
-
+				if (ct.IsCancellationRequested == true)
+					break;
 			}
 		}
 
-		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer)
+		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
 			int numPix = 1;
 			int pix = 0;
@@ -665,6 +686,9 @@ namespace GPUTEMSTEMSimulation
 
 				for (int i = 1; i <= NumberOfSlices; i++)
 				{
+					if (ct.IsCancellationRequested == true)
+						break;
+
 					timer.Start();
 					mCL.MultisliceStep(i, NumberOfSlices);
 					timer.Stop();
@@ -674,18 +698,23 @@ namespace GPUTEMSTEMSimulation
 					// Report progress of the work. 
 					progressReporter.ReportProgress((val) =>
 					{
+						CancelButton.IsEnabled = true;
 						// Note: code passed to "ReportProgress" can access UI elements freely. 
 						UI_UpdateSimulationProgress(ms, NumberOfSlices, runs, j, i, mem);
 					}, i);
 				}
 
-				// After a complete run if TDS need to sum up the DIFF...
+				if (ct.IsCancellationRequested == true)
+					break;
+
+								// After a complete run if TDS need to sum up the DIFF...
 				mCL.AddTDSDiffImage(TDSImage, Resolution);
 				// Sum it in C++ also for the stem pixel measurement...
 				mCL.AddTDS();
 
 				progressReporter.ReportProgress((val) =>
 				{
+					CancelButton.IsEnabled = false;
 					UpdateTDSImage();
 				}, j);
 			}
@@ -890,5 +919,14 @@ namespace GPUTEMSTEMSimulation
 
         }
 
+		private void Application_Exit(object sender, ExitEventArgs e)
+		{
+			GPUTEMSTEMSimulation.Properties.Settings.Default.Save();
+		}
+
+		private void Cancel_Click(object sender, RoutedEventArgs e)
+		{
+			cancellationTokenSource.Cancel();
+		}
     }
 }
