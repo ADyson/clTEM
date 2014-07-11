@@ -417,15 +417,15 @@ namespace GPUTEMSTEMSimulation
 			var arraySize2 = stride2 * DiffDisplay._ImgBMP.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			float min2 = mCL.GetDiffMin();
-			float max2 = mCL.GetDiffMax();
+			float min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
+			float max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
 
 			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
 				{
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
 					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
 				}
 
@@ -450,7 +450,7 @@ namespace GPUTEMSTEMSimulation
 	
             DiffDisplay.tCanvas.Width = CurrentResolution;
             DiffDisplay.tCanvas.Height = CurrentResolution;
-    
+
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
 
@@ -462,17 +462,17 @@ namespace GPUTEMSTEMSimulation
 			var arraySize2 = stride2 * DiffDisplay._ImgBMP.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			float min2 = mCL.GetDiffMin();
-			float max2 = mCL.GetDiffMax();
+			float min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
+            float max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
 
-			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
-				{
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
-				}
+            for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
+                for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
+                {
+                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+                }
 
 
 			Int32Rect rect2 = new Int32Rect(0, 0, DiffDisplay._ImgBMP.PixelWidth, DiffDisplay._ImgBMP.PixelHeight);
