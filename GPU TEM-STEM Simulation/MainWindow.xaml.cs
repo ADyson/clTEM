@@ -920,10 +920,6 @@ namespace GPUTEMSTEMSimulation
 
         }
 
-		private void Application_Exit(object sender, ExitEventArgs e)
-		{
-			GPUTEMSTEMSimulation.Properties.Settings.Default.Save();
-		}
 
 		private void Cancel_Click(object sender, RoutedEventArgs e)
 		{
