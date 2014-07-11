@@ -319,15 +319,15 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateEWImage()
 		{
-			EWDisplay.xDim = Resolution;
-			EWDisplay.yDim = Resolution;
+			EWDisplay.xDim = CurrentResolution;
+			EWDisplay.yDim = CurrentResolution;
 
-			EWDisplay._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+			EWDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			EWDisplay.tImage.Source = EWDisplay._ImgBMP;
 
 			// When its completed we want to get data to c# for displaying in an image...
-			EWDisplay.ImageData = new float[Resolution * Resolution];
-			mCL.GetEWImage(EWDisplay.ImageData, Resolution);
+			EWDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
+			mCL.GetEWImage(EWDisplay.ImageData, CurrentResolution);
 
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
@@ -347,9 +347,9 @@ namespace GPUTEMSTEMSimulation
 			for (int row = 0; row < EWDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < EWDisplay._ImgBMP.PixelWidth; col++)
 				{
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * Resolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
 					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
 				}
 
@@ -390,15 +390,15 @@ namespace GPUTEMSTEMSimulation
 		private void UpdateDiffractionImage()
 		{
 
-			DiffDisplay.xDim = Resolution;
-			DiffDisplay.yDim = Resolution;
+			DiffDisplay.xDim = CurrentResolution;
+			DiffDisplay.yDim = CurrentResolution;
 			
-			DiffDisplay._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+			DiffDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			DiffDisplay.tImage.Source = DiffDisplay._ImgBMP;
 
-			DiffDisplay.ImageData = new float[Resolution * Resolution];
+			DiffDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
-			mCL.GetDiffImage(DiffDisplay.ImageData, Resolution);
+			mCL.GetDiffImage(DiffDisplay.ImageData, CurrentResolution);
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
 			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
 
@@ -416,9 +416,9 @@ namespace GPUTEMSTEMSimulation
 			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
 				{
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((DiffDisplay.ImageData[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
 					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
 				}
 
@@ -434,11 +434,11 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateTDSImage()
 		{
-			DiffDisplay._ImgBMP = new WriteableBitmap(Resolution, Resolution, 96, 96, PixelFormats.Bgr32, null);
+			DiffDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			DiffDisplay.tImage.Source = DiffDisplay._ImgBMP;
 
-			DiffDisplay.xDim = Resolution;
-			DiffDisplay.yDim = Resolution;
+			DiffDisplay.xDim = CurrentResolution;
+			DiffDisplay.yDim = CurrentResolution;
 			DiffDisplay.ImageData = TDSImage;	
 	
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
@@ -458,9 +458,9 @@ namespace GPUTEMSTEMSimulation
 			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
 				{
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * Resolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((TDSImage[col + row * CurrentResolution] - min2) / (max2 - min2)) * 254.0f));
 					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
 				}
 
@@ -476,7 +476,7 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer)
 		{
-			mCL.InitialiseSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
 			// Reset atoms incase TDS has been used
 			mCL.SortStructure(false);
@@ -518,8 +518,8 @@ namespace GPUTEMSTEMSimulation
 			{
 				DiffDisplay.tCanvas.Children.Clear();
 
-				DiffDisplay.tCanvas.Width = Resolution;
-				DiffDisplay.tCanvas.Height = Resolution;
+				DiffDisplay.tCanvas.Width = CurrentResolution;
+				DiffDisplay.tCanvas.Height = CurrentResolution;
 
 				// enable checkbox here if it is implemented?
 				// will also possibly change initial visibility of ellipses
@@ -547,7 +547,7 @@ namespace GPUTEMSTEMSimulation
 
 			numPix *= runs;
 
-			mCL.InitialiseSTEMSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
 			float xInterval = LockedArea.getxInterval;
 			float yInterval = LockedArea.getyInterval;
@@ -558,7 +558,7 @@ namespace GPUTEMSTEMSimulation
 
 				for (int posX = 0; posX < LockedArea.xPixels; posX++)
 				{
-					TDSImage = new float[Resolution * Resolution];
+					TDSImage = new float[CurrentResolution * CurrentResolution];
 
 					for (int j = 0; j < runs; j++)
 					{
@@ -593,7 +593,7 @@ namespace GPUTEMSTEMSimulation
 						pix++;
 
 						// After a complete run if TDS need to sum up the DIFF...
-						mCL.AddTDSDiffImage(TDSImage, Resolution);
+						mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
 						// Sum it in C++ also for the stem pixel measurement...
 						mCL.AddTDS();
 
@@ -643,10 +643,10 @@ namespace GPUTEMSTEMSimulation
 			int numPix = 1;
 			int pix = 0;
 
-			mCL.InitialiseSTEMSimulation(Resolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
 
-			int posX = Resolution / 2;
-			int posY = Resolution / 2;
+			int posX = CurrentResolution / 2;
+			int posY = CurrentResolution / 2;
 
 			
 
@@ -661,7 +661,7 @@ namespace GPUTEMSTEMSimulation
 				runs = TDSruns;
 			}
 
-			TDSImage = new float[Resolution * Resolution];
+			TDSImage = new float[CurrentResolution * CurrentResolution];
 
 			for (int j = 0; j < runs; j++)
 			{
@@ -686,7 +686,7 @@ namespace GPUTEMSTEMSimulation
 				}
 
 				// After a complete run if TDS need to sum up the DIFF...
-				mCL.AddTDSDiffImage(TDSImage, Resolution);
+				mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
 				// Sum it in C++ also for the stem pixel measurement...
 				mCL.AddTDS();
 
@@ -845,7 +845,7 @@ namespace GPUTEMSTEMSimulation
 							output.SetField(TiffTag.SAMPLEFORMAT, 3);
 							output.SetField(TiffTag.BITSPERSAMPLE, 32);
 							output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
-							output.SetField(TiffTag.ROWSPERSTRIP, Resolution);
+							output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
 							output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 							output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
 							output.SetField(TiffTag.COMPRESSION, Compression.NONE);
