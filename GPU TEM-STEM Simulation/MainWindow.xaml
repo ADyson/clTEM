@@ -113,7 +113,8 @@
                              Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
                 
                 <CheckBox x:Name="ToggleFull3D"  Content="Full 3D Potential" 
-                          Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                          Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
+                          Checked="Full3D_Checked" Unchecked="Full3D_Unchecked" IsChecked="True" />
 
                 <Grid Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center">
                     <Grid.RowDefinitions>

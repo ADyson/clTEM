@@ -36,5 +36,5 @@ public:
 	 template<typename T> void Read(std::vector<T> &data){
 			clEnqueueReadBuffer(clq->cmdQueue,buffer,CL_TRUE,0,data.size()*sizeof(T),&data[0],0,NULL,NULL);
 	};
-
+	 
 };

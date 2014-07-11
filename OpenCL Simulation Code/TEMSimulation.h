@@ -19,9 +19,9 @@ public:
 	float FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	// Simulation steps
-	void Initialise(int resolution, MultisliceStructure* Structure);
-	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy);
+	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D);
+	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
+	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
 	void MakeSTEMWaveFunction(float posx, float posy);
 
 	void MultisliceStep(int stepno, int steps);

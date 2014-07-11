@@ -38,6 +38,7 @@ namespace GPUTEMSTEMSimulation
         bool HaveStructure = false;
         bool IsSorted = false;
         bool TDS = false;
+        bool isFull3D = true;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
@@ -482,7 +483,7 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer)
 		{
-			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
 			// Reset atoms incase TDS has been used
 			mCL.SortStructure(false);
@@ -556,7 +557,7 @@ namespace GPUTEMSTEMSimulation
 
 			numPix *= runs;
 
-			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
 			float xInterval = LockedArea.getxInterval;
 			float yInterval = LockedArea.getyInterval;
@@ -652,7 +653,7 @@ namespace GPUTEMSTEMSimulation
 			int numPix = 1;
 			int pix = 0;
 
-			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish);
+			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
 			int posX = CurrentResolution / 2;
 			int posY = CurrentResolution / 2;

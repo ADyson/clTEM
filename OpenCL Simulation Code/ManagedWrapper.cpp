@@ -91,11 +91,11 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->SetParamsSTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, bool Full3D)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSimulation(resolution);
+			_UMOpenCL->InitialiseSimulation(resolution,Full3D);
 		}
 		catch(std::exception ex)
 		{
@@ -106,11 +106,11 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy);
+			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D);
 		}
 		catch(std::exception ex)
 		{
@@ -121,11 +121,11 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy)
+	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy);
+			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy,Full3D);
 		}
 		catch(std::exception ex)
 		{
