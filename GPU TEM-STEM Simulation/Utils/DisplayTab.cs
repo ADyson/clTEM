@@ -46,10 +46,32 @@ namespace GPUTEMSTEMSimulation
         public Label xCoord { get; set; }
         public Label yCoord { get; set; }
 
+        private float _PixelScaleX;
+
+        public float PixelScaleX
+        {
+            get { return _PixelScaleX; }
+            set { _PixelScaleX = value; }
+        }
+
+        private float _PixelScaleY;
+
+        public float PixelScaleY
+        {
+            get { return _PixelScaleY; }
+            set { _PixelScaleY = value; }
+        }
+
+        public bool Reciprocal;
+
         public DisplayTab(string tName)
         {
-            xDim = yDim = 0;
+            // Assume LeftTab by default
+            // Could just make 2 classes for Left and RightTab...
+            Reciprocal = false;
+            PixelScaleX = PixelScaleY = 1;
 
+            xDim = yDim = 0;
             BrushConverter bc = new BrushConverter();
 
             Tab = new TabItem();
@@ -87,9 +109,17 @@ namespace GPUTEMSTEMSimulation
         public void MouseMove(object sender, MouseEventArgs e)
         {
             Point p = e.GetPosition(tImage);
+            if (Reciprocal)
+            {
+                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString();
+                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString();
 
-            xCoord.Content = p.X.ToString();
-            yCoord.Content = p.Y.ToString();
+            }
+            else
+            {
+                xCoord.Content = (PixelScaleX * p.X).ToString();
+                yCoord.Content = (PixelScaleY * p.Y).ToString();
+            }
         }
 
         public void SetPositionReadoutElements(ref Label tb1, ref Label tb2)
