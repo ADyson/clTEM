@@ -43,33 +43,38 @@ namespace GPUTEMSTEMSimulation
 
 	    public Canvas tCanvas { get; set; }
 
-		public DisplayTab(string tName)
-		{
-			xDim = yDim = 0;
+        public Label xCoord { get; set; }
+        public Label yCoord { get; set; }
 
-			BrushConverter bc = new BrushConverter();
+        public DisplayTab(string tName)
+        {
+            xDim = yDim = 0;
 
-			Tab = new TabItem();
-			Tab.Header = tName;
-			Grid tempGrid = new Grid();
-			tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
-			ZoomBorder tempZoom = new ZoomBorder();
-			tempZoom.ClipToBounds = true;
-			tImage = new Image();
+            BrushConverter bc = new BrushConverter();
 
-	        Viewbox tvBox = new Viewbox();
-	        Grid temptempGrid = new Grid();
-	        tCanvas = new Canvas();
+            Tab = new TabItem();
+            Tab.Header = tName;
+            Grid tempGrid = new Grid();
+            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
+            ZoomBorder tempZoom = new ZoomBorder();
+            tempZoom.ClipToBounds = true;
+            tImage = new Image();
 
-			tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+            Viewbox tvBox = new Viewbox();
+            Grid temptempGrid = new Grid();
+            tCanvas = new Canvas();
 
-			temptempGrid.Children.Add(tImage);
-			temptempGrid.Children.Add(tCanvas);
-			tvBox.Child = temptempGrid;
-			tempZoom.Child = tvBox;
-			tempGrid.Children.Add(tempZoom);
-			Tab.Content = tempGrid;
-		}
+            tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+
+            temptempGrid.Children.Add(tImage);
+            temptempGrid.Children.Add(tCanvas);
+            tvBox.Child = temptempGrid;
+            tempZoom.Child = tvBox;
+            tempGrid.Children.Add(tempZoom);
+            Tab.Content = tempGrid;
+
+            tImage.MouseMove += new MouseEventHandler(MouseMove);
+        }
 
 	    private WriteableBitmap ImgBMP;
 
@@ -78,5 +83,19 @@ namespace GPUTEMSTEMSimulation
 	        get { return ImgBMP; }
 	        set { ImgBMP = value; }
 	    }
+
+        public void MouseMove(object sender, MouseEventArgs e)
+        {
+            Point p = e.GetPosition(tImage);
+
+            xCoord.Content = p.X.ToString();
+            yCoord.Content = p.Y.ToString();
+        }
+
+        public void SetPositionReadoutElements(ref Label tb1, ref Label tb2)
+        {
+            xCoord = tb1;
+            yCoord = tb2;
+        }
 	}
 }

@@ -94,6 +94,12 @@ namespace GPUTEMSTEMSimulation
             // add constant tabs
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
+
+            CTEMDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            EWDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            DiffDisplay.SetPositionReadoutElements(ref RightXCoord, ref RightYCoord);
+
+
 			RightTab.Items.Add(DiffDisplay.Tab);
 
             // Start in TEM mode.
