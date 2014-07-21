@@ -857,7 +857,7 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution, float doseperpix, 
 
 
 	float conversionfactor = 8; //CCD counts per electron.
-	float Ntot = doseperpix; // Get this passed in, its dose per pixel i think.
+	float Ntot = doseperpix*binning*binning; // Get this passed in, its dose per pixel i think.
 
 	// Original data is complex so copy complex version down first
 	std::vector<cl_float2> compdata;

@@ -82,6 +82,7 @@ namespace GPUTEMSTEMSimulation
         float pixelScale;
         float wavelength;
 
+		// Make the 3 default tabs...
         DisplayTab CTEMDisplay = new DisplayTab("CTEM");
         DisplayTab EWDisplay = new DisplayTab("EW");
         DisplayTab DiffDisplay = new DisplayTab("Diffraction");
@@ -90,18 +91,18 @@ namespace GPUTEMSTEMSimulation
         {
             InitializeComponent();
 			CancelButton.IsEnabled = false;
-            // add constant tabs
+            
+			// add constant tabs to UI
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
+			RightTab.Items.Add(DiffDisplay.Tab);
 
             CTEMDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
             EWDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
             DiffDisplay.SetPositionReadoutElements(ref RightXCoord, ref RightYCoord);
             DiffDisplay.Reciprocal = true;
 
-			RightTab.Items.Add(DiffDisplay.Tab);
-
-            // Start in TEM mode.
+			// Start in TEM mode.
             TEMRadioButton.IsChecked = true;
 
             ImagingParameters = new TEMParams();
