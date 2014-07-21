@@ -104,7 +104,7 @@ std::string clState::GetDeviceString(int i, bool getShort)
 
 void clState::SetDevice(int index)
 {
-	context = clCreateContext(NULL,1,devices[deviceplatform[index]],NULL,NULL,&status);
+	context = clCreateContext(NULL,numdevices[deviceplatform[index]],devices[deviceplatform[index]],NULL,NULL,&status);
 	clq = new clQueue();
 	status = clq->SetupQueue(context,devices[deviceplatform[index]][deviceid[index]]);
 
