@@ -96,6 +96,8 @@ namespace GPUTEMSTEMSimulation
             Tab.Content = tempGrid;
 
             tImage.MouseMove += new MouseEventHandler(MouseMove);
+			tImage.MouseEnter += new MouseEventHandler(MouseEnter);
+			tImage.MouseLeave += new MouseEventHandler(MouseLeave);
         }
 
 	    private WriteableBitmap ImgBMP;
@@ -121,6 +123,18 @@ namespace GPUTEMSTEMSimulation
                 yCoord.Content = (PixelScaleY * p.Y).ToString();
             }
         }
+
+		public void MouseEnter(object sender, MouseEventArgs e)
+		{
+			xCoord.Visibility = Visibility.Visible;
+			yCoord.Visibility = Visibility.Visible;
+		}
+
+		public void MouseLeave(object sender, MouseEventArgs e)
+		{
+			xCoord.Visibility = Visibility.Hidden;
+			yCoord.Visibility = Visibility.Hidden;
+		}
 
         public void SetPositionReadoutElements(ref Label tb1, ref Label tb2)
         {
