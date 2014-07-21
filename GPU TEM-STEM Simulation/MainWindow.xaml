@@ -333,23 +333,49 @@
                 <ColumnDefinition Width=".5*"/>
             </Grid.ColumnDefinitions>
             <!-- Left Image Tab Control-->
-			<TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,10,20,80" Grid.Row="1"/>
-            
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
+                <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,20,20,0" Grid.Row="0"/>
+                    <Grid Grid.Row="1" Margin="20,5,20,40">
+                        <Border BorderThickness="1" Background="PaleGoldenrod" BorderBrush="Black">
+                            <DockPanel HorizontalAlignment="Stretch">
+                            <Label Name="LeftXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left"/>
+                            <Label Name="LeftXCoord" Content="0.00" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left"/>
+                            <Label Name="LeftYCoordLabel" Content="; Y = " HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                            <Label Name="LeftYCoord" Content="0.00" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left"/>
+                                <Button x:Name="SaveImageButton" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" Height="30" Width="103" Click="SaveImageButton_Click" IsEnabled="False"/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>   
+            </Grid>
+
             <!-- Right Image Tab Control-->
-            <TabControl Name="RightTab" Margin="20,10,20,80" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-            
-            <Button x:Name="SaveImageButton" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Click="SaveImageButton_Click" IsEnabled="False"/>
-            
-            <CheckBox x:Name="ShowDetectors"
-                      Grid.Row="1" Grid.Column="1" Margin="0,0,170,48" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="Auto" VerticalContentAlignment="Center"
-                      Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="True">
-
-                      <TextBlock Text="Show Detectors" VerticalAlignment="Center" />
-
-          </CheckBox>
-
-            <Button x:Name="SaveImageButton2" Content="Save Image" HorizontalAlignment="Right" Height="31" VerticalAlignment="Bottom" Width="103" Margin="0,0,50,40" Grid.Row="1" Grid.Column="1" Click="SaveImageButton2_Click" IsEnabled="False"/>
-            
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
+                <TabControl Name="RightTab" Margin="20,20,20,0" Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                <Grid Grid.Row="1" Grid.Column="1" Margin="20,5,20,40">
+                    <Border BorderThickness="1" Background="PaleGoldenrod" BorderBrush="Black">
+                        <DockPanel HorizontalAlignment="Stretch">
+                            <Label Name="RightXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left"/>
+                            <Label Name="RightXCoord" Content="0.00" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left"/>
+                            <Label Name="RightYCoordLabel" Content="; Y = " HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                            <Label Name="RightYCoord" Content="0.00" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left"/>
+                            <CheckBox x:Name="ShowDetectors" VerticalAlignment="Center" Width="Auto" Margin="20,0,0,0"
+                                Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="True">
+                                <TextBlock Text="Show Detectors" VerticalAlignment="Center" />
+                            </CheckBox>
+                            <Button x:Name="SaveImageButton2" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" Height="30" Width="103" Click="SaveImageButton2_Click" IsEnabled="False"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+                     
             <StatusBar HorizontalAlignment="Stretch" Height="34" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" BorderThickness="0,1,0,0" BorderBrush="#FFC1C1C1" HorizontalContentAlignment="Right">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -397,5 +423,6 @@
                 
             </StatusBar>
         </Grid>
+        <StackPanel HorizontalAlignment="Left" Height="100" Margin="-14,569,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100"/>
     </Grid>
 </Window>

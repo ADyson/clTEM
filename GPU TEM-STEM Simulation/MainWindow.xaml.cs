@@ -47,7 +47,6 @@ namespace GPUTEMSTEMSimulation
         float CurrentPixelScale = 0;
         float CurrentWavelength = 0;
         float CurrentVoltage = 0;
-
         List<String> devicesShort;
         List<String> devicesLong;
 
@@ -94,6 +93,12 @@ namespace GPUTEMSTEMSimulation
             // add constant tabs
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
+
+            CTEMDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            EWDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            DiffDisplay.SetPositionReadoutElements(ref RightXCoord, ref RightYCoord);
+            DiffDisplay.Reciprocal = true;
+
 			RightTab.Items.Add(DiffDisplay.Tab);
 
             // Start in TEM mode.
@@ -243,6 +248,9 @@ namespace GPUTEMSTEMSimulation
 
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
+
+
+
             CurrentWavelength = wavelength;
             CurrentVoltage = ImagingParameters.kilovoltage;
 
@@ -368,16 +376,30 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulationMethod(bool select_TEM, bool select_STEM, bool select_CBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
+
+            // Add Pixelscale to image tabs and diffraction then run simulation
 			if (select_TEM)
 			{
+                EWDisplay.PixelScaleX = pixelScale;
+                CTEMDisplay.PixelScaleX = pixelScale;
+                DiffDisplay.PixelScaleX = pixelScale;
+
+                EWDisplay.PixelScaleY = pixelScale;
+                CTEMDisplay.PixelScaleY = pixelScale;
+                DiffDisplay.PixelScaleY = pixelScale;
+
 				SimulateTEM(ref progressReporter,ref timer, ref ct);
 			}
 			else if (select_STEM)
 			{
+                DiffDisplay.PixelScaleX = pixelScale;
+                DiffDisplay.PixelScaleY = pixelScale;
 				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct);
 			}
 			else if (select_CBED)
 			{
+                DiffDisplay.PixelScaleX = pixelScale;
+                DiffDisplay.PixelScaleY = pixelScale;
 				SimulateCBED(TDSruns, ref progressReporter,ref timer, ref ct);
 			}
 		}	
@@ -525,29 +547,18 @@ namespace GPUTEMSTEMSimulation
 			LockedDetectors = Detectors;
 			LockedArea = STEMRegion;
 
+            foreach (DetectorItem dt in LockedDetectors)
+            {
+                dt.PixelScaleX = LockedArea.getxInterval;
+                dt.PixelScaleY = LockedArea.getyInterval;
+                dt.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            }
+
 			if (LockedDetectors.Count == 0)
 			{
 				var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
 				return;
 			}
-
-			progressReporter.ReportProgress((val) =>
-			{
-				//DiffDisplay.tCanvas.Children.Clear();
-
-				// DiffDisplay.tCanvas.Width = CurrentResolution;
-				// DiffDisplay.tCanvas.Height = CurrentResolution;
-
-                // foreach (DetectorItem det in Detectors)
-                //     det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
-
-				// enable checkbox here if it is implemented?
-				// will also possibly change initial visibility of ellipses
-
-				// ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
-				// var converter = new System.Windows.Media.BrushConverter();
-			}, 0);
-
 
 			int numPix = LockedArea.xPixels * LockedArea.yPixels;
 			int pix = 0;

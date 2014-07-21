@@ -43,33 +43,60 @@ namespace GPUTEMSTEMSimulation
 
 	    public Canvas tCanvas { get; set; }
 
-		public DisplayTab(string tName)
-		{
-			xDim = yDim = 0;
+        public Label xCoord { get; set; }
+        public Label yCoord { get; set; }
 
-			BrushConverter bc = new BrushConverter();
+        private float _PixelScaleX;
 
-			Tab = new TabItem();
-			Tab.Header = tName;
-			Grid tempGrid = new Grid();
-			tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
-			ZoomBorder tempZoom = new ZoomBorder();
-			tempZoom.ClipToBounds = true;
-			tImage = new Image();
+        public float PixelScaleX
+        {
+            get { return _PixelScaleX; }
+            set { _PixelScaleX = value; }
+        }
 
-	        Viewbox tvBox = new Viewbox();
-	        Grid temptempGrid = new Grid();
-	        tCanvas = new Canvas();
+        private float _PixelScaleY;
 
-			tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+        public float PixelScaleY
+        {
+            get { return _PixelScaleY; }
+            set { _PixelScaleY = value; }
+        }
 
-			temptempGrid.Children.Add(tImage);
-			temptempGrid.Children.Add(tCanvas);
-			tvBox.Child = temptempGrid;
-			tempZoom.Child = tvBox;
-			tempGrid.Children.Add(tempZoom);
-			Tab.Content = tempGrid;
-		}
+        public bool Reciprocal;
+
+        public DisplayTab(string tName)
+        {
+            // Assume LeftTab by default
+            // Could just make 2 classes for Left and RightTab...
+            Reciprocal = false;
+            PixelScaleX = PixelScaleY = 1;
+
+            xDim = yDim = 0;
+            BrushConverter bc = new BrushConverter();
+
+            Tab = new TabItem();
+            Tab.Header = tName;
+            Grid tempGrid = new Grid();
+            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
+            ZoomBorder tempZoom = new ZoomBorder();
+            tempZoom.ClipToBounds = true;
+            tImage = new Image();
+
+            Viewbox tvBox = new Viewbox();
+            Grid temptempGrid = new Grid();
+            tCanvas = new Canvas();
+
+            tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
+
+            temptempGrid.Children.Add(tImage);
+            temptempGrid.Children.Add(tCanvas);
+            tvBox.Child = temptempGrid;
+            tempZoom.Child = tvBox;
+            tempGrid.Children.Add(tempZoom);
+            Tab.Content = tempGrid;
+
+            tImage.MouseMove += new MouseEventHandler(MouseMove);
+        }
 
 	    private WriteableBitmap ImgBMP;
 
@@ -78,5 +105,27 @@ namespace GPUTEMSTEMSimulation
 	        get { return ImgBMP; }
 	        set { ImgBMP = value; }
 	    }
+
+        public void MouseMove(object sender, MouseEventArgs e)
+        {
+            Point p = e.GetPosition(tImage);
+            if (Reciprocal)
+            {
+                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString();
+                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString();
+
+            }
+            else
+            {
+                xCoord.Content = (PixelScaleX * p.X).ToString();
+                yCoord.Content = (PixelScaleY * p.Y).ToString();
+            }
+        }
+
+        public void SetPositionReadoutElements(ref Label tb1, ref Label tb2)
+        {
+            xCoord = tb1;
+            yCoord = tb2;
+        }
 	}
 }
