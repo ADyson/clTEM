@@ -406,8 +406,8 @@ namespace GPUTEMSTEMSimulation
                 STEMRegion.yPixels = (int)Math.Ceiling((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
 
             //var result = MessageBox.Show("STEM limits now out of bounds and have been rescaled", "", MessageBoxButton.OK, MessageBoxImage.Error);
-            
-            UpdateMaxMrad();
+			UpdatePx();
+            //UpdateMaxMrad();
         }
 
         private void gridZoom_reset(object sender, MouseButtonEventArgs e)

@@ -382,11 +382,9 @@ namespace GPUTEMSTEMSimulation
 			if (select_TEM)
 			{
                 EWDisplay.PixelScaleX = pixelScale;
-                CTEMDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleX = pixelScale;
 
                 EWDisplay.PixelScaleY = pixelScale;
-                CTEMDisplay.PixelScaleY = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 
 				SimulateTEM(ref progressReporter,ref timer, ref ct);
@@ -791,6 +789,10 @@ namespace GPUTEMSTEMSimulation
 
 		private void UpdateCTEMImage(float dpp, int binning, int CCD)
 		{
+			// Get pixelscale from EW and apply to image.
+			CTEMDisplay.PixelScaleY = EWDisplay.PixelScaleY;
+			CTEMDisplay.PixelScaleX = EWDisplay.PixelScaleY;
+
 			CTEMDisplay.xDim = CurrentResolution;
 			CTEMDisplay.yDim = CurrentResolution;
 
