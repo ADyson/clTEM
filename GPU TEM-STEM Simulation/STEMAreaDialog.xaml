@@ -68,7 +68,7 @@
                       m:Masking.Mask="^[0-9]*$"
                       TextWrapping="NoWrap" Height="22" Width="60" GotFocus="tBox_GotFocus" Margin="0,2"/>
         
-        <Button x:Name="OKButton" Content="OK"
+        <Button x:Name="OKButton" Content="OK" Style="{StaticResource MetroButton}"
                 Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2"
                 Click="OKButton_Click" HorizontalAlignment="Right" Width="75" Height="24" Margin="0,2"/>
     </Grid>

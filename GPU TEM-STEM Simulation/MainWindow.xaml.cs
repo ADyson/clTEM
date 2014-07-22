@@ -360,6 +360,9 @@ namespace GPUTEMSTEMSimulation
 			float min = mCL.GetEWMin();
 			float max = mCL.GetEWMax();
 
+			if (min == max)
+				return;
+
 			for (int row = 0; row < EWDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < EWDisplay._ImgBMP.PixelWidth; col++)
 				{
@@ -440,6 +443,9 @@ namespace GPUTEMSTEMSimulation
 
 			float min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
 			float max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
+
+			if (min2 == max2)
+				return;
 
 			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
@@ -820,6 +826,9 @@ namespace GPUTEMSTEMSimulation
 
 			float min = mCL.GetIMMin();
 			float max = mCL.GetIMMax();
+
+			if (min == max)
+				return;
 
 			for (int row = 0; row < CTEMDisplay._ImgBMP.PixelHeight; row++)
 				for (int col = 0; col < CTEMDisplay._ImgBMP.PixelWidth; col++)

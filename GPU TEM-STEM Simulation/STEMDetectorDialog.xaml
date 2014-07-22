@@ -74,11 +74,11 @@
                       Grid.Row="5" Grid.Column="1"
                       MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
 
-        <Button x:Name="AddButton"
+        <Button x:Name="AddButton" Style="{StaticResource MetroButton}"
                 Grid.Row="6" Grid.Column="1"
                 Content="Add" Click="AddButton_Click" Width="75" Height="24" Margin="0,2"/>
 
-        <Button x:Name="DeleteButton" 
+        <Button x:Name="DeleteButton" Style="{StaticResource MetroButton}"
                 Grid.Row="7" Grid.Column="1"
                 Content="Delete" Click="DeleteButton_Click" Width="75" Height="24" Margin="0,2"/>
 
