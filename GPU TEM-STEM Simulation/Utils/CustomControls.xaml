@@ -9,12 +9,12 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" BorderThickness="0,0,0,0" BorderBrush="AliceBlue" Background="AliceBlue">
-                <Label Foreground="Black">
+            <Border Grid.Row="0" BorderThickness="0,0,1,0" BorderBrush="PaleGoldenrod" Background="WhiteSmoke">
+                <Label Foreground="Black" HorizontalAlignment="Center" FontFamily="Calibri">
                     <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
                 </Label>
             </Border>
-            <Border Grid.Row="1" BorderThickness="0,0,1,1" BorderBrush="AliceBlue">
+            <Border Grid.Row="1" BorderThickness="0,0,1,1" BorderBrush="PaleGoldenrod" Background="Snow">
                 <ContentPresenter Margin="4" />
             </Border>
         </Grid>
@@ -59,15 +59,14 @@
                                 RecognizesAccessKey="True" />
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="OpacityMask" Value="#AA888888"/>
-                            <Setter Property="Background" Value="AliceBlue"/>
-                            <Setter Property="Margin" Value="2 1" />
-                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="Background" Value="PaleGoldenrod"/>
                             <Setter Property="Foreground" Value="Black"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="LightSkyBlue"/>
+                            <Setter Property="Margin" Value="2 1" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="#ADADAD"/>

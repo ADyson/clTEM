@@ -42,6 +42,7 @@ namespace GPUTEMSTEMSimulation
             DetectorListView.ItemsSource = mainDetectors;
 
             numDet = mainDetectors.Count;
+			NameTxtbx.Text = "Detector" + (numDet + 1).ToString();
 
             // needed so it doesnt default to on when too many items are selected
             ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);

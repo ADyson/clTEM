@@ -113,14 +113,14 @@ namespace GPUTEMSTEMSimulation
             Point p = e.GetPosition(tImage);
             if (Reciprocal)
             {
-                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString();
-                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString();
+                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
+                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
 
             }
             else
             {
-                xCoord.Content = (PixelScaleX * p.X).ToString();
-                yCoord.Content = (PixelScaleY * p.Y).ToString();
+				xCoord.Content = (PixelScaleX * p.X).ToString("f2") + " Å";
+				yCoord.Content = (PixelScaleY * p.Y).ToString("f2") + " Å";
             }
         }
 

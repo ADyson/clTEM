@@ -923,6 +923,9 @@ namespace GPUTEMSTEMSimulation
 
         private void Button_Click_SimImage(object sender, RoutedEventArgs e)
         {
+			//Disable simulate EW button for the duration
+			SimulateEWButton.IsEnabled = false;
+
             mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, CurrentVoltage, ImagingParameters.spherical,
                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
@@ -944,6 +947,7 @@ namespace GPUTEMSTEMSimulation
 			UpdateCTEMImage(dpp, binning, CCD);
 			UpdateDiffractionImage();
 
+			SimulateEWButton.IsEnabled = true;
         }
 
 
