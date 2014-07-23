@@ -78,6 +78,23 @@ void UnmanagedOpenCL::MultisliceStep(int stepnumber, int steps)
 	TS->MultisliceStep(stepnumber,steps);
 };
 
+
+void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution,float startx, float starty ,float endx, float endy, bool Full3D, int waves)
+{
+	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
+	TS->InitialiseSTEM(resolution,Structure,startx,starty,endx,endy,Full3D,waves);
+};
+
+void UnmanagedOpenCL::MakeSTEMWaveFunction(float posx, float posy, int waves)
+{
+	TS->MakeSTEMWaveFunction(posx,posy, waves);
+};
+
+void UnmanagedOpenCL::MultisliceStep(int stepnumber, int steps, int waves)
+{
+	TS->MultisliceStep(stepnumber,steps, waves);
+};
+
 void UnmanagedOpenCL::SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
 {
 	temparams->defocus = df;

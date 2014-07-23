@@ -21,20 +21,28 @@ public:
 	// Simulation steps
 	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D);
 	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
+	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, int waves = 1);
 	void MakeSTEMWaveFunction(float posx, float posy);
+	void MakeSTEMWaveFunction(float posx, float posy, int wave);
 
 	void MultisliceStep(int stepno, int steps);
+	void MultisliceStep(int stepno, int steps, int waves);
 	float MeasureSTEMPixel(float inner, float outer);
+	float MeasureSTEMPixel(float inner, float outer, int wave);
 	void GetCTEMImage(float* data, int resolution);
 	void GetCTEMImage(float* data, int resolution, float dose, int binning, int detector);
 	void GetDiffImage(float* data, int resolution);
+	void GetDiffImage(float* data, int resolution, int wave);
 	void GetImDiffImage(float* data, int resolution);
+	void GetImDiffImage(float* data, int resolution, int wave);
 	void GetEWImage(float* data, int resolution);
+	void GetEWImage(float* data, int resolution, int wave);
 	void AddTDSDiffImage(float* data, int resolution);
-
 	void AddTDS();
+	void AddTDSDiffImage(float* data, int resolution, int wave);
+	void AddTDS(int wave);
 	void ClearTDS();
+	void ClearTDS(int waves);
 	void SimulateCTEM();
 	void SimulateCTEM(int detector, int binning);
 
@@ -61,18 +69,18 @@ public:
 	// OpenCL memory objects
 	Buffer clXFrequencies;
 	Buffer clYFrequencies;
-	Buffer clWaveFunction1;
-	Buffer clWaveFunction2;
-	Buffer clWaveFunction3;
-	Buffer clWaveFunction4;
+	std::vector<Buffer> clWaveFunction1;
+	std::vector<Buffer> clWaveFunction2;
+	std::vector<Buffer> clWaveFunction3;
+	std::vector<Buffer> clWaveFunction4;
 	Buffer clImageWaveFunction;
-	Buffer clTDSDiff;
+	std::vector<Buffer> clTDSDiff;
 	Buffer clTDSMaskDiff;
 	Buffer clPropagator;
 	Buffer clPotential;
 
-	std::vector<float> clTDSx;
-	std::vector<float> clTDSk;
+	std::vector<std::vector<float>> clTDSx;
+	std::vector<std::vector<float>> clTDSk;
 
 	// Simulation variables
 	int resolution;
@@ -83,10 +91,10 @@ public:
 	// Image contrast limits (technically ew atm)
 	float imagemin;
 	float imagemax;
-	float ewmin;
-	float ewmax;
-	float diffmin;
-	float diffmax;
-	float tdsmin;
-	float tdsmax;
+	std::vector<float> ewmin;
+	std::vector<float> ewmax;
+	std::vector<float> diffmin;
+	std::vector<float> diffmax;
+	std::vector<float> tdsmin;
+	std::vector<float> tdsmax;
 };

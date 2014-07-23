@@ -45,6 +45,20 @@ namespace ManagedOpenCLWrapper {
 		void AddTDS();
 		void ClearTDS();
 
+		// Multiwave variants
+		void InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, int waves);
+		void MakeSTEMWaveFunction(float posx, float posy, int wave);
+		void MultisliceStep(int stepno, int steps, int waves);
+		void GetDiffImage(array<float>^ data, int resolution, int wave);
+		void AddTDSDiffImage(array<float>^ data, int resolution, int wave);
+		float GetDiffMax(int wave);
+		float GetDiffMin(int wave);
+		float GetEWMax(int wave);
+		float GetEWMin(int wave);
+		float GetSTEMPixel(float inner, float outer, int wave);
+		void AddTDS(int wave);
+		void ClearTDS(int waves);
+
 		int getCLdevCount();
 		String^ getCLdevString(int i, bool getShort);
 

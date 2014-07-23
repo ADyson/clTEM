@@ -48,6 +48,10 @@ public:
 	void MultisliceStep(int stepno, int steps);
 	void MakeSTEMWaveFunction(float posx, float posy);
 
+	void InitialiseSTEMSimulation(int resolution,float startx,float starty,float endx,float endy, bool Full3D, int waves);
+	void MultisliceStep(int stepno, int steps, int waves);
+	void MakeSTEMWaveFunction(float posx, float posy, int wave);
+
 	void SetDevice(int index);
 	size_t MemoryUsed();
 
