@@ -923,24 +923,22 @@ namespace GPUTEMSTEMSimulation
                         }
                         else if (filename.EndsWith(".png"))
                         {
-                            // image5 = dt._ImgBMP.Clone();
-                            using (FileStream stream5 = new FileStream(filename, FileMode.Create))
+                            using (FileStream stream = new FileStream(filename, FileMode.Create))
                             {
-                                PngBitmapEncoder encoder5 = new PngBitmapEncoder();
-                                encoder5.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
-                                encoder5.Save(stream5);
-                                stream5.Close();
+                                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                encoder.Save(stream);
+                                stream.Close();
                             }
                         }
                         else if (filename.EndsWith(".jpeg"))
                         {
-                            // image5 = dt._ImgBMP.Clone();
-                            using (FileStream stream5 = new FileStream(filename, FileMode.Create))
+                            using (FileStream stream = new FileStream(filename, FileMode.Create))
                             {
-                                JpegBitmapEncoder encoder5 = new JpegBitmapEncoder();
-                                encoder5.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
-                                encoder5.Save(stream5);
-                                stream5.Close();
+                                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                encoder.Save(stream);
+                                stream.Close();
                             }
                         }
 					}
