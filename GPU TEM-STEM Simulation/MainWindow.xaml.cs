@@ -881,7 +881,7 @@ namespace GPUTEMSTEMSimulation
 
 						saveDialog.Title = "Save Output Image";
 						saveDialog.DefaultExt = ".tiff";                     // Default file extension
-						saveDialog.Filter = "TIFF Image (.tiff)|*.tiff"; // Filter files by extension
+						saveDialog.Filter = "TIFF (*.tiff)|*.tiff|PNG (*.png)|*.png|JPEG (*.jpeg)|*.jpeg"; // Filter files by extension
 
 						Nullable<bool> result = saveDialog.ShowDialog();
 						string filename = saveDialog.FileName;
@@ -889,35 +889,60 @@ namespace GPUTEMSTEMSimulation
 						if (result == false)
 							return;
 
-						using (Tiff output = Tiff.Open(filename, "w"))
-						{
+                        if (filename.EndsWith(".tiff"))
+                        {
+    						using (Tiff output = Tiff.Open(filename, "w"))
+    						{
 
-							output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
-							output.SetField(TiffTag.IMAGELENGTH, dt.yDim);
-							output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
-							output.SetField(TiffTag.SAMPLEFORMAT, 3);
-							output.SetField(TiffTag.BITSPERSAMPLE, 32);
-							output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
-							output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
-							output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
-							output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
-							output.SetField(TiffTag.COMPRESSION, Compression.NONE);
-							output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+    							output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
+    							output.SetField(TiffTag.IMAGELENGTH, dt.yDim);
+    							output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+    							output.SetField(TiffTag.SAMPLEFORMAT, 3);
+    							output.SetField(TiffTag.BITSPERSAMPLE, 32);
+    							output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+    							output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
+    							output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+    							output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+    							output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+    							output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
 
-							for (int i = 0; i < dt.yDim; ++i)
-							{
-								float[] buf = new float[dt.xDim];
-								byte[] buf2 = new byte[4 * dt.xDim];
+    							for (int i = 0; i < dt.yDim; ++i)
+    							{
+    								float[] buf = new float[dt.xDim];
+    								byte[] buf2 = new byte[4 * dt.xDim];
 
-								for (int j = 0; j < dt.yDim; ++j)
-								{
-									buf[j] = dt.ImageData[j + dt.xDim * i];
-								}
+    								for (int j = 0; j < dt.yDim; ++j)
+    								{
+    									buf[j] = dt.ImageData[j + dt.xDim * i];
+    								}
 
-								Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
-								output.WriteScanline(buf2, i);
-							}
-						}
+    								Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
+    								output.WriteScanline(buf2, i);
+    							}
+    						}
+                        }
+                        else if (filename.EndsWith(".png"))
+                        {
+                            // image5 = dt._ImgBMP.Clone();
+                            using (FileStream stream5 = new FileStream(filename, FileMode.Create))
+                            {
+                                PngBitmapEncoder encoder5 = new PngBitmapEncoder();
+                                encoder5.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                encoder5.Save(stream5);
+                                stream5.Close();
+                            }
+                        }
+                        else if (filename.EndsWith(".jpeg"))
+                        {
+                            // image5 = dt._ImgBMP.Clone();
+                            using (FileStream stream5 = new FileStream(filename, FileMode.Create))
+                            {
+                                JpegBitmapEncoder encoder5 = new JpegBitmapEncoder();
+                                encoder5.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                encoder5.Save(stream5);
+                                stream5.Close();
+                            }
+                        }
 					}
 				}
 			}
