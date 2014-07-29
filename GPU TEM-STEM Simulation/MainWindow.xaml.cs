@@ -251,6 +251,33 @@ namespace GPUTEMSTEMSimulation
                 return;
             }
 
+            bool select_TEM = TEMRadioButton.IsChecked == true;
+            bool select_STEM = STEMRadioButton.IsChecked == true;
+            bool select_CBED = CBEDRadioButton.IsChecked == true;
+
+            if (select_CBED)
+            {
+                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
+                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
+
+                bool validCBED = true;
+
+                if (CBED_xpos < SimRegion.xStart || CBED_xpos > SimRegion.xFinish)
+                {
+                    CBEDxpos.RaiseTapEvent();
+                    validCBED = false;
+                }
+                if (CBED_ypos < SimRegion.yStart || CBED_ypos > SimRegion.yFinish)
+                {
+                    CBEDypos.RaiseTapEvent();
+                    validCBED = false;
+                }
+                if (!validCBED)
+                {
+                    return;
+                }
+            }
+
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
 
@@ -265,10 +292,6 @@ namespace GPUTEMSTEMSimulation
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
-            bool select_TEM = TEMRadioButton.IsChecked == true;
-            bool select_STEM = STEMRadioButton.IsChecked == true;
-            bool select_CBED = CBEDRadioButton.IsChecked == true;
-
             int TDSruns = 1;
 
             if (select_STEM)
@@ -279,14 +302,6 @@ namespace GPUTEMSTEMSimulation
             {
                 TDSruns = Convert.ToInt32(CBED_TDSCounts.Text);
             }
-
-            if (select_CBED)
-            {
-                // NEED CHECKING IF POSITION IS IN BOUNDS
-                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
-                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
-            }
-
 
             this.cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = this.cancellationTokenSource.Token;
