@@ -137,8 +137,8 @@ namespace GPUTEMSTEMSimulation
 
             innerEllipse.Width = (innerRad * 2) + 0.5;
             innerEllipse.Height = (innerRad * 2) + 0.5;
-            Canvas.SetTop(innerEllipse, innerShift + 0.25);
-            Canvas.SetLeft(innerEllipse, innerShift + 0.25);
+            Canvas.SetTop(innerEllipse, innerShift + 0.25 - ycRad);
+            Canvas.SetLeft(innerEllipse, innerShift + 0.25 + xcRad);
             innerEllipse.StrokeDashArray = dashes;
 
             outerEllipse.Width = (outerRad * 2) + 0.5;
