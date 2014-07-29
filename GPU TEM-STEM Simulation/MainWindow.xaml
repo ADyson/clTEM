@@ -182,7 +182,7 @@
                 <Label Content="kV:"  ToolTip="Accelerating Voltage"
                        Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingkV" Text=""  ToolTip="kilo Volts"
-                         Grid.Row="0" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
+                         Grid.Row="0" Grid.Column="3" m:Masking.Mask="^[\+]?[1-9][0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
 
                 <Label Content="β:" ToolTip="Convergence Angle"
                        Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
@@ -197,7 +197,7 @@
                 <Label Content="Aper:"  ToolTip="Objective Aperture"
                        Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingAperture" Text="" ToolTip="milliRadians"
-                         Grid.Row="3" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
+                         Grid.Row="3" Grid.Column="3" m:Masking.Mask="^[\+]?[1-9][0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
 
                 <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
                        Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>

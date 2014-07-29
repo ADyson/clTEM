@@ -163,6 +163,26 @@ namespace MaskedTextBox
                     e.Handled = true;
                 }
             }
+
+            if (e.Key == Key.Delete)
+            {
+                var proposedDeleteText = GetProposedDeleteText(textBox);
+
+                if (!maskExpression.IsMatch(proposedDeleteText))
+                {
+                    e.Handled = true;
+                }
+            }
+
+            if (e.Key == Key.Back)
+            {
+                var proposedBackText = GetProposedBackText(textBox);
+
+                if (!maskExpression.IsMatch(proposedBackText))
+                {
+                    e.Handled = true;
+                }
+            }
         }
 
         private static void Pasting(object sender, DataObjectPastingEventArgs e)
@@ -201,6 +221,47 @@ namespace MaskedTextBox
             }
 
             text = text.Insert(textBox.CaretIndex, newText);
+
+            return text;
+        }
+
+        private static string GetProposedDeleteText(TextBox textBox)
+        {
+            var text = textBox.Text;
+
+            if (textBox.SelectionStart != -1)
+            {
+                int l = textBox.SelectionLength;
+                int s = textBox.SelectionStart;
+
+                if (l == 0 && s != text.Length)
+                {
+                    l = 1;
+                }
+
+                text = text.Remove(s, l);
+            }
+
+            return text;
+        }
+
+        private static string GetProposedBackText(TextBox textBox)
+        {
+            var text = textBox.Text;
+
+            if (textBox.SelectionStart != -1)
+            {
+                int l = textBox.SelectionLength;
+                int s = textBox.SelectionStart;
+
+                if (l == 0 && s != 0)
+                {
+                    l = 1;
+                    s = s - 1;
+                }
+
+                text = text.Remove(s, l);
+            }
 
             return text;
         }
