@@ -41,7 +41,7 @@ namespace ManagedOpenCLWrapper {
 		float GetDiffMin();
 		float GetEWMax();
 		float GetEWMin();
-		float GetSTEMPixel(float inner, float outer);
+		float GetSTEMPixel(float inner, float outer, float xc, float yc);
 		void AddTDS();
 		void ClearTDS();
 

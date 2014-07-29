@@ -683,7 +683,7 @@ void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 }
 
 
-float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
+float TEMSimulation::MeasureSTEMPixel(float inner, float outer, float xc, float yc)
 {
 
 	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
@@ -707,13 +707,19 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 	float outerFreq = outer/(1000 * wavelength);
 	float outerPx = outerFreq*pxFreq;
 
+	float xcFreq = xc/(1000 * wavelength);
+	float xcPx = xcFreq*pxFreq;
+
+	float ycFreq = yc/(1000 * wavelength);
+	float ycPx = ycFreq*pxFreq
+
 	/**MaskingKernel << clWaveFunction4 && clWaveFunction3 && resolution && resolution && innerPx && outerPx;
 
 	MaskingKernel->Enqueue(WorkSize);*/
 
 	clTDSDiff->Write(clTDSk);
 	
-	*TDSMaskingKernel << clTDSMaskDiff && clTDSDiff && resolution && resolution && innerPx && outerPx;
+	*TDSMaskingKernel << clTDSMaskDiff && clTDSDiff && resolution && resolution && innerPx && outerPx && xcPx && ycPx;
 
 	TDSMaskingKernel->Enqueue(WorkSize);
 

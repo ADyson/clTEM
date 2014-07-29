@@ -646,7 +646,7 @@ namespace GPUTEMSTEMSimulation
 					// loop through and get each STEM pixel for each detector at the same time
 					foreach (DetectorItem i in LockedDetectors)
 					{
-						float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
+						float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer, i.xCentre, i.yCentre);
 
 						i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
 
