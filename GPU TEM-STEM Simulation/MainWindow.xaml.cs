@@ -37,7 +37,8 @@ namespace GPUTEMSTEMSimulation
         bool IsResolutionSet = false;
         bool HaveStructure = false;
         bool IsSorted = false;
-        bool TDS = false;
+        bool doTDS_STEM = false;
+        bool doTDS_CBED = false;
         bool isFull3D = true;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
@@ -208,7 +209,7 @@ namespace GPUTEMSTEMSimulation
                 var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
-                    mCL.SortStructure(TDS);
+                    mCL.SortStructure(doTDS_STEM);
                     return 0;
                 },cancellationToken);
 
@@ -265,7 +266,17 @@ namespace GPUTEMSTEMSimulation
             bool select_STEM = STEMRadioButton.IsChecked == true;
             bool select_CBED = CBEDRadioButton.IsChecked == true;
 
-            int TDSruns = Convert.ToInt32(TDSCounts.Text);
+            int TDSruns = 1;
+
+            if (select_STEM)
+            {
+                TDSruns = Convert.ToInt32(STEM_TDSCounts.Text);
+            }
+            else if (select_CBED)
+            {
+                TDSruns = Convert.ToInt32(CBED_TDSCounts.Text);
+            }
+
 
             this.cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = this.cancellationTokenSource.Token;
@@ -570,7 +581,7 @@ namespace GPUTEMSTEMSimulation
 			}
 
 			int runs = 1;
-			if (TDS)
+			if (doTDS_STEM)
 			{
 				runs = TDSruns;
 			}
@@ -594,7 +605,7 @@ namespace GPUTEMSTEMSimulation
 					{
 						// if TDS was used last atoms are in wrong place and need resetting via same function
 						// if (TDS)
-						mCL.SortStructure(TDS);
+						mCL.SortStructure(doTDS_STEM);
 
 						float fCoordx = (LockedArea.xStart + posX * xInterval) / pixelScale;
 
@@ -689,15 +700,13 @@ namespace GPUTEMSTEMSimulation
 			int posX = CurrentResolution / 2;
 			int posY = CurrentResolution / 2;
 
-			
-
 			// Use Background worker to progress through each step
 			int NumberOfSlices = 0;
 			mCL.GetNumberSlices(ref NumberOfSlices);
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
 			int runs = 1;
-			if (TDS)
+			if (doTDS_CBED)
 			{
 				runs = TDSruns;
 			}
@@ -706,7 +715,7 @@ namespace GPUTEMSTEMSimulation
 
 			for (int j = 0; j < runs; j++)
 			{
-				mCL.SortStructure(TDS);
+				mCL.SortStructure(doTDS_STEM);
 				mCL.MakeSTEMWaveFunction(posX, posY);
 
 
