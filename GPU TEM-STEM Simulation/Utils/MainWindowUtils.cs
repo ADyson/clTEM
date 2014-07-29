@@ -130,6 +130,10 @@ namespace GPUTEMSTEMSimulation
         private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingkV.Text;
+
+            if (temporarytext.Length == 0)
+                return;
+
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
 
@@ -169,6 +173,10 @@ namespace GPUTEMSTEMSimulation
         private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingAperture.Text;
+
+            if (temporarytext.Length == 0)
+                return;
+
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.aperturemrad);
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
         }
