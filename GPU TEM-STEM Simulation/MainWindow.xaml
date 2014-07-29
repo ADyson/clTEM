@@ -220,7 +220,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
+        <GroupBox Name="TEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -271,7 +271,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="6" Template="{StaticResource gbox}" x:Name="STEM" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
+        <GroupBox Name="STEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

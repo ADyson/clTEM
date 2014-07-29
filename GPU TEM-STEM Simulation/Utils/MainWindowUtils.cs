@@ -183,6 +183,9 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = true;
                 Imagingdelta.IsEnabled = true;
                 Imagingbeta.IsEnabled = true;
+                TEMbox.Visibility = System.Windows.Visibility.Visible;
+                STEMbox.Visibility = System.Windows.Visibility.Hidden;
+
             }
             else if (STEMRadioButton.IsChecked == true)
             {
@@ -192,6 +195,9 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = false;
                 Imagingdelta.IsEnabled = false;
                 Imagingbeta.IsEnabled = false;
+
+                STEMbox.Visibility = System.Windows.Visibility.Visible;
+                TEMbox.Visibility = System.Windows.Visibility.Hidden;
             }
             else if (CBEDRadioButton.IsChecked == true)
             {
@@ -201,6 +207,9 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = false;
                 Imagingdelta.IsEnabled = false;
                 Imagingbeta.IsEnabled = false;
+
+                STEMbox.Visibility = System.Windows.Visibility.Visible;
+                TEMbox.Visibility = System.Windows.Visibility.Hidden;
             }
         }
 
