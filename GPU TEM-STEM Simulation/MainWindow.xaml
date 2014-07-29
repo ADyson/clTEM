@@ -327,7 +327,7 @@
                     <Label Content="x:"  ToolTip="x position"
                            Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center"/>
                     <TextBox Name="CBEDxpos" Text="0" ToolTip="Angstrom"
-                             Grid.Row="0" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72" IsEnabled="False"/>
+                             Grid.Row="0" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72"/>
                 </Grid>
                 <Grid Grid.Row="1" HorizontalAlignment="Center">
                     <Grid.RowDefinitions>
@@ -340,7 +340,7 @@
                         <Label Content="y:"  ToolTip="y position"
                                    Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" />
                         <TextBox Name="CBEDypos" Text="0" ToolTip="Angstrom"
-                                     Grid.Row="1" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72" IsEnabled="False" />
+                                     Grid.Row="1" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72"/>
                     </Grid>
 
                 <Grid Grid.Row="2" HorizontalAlignment="Center">

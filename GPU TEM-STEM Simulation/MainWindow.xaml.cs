@@ -43,6 +43,9 @@ namespace GPUTEMSTEMSimulation
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
+        float CBED_xpos = 0;
+        float CBED_ypos = 0;
+
         int Resolution;
         int CurrentResolution = 0;
         float CurrentPixelScale = 0;
@@ -209,7 +212,7 @@ namespace GPUTEMSTEMSimulation
                 var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
-                    mCL.SortStructure(doTDS_STEM);
+                    mCL.SortStructure(false);
                     return 0;
                 },cancellationToken);
 
@@ -275,6 +278,13 @@ namespace GPUTEMSTEMSimulation
             else if (select_CBED)
             {
                 TDSruns = Convert.ToInt32(CBED_TDSCounts.Text);
+            }
+
+            if (select_CBED)
+            {
+                // NEED CHECKING IF POSITION IS IN BOUNDS
+                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
+                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
             }
 
 
@@ -595,7 +605,7 @@ namespace GPUTEMSTEMSimulation
 
 			for (int posY = 0; posY < LockedArea.yPixels; posY++)
 			{
-				float fCoordy = (LockedArea.yStart + posY * yInterval) / pixelScale;
+                float fCoordy = (LockedArea.yStart + posY * yInterval - SimRegion.yStart) / pixelScale;
 
 				for (int posX = 0; posX < LockedArea.xPixels; posX++)
 				{
@@ -607,9 +617,9 @@ namespace GPUTEMSTEMSimulation
 						// if (TDS)
 						mCL.SortStructure(doTDS_STEM);
 
-						float fCoordx = (LockedArea.xStart + posX * xInterval) / pixelScale;
+                        float fCoordx = (LockedArea.xStart + posX * xInterval - SimRegion.xStart) / pixelScale;
 
-						mCL.MakeSTEMWaveFunction(fCoordx - SimRegion.xStart, fCoordy - SimRegion.yStart);
+						mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
 
 						// Use Background worker to progress through each step
 						int NumberOfSlices = 0;
@@ -697,8 +707,11 @@ namespace GPUTEMSTEMSimulation
 
 			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
-			int posX = CurrentResolution / 2;
-			int posY = CurrentResolution / 2;
+			//int posX = CurrentResolution / 2;
+			//int posY = CurrentResolution / 2;
+
+            float posx = (CBED_xpos - SimRegion.xStart) / pixelScale;
+            float posy = (CBED_ypos - SimRegion.yStart) / pixelScale;
 
 			// Use Background worker to progress through each step
 			int NumberOfSlices = 0;
@@ -715,8 +728,8 @@ namespace GPUTEMSTEMSimulation
 
 			for (int j = 0; j < runs; j++)
 			{
-				mCL.SortStructure(doTDS_STEM);
-				mCL.MakeSTEMWaveFunction(posX, posY);
+				mCL.SortStructure(doTDS_CBED);
+                mCL.MakeSTEMWaveFunction(posx, posy);
 
 
 				for (int i = 1; i <= NumberOfSlices; i++)
