@@ -43,64 +43,141 @@ namespace GPUTEMSTEMSimulation
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            float xs, xf, ys, yf;
+
+            string Sxs, Sxf, Sys, Syf, Sxp, Syp;
+            float xs, xf, ys, yf, xmin, xmax, ymin, ymax;
             int xp, yp;
-            bool valid = true;
+            bool valid, xvalid, yvalid;
 
-            try
+            valid = xvalid = yvalid = true;
+            xmin = xmax = ymin = ymax = 0;
+            xp = yp = 0;
+            
+
+            Sxs = xStartBox.Text;
+            Sys = yStartBox.Text;
+            Sxf = xFinishBox.Text;
+            Syf = yFinishBox.Text;
+            Sxp = xPxBox.Text;
+            Syp = yPxBox.Text;
+
+            if (Sxp.Length == 0)
             {
-                // needed?
-                xs = Convert.ToSingle(xStartBox.Text);
-                ys = Convert.ToSingle(yStartBox.Text);
-                xf = Convert.ToSingle(xFinishBox.Text);
-                yf = Convert.ToSingle(yFinishBox.Text);
-            }
-            catch
-            {
-                return;
+                xPxBox.RaiseTapEvent();
+                valid = false;
             }
 
-            if (xs == xf)
+            if (Syp.Length == 0)
+            {
+                yPxBox.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (valid)
+            {
+                xp = Convert.ToInt32(Sxp);
+                yp = Convert.ToInt32(Syp);
+
+                if ( xp == 0 )
+                {
+                    xPxBox.RaiseTapEvent();
+                    valid = false;
+                }
+
+                if ( yp == 0 ) 
+                {
+                    yPxBox.RaiseTapEvent();
+                    valid = false;
+                }
+            }
+
+            if (Sxs.Length == 0)
             {
                 xStartBox.RaiseTapEvent();
-                xFinishBox.RaiseTapEvent();
-                valid = false;
+                xvalid = false;
             }
-            if (ys == yf)
+
+            if (Sxf.Length == 0)
+            {
+                xFinishBox.RaiseTapEvent();
+                xvalid = false;
+            }
+
+            if (xvalid)
+            {
+                xs = Convert.ToSingle(Sxs);
+                xf = Convert.ToSingle(Sxf);
+
+                xmin = Math.Min(xs, xf);
+                xmax = Math.Max(xs, xf);
+
+                if (xs == xf)
+                {
+                    xStartBox.RaiseTapEvent();
+                    xFinishBox.RaiseTapEvent();
+                    xvalid = false;
+                }
+
+                if (xmin < simxStart || xmin > simxFinish)
+                {
+                    xStartBox.RaiseTapEvent();
+                    xvalid = false;
+                }
+
+                if (xmax < simxStart || xmax > simxFinish)
+                {
+                    xFinishBox.RaiseTapEvent();
+                    xvalid = false;
+                }
+            }
+
+            if (Sys.Length == 0)
             {
                 yStartBox.RaiseTapEvent();
-                yFinishBox.RaiseTapEvent();
-                valid = false;
+                yvalid = false;
             }
 
-            if (!valid)
+            if (Syf.Length == 0)
+            {
+                yFinishBox.RaiseTapEvent();
+                yvalid = false;
+            }
+
+            if (yvalid)
+            {
+                ys = Convert.ToSingle(Sys);
+                yf = Convert.ToSingle(Syf);
+
+                ymin = Math.Min(ys, yf);
+                ymax = Math.Max(ys, yf);
+
+                if (ys == yf)
+                {
+                    yStartBox.RaiseTapEvent();
+                    yFinishBox.RaiseTapEvent();
+                    yvalid = false;
+                }
+
+                if (ymin < simyStart || ymin > simyFinish)
+                {
+                    yStartBox.RaiseTapEvent();
+                    yvalid = false;
+                }
+
+                if (ymax < simyStart || ymax > simyFinish)
+                {
+                    yFinishBox.RaiseTapEvent();
+                    yvalid = false;
+                }
+            }
+
+            if (!(valid && xvalid && yvalid))
                 return;
-
-            xp = Convert.ToInt32(xPxBox.Text);
-            yp = Convert.ToInt32(yPxBox.Text);
-
-            // Need to decide whether to just use max/min or prompt user.
-            float xmin = Math.Min(xs, xf);
-            float xmax = Math.Max(xs, xf);
-            float ymin = Math.Min(ys, yf);
-            float ymax = Math.Max(ys, yf);
 
             xStartBox.Text = xmin.ToString();
             xFinishBox.Text = xmax.ToString();
             yStartBox.Text = ymin.ToString();
             yFinishBox.Text = ymax.ToString();
-
-            if (xmin < simxStart || xmin > simxFinish)
-            {
-                xStartBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (xmax < simxStart || xmax > simxFinish)
-            {
-                xFinishBox.RaiseTapEvent();
-                valid = false;
-            }
 
             if (ymin < simyStart || ymin > simyFinish)
             {
