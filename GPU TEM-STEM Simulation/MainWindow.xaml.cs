@@ -702,9 +702,6 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			int numPix = 1;
-			int pix = 0;
-
 			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
 			//int posX = CurrentResolution / 2;

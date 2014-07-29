@@ -641,6 +641,9 @@ void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
+	posx = resolution - posx;
+	posy = resolution - posy;
+
 	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
 
 	/**InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
