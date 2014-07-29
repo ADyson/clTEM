@@ -4,18 +4,22 @@
         xmlns:l="clr-namespace:FixedWidthColumnSample"
         xmlns:t="clr-namespace:ErrTextBox"
         xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
-        Title="STEM Detectors" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight">
+        Title="STEM Detectors" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight" Height="324" Width="514">
 
     <Grid Margin="5,5,10,5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -23,8 +27,8 @@
         </Grid.ColumnDefinitions>
         
         <ListView x:Name="DetectorListView"
-                  Grid.Row="0" Grid.Column="0" Grid.RowSpan="8"
-                  Width="256" Height="180" Margin="0,0,5,0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" MouseEnter="DetectorListView_MouseEnter" MouseLeave="DetectorListView_MouseLeave">
+                  Grid.Row="0" Grid.Column="0" Grid.RowSpan="12"
+                  Width="Auto" Margin="0,0,5,0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" MouseEnter="DetectorListView_MouseEnter" MouseLeave="DetectorListView_MouseLeave">
             <ListView.View>
                 <GridView x:Name="DetectorListGrid" AllowsColumnReorder="False">
                     <l:FixedWidthColumn FixedWidth ="25">
@@ -52,6 +56,16 @@
                             <GridViewColumnHeader Content="Outer" HorizontalContentAlignment="Left"/>
                         </GridViewColumn.Header>
                     </l:FixedWidthColumn>
+                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding xCentre}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="x Centre" HorizontalContentAlignment="Left"/>
+                        </GridViewColumn.Header>
+                    </l:FixedWidthColumn>
+                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding yCentre}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="y Centre" HorizontalContentAlignment="Left"/>
+                        </GridViewColumn.Header>
+                    </l:FixedWidthColumn>
                 </GridView>
             </ListView.View>
         </ListView>
@@ -74,12 +88,24 @@
                       Grid.Row="5" Grid.Column="1"
                       MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
 
+        <TextBlock Text="x Centre:"
+                   Grid.Row="6" Grid.Column="1"/>
+        <t:ErrTextBox x:Name="xcTxtbx" Text="0"
+                      Grid.Row="7" Grid.Column="1"
+                      MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
+
+        <TextBlock Text="y Centre:"
+                   Grid.Row="8" Grid.Column="1"/>
+        <t:ErrTextBox x:Name="ycTxtbx" Text="0"
+                      Grid.Row="9" Grid.Column="1"
+                      MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
+        
         <Button x:Name="AddButton"
-                Grid.Row="6" Grid.Column="1"
+                Grid.Row="10" Grid.Column="1"
                 Content="Add" Click="AddButton_Click" Width="75" Height="24" Margin="0,2"/>
 
         <Button x:Name="DeleteButton" 
-                Grid.Row="7" Grid.Column="1"
+                Grid.Row="11" Grid.Column="1"
                 Content="Delete" Click="DeleteButton_Click" Width="75" Height="24" Margin="0,2"/>
 
     </Grid>

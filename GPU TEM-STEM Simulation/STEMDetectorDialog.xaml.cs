@@ -57,9 +57,13 @@ namespace GPUTEMSTEMSimulation
             string Sname = NameTxtbx.Text;
             string Sin = InnerTxtbx.Text;
             string Sout = OuterTxtbx.Text;
+            string Sxc = xcTxtbx.Text;
+            string Syc = ycTxtbx.Text;
 
             float Fin = 0;
             float Fout = 0;
+            float Fxc = 0;
+            float Fyc = 0;
 
             // must have name
             if (Sname.Length == 0)
@@ -80,6 +84,8 @@ namespace GPUTEMSTEMSimulation
             // convert inputs to floats (error checking should be handled by regular expression)
             Fout = Convert.ToSingle(Sout);
             Fin = Convert.ToSingle(Sin);
+            Fxc = Convert.ToSingle(Sxc);
+            Fyc = Convert.ToSingle(Syc);
 
             // check the outer radii is bigger than the inner
             // could just auto place the larger number as outer?
@@ -95,7 +101,7 @@ namespace GPUTEMSTEMSimulation
                 return;
 
             // add everything to detector class
-            DetectorItem temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
+            DetectorItem temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, xCentre = Fxc, yCentre = Fyc, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
 
             // add to the listview
             mainDetectors.Add(temp);

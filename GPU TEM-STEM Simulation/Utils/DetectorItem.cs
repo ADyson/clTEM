@@ -71,6 +71,10 @@ namespace GPUTEMSTEMSimulation
 
         public float Outer { get; set; }
 
+        public float xCentre { get; set; }
+
+        public float yCentre { get; set; }
+
         public float Min { get; set; }
 
         public float Max { get; set; }
