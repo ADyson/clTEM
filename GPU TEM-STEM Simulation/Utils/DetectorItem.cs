@@ -129,6 +129,8 @@ namespace GPUTEMSTEMSimulation
 
             float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
             float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+            float xcRad = (res * pxScale) * xCentre / (1000 * wavelength);
+            float ycRad = (res * pxScale) * yCentre / (1000 * wavelength);
 
             float innerShift = (res) / 2 - innerRad;
             float outerShift = (res) / 2 - outerRad;
@@ -141,14 +143,14 @@ namespace GPUTEMSTEMSimulation
 
             outerEllipse.Width = (outerRad * 2) + 0.5;
             outerEllipse.Height = (outerRad * 2) + 0.5;
-            Canvas.SetTop(outerEllipse, outerShift + 0.25);
-            Canvas.SetLeft(outerEllipse, outerShift + 0.25);
+            Canvas.SetTop(outerEllipse, outerShift + 0.25 - ycRad);
+            Canvas.SetLeft(outerEllipse, outerShift + 0.25 + xcRad);
             outerEllipse.StrokeDashArray = dashes;
 
             ringEllipse.Width = outerRad * 2;
             ringEllipse.Height = outerRad * 2;
-            Canvas.SetTop(ringEllipse, outerShift + 0.5);
-            Canvas.SetLeft(ringEllipse, outerShift + 0.5);
+            Canvas.SetTop(ringEllipse, outerShift + 0.5 - ycRad);
+            Canvas.SetLeft(ringEllipse, outerShift + 0.5 + xcRad);
 
             float ratio = innerRad / outerRad;
             RadialGradientBrush LGB = new RadialGradientBrush();
