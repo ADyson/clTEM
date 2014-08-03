@@ -229,28 +229,11 @@ namespace GPUTEMSTEMSimulation
         // Simulation Button
         private void SimulationButton(object sender, RoutedEventArgs e)
         {
-            // Check We Have Structure
-            if (HaveStructure == false)
-            {
-                var result = MessageBox.Show("No Structure Loaded", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            // Check parameters are set
-            if (IsResolutionSet == false)
-            {
-                var result = MessageBox.Show("Resolution Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            if (DeviceSelector.SelectedIndex == -1)
-            {
-                var result = MessageBox.Show("OpenCL Device Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+			if (!TestSimulationPrerequisites())
+				return;
 
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
-
-
 
             CurrentWavelength = wavelength;
             CurrentVoltage = ImagingParameters.kilovoltage;
@@ -965,6 +948,10 @@ namespace GPUTEMSTEMSimulation
 
         private void Button_Click_SimImage(object sender, RoutedEventArgs e)
         {
+
+			if (!TestImagePrerequisites())
+				return;
+
 			//Disable simulate EW button for the duration
 			SimulateEWButton.IsEnabled = false;
 
