@@ -420,5 +420,44 @@ namespace GPUTEMSTEMSimulation
                 child.Reset();
         }
 
+		// Test if conditions necessary to perform simulation have been met.s
+		private bool TestSimulationPrerequisites()
+		{
+			// Check We Have Structure
+			if (HaveStructure == false)
+			{
+				var result = MessageBox.Show("No Structure Loaded", "", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+			// Check parameters are set
+			if (IsResolutionSet == false)
+			{
+				var result = MessageBox.Show("Resolution Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+			// Check for OpenCL device.
+			if (DeviceSelector.SelectedIndex == -1)
+			{
+				var result = MessageBox.Show("OpenCL Device Not Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+			// Check we have sensible parameters.
+			if (ImagingParameters.kilovoltage == 0)
+			{
+				var result = MessageBox.Show("Voltage cannot be zero", "", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+			else return true;
+		}
+
+		private bool TestImagePrerequisites()
+		{
+			if (ImagingParameters.aperturemrad == 0)
+			{
+				var result = MessageBox.Show("Aperture should not be zero, do you want to continue?", "Continue?", MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
+				return result.Equals(MessageBoxResult.Yes);
+			}
+			else return true;
+		}
     }
 }
