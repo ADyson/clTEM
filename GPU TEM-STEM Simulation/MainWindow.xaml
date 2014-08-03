@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:p="clr-namespace:GPUTEMSTEMSimulation.Properties"
         xmlns:local="clr-namespace:PanAndZoom"
+        xmlns:t="clr-namespace:ErrTextBox"
+        xmlns:m="clr-namespace:MaskedTextBox"
     Title="Multislice Simulation" MinHeight="850" Height="850" MinWidth="1200" Width="1200"
-	xmlns:MaskNameSpace="clr-namespace:MaskedTextBox" Background="#FFFFFF" >
+	Background="#FFFFFF" >
 
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
@@ -160,67 +162,67 @@
                 <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
                        Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingDf" Text="" ToolTip="Angstroms" 
-                         Grid.Row="0" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingDf_TextChanged"/>
+                         Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingDf_TextChanged"/>
 
                 <Label Content="Cs:" ToolTip="Spherical Aberration"
                        Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingCs" Text="" ToolTip="Angstroms"
-                         Grid.Row="1" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingCs_TextChanged"/>
+                         Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingCs_TextChanged"/>
 
                 <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
                        Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingA1" Text=""  ToolTip="Angstroms"
-                         Grid.Row="2" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1_TextChanged"/>
+                         Grid.Row="2" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1_TextChanged"/>
 
                 <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
                        Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingA1theta" Text=""  ToolTip="Degrees"
-                         Grid.Row="3" Grid.Column="1" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1theta_TextChanged"/>
+                         Grid.Row="3" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1theta_TextChanged"/>
 
                 <Label Content="kV:"  ToolTip="Accelerating Voltage"
                        Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingkV" Text=""  ToolTip="kilo Volts"
-                         Grid.Row="0" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
+                         Grid.Row="0" Grid.Column="3" m:Masking.Mask="^([\+]?[1-9][0-9]*\.?[0-9]*)*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
 
                 <Label Content="β:" ToolTip="Convergence Angle"
                        Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="Imagingbeta" Text="" ToolTip="milliRadians"
-                         Grid.Row="1" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingbeta_TextChanged"/>
+                         Grid.Row="1" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingbeta_TextChanged"/>
 
                 <Label Content="Δ:" ToolTip="Defocus Spread"
                        Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox Name="Imagingdelta" Text="" ToolTip="nm"
-                         Grid.Row="2" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingdelta_TextChanged"/>
+                         Grid.Row="2" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="Imagingdelta_TextChanged"/>
 
                 <Label Content="Aper:"  ToolTip="Objective Aperture"
                        Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
                 <TextBox Name="ImagingAperture" Text="" ToolTip="milliRadians"
-                         Grid.Row="3" Grid.Column="3" MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
+                         Grid.Row="3" Grid.Column="3" m:Masking.Mask="^([\+]?[1-9][0-9]*\.?[0-9]*)*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
 
                 <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
                        Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox x:Name="ImagingA2" Text="" ToolTip="Angstroms"
-                         Grid.Row="0" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="22"  TextChanged="ImagingA2_TextChanged" />
+                         Grid.Row="0" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="22"  TextChanged="ImagingA2_TextChanged" />
 
                 <Label Content="A2 θ:"  ToolTip="3-fold Astimatism Angle"
                        Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox x:Name="ImagingA2Phi" Text="" ToolTip="Degrees"
-                         Grid.Row="1" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA2Phi_TextChanged" />
+                         Grid.Row="1" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA2Phi_TextChanged" />
 
                 <Label Content="B2:"  ToolTip="Coma Magnitude"
                        Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right"/>
                 <TextBox x:Name="ImagingB2" Text="" ToolTip="Angstroms"
-                         Grid.Row="2" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2_TextChanged" />
+                         Grid.Row="2" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2_TextChanged" />
 
                 <Label Content="B2 θ:"  ToolTip="Coma Angle"
                        Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right"/>
                 <TextBox x:Name="ImagingB2Phi" Text="" ToolTip="Degrees"
-                         Grid.Row="3" Grid.Column="5" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
+                         Grid.Row="3" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
 
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
+        <GroupBox Name="TEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="115" Grid.RowSpan="2" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -246,7 +248,7 @@
 
                     <Label Content="Dose:  " ToolTip="e/A^-2"
                              Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox x:Name="DoseTextBox" Text="1" ToolTip="e/A^-2" MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"
+                    <TextBox x:Name="DoseTextBox" Text="1" ToolTip="e/A^-2" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"
                              Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="40"/>
 
                     <Label Content="CCD:  " ToolTip="Select a CCD to include detector characteristics for TEM image simulation"
@@ -271,7 +273,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="6" Template="{StaticResource gbox}" x:Name="STEM" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
+        <GroupBox Name="STEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="115" Grid.RowSpan="2" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -279,7 +281,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <Button x:Name ="STEMDetButton" Content="Edit Detectors"
@@ -296,9 +298,64 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox x:Name="ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
-                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-                    <TextBox Name="TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
+                    <CheckBox x:Name="STEM_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
+                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="STEM_TDSchecked" Unchecked="STEM_TDSunchecked"/>
+                    <TextBox Name="STEM_TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
+                             Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
+                </Grid>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Name="CBEDbox" Grid.Column="5" Template="{StaticResource gbox}" Header="CBED" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="115" Grid.RowSpan="2" Visibility="Visible">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+
+                <Grid Grid.Row="0" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                    <Label Content="x:"  ToolTip="x position"
+                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center"/>
+                    <t:ErrTextBox x:Name="CBEDxpos" Text="0" ToolTip="Angstrom"
+                             Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72"/>
+                </Grid>
+                <Grid Grid.Row="1" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                        <Label Content="y:"  ToolTip="y position"
+                                   Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" />
+                    <t:ErrTextBox x:Name="CBEDypos" Text="0" ToolTip="Angstrom"
+                                     Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap"  Width="72"/>
+                    </Grid>
+
+                <Grid Grid.Row="2" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="CBED_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
+                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CBED_TDSchecked" Unchecked="CBED_TDSunchecked"/>
+                    <TextBox Name="CBED_TDSCounts" Text="10" ToolTip="Number of frozen phonon calculations"
                              Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="24" TextWrapping="NoWrap" Width="45"/>
                 </Grid>
             </Grid>

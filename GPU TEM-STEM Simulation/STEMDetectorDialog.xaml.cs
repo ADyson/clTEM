@@ -78,6 +78,21 @@ namespace GPUTEMSTEMSimulation
                 }
 
             // convert inputs to floats (error checking should be handled by regular expression)
+            if (Sout.Length == 0)
+            {
+                OuterTxtbx.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (Sin.Length == 0)
+            {
+                InnerTxtbx.RaiseTapEvent();
+                valid = false;
+            }
+
+            if (!valid)
+                return;
+
             Fout = Convert.ToSingle(Sout);
             Fin = Convert.ToSingle(Sin);
 

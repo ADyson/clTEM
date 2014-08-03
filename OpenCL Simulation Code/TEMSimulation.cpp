@@ -641,45 +641,17 @@ void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
+	posx = resolution - posx;
+	posy = resolution - posy;
+
 	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2, resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
 
-	/**InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
-								&& clXFrequencies && clYFrequencies && posx && posy 
-								&& STEMParams->aperturesizemrad && pixelscale 
-								&& STEMParams->defocus && STEMParams->spherical 
-								&& wavelength;*/
 
 	InitialiseSTEMWavefunction->Enqueue(WorkSize);
 
 	// IFFT
 	FourierTrans->Enqueue(clWaveFunction2,clWaveFunction1,CLFFT_BACKWARD);
 
-	// so both cl mem things have the wavefunction (gonna edit one in a sec)
-	/*clEnqueueCopyBuffer(clState::clq->cmdQueue,clWaveFunction1, clWaveFunction2, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
-
-	*WFabsolute << clWaveFunction2 && resolution && resolution;
-
-	WFabsolute->Enqueue(WorkSize);
-
-	int totalSize = resolution*resolution;
-	int nGroups = totalSize / 256;
-
-	size_t* globalSizeSum = new size_t[3];
-	size_t* localSizeSum = new size_t[3];
-
-	globalSizeSum[0] = totalSize;
-	globalSizeSum[1] = 1;
-	globalSizeSum[2] = 1;
-	localSizeSum[0] = 256;
-	localSizeSum[1] = 1;
-	localSizeSum[2] = 1;
-
-	float sumRed = SumReduction(clWaveFunction2, globalSizeSum, localSizeSum, nGroups, totalSize);
-	float inverseSum =1.0f/sumRed;
-
-	*MultiplyCL << clWaveFunction1 && inverseSum && resolution && resolution;
-
-	MultiplyCL->Enqueue(WorkSize);*/
 }
 
 

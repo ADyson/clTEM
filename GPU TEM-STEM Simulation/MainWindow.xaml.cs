@@ -37,10 +37,14 @@ namespace GPUTEMSTEMSimulation
         bool IsResolutionSet = false;
         bool HaveStructure = false;
         bool IsSorted = false;
-        bool TDS = false;
+        bool doTDS_STEM = false;
+        bool doTDS_CBED = false;
         bool isFull3D = true;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
+
+        float CBED_xpos = 0;
+        float CBED_ypos = 0;
 
         int Resolution;
         int CurrentResolution = 0;
@@ -208,7 +212,7 @@ namespace GPUTEMSTEMSimulation
                 var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
-                    mCL.SortStructure(TDS);
+                    mCL.SortStructure(false);
                     return 0;
                 },cancellationToken);
 
@@ -232,6 +236,33 @@ namespace GPUTEMSTEMSimulation
 			if (!TestSimulationPrerequisites())
 				return;
 
+            bool select_TEM = TEMRadioButton.IsChecked == true;
+            bool select_STEM = STEMRadioButton.IsChecked == true;
+            bool select_CBED = CBEDRadioButton.IsChecked == true;
+
+            if (select_CBED)
+            {
+                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
+                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
+
+                bool validCBED = true;
+
+                if (CBED_xpos < SimRegion.xStart || CBED_xpos > SimRegion.xFinish)
+                {
+                    CBEDxpos.RaiseTapEvent();
+                    validCBED = false;
+                }
+                if (CBED_ypos < SimRegion.yStart || CBED_ypos > SimRegion.yFinish)
+                {
+                    CBEDypos.RaiseTapEvent();
+                    validCBED = false;
+                }
+                if (!validCBED)
+                {
+                    return;
+                }
+            }
+
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
 
@@ -244,11 +275,16 @@ namespace GPUTEMSTEMSimulation
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
-            bool select_TEM = TEMRadioButton.IsChecked == true;
-            bool select_STEM = STEMRadioButton.IsChecked == true;
-            bool select_CBED = CBEDRadioButton.IsChecked == true;
+            int TDSruns = 1;
 
-            int TDSruns = Convert.ToInt32(TDSCounts.Text);
+            if (select_STEM)
+            {
+                TDSruns = Convert.ToInt32(STEM_TDSCounts.Text);
+            }
+            else if (select_CBED)
+            {
+                TDSruns = Convert.ToInt32(CBED_TDSCounts.Text);
+            }
 
             this.cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = this.cancellationTokenSource.Token;
@@ -564,7 +600,7 @@ namespace GPUTEMSTEMSimulation
 			}
 
 			int runs = 1;
-			if (TDS)
+			if (doTDS_STEM)
 			{
 				runs = TDSruns;
 			}
@@ -578,7 +614,7 @@ namespace GPUTEMSTEMSimulation
 
 			for (int posY = 0; posY < LockedArea.yPixels; posY++)
 			{
-				float fCoordy = (LockedArea.yStart + posY * yInterval) / pixelScale;
+                float fCoordy = (LockedArea.yStart + posY * yInterval - SimRegion.yStart) / pixelScale;
 
 				for (int posX = 0; posX < LockedArea.xPixels; posX++)
 				{
@@ -588,11 +624,11 @@ namespace GPUTEMSTEMSimulation
 					{
 						// if TDS was used last atoms are in wrong place and need resetting via same function
 						// if (TDS)
-						mCL.SortStructure(TDS);
+						mCL.SortStructure(doTDS_STEM);
 
-						float fCoordx = (LockedArea.xStart + posX * xInterval) / pixelScale;
+                        float fCoordx = (LockedArea.xStart + posX * xInterval - SimRegion.xStart) / pixelScale;
 
-						mCL.MakeSTEMWaveFunction(fCoordx - SimRegion.xStart, fCoordy - SimRegion.yStart);
+						mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
 
 						// Use Background worker to progress through each step
 						int NumberOfSlices = 0;
@@ -675,15 +711,13 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			int numPix = 1;
-			int pix = 0;
-
 			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
-			int posX = CurrentResolution / 2;
-			int posY = CurrentResolution / 2;
+			//int posX = CurrentResolution / 2;
+			//int posY = CurrentResolution / 2;
 
-			
+            float posx = (CBED_xpos - SimRegion.xStart) / pixelScale;
+            float posy = (CBED_ypos - SimRegion.yStart) / pixelScale;
 
 			// Use Background worker to progress through each step
 			int NumberOfSlices = 0;
@@ -691,7 +725,7 @@ namespace GPUTEMSTEMSimulation
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
 			int runs = 1;
-			if (TDS)
+			if (doTDS_CBED)
 			{
 				runs = TDSruns;
 			}
@@ -700,8 +734,8 @@ namespace GPUTEMSTEMSimulation
 
 			for (int j = 0; j < runs; j++)
 			{
-				mCL.SortStructure(TDS);
-				mCL.MakeSTEMWaveFunction(posX, posY);
+				mCL.SortStructure(doTDS_CBED);
+                mCL.MakeSTEMWaveFunction(posx, posy);
 
 
 				for (int i = 1; i <= NumberOfSlices; i++)

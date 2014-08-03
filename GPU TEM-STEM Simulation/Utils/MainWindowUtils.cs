@@ -130,6 +130,10 @@ namespace GPUTEMSTEMSimulation
         private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingkV.Text;
+
+            if (temporarytext.Length == 0)
+                return;
+
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
 
@@ -169,6 +173,10 @@ namespace GPUTEMSTEMSimulation
         private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
         {
             string temporarytext = ImagingAperture.Text;
+
+            if (temporarytext.Length == 0)
+                return;
+
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.aperturemrad);
             float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
         }
@@ -183,6 +191,10 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = true;
                 Imagingdelta.IsEnabled = true;
                 Imagingbeta.IsEnabled = true;
+                TEMbox.Visibility = System.Windows.Visibility.Visible;
+                STEMbox.Visibility = System.Windows.Visibility.Hidden;
+                CBEDbox.Visibility = System.Windows.Visibility.Hidden;
+
             }
             else if (STEMRadioButton.IsChecked == true)
             {
@@ -192,6 +204,10 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = false;
                 Imagingdelta.IsEnabled = false;
                 Imagingbeta.IsEnabled = false;
+
+                STEMbox.Visibility = System.Windows.Visibility.Visible;
+                TEMbox.Visibility = System.Windows.Visibility.Hidden;
+                CBEDbox.Visibility = System.Windows.Visibility.Hidden;
             }
             else if (CBEDRadioButton.IsChecked == true)
             {
@@ -201,6 +217,10 @@ namespace GPUTEMSTEMSimulation
                 ImagingB2Phi.IsEnabled = false;
                 Imagingdelta.IsEnabled = false;
                 Imagingbeta.IsEnabled = false;
+
+                STEMbox.Visibility = System.Windows.Visibility.Hidden;
+                TEMbox.Visibility = System.Windows.Visibility.Hidden;
+                CBEDbox.Visibility = System.Windows.Visibility.Visible;
             }
         }
 
@@ -247,14 +267,24 @@ namespace GPUTEMSTEMSimulation
             float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2mag);
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void STEM_TDSchecked(object sender, RoutedEventArgs e)
         {
-            TDS = true;
+            doTDS_STEM = true;
         }
 
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void STEM_TDSunchecked(object sender, RoutedEventArgs e)
         {
-            TDS = false;
+            doTDS_STEM = false;
+        }
+
+        private void CBED_TDSchecked(object sender, RoutedEventArgs e)
+        {
+            doTDS_CBED = true;
+        }
+
+        private void CBED_TDSunchecked(object sender, RoutedEventArgs e)
+        {
+            doTDS_CBED = false;
         }
 
         private void Full3D_Checked(object sender, RoutedEventArgs e)

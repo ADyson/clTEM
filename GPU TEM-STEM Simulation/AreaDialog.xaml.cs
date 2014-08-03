@@ -35,36 +35,70 @@ namespace GPUTEMSTEMSimulation
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
+            String Sxs, Sxf, Sys, Syf;
             float xs, xf, ys, yf;
-            bool valid = true;
+            bool xvalid, yvalid;
 
-            try
-            {
-                // needed?
-                xs = Convert.ToSingle(xStartBox.Text);
-                ys = Convert.ToSingle(yStartBox.Text);
-                xf = Convert.ToSingle(xEndBox.Text);
-                yf = Convert.ToSingle(yEndBox.Text);
-            }
-            catch
-            {
-                return;
-            }
+            xs = xf = ys = yf = 0;
+            xvalid = yvalid = true;
 
-            if (xs == xf)
+
+            Sxs = xStartBox.Text;
+            Sys = yStartBox.Text;
+            Sxf = xEndBox.Text;
+            Syf = yEndBox.Text;
+
+            if (Sxs.Length == 0)
             {
                 xStartBox.RaiseTapEvent();
-                xEndBox.RaiseTapEvent();
-                valid = false;
-            }
-            if (ys == yf)
-            {
-                yStartBox.RaiseTapEvent();
-                yEndBox.RaiseTapEvent();
-                valid = false;
+                xvalid = false;
             }
 
-            if (!valid)
+            if (Sxf.Length == 0)
+            {
+                xEndBox.RaiseTapEvent();
+                xvalid = false;
+            }
+
+            if (xvalid)
+            {
+                xs = Convert.ToSingle(Sxs);
+                xf = Convert.ToSingle(Sxf);
+
+                if (xs == xf)
+                {
+                    xStartBox.RaiseTapEvent();
+                    xEndBox.RaiseTapEvent();
+                    xvalid = false;
+                }
+            }
+
+            if (Sys.Length == 0)
+            {
+                yStartBox.RaiseTapEvent();
+                yvalid = false;
+            }
+
+            if (Syf.Length == 0)
+            {
+                yEndBox.RaiseTapEvent();
+                yvalid = false;
+            }
+
+            if (yvalid)
+            {
+                ys = Convert.ToSingle(Sys);
+                yf = Convert.ToSingle(Syf);
+
+                if (ys == yf)
+                {
+                    yStartBox.RaiseTapEvent();
+                    yEndBox.RaiseTapEvent();
+                    yvalid = false;
+                }
+            }
+
+            if (!(xvalid && yvalid))
                 return;
 
             // Need to decide whether to just use max/min or prompt user.
