@@ -43,18 +43,23 @@ namespace GPUTEMSTEMSimulation
 
 	    public Canvas tCanvas { get; set; }
 
+		// Set labels to be updated on mouse event.
         public Label xCoord { get; set; }
         public Label yCoord { get; set; }
 
+		// To display mouseover coordinates w.r.t original reference.
+		public float xStartPosition;
+		public float yStartPosition;
+
+		// For displaying mouseover coordinates scaled correctly
         private float _PixelScaleX;
+		private float _PixelScaleY;
 
         public float PixelScaleX
         {
             get { return _PixelScaleX; }
             set { _PixelScaleX = value; }
-        }
-
-        private float _PixelScaleY;
+        }      
 
         public float PixelScaleY
         {
@@ -62,6 +67,7 @@ namespace GPUTEMSTEMSimulation
             set { _PixelScaleY = value; }
         }
 
+		// Mouseover coordinates displayed in reciprocal space if true.
         public bool Reciprocal;
 
         public DisplayTab(string tName)
@@ -69,9 +75,11 @@ namespace GPUTEMSTEMSimulation
             // Assume LeftTab by default
             // Could just make 2 classes for Left and RightTab...
             Reciprocal = false;
-            PixelScaleX = PixelScaleY = 1;
 
+            PixelScaleX = PixelScaleY = 1;
+			xStartPosition = yStartPosition = 0;
             xDim = yDim = 0;
+
             BrushConverter bc = new BrushConverter();
 
             Tab = new TabItem();
@@ -95,7 +103,13 @@ namespace GPUTEMSTEMSimulation
             tempGrid.Children.Add(tempZoom);
             Tab.Content = tempGrid;
 
-            tImage.MouseMove += new MouseEventHandler(MouseMove);
+			// To get mouseover over detectors
+			tCanvas.MouseEnter += new MouseEventHandler(MouseEnter);
+			tCanvas.MouseLeave += new MouseEventHandler(MouseLeave);
+			tCanvas.MouseMove += new MouseEventHandler(MouseMove);
+            
+			// To get mouseover over image
+			tImage.MouseMove += new MouseEventHandler(MouseMove);
 			tImage.MouseEnter += new MouseEventHandler(MouseEnter);
 			tImage.MouseLeave += new MouseEventHandler(MouseLeave);
         }
@@ -111,16 +125,16 @@ namespace GPUTEMSTEMSimulation
         public void MouseMove(object sender, MouseEventArgs e)
         {
             Point p = e.GetPosition(tImage);
-            if (Reciprocal)
+			            
+			if (Reciprocal)
             {
-                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
-                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
-
+                xCoord.Content = ((1 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
+                yCoord.Content = ((1 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
             }
             else
             {
-				xCoord.Content = (PixelScaleX * p.X).ToString("f2") + " Å";
-				yCoord.Content = (PixelScaleY * p.Y).ToString("f2") + " Å";
+				xCoord.Content = (xStartPosition + PixelScaleX * p.X).ToString("f2") + " Å";
+				yCoord.Content = (yStartPosition + PixelScaleY * p.Y).ToString("f2") + " Å";
             }
         }
 
