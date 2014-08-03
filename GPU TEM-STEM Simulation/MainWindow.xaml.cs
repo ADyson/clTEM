@@ -390,6 +390,9 @@ namespace GPUTEMSTEMSimulation
                 EWDisplay.PixelScaleY = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 
+				EWDisplay.xStartPosition = SimRegion.xStart;
+				EWDisplay.yStartPosition = SimRegion.yStart;
+
 				SimulateTEM(ref progressReporter,ref timer, ref ct);
 			}
 			else if (select_STEM)
@@ -521,10 +524,8 @@ namespace GPUTEMSTEMSimulation
 			// Use Background worker to progress through each step
 			int NumberOfSlices = 0;
 			mCL.GetNumberSlices(ref NumberOfSlices);
+	
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
-
-			
-
 			for (int i = 1; i <= NumberOfSlices; i++)
 			{
 				if (ct.IsCancellationRequested == true)
@@ -556,6 +557,10 @@ namespace GPUTEMSTEMSimulation
             {
                 dt.PixelScaleX = LockedArea.getxInterval;
                 dt.PixelScaleY = LockedArea.getyInterval;
+
+				dt.xStartPosition = STEMRegion.xStart;
+				dt.yStartPosition = STEMRegion.yStart;
+
                 dt.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
             }
 
@@ -801,6 +806,9 @@ namespace GPUTEMSTEMSimulation
 
 			CTEMDisplay.xDim = CurrentResolution;
 			CTEMDisplay.yDim = CurrentResolution;
+
+			CTEMDisplay.xStartPosition = EWDisplay.xStartPosition;
+			CTEMDisplay.yStartPosition = EWDisplay.yStartPosition;
 
 			CTEMDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			CTEMDisplay.tImage.Source = CTEMDisplay._ImgBMP;
