@@ -259,6 +259,7 @@ namespace GPUTEMSTEMSimulation
                 }
                 if (!validCBED)
                 {
+					var result = MessageBox.Show("CBED Probe position outside simulated region", "", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }

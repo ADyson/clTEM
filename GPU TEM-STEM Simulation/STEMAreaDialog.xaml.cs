@@ -120,13 +120,20 @@ namespace GPUTEMSTEMSimulation
 
                 if (xmin < simxStart || xmin > simxFinish)
                 {
-                    xStartBox.RaiseTapEvent();
+					if(xmin==xs)
+						xStartBox.RaiseTapEvent();
+					else if(xmin==xf)
+						xFinishBox.RaiseTapEvent();
                     xvalid = false;
                 }
 
                 if (xmax < simxStart || xmax > simxFinish)
                 {
-                    xFinishBox.RaiseTapEvent();
+					if (xmax == xs)
+						xStartBox.RaiseTapEvent();
+					else if (xmax == xf)
+						xFinishBox.RaiseTapEvent();
+
                     xvalid = false;
                 }
             }
@@ -160,13 +167,19 @@ namespace GPUTEMSTEMSimulation
 
                 if (ymin < simyStart || ymin > simyFinish)
                 {
-                    yStartBox.RaiseTapEvent();
+					if (ymin == ys)
+						yStartBox.RaiseTapEvent();
+					else if (ymax == yf)
+						yFinishBox.RaiseTapEvent();
                     yvalid = false;
                 }
 
                 if (ymax < simyStart || ymax > simyFinish)
                 {
-                    yFinishBox.RaiseTapEvent();
+					if (ymax == ys)
+						yStartBox.RaiseTapEvent();
+					else if (ymax == yf)
+						yFinishBox.RaiseTapEvent();
                     yvalid = false;
                 }
             }
@@ -178,21 +191,6 @@ namespace GPUTEMSTEMSimulation
             xFinishBox.Text = xmax.ToString();
             yStartBox.Text = ymin.ToString();
             yFinishBox.Text = ymax.ToString();
-
-            if (ymin < simyStart || ymin > simyFinish)
-            {
-                yStartBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (ymax < simyStart || ymax > simyFinish)
-            {
-                yFinishBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (!valid)
-                return;
 
             STEMArea temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
 
