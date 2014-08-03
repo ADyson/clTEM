@@ -112,5 +112,11 @@
     <None Include="CL\BinnedAtomicPotentialOpt2.cl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="CL\BinnedAtomicPotentialConventional.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CL\BinnedAtomicPotentialConventional2.cl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

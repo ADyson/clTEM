@@ -124,9 +124,6 @@ __kernel void clBinnedAtomicPotentialConventional(__global float2* Potential,
 						int i;
 						float suml, sumg, x;
 
-						/* Lorenzian, Gaussian consts */
-						if( rad < 0.25f ) rad = 0.25f; // was 0.15
-
 						/* avoid singularity at r=0 */
 						suml = sumg = 0.0f;
 

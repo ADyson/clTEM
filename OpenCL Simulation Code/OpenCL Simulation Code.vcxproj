@@ -158,6 +158,8 @@
     <ClCompile Include="clDevice.cpp" />
     <ClCompile Include="clFourier.cpp" />
     <ClCompile Include="clKernel.cpp" />
+    <None Include="CL\BinnedAtomicPotentialConventional.cl" />
+    <None Include="CL\BinnedAtomicPotentialConventional2.cl" />
     <None Include="CL\BinnedAtomicPotentialOpt.cl" />
     <None Include="CL\BinnedAtomicPotentialOpt2.cl" />
     <None Include="CL\GeneratePropagator.cl" />

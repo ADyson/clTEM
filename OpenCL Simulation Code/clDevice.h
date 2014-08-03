@@ -11,4 +11,3 @@ public:
 	clDevice();
 	~clDevice();
 };
-

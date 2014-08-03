@@ -54,9 +54,9 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 			for (int l = 0; l < end-start; l++) 
 			{
 				int ZNum = atZ[l];
-				for (int h = 0; h <= 15; h++)
+				for (int h = 0; h <= 20; h++)
 				{
-					float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - h*dz/15.0f-atz[l])*(z - h*dz/15.0f-atz[l]));
+					float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]) + (z - h*dz/20.0f-atz[l])*(z - h*dz/20.0f-atz[l]));
 
 					if(rad < 0.25f * pixelscale)
 						rad = 0.25f * pixelscale;
@@ -74,7 +74,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 
 						sumz += (h!=0) * (p1+p2)*0.5f;
 						p2 = p1;
-
+						//sumz += p1;
 					}
 				}
 			}
@@ -84,7 +84,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 	}
 	if(xid < width && yid < height)
 	{
-		Potential[Index].x = native_cos((dz/15.0f)*sigma*sumz);
-		Potential[Index].y = native_sin((dz/15.0f)*sigma*sumz);
+		Potential[Index].x = native_cos((dz/20.0f)*sigma*sumz);
+		Potential[Index].y = native_sin((dz/20.0f)*sigma*sumz);
 	}
 }
