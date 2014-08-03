@@ -447,6 +447,11 @@ namespace GPUTEMSTEMSimulation
 				var result = MessageBox.Show("Voltage cannot be zero", "", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}
+			if (ImagingParameters.aperturemrad == 0)
+			{
+				var result = MessageBox.Show("Aperture should not be zero, do you want to continue?", "Continue?", MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
+				return result.Equals(MessageBoxResult.Yes);
+			}
 			else return true;
 		}
 
