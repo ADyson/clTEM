@@ -128,8 +128,8 @@ namespace GPUTEMSTEMSimulation
 			            
 			if (Reciprocal)
             {
-                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
-                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
+                xCoord.Content = ((1 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
+                yCoord.Content = ((1 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
             }
             else
             {
