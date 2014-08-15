@@ -40,6 +40,7 @@ namespace GPUTEMSTEMSimulation
         bool doTDS_STEM = false;
         bool doTDS_CBED = false;
         bool isFull3D = true;
+        bool isFD = false;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
@@ -538,9 +539,9 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-		    bool FDMode = true;
+		    bool FDMode = isFD;
             
-			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
+			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD);
 
 			// Reset atoms incase TDS has been used
 			mCL.SortStructure(false);
@@ -1024,5 +1025,6 @@ namespace GPUTEMSTEMSimulation
 		{
 			cancellationTokenSource.Cancel();
 		}
+
     }
 }

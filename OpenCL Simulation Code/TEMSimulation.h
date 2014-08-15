@@ -20,7 +20,7 @@ public:
 
 	// Simulation steps
 	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D);
-	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
+	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D,bool FD);
 	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
 	void MakeSTEMWaveFunction(float posx, float posy);
 

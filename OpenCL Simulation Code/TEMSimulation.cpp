@@ -217,13 +217,9 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, b
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
+void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD)
 {
-	// Force FD flag to true for testing purposes
 
-	bool FD = true;
-	Full3D = false;
-	
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
 

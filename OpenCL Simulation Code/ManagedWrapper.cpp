@@ -122,11 +122,11 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D);
+			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D,FD);
 		}
 		catch(std::exception ex)
 		{

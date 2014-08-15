@@ -54,11 +54,11 @@ void UnmanagedOpenCL::InitialiseSimulation(int resolution, bool Full3D)
 	TS->Initialise(resolution,Structure,Full3D);
 };
 
-void UnmanagedOpenCL::InitialiseReSizedSimulation(int resolution,float startx, float starty ,float endx, float endy, bool Full3D)
+void UnmanagedOpenCL::InitialiseReSizedSimulation(int resolution,float startx, float starty ,float endx, float endy, bool Full3D, bool FD)
 {
 	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
 	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
-	TS->InitialiseReSized(resolution,Structure,startx,starty,endx,endy,Full3D);
+	TS->InitialiseReSized(resolution,Structure,startx,starty,endx,endy,Full3D,FD);
 };
 
 // Calls different initialiser to make a probe wavefunction instead of plane wave

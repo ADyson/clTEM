@@ -102,6 +102,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -120,7 +121,11 @@
                           Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
                           Checked="Full3D_Checked" Unchecked="Full3D_Unchecked" IsChecked="True" />
 
-                <Grid Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center">
+                <CheckBox x:Name="ToggleFD"  Content="Finite Difference" 
+                          Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
+                          Checked="FD_Checked" Unchecked="FD_Unchecked" IsChecked="False" />
+
+                <Grid Grid.Row="5" Grid.Column="0" HorizontalAlignment="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
