@@ -51,12 +51,12 @@ namespace GPUTEMSTEMSimulation
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             // to check if entry is valid
-            bool valid = true;
+            var valid = true;
 
             // get the strings from the textboxes
-            string Sname = NameTxtbx.Text;
-            string Sin = InnerTxtbx.Text;
-            string Sout = OuterTxtbx.Text;
+            var Sname = NameTxtbx.Text;
+            var Sin = InnerTxtbx.Text;
+            var Sout = OuterTxtbx.Text;
 
             float Fin = 0;
             float Fout = 0;
@@ -69,13 +69,11 @@ namespace GPUTEMSTEMSimulation
             }
 
             // check for duplicate names
-            foreach (DetectorItem i in mainDetectors)
-                if (i.Name.Equals(Sname))
-                {
-                    valid = false;
-                    NameTxtbx.RaiseTapEvent();
-                    break;
-                }
+            if (mainDetectors.Any(i => i.Name.Equals(Sname)))
+            {
+                valid = false;
+                NameTxtbx.RaiseTapEvent();
+            }
 
             // convert inputs to floats (error checking should be handled by regular expression)
             if (Sout.Length == 0)
@@ -110,7 +108,7 @@ namespace GPUTEMSTEMSimulation
                 return;
 
             // add everything to detector class
-            DetectorItem temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
+            var temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
 
             // add to the listview
             mainDetectors.Add(temp);
@@ -126,7 +124,7 @@ namespace GPUTEMSTEMSimulation
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             // get list of the selected items
-            List<DetectorItem> selected = DetectorListView.SelectedItems.Cast<Object>().OfType<DetectorItem>().ToList();
+            var selected = DetectorListView.SelectedItems.Cast<Object>().OfType<DetectorItem>().ToList();
 
             // check if anything was selected
             if (selected.Count > 0)
@@ -135,7 +133,7 @@ namespace GPUTEMSTEMSimulation
                 foreach (var item in selected) mainDetectors.Remove(item);//DetectorListView.Items.Remove(item);
 
                 // used for resetting the colour index
-                int i = 0;
+                var i = 0;
                 foreach (var item in mainDetectors)
                 {
                     item.ColourIndex = i;
@@ -176,24 +174,18 @@ namespace GPUTEMSTEMSimulation
 
     public class DetectorArgs : EventArgs
     {
-        private DetectorItem msg;
         public DetectorArgs(DetectorItem s)
         {
-            msg = s;
-        }
-        public DetectorItem Detector
-        {
-            get { return msg; }
+            Detector = s;
         }
 
-        private List<DetectorItem> msgList;
+        public DetectorItem Detector { get; private set; }
+
         public DetectorArgs(List<DetectorItem> sList)
         {
-            msgList = sList;
+            DetectorList = sList;
         }
-        public List<DetectorItem> DetectorList
-        {
-            get { return msgList; }
-        }
+
+        public List<DetectorItem> DetectorList { get; private set; }
     }
 }

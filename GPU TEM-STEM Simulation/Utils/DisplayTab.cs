@@ -52,22 +52,12 @@ namespace GPUTEMSTEMSimulation
 		public float yStartPosition;
 
 		// For displaying mouseover coordinates scaled correctly
-        private float _PixelScaleX;
-		private float _PixelScaleY;
 
-        public float PixelScaleX
-        {
-            get { return _PixelScaleX; }
-            set { _PixelScaleX = value; }
-        }      
+	    public float PixelScaleX { get; set; }
 
-        public float PixelScaleY
-        {
-            get { return _PixelScaleY; }
-            set { _PixelScaleY = value; }
-        }
+	    public float PixelScaleY { get; set; }
 
-		// Mouseover coordinates displayed in reciprocal space if true.
+	    // Mouseover coordinates displayed in reciprocal space if true.
         public bool Reciprocal;
 
         public DisplayTab(string tName)
@@ -80,18 +70,15 @@ namespace GPUTEMSTEMSimulation
 			xStartPosition = yStartPosition = 0;
             xDim = yDim = 0;
 
-            BrushConverter bc = new BrushConverter();
+            var bc = new BrushConverter();
 
-            Tab = new TabItem();
-            Tab.Header = tName;
-            Grid tempGrid = new Grid();
-            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
-            ZoomBorder tempZoom = new ZoomBorder();
-            tempZoom.ClipToBounds = true;
+            Tab = new TabItem {Header = tName};
+            var tempGrid = new Grid {Background = (Brush) bc.ConvertFrom("#FFE5E5E5")};
+            var tempZoom = new ZoomBorder {ClipToBounds = true};
             tImage = new Image();
 
-            Viewbox tvBox = new Viewbox();
-            Grid temptempGrid = new Grid();
+            var tvBox = new Viewbox();
+            var temptempGrid = new Grid();
             tCanvas = new Canvas();
 
             tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
@@ -114,17 +101,11 @@ namespace GPUTEMSTEMSimulation
 			tImage.MouseLeave += new MouseEventHandler(MouseLeave);
         }
 
-	    private WriteableBitmap ImgBMP;
+	    public WriteableBitmap ImgBmp { get; set; }
 
-	    public WriteableBitmap _ImgBMP
-	    {
-	        get { return ImgBMP; }
-	        set { ImgBMP = value; }
-	    }
-
-        public void MouseMove(object sender, MouseEventArgs e)
+	    public void MouseMove(object sender, MouseEventArgs e)
         {
-            Point p = e.GetPosition(tImage);
+            var p = e.GetPosition(tImage);
 			            
 			if (Reciprocal)
             {

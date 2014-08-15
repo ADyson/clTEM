@@ -192,7 +192,7 @@ namespace GPUTEMSTEMSimulation
             yStartBox.Text = ymin.ToString();
             yFinishBox.Text = ymax.ToString();
 
-            STEMArea temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
+            var temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
 
             AddSTEMAreaEvent(this, new StemAreaArgs(temp));
 
@@ -208,14 +208,11 @@ namespace GPUTEMSTEMSimulation
 
     public class StemAreaArgs : EventArgs
     {
-        private STEMArea msg;
         public StemAreaArgs(STEMArea s)
         {
-            msg = s;
+            AreaParams = s;
         }
-        public STEMArea AreaParams
-        {
-            get { return msg; }
-        }
+
+        public STEMArea AreaParams { get; private set; }
     }
 }

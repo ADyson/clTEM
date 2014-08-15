@@ -129,9 +129,9 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Label Content="Resolution"
-                           Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                           Grid.Column="0" HorizontalAlignment="Right" Width="Auto" HorizontalContentAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
                     <ComboBox x:Name="ResolutionCombo"
-                              Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="2.5,0" VerticalAlignment="Center" Width="75" SelectionChanged="ComboBox_SelectionChanged_1" SelectedValuePath="Content" Height="24">
+                              Grid.Column="1" HorizontalAlignment="Left" Margin="2.5,0" VerticalAlignment="Center" Width="75" SelectionChanged="ComboBoxSelectionChanged1" SelectedValuePath="Content" Height="24">
                         <ComboBoxItem Content="256"/>
                         <ComboBoxItem Content="512"/>
                         <ComboBoxItem Content="1024"/>
@@ -550,8 +550,8 @@
 
                 <StatusBarItem Grid.Column="5">
                     <Grid>
-                        <ProgressBar x:Name="progressBar1" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,8,5,-8"/>
-                        <ProgressBar  x:Name="progressBar2" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,-8,5,8"/>
+                        <ProgressBar x:Name="ProgressBar1" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,8,5,-8"/>
+                        <ProgressBar  x:Name="ProgressBar2" Value="0" Width="250" Height="12" Minimum="0" Maximum="100" Margin="0,-8,5,8"/>
                     </Grid>
                 </StatusBarItem>
 

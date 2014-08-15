@@ -141,9 +141,9 @@ namespace GPUTEMSTEMSimulation
             devicesShort = new List<String>();
             devicesLong = new List<String>();
 
-            int numDev = mCL.getCLdevCount();
+            var numDev = mCL.getCLdevCount();
 
-            for (int i = 0; i < numDev; i++)
+            for (var i = 0; i < numDev; i++)
             {
                 devicesShort.Add(mCL.getCLdevString(i, true));
                 devicesLong.Add(mCL.getCLdevString(i, false));
@@ -154,18 +154,20 @@ namespace GPUTEMSTEMSimulation
 
         private void ImportStructureButton(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openDialog = new Microsoft.Win32.OpenFileDialog();
+            var openDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                FileName = "file name",
+                DefaultExt = ".xyz",
+                Filter = "XYZ Coordinates (.xyz)|*.xyz"
+            };
 
             // Set defaults for file dialog.
-            openDialog.FileName = "file name";                  // Default file name
-            openDialog.DefaultExt = ".xyz";                     // Default file extension
-            openDialog.Filter = "XYZ Coordinates (.xyz)|*.xyz"; // Filter files by extension
 
-            Nullable<bool> result = openDialog.ShowDialog();
+            var result = openDialog.ShowDialog();
 
             if (result == true)
             {
-                string fName = openDialog.FileName;
+                var fName = openDialog.FileName;
                 fileNameLabel.Content = System.IO.Path.GetFileName(fName);
                 fileNameLabel.ToolTip = fName;
 
@@ -174,7 +176,7 @@ namespace GPUTEMSTEMSimulation
                 mCL.UploadParameterisation();
 
                 // Update some dialogs if everything went OK.
-                Int32 Len = 0;
+                var Len = 0;
                 float MinX = 0;
                 float MinY = 0;
                 float MinZ = 0;
@@ -236,16 +238,16 @@ namespace GPUTEMSTEMSimulation
 			if (!TestSimulationPrerequisites())
 				return;
 
-            bool select_TEM = TEMRadioButton.IsChecked == true;
-            bool select_STEM = STEMRadioButton.IsChecked == true;
-            bool select_CBED = CBEDRadioButton.IsChecked == true;
+            var select_TEM = TEMRadioButton.IsChecked == true;
+            var select_STEM = STEMRadioButton.IsChecked == true;
+            var select_CBED = CBEDRadioButton.IsChecked == true;
 
             if (select_CBED)
             {
                 CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
                 CBED_ypos = Convert.ToInt32(CBEDypos.Text);
 
-                bool validCBED = true;
+                var validCBED = true;
 
                 if (CBED_xpos < SimRegion.xStart || CBED_xpos > SimRegion.xFinish)
                 {
@@ -276,7 +278,7 @@ namespace GPUTEMSTEMSimulation
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
-            int TDSruns = 1;
+            var TDSruns = 1;
 
             if (select_STEM)
             {
@@ -296,7 +298,7 @@ namespace GPUTEMSTEMSimulation
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Normal;
 
-                Stopwatch timer = new Stopwatch();
+                var timer = new Stopwatch();
 
                 // Upload Simulation Parameters to c++ class
                 mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical, ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
@@ -312,8 +314,8 @@ namespace GPUTEMSTEMSimulation
             progressReporter.RegisterContinuation(task, () =>
             {
 				CancelButton.IsEnabled = false;
-                progressBar1.Value = 100;
-                progressBar2.Value = 100;
+                ProgressBar1.Value = 100;
+                ProgressBar2.Value = 100;
 
                 if (select_STEM)
                 {
@@ -323,7 +325,7 @@ namespace GPUTEMSTEMSimulation
                         return;
                     }
 
-                    foreach (DetectorItem i in LockedDetectors)
+                    foreach (var i in LockedDetectors)
                     {
 						UpdateDetectorImage(i);
                     }
@@ -358,8 +360,8 @@ namespace GPUTEMSTEMSimulation
 			EWDisplay.xDim = CurrentResolution;
 			EWDisplay.yDim = CurrentResolution;
 
-			EWDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
-			EWDisplay.tImage.Source = EWDisplay._ImgBMP;
+			EWDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
+			EWDisplay.tImage.Source = EWDisplay.ImgBmp;
 
 			// When its completed we want to get data to c# for displaying in an image...
 			EWDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
@@ -367,35 +369,35 @@ namespace GPUTEMSTEMSimulation
 
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel = (EWDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			var bytesPerPixel = (EWDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
-			var stride = EWDisplay._ImgBMP.PixelWidth * bytesPerPixel;
+			var stride = EWDisplay.ImgBmp.PixelWidth * bytesPerPixel;
 
 			// Create a byte array for a the entire size of bitmap.
-			var arraySize = stride * EWDisplay._ImgBMP.PixelHeight;
+			var arraySize = stride * EWDisplay.ImgBmp.PixelHeight;
 			var pixelArray = new byte[arraySize];
 
-			float min = mCL.GetEWMin();
-			float max = mCL.GetEWMax();
+			var min = mCL.GetEWMin();
+			var max = mCL.GetEWMax();
 
 			if (min == max)
 				return;
 
-			for (int row = 0; row < EWDisplay._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < EWDisplay._ImgBMP.PixelWidth; col++)
+			for (var row = 0; row < EWDisplay.ImgBmp.PixelHeight; row++)
+				for (var col = 0; col < EWDisplay.ImgBmp.PixelWidth; col++)
 				{
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * EWDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
+					pixelArray[(row * EWDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * EWDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 3] = 0;
 				}
 
 
-			Int32Rect rect = new Int32Rect(0, 0, EWDisplay._ImgBMP.PixelWidth, EWDisplay._ImgBMP.PixelHeight);
+			var rect = new Int32Rect(0, 0, EWDisplay.ImgBmp.PixelWidth, EWDisplay.ImgBmp.PixelHeight);
 
-			EWDisplay._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
+			EWDisplay.ImgBmp.WritePixels(rect, pixelArray, stride, 0);
 		}
 
 		private void SimulationMethod(bool select_TEM, bool select_STEM, bool select_CBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
@@ -431,10 +433,10 @@ namespace GPUTEMSTEMSimulation
 
 		private void UI_UpdateSimulationProgress(float ms, int NumberOfSlices, int runs, int j, int i, int mem)
 		{
-			this.progressBar1.Value =
+			this.ProgressBar1.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(i) /
 								Convert.ToSingle(NumberOfSlices));
-			this.progressBar2.Value =
+			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(j) /
 								Convert.ToSingle(runs));
 			this.TimerMessage.Content = ms.ToString() + " ms";
@@ -447,52 +449,52 @@ namespace GPUTEMSTEMSimulation
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
 			
-			DiffDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
-			DiffDisplay.tImage.Source = DiffDisplay._ImgBMP;
+			DiffDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
+			DiffDisplay.tImage.Source = DiffDisplay.ImgBmp;
 
 			DiffDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
 			mCL.GetDiffImage(DiffDisplay.ImageData, CurrentResolution);
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
-			var stride2 = DiffDisplay._ImgBMP.PixelWidth * bytesPerPixel2;
+			var stride2 = DiffDisplay.ImgBmp.PixelWidth * bytesPerPixel2;
 
 			// Create a byte array for a the entire size of bitmap.
-			var arraySize2 = stride2 * DiffDisplay._ImgBMP.PixelHeight;
+			var arraySize2 = stride2 * DiffDisplay.ImgBmp.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			float min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
-			float max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
+			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
+			var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
 
 			if (min2 == max2)
 				return;
 
-			for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
+			for (int row = 0; row < DiffDisplay.ImgBmp.PixelHeight; row++)
+				for (int col = 0; col < DiffDisplay.ImgBmp.PixelWidth; col++)
 				{
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-					pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+					pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(DiffDisplay.ImageData[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+					pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
 				}
 
 
-			Int32Rect rect2 = new Int32Rect(0, 0, DiffDisplay._ImgBMP.PixelWidth, DiffDisplay._ImgBMP.PixelHeight);
+			var rect2 = new Int32Rect(0, 0, DiffDisplay.ImgBmp.PixelWidth, DiffDisplay.ImgBmp.PixelHeight);
 
-			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
+			DiffDisplay.ImgBmp.WritePixels(rect2, pixelArray2, stride2, 0);
 
             // to update diffraction rings, show they have changed.
-            foreach (DetectorItem det in Detectors)
-                det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
+            foreach (var det in Detectors)
+                det.SetEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 		}
 
 		private void UpdateTDSImage()
 		{
-			DiffDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
-			DiffDisplay.tImage.Source = DiffDisplay._ImgBMP;
+			DiffDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
+			DiffDisplay.tImage.Source = DiffDisplay.ImgBmp;
 
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
@@ -502,36 +504,36 @@ namespace GPUTEMSTEMSimulation
             DiffDisplay.tCanvas.Height = CurrentResolution;
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel2 = (DiffDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
-			var stride2 = DiffDisplay._ImgBMP.PixelWidth * bytesPerPixel2;
+			var stride2 = DiffDisplay.ImgBmp.PixelWidth * bytesPerPixel2;
 
 			// Create a byte array for a the entire size of bitmap.
-			var arraySize2 = stride2 * DiffDisplay._ImgBMP.PixelHeight;
+			var arraySize2 = stride2 * DiffDisplay.ImgBmp.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			float min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
-            float max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
+			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
+            var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
 
-            for (int row = 0; row < DiffDisplay._ImgBMP.PixelHeight; row++)
-                for (int col = 0; col < DiffDisplay._ImgBMP.PixelWidth; col++)
+            for (var row = 0; row < DiffDisplay.ImgBmp.PixelHeight; row++)
+                for (var col = 0; col < DiffDisplay.ImgBmp.PixelWidth; col++)
                 {
-                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
-                    pixelArray2[(row * DiffDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
+                    pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 0] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 1] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 2] = Convert.ToByte(Math.Ceiling(((Convert.ToSingle(Math.Log(Convert.ToDouble(TDSImage[col + row * CurrentResolution]+1.0f))) - min2) / (max2 - min2)) * 254.0f));
+                    pixelArray2[(row * DiffDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel2 + 3] = 0;
                 }
 
 
-			Int32Rect rect2 = new Int32Rect(0, 0, DiffDisplay._ImgBMP.PixelWidth, DiffDisplay._ImgBMP.PixelHeight);
+			var rect2 = new Int32Rect(0, 0, DiffDisplay.ImgBmp.PixelWidth, DiffDisplay.ImgBmp.PixelHeight);
 
-			DiffDisplay._ImgBMP.WritePixels(rect2, pixelArray2, stride2, 0);
+			DiffDisplay.ImgBmp.WritePixels(rect2, pixelArray2, stride2, 0);
 
             // to update diffraction rings, show they have changed.
-            foreach (DetectorItem det in Detectors)
-                det.setEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
+            foreach (var det in Detectors)
+                det.SetEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
 		}
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
@@ -542,11 +544,11 @@ namespace GPUTEMSTEMSimulation
 			mCL.SortStructure(false);
 
 			// Use Background worker to progress through each step
-			int NumberOfSlices = 0;
+			var NumberOfSlices = 0;
 			mCL.GetNumberSlices(ref NumberOfSlices);
 	
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
-			for (int i = 1; i <= NumberOfSlices; i++)
+			for (var i = 1; i <= NumberOfSlices; i++)
 			{
 				if (ct.IsCancellationRequested == true)
 					break;
@@ -554,7 +556,7 @@ namespace GPUTEMSTEMSimulation
 				timer.Start();
 				mCL.MultisliceStep(i, NumberOfSlices);
 				timer.Stop();
-				int mem = mCL.MemoryUsed();
+				var mem = mCL.MemoryUsed();
 				// Report progress of the work. 
 
 				float ms = timer.ElapsedMilliseconds;
@@ -573,7 +575,7 @@ namespace GPUTEMSTEMSimulation
 			LockedDetectors = Detectors;
 			LockedArea = STEMRegion;
 
-            foreach (DetectorItem dt in LockedDetectors)
+            foreach (var dt in LockedDetectors)
             {
                 dt.PixelScaleX = LockedArea.getxInterval;
                 dt.PixelScaleY = LockedArea.getyInterval;
@@ -590,124 +592,127 @@ namespace GPUTEMSTEMSimulation
 				return;
 			}
 
-			int numPix = LockedArea.xPixels * LockedArea.yPixels;
-			int pix = 0;
+		    if (LockedArea != null)
+		    {
+		        var numPix = LockedArea.xPixels * LockedArea.yPixels;
+		        var pix = 0;
 
-			foreach (DetectorItem i in LockedDetectors)
-			{
-				i.ImageData = new float[numPix];
-				i.Min = float.MaxValue;
-				i.Max = float.MinValue;
-			}
+		        foreach (var i in LockedDetectors)
+		        {
+		            i.ImageData = new float[numPix];
+		            i.Min = float.MaxValue;
+		            i.Max = float.MinValue;
+		        }
 
-			int runs = 1;
-			if (doTDS_STEM)
-			{
-				runs = TDSruns;
-			}
+		        var runs = 1;
+		        if (doTDS_STEM)
+		        {
+		            runs = TDSruns;
+		        }
 
-			numPix *= runs;
+		        numPix *= runs;
 
-			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
+		        mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
 
-			float xInterval = LockedArea.getxInterval;
-			float yInterval = LockedArea.getyInterval;
+		        var xInterval = LockedArea.getxInterval;
+		        var yInterval = LockedArea.getyInterval;
 
-			for (int posY = 0; posY < LockedArea.yPixels; posY++)
-			{
-                float fCoordy = (LockedArea.yStart + posY * yInterval - SimRegion.yStart) / pixelScale;
+		        for (var posY = 0; posY < LockedArea.yPixels; posY++)
+		        {
+		            var fCoordy = (LockedArea.yStart + posY * yInterval - SimRegion.yStart) / pixelScale;
 
-				for (int posX = 0; posX < LockedArea.xPixels; posX++)
-				{
-					TDSImage = new float[CurrentResolution * CurrentResolution];
+		            for (var posX = 0; posX < LockedArea.xPixels; posX++)
+		            {
+		                TDSImage = new float[CurrentResolution * CurrentResolution];
 
-					for (int j = 0; j < runs; j++)
-					{
-						// if TDS was used last atoms are in wrong place and need resetting via same function
-						// if (TDS)
-						mCL.SortStructure(doTDS_STEM);
+		                for (var j = 0; j < runs; j++)
+		                {
+		                    // if TDS was used last atoms are in wrong place and need resetting via same function
+		                    // if (TDS)
+		                    mCL.SortStructure(doTDS_STEM);
 
-                        float fCoordx = (LockedArea.xStart + posX * xInterval - SimRegion.xStart) / pixelScale;
+		                    var fCoordx = (LockedArea.xStart + posX * xInterval - SimRegion.xStart) / pixelScale;
 
-						mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
+		                    mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
 
-						// Use Background worker to progress through each step
-						int NumberOfSlices = 0;
-						mCL.GetNumberSlices(ref NumberOfSlices);
-						// Seperate into setup, loop over slices and final steps to allow for progress reporting.
+		                    // Use Background worker to progress through each step
+		                    var NumberOfSlices = 0;
+		                    mCL.GetNumberSlices(ref NumberOfSlices);
+		                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 						
-						for (int i = 1; i <= NumberOfSlices; i++)
-						{
-							if (ct.IsCancellationRequested == true)
-								break;
+		                    for (var i = 1; i <= NumberOfSlices; i++)
+		                    {
+		                        if (ct.IsCancellationRequested == true)
+		                            break;
 
-							timer.Start();
-							mCL.MultisliceStep(i, NumberOfSlices);
-							timer.Stop();
-							int mem = mCL.MemoryUsed();
-							float ms = timer.ElapsedMilliseconds;
+		                        timer.Start();
+		                        mCL.MultisliceStep(i, NumberOfSlices);
+		                        timer.Stop();
+		                        var mem = mCL.MemoryUsed();
+		                        var ms = timer.ElapsedMilliseconds;
 
-							progressReporter.ReportProgress((val) =>
-							{
-								CancelButton.IsEnabled = true;
-								// Note: code passed to "ReportProgress" can access UI elements freely. 
-								UI_UpdateSimulationProgressSTEM(ms, numPix, pix, NumberOfSlices, i, mem);
-							}, i);
-						}
-						pix++;
+		                        progressReporter.ReportProgress((val) =>
+		                        {
+		                            CancelButton.IsEnabled = true;
+		                            // Note: code passed to "ReportProgress" can access UI elements freely. 
+		                            UI_UpdateSimulationProgressSTEM(ms, numPix, pix, NumberOfSlices, i, mem);
+		                        }, i);
+		                    }
+		                    pix++;
 
-						if (ct.IsCancellationRequested == true)
-							break;
+		                    if (ct.IsCancellationRequested == true)
+		                        break;
 
-						// After a complete run if TDS need to sum up the DIFF...
-						mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
-						// Sum it in C++ also for the stem pixel measurement...
-						mCL.AddTDS();
+		                    // After a complete run if TDS need to sum up the DIFF...
+		                    mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
+		                    // Sum it in C++ also for the stem pixel measurement...
+		                    mCL.AddTDS();
 
-						progressReporter.ReportProgress((val) =>
-						{
-							CancelButton.IsEnabled = false;
-							UpdateTDSImage();
-						}, j);
-					}
+		                    progressReporter.ReportProgress((val) =>
+		                    {
+		                        CancelButton.IsEnabled = false;
+		                        UpdateTDSImage();
+		                    }, j);
+		                }
 
-					if (ct.IsCancellationRequested == true)
-						break;
+		                if (ct.IsCancellationRequested == true)
+		                    break;
 
-					// loop through and get each STEM pixel for each detector at the same time
-					foreach (DetectorItem i in LockedDetectors)
-					{
-						float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
+		                // loop through and get each STEM pixel for each detector at the same time
+		                foreach (DetectorItem i in LockedDetectors)
+		                {
+		                    var pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer);
 
-						i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
+		                    i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
 
-						if (pixelVal < i.Min)
-						{
-							i.Min = pixelVal;
-						}
-						if (pixelVal > i.Max)
-						{
-							i.Max = pixelVal;
-						}
+		                    if (pixelVal < i.Min)
+		                    {
+		                        i.Min = pixelVal;
+		                    }
+		                    if (pixelVal > i.Max)
+		                    {
+		                        i.Max = pixelVal;
+		                    }
 
-					}
+		                }
 
-					progressReporter.ReportProgress((val) =>
-					{
+		                progressReporter.ReportProgress((val) =>
+		                {
 
-						foreach (DetectorItem i in LockedDetectors)
-						{
-							UpdateDetectorImage(i);
-						}
-					}, posX);
+		                    foreach (var i in LockedDetectors)
+		                    {
+		                        UpdateDetectorImage(i);
+		                    }
+		                }, posX);
 
-					// Reset TDS arrays after pixel values retrieved...
-					mCL.ClearTDS();
+		                // Reset TDS arrays after pixel values retrieved...
+		                mCL.ClearTDS();
 
-				}
-				if (ct.IsCancellationRequested == true)
-					break;
-			}
+		            }
+		            if (ct.IsCancellationRequested == true)
+		                break;
+		        }
+		    }
 		}
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
@@ -717,15 +722,15 @@ namespace GPUTEMSTEMSimulation
 			//int posX = CurrentResolution / 2;
 			//int posY = CurrentResolution / 2;
 
-            float posx = (CBED_xpos - SimRegion.xStart) / pixelScale;
-            float posy = (CBED_ypos - SimRegion.yStart) / pixelScale;
+            var posx = (CBED_xpos - SimRegion.xStart) / pixelScale;
+            var posy = (CBED_ypos - SimRegion.yStart) / pixelScale;
 
 			// Use Background worker to progress through each step
-			int NumberOfSlices = 0;
+			var NumberOfSlices = 0;
 			mCL.GetNumberSlices(ref NumberOfSlices);
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
-			int runs = 1;
+			var runs = 1;
 			if (doTDS_CBED)
 			{
 				runs = TDSruns;
@@ -733,13 +738,13 @@ namespace GPUTEMSTEMSimulation
 
 			TDSImage = new float[CurrentResolution * CurrentResolution];
 
-			for (int j = 0; j < runs; j++)
+			for (var j = 0; j < runs; j++)
 			{
 				mCL.SortStructure(doTDS_CBED);
                 mCL.MakeSTEMWaveFunction(posx, posy);
 
 
-				for (int i = 1; i <= NumberOfSlices; i++)
+				for (var i = 1; i <= NumberOfSlices; i++)
 				{
 					if (ct.IsCancellationRequested == true)
 						break;
@@ -747,7 +752,7 @@ namespace GPUTEMSTEMSimulation
 					timer.Start();
 					mCL.MultisliceStep(i, NumberOfSlices);
 					timer.Stop();
-					int mem = mCL.MemoryUsed();
+					var mem = mCL.MemoryUsed();
 					float ms = timer.ElapsedMilliseconds;
 
 					// Report progress of the work. 
@@ -780,40 +785,40 @@ namespace GPUTEMSTEMSimulation
 			i.xDim = LockedArea.xPixels;
 			i.yDim = LockedArea.yPixels;
 
-			i._ImgBMP = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
-			i.tImage.Source = i._ImgBMP;
+			i.ImgBmp = new WriteableBitmap(LockedArea.xPixels, LockedArea.yPixels, 96, 96, PixelFormats.Bgr32, null);
+			i.tImage.Source = i.ImgBmp;
 
 			RenderOptions.SetBitmapScalingMode(i.tImage, BitmapScalingMode.NearestNeighbor);
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel = (i._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			var bytesPerPixel = (i.ImgBmp.Format.BitsPerPixel + 7) / 8;
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
-			var stride = i._ImgBMP.PixelWidth * bytesPerPixel;
+			var stride = i.ImgBmp.PixelWidth * bytesPerPixel;
 
 			// Create a byte array for a the entire size of bitmap.
-			var arraySize = stride * i._ImgBMP.PixelHeight;
+			var arraySize = stride * i.ImgBmp.PixelHeight;
 			var pixelArray = new byte[arraySize];
 
-			float min = i.Min;
-			float max = i.Max;
+			var min = i.Min;
+			var max = i.Max;
 
 			if (min == max)
 				return;
 
-			for (int row = 0; row < i._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < i._ImgBMP.PixelWidth; col++)
+			for (var row = 0; row < i.ImgBmp.PixelHeight; row++)
+				for (var col = 0; col < i.ImgBmp.PixelWidth; col++)
 				{
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
-					pixelArray[(row * i._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
+					pixelArray[(row * i.ImgBmp.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i.ImgBmp.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i.ImgBmp.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((i.GetClampedPixel(col + row * LockedArea.xPixels) - min) / (max - min)) * 254.0f));
+					pixelArray[(row * i.ImgBmp.PixelWidth + col) * bytesPerPixel + 3] = 0;
 				}
 
 
-			Int32Rect rect = new Int32Rect(0, 0, i._ImgBMP.PixelWidth, i._ImgBMP.PixelHeight);
+			var rect = new Int32Rect(0, 0, i.ImgBmp.PixelWidth, i.ImgBmp.PixelHeight);
 
-			i._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
+			i.ImgBmp.WritePixels(rect, pixelArray, stride, 0);
 		}
 
 		private void UpdateCTEMImage(float dpp, int binning, int CCD)
@@ -828,8 +833,8 @@ namespace GPUTEMSTEMSimulation
 			CTEMDisplay.xStartPosition = EWDisplay.xStartPosition;
 			CTEMDisplay.yStartPosition = EWDisplay.yStartPosition;
 
-			CTEMDisplay._ImgBMP = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
-			CTEMDisplay.tImage.Source = CTEMDisplay._ImgBMP;
+			CTEMDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
+			CTEMDisplay.tImage.Source = CTEMDisplay.ImgBmp;
 
 			// When its completed we want to get data to c# for displaying in an image...
 			CTEMDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
@@ -840,45 +845,45 @@ namespace GPUTEMSTEMSimulation
 				mCL.GetCTEMImage(CTEMDisplay.ImageData, CurrentResolution);
 
 			// Calculate the number of bytes per pixel (should be 4 for this format). 
-			var bytesPerPixel = (CTEMDisplay._ImgBMP.Format.BitsPerPixel + 7) / 8;
+			var bytesPerPixel = (CTEMDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
-			var stride = CTEMDisplay._ImgBMP.PixelWidth * bytesPerPixel;
+			var stride = CTEMDisplay.ImgBmp.PixelWidth * bytesPerPixel;
 
 			// Create a byte array for a the entire size of bitmap.
-			var arraySize = stride * CTEMDisplay._ImgBMP.PixelHeight;
+			var arraySize = stride * CTEMDisplay.ImgBmp.PixelHeight;
 			var pixelArray = new byte[arraySize];
 
-			float min = mCL.GetIMMin();
-			float max = mCL.GetIMMax();
+			var min = mCL.GetIMMin();
+			var max = mCL.GetIMMax();
 
 			if (min == max)
 				return;
 
-			for (int row = 0; row < CTEMDisplay._ImgBMP.PixelHeight; row++)
-				for (int col = 0; col < CTEMDisplay._ImgBMP.PixelWidth; col++)
+			for (var row = 0; row < CTEMDisplay.ImgBmp.PixelHeight; row++)
+				for (var col = 0; col < CTEMDisplay.ImgBmp.PixelWidth; col++)
 				{
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
-					pixelArray[(row * CTEMDisplay._ImgBMP.PixelWidth + col) * bytesPerPixel + 3] = 0;
+					pixelArray[(row * CTEMDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((CTEMDisplay.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+					pixelArray[(row * CTEMDisplay.ImgBmp.PixelWidth + col) * bytesPerPixel + 3] = 0;
 				}
 
 
-			Int32Rect rect = new Int32Rect(0, 0, CTEMDisplay._ImgBMP.PixelWidth, CTEMDisplay._ImgBMP.PixelHeight);
+			var rect = new Int32Rect(0, 0, CTEMDisplay.ImgBmp.PixelWidth, CTEMDisplay.ImgBmp.PixelHeight);
 
-			CTEMDisplay._ImgBMP.WritePixels(rect, pixelArray, stride, 0);
+			CTEMDisplay.ImgBmp.WritePixels(rect, pixelArray, stride, 0);
 
 			CTEMDisplay.Tab.IsSelected = true;
 		}
 		
 		private void UI_UpdateSimulationProgressSTEM(float ms, int numPix, int pix, int NumberOfSlices, int i, int mem)
 		{
-			this.progressBar1.Value =
+			this.ProgressBar1.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(i) /
 								Convert.ToSingle(NumberOfSlices));
-			this.progressBar2.Value =
+			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(pix) /
 								Convert.ToSingle(numPix));
 			this.TimerMessage.Content = ms.ToString() + " ms";
@@ -887,10 +892,8 @@ namespace GPUTEMSTEMSimulation
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)
 		{
-			List<DisplayTab> tabs = new List<DisplayTab>();
-			tabs.Add(CTEMDisplay);
-			tabs.Add(EWDisplay);
-			tabs.AddRange(LockedDetectors);
+			var tabs = new List<DisplayTab> {CTEMDisplay, EWDisplay};
+		    tabs.AddRange(LockedDetectors);
 
 			SaveImageFromTabs(tabs);
 		}
@@ -898,35 +901,35 @@ namespace GPUTEMSTEMSimulation
         private void SaveImageButton2_Click(object sender, RoutedEventArgs e)
         {
 			// Ideally want to check tab and use information to save either EW or CTEM....
-			List<DisplayTab> tabs = new List<DisplayTab>();
-			tabs.Add(DiffDisplay);
-			SaveImageFromTabs(tabs);
+			var tabs = new List<DisplayTab> {DiffDisplay};
+            SaveImageFromTabs(tabs);
         }
 
-		private void SaveImageFromTabs(List<DisplayTab> tabs)
+		private void SaveImageFromTabs(IEnumerable<DisplayTab> tabs)
 		{				
-			foreach (DisplayTab dt in tabs)
+			foreach (var dt in tabs)
 			{
 				if (dt.xDim != 0 || dt.yDim != 0)
 				{
 					if (dt.Tab.IsSelected == true)
 					{
 						// File saving dialog
-						Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+						var saveDialog = new Microsoft.Win32.SaveFileDialog
+						{
+						    Title = "Save Output Image",
+						    DefaultExt = ".tiff",
+						    Filter = "TIFF (*.tiff)|*.tiff|PNG (*.png)|*.png|JPEG (*.jpeg)|*.jpeg"
+						};
 
-						saveDialog.Title = "Save Output Image";
-						saveDialog.DefaultExt = ".tiff";                     // Default file extension
-						saveDialog.Filter = "TIFF (*.tiff)|*.tiff|PNG (*.png)|*.png|JPEG (*.jpeg)|*.jpeg"; // Filter files by extension
-
-						Nullable<bool> result = saveDialog.ShowDialog();
-						string filename = saveDialog.FileName;
+					    var result = saveDialog.ShowDialog();
+						var filename = saveDialog.FileName;
 
 						if (result == false)
 							return;
 
                         if (filename.EndsWith(".tiff"))
                         {
-    						using (Tiff output = Tiff.Open(filename, "w"))
+    						using (var output = Tiff.Open(filename, "w"))
     						{
 
     							output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
@@ -941,12 +944,12 @@ namespace GPUTEMSTEMSimulation
     							output.SetField(TiffTag.COMPRESSION, Compression.NONE);
     							output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
 
-    							for (int i = 0; i < dt.yDim; ++i)
+    							for (var i = 0; i < dt.yDim; ++i)
     							{
-    								float[] buf = new float[dt.xDim];
-    								byte[] buf2 = new byte[4 * dt.xDim];
+    								var buf = new float[dt.xDim];
+    								var buf2 = new byte[4 * dt.xDim];
 
-    								for (int j = 0; j < dt.yDim; ++j)
+    								for (var j = 0; j < dt.yDim; ++j)
     								{
     									buf[j] = dt.ImageData[j + dt.xDim * i];
     								}
@@ -958,20 +961,20 @@ namespace GPUTEMSTEMSimulation
                         }
                         else if (filename.EndsWith(".png"))
                         {
-                            using (FileStream stream = new FileStream(filename, FileMode.Create))
+                            using (var stream = new FileStream(filename, FileMode.Create))
                             {
-                                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                                encoder.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                var encoder = new PngBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
                                 encoder.Save(stream);
                                 stream.Close();
                             }
                         }
                         else if (filename.EndsWith(".jpeg"))
                         {
-                            using (FileStream stream = new FileStream(filename, FileMode.Create))
+                            using (var stream = new FileStream(filename, FileMode.Create))
                             {
-                                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                                encoder.Frames.Add(BitmapFrame.Create(dt._ImgBMP.Clone()));
+                                var encoder = new JpegBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
                                 encoder.Save(stream);
                                 stream.Close();
                             }
@@ -994,13 +997,13 @@ namespace GPUTEMSTEMSimulation
                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
 			// Calculate Dose Per Pixel
-			float dpp = Convert.ToSingle(DoseTextBox.Text) * (CurrentPixelScale * CurrentPixelScale);
+			var dpp = Convert.ToSingle(DoseTextBox.Text) * (CurrentPixelScale * CurrentPixelScale);
 			// Get CCD and Binning
 
 			var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
 
-			int binning = Convert.ToInt32(bincombo.Content);
-			int CCD = CCDCombo.SelectedIndex;
+			var binning = Convert.ToInt32(bincombo.Content);
+			var CCD = CCDCombo.SelectedIndex;
 
 			if (CCD != 0)
 				mCL.SimulateCTEMImage(CCD,binning);
