@@ -25,6 +25,7 @@ public:
 	void MakeSTEMWaveFunction(float posx, float posy);
 
 	void MultisliceStep(int stepno, int steps);
+	void MultisliceStepFD(int stepno, int steps);
 	float MeasureSTEMPixel(float inner, float outer);
 	void GetCTEMImage(float* data, int resolution);
 	void GetCTEMImage(float* data, int resolution, float dose, int binning, int detector);
@@ -55,6 +56,10 @@ public:
 	Kernel MultiplyCL;
 	Kernel MaskingKernel;
 	Kernel TDSMaskingKernel;
+
+	// FD Only
+	Kernel GradKernel;
+	Kernel FiniteDifference;
 	
 	cl_int status;
 
@@ -65,6 +70,10 @@ public:
 	Buffer clWaveFunction2;
 	Buffer clWaveFunction3;
 	Buffer clWaveFunction4;
+
+	Buffer clWaveFunction1Minus;
+	Buffer clWaveFunction1Plus;
+
 	Buffer clImageWaveFunction;
 	Buffer clTDSDiff;
 	Buffer clTDSMaskDiff;
@@ -79,6 +88,12 @@ public:
 	float pixelscale;
 	float wavelength;
 	float bandwidthkmax;
+
+	// Variables for finite difference method.
+	int NumberOfFDSlices;
+	float FDdz;
+	bool FDMode;
+	float FDsigma;
 
 	// Image contrast limits (technically ew atm)
 	float imagemin;

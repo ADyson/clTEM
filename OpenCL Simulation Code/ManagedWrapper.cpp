@@ -50,6 +50,22 @@ namespace ManagedOpenCLWrapper
 		Slices = _NSlices;
 	};
 
+	void ManagedOpenCL::GetNumberSlices(Int32% Slices, bool FD)
+	{
+		if (FD)
+		{
+			int _NSlices = _UMOpenCL->TS->NumberOfFDSlices;
+			Slices = _NSlices;
+		}
+		else
+		{
+			int _NSlices = _UMOpenCL->Structure->nSlices;
+			Slices = _NSlices;
+		}
+		
+		
+	};
+
 	void ManagedOpenCL::UploadParameterisation()
 	{
 		try
