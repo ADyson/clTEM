@@ -47,25 +47,25 @@ int UnmanagedOpenCL::UploadParameterisation()
 	return 0;
 };
 
-void UnmanagedOpenCL::InitialiseSimulation(int resolution, bool Full3D)
+void UnmanagedOpenCL::InitialiseSimulation(int resolution, bool Full3D, float dz, int full3dints)
 {
 	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
 	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
-	TS->Initialise(resolution,Structure,Full3D);
+	TS->Initialise(resolution,Structure,Full3D,dz,full3dints);
 };
 
-void UnmanagedOpenCL::InitialiseReSizedSimulation(int resolution,float startx, float starty ,float endx, float endy, bool Full3D, bool FD)
+void UnmanagedOpenCL::InitialiseReSizedSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 {
 	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
 	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
-	TS->InitialiseReSized(resolution,Structure,startx,starty,endx,endy,Full3D,FD);
+	TS->InitialiseReSized(resolution,Structure,startx,starty,endx,endy,Full3D,FD,dz,full3dints);
 };
 
 // Calls different initialiser to make a probe wavefunction instead of plane wave
-void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution,float startx, float starty ,float endx, float endy, bool Full3D)
+void UnmanagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 {
 	TS = SimulationPtr(new TEMSimulation(temparams,stemparams));
-	TS->InitialiseSTEM(resolution,Structure,startx,starty,endx,endy,Full3D);
+	TS->InitialiseSTEM(resolution,Structure,startx,starty,endx,endy,Full3D,dz,full3dints);
 };
 
 void UnmanagedOpenCL::MakeSTEMWaveFunction(float posx, float posy)

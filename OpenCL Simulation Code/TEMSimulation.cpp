@@ -14,11 +14,13 @@ TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparam
 
 };
 
-void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, bool Full3D)
+void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, bool Full3D, float dz, int full3dints)
 {
+	FDMode = false;
 
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
@@ -217,11 +219,14 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, b
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD)
+void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 {
+	// Maintain whether we initialised for FD for later multislicestep calls...
+	FDMode = FD;
 
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx-startx;
@@ -354,7 +359,7 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	clWaveFunction3 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
 	clWaveFunction4 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
 	
-	if (FD)
+	if(FD)
 	{
 		clWaveFunction1Minus = Buffer(new clMemory(resolution * resolution * sizeof(cl_float2)));
 		clWaveFunction1Plus = Buffer(new clMemory(resolution * resolution * sizeof(cl_float2)));
@@ -424,6 +429,7 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
 		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");		
 	}
+
 	BinnedAtomicPotential->BuildKernel();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
@@ -450,6 +456,9 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 	BinnedAtomicPotential->SetArgT(24,startx); // Not sure why i am using sigma 2 and not sigma...
 	BinnedAtomicPotential->SetArgT(25,starty); // Not sure why i am using sigma 2 and not sigma...
+
+	if (Full3D)
+		BinnedAtomicPotential->SetArgT(26, full3dints);
 	
 	// Also need to generate propagator.
 	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
@@ -489,7 +498,7 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	ImagingKernel = Kernel( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
 	ImagingKernel->BuildKernelOld();
 
-	if (FD)
+	if(FD)
 	{
 		// Need Grad Kernel and FiniteDifference also
 		GradKernel = Kernel(new clKernel(clState::context, clState::cldev, "clGrad", clState::clq));
@@ -509,18 +518,18 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 		InitialiseWavefunction->SetArgT(0, clWaveFunction1);
 		InitialiseWavefunction->Enqueue(WorkSize);
 
-		FDMode = true;
 	}
 	
 
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
+void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
-
+	AtomicStructure->dz = dz;
+	
 	// Get size of input structure
 	float RealSizeX = endx-startx;
 	float RealSizeY = endy-starty;
@@ -695,6 +704,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 	BinnedAtomicPotential->SetArgT(24,startx);
 	BinnedAtomicPotential->SetArgT(25,starty);
+
+	if (Full3D)
+		BinnedAtomicPotential->SetArgT(26, full3dints);
 
 	// Also need to generate propagator.
 	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
@@ -1177,6 +1189,38 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 	ewmax = max;
 
 	
+};
+
+void TEMSimulation::GetEWImage2(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	clWaveFunction1->Read(compdata);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for (int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		//data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+
+		// Get sqrt abs value for display...	
+		data[i] = hypot(compdata[i].s[1], compdata[i].s[0]);
+
+		// Find max,min for contrast limits
+		if (data[i] > max)
+			max = data[i];
+		if (data[i] < min)
+			min = data[i];
+	}
+
+	ewmin2 = min;
+	ewmax2 = max;
+
+
 };
 
 void TEMSimulation::AddTDSDiffImage(float* data, int resolution)

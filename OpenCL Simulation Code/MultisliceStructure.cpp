@@ -6,6 +6,7 @@ MultisliceStructure::MultisliceStructure()
 {
 	sorted = false;
 	srand(time(NULL));
+	dz = 1.0f;
 };
 
 float MultisliceStructure::TDSRand()
@@ -182,7 +183,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		int NumberOfAtoms = Atoms.size();
 		xBlocks = 80;
 		yBlocks = 80;
-		dz		= 1.0f;
+		//dz		= 1.0f; now set in constructor and can be changed...
 		nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 		nSlices+=(nSlices==0);
 

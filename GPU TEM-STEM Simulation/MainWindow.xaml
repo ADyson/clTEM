@@ -23,6 +23,7 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -370,7 +371,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -384,15 +385,56 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="8" Template="{StaticResource gbox}" Header="" Grid.RowSpan="2" />
+        <GroupBox Template="{StaticResource gbox}" Grid.Column="8" Header="Options" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="2" Grid.ColumnSpan="9" HorizontalAlignment="Stretch">
+                <Grid Grid.Row="0" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                <Label Content="Slice Thickness:"  ToolTip="x position"
+                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center"/>
+                <t:ErrTextBox x:Name="SliceDz" Text="0" ToolTip="Angstroms"
+                             Grid.Row="1" Grid.Column="0" m:Masking.Mask="^([\+]?[0-9][0-9]*\.?[0-9]*)*$"  HorizontalAlignment="Center" Height="22" TextWrapping="Wrap"  Width="50"/>
+            </Grid>
+            <Grid Grid.Row="1" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                <Label Content="Full3D Integrals:"  ToolTip="y position"
+                                   Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" />
+                <t:ErrTextBox x:Name="Full3DIntegrals" Text="0" ToolTip="Angstroms"
+                                     Grid.Row="1" Grid.Column="0" m:Masking.Mask="^([\+]?[1-9][0-9]*)*$"  HorizontalAlignment="Center" Height="22" TextWrapping="Wrap"  Width="50"/>
+            </Grid>
+           </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Column="9" Template="{StaticResource gbox}" Header="" Grid.RowSpan="2" />
+
+        <!--  Huge columnspan as there is no all option -->
+        <Grid Grid.Row="2" Grid.ColumnSpan="1000" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width=".5*"/>
                 <ColumnDefinition Width=".5*"/>
             </Grid.ColumnDefinitions>
             <!-- Left Image Tab Control-->
-            <Grid Grid.Row="1" Grid.Column="0">
+            <Grid Grid.Row="0" Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="80"/>
@@ -452,7 +494,7 @@
             </Grid>
 
             <!-- Right Image Tab Control-->
-            <Grid Grid.Row="1" Grid.Column="1">
+            <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="80"/>

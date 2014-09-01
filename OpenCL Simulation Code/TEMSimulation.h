@@ -19,9 +19,9 @@ public:
 	float FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	// Simulation steps
-	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D);
-	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D,bool FD);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
+	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D, float dz, int full3dints);
+	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
+	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints);
 	void MakeSTEMWaveFunction(float posx, float posy);
 
 	void MultisliceStep(int stepno, int steps);
@@ -32,6 +32,7 @@ public:
 	void GetDiffImage(float* data, int resolution);
 	void GetImDiffImage(float* data, int resolution);
 	void GetEWImage(float* data, int resolution);
+	void GetEWImage2(float* data, int resolution);
 	void AddTDSDiffImage(float* data, int resolution);
 
 	void AddTDS();
@@ -100,6 +101,8 @@ public:
 	float imagemax;
 	float ewmin;
 	float ewmax;
+	float ewmin2;
+	float ewmax2;
 	float diffmin;
 	float diffmax;
 	float tdsmin;

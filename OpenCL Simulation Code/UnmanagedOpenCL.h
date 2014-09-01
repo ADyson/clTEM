@@ -42,9 +42,9 @@ public:
 	void SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang);
 	void SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 
-	void InitialiseSimulation(int resolution, bool Full3D);
-	void InitialiseReSizedSimulation(int resolution, float startx,float starty,float endx,float endy, bool Full3D,bool FD);
-	void InitialiseSTEMSimulation(int resolution,float startx,float starty,float endx,float endy, bool Full3D);
+	void InitialiseSimulation(int resolution, bool Full3D, float dz, int full3dints);
+	void InitialiseReSizedSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
+	void InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints);
 	void MultisliceStep(int stepno, int steps);
 	void MakeSTEMWaveFunction(float posx, float posy);
 

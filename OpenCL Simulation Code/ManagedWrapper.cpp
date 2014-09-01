@@ -107,11 +107,11 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->SetParamsSTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, bool Full3D)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, bool Full3D, float dz, int full3dints)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSimulation(resolution,Full3D);
+			_UMOpenCL->InitialiseSimulation(resolution,Full3D,dz,full3dints);
 		}
 		catch(std::exception ex)
 		{
@@ -122,11 +122,11 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD)
+	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D,FD);
+			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D,FD,dz,full3dints);
 		}
 		catch(std::exception ex)
 		{
@@ -137,11 +137,11 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D)
+	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy,Full3D);
+			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy,Full3D,dz,full3dints);
 		}
 		catch(std::exception ex)
 		{
@@ -200,6 +200,12 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->GetEWImage(pdata,resolution);
 	};
 
+	void ManagedOpenCL::GetEWImage2(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->GetEWImage2(pdata, resolution);
+	};
+
 	float ManagedOpenCL::GetIMMax()
 	{	
 		return _UMOpenCL->TS->imagemax;
@@ -220,6 +226,15 @@ namespace ManagedOpenCLWrapper
 		return _UMOpenCL->TS->ewmin;
 	};
 
+	float ManagedOpenCL::GetEWMax2()
+	{
+		return _UMOpenCL->TS->ewmax2;
+	};
+
+	float ManagedOpenCL::GetEWMin2()
+	{
+		return _UMOpenCL->TS->ewmin2;
+	};
 	void ManagedOpenCL::GetDiffImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
