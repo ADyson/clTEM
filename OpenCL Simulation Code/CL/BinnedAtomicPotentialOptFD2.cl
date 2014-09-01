@@ -1,11 +1,11 @@
-__kernel void clBinnedAtomicPotentialOpt(__global float2* Potential, 
+__kernel void clBinnedAtomicPotentialOptFD(__global float2* Potential, 
 										  __global const float* restrict clAtomXPos, 
 										  __global const float* restrict clAtomYPos, 
 										  __global const float* restrict clAtomZPos, 
 										  __global const int* restrict clAtomZNum, 
 										  __constant float* clfParams, 
 										  __global const int* restrict clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma,
-										  float startx, float starty, int full3dints)
+										  float startx, float starty)
 {
 	int xid = get_global_id(0);
 	int yid = get_global_id(1);
@@ -25,8 +25,6 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 	__local float aty[256];
 	__local float atz[256];
 	__local int atZ[256];
-
-	float integrals = full3dints;
 
 	int startj = fmax(floor(((starty + gy * get_local_size(1) * pixelscale) * yBlocks ) / (MaxY-MinY)) - loadBlocksY,0) ;
 	int endj = fmin(ceil(((starty + (gy+1) * get_local_size(1) * pixelscale) * yBlocks) / (MaxY-MinY)) + loadBlocksY,yBlocks-1);
@@ -53,15 +51,13 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 
 			barrier(CLK_LOCAL_MEM_FENCE);
 
-			float p2=0;
 			for (int l = 0; l < end-start; l++) 
 			{
 				float xyrad2 = (startx + xid*pixelscale-atx[l])*(startx + xid*pixelscale-atx[l]) + (starty + yid*pixelscale-aty[l])*(starty + yid*pixelscale-aty[l]);
 
 				int ZNum = atZ[l];
-				for (int h = 0; h <= full3dints; h++)
-				{
-					float rad = native_sqrt(xyrad2 + (z - h*dz/integrals -atz[l])*(z - h*dz/integrals-atz[l]));
+
+					float rad = native_sqrt(xyrad2 + (z-atz[l])*(z-atz[l]));
 
 					if(rad < 0.25f * pixelscale)
 						rad = 0.25f * pixelscale;
@@ -77,11 +73,9 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 						p1 += (266.5157269f * clfParams[(ZNum-1)*12+8] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+8+1]) * native_powr(clfParams[(ZNum-1)*12+8+1],-1.5f));
 						p1 += (266.5157269f * clfParams[(ZNum-1)*12+10] * native_exp (-3.141592f*rad*3.141592f*rad/clfParams[(ZNum-1)*12+10+1]) * native_powr(clfParams[(ZNum-1)*12+10+1],-1.5f));
 
-						sumz += (h!=0) * (p1+p2)*0.5f;
-						p2 = p1;
-						//sumz +=p1;
+						sumz +=p1;
 					}
-				}
+
 			}
 
 			barrier(CLK_LOCAL_MEM_FENCE);
@@ -89,7 +83,7 @@ __kernel void clBinnedAtomicPotentialOpt(__global float2* Potential,
 	}
 	if(xid < width && yid < height)
 	{
-		Potential[Index].x = native_cos((dz/integrals)*sigma*sumz);
-		Potential[Index].y = native_sin((dz/integrals)*sigma*sumz);
+		Potential[Index].x = sumz;
+		Potential[Index].y = 0;
 	}
 }

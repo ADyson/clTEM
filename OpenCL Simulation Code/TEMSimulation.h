@@ -19,18 +19,20 @@ public:
 	float FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
 	// Simulation steps
-	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D);
-	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
-	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D);
+	void Initialise(int resolution, MultisliceStructure* Structure, bool Full3D, float dz, int full3dints);
+	void InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
+	void InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints);
 	void MakeSTEMWaveFunction(float posx, float posy);
 
 	void MultisliceStep(int stepno, int steps);
+	void MultisliceStepFD(int stepno, int steps);
 	float MeasureSTEMPixel(float inner, float outer);
 	void GetCTEMImage(float* data, int resolution);
 	void GetCTEMImage(float* data, int resolution, float dose, int binning, int detector);
 	void GetDiffImage(float* data, int resolution);
 	void GetImDiffImage(float* data, int resolution);
 	void GetEWImage(float* data, int resolution);
+	void GetEWImage2(float* data, int resolution);
 	void AddTDSDiffImage(float* data, int resolution);
 
 	void AddTDS();
@@ -55,6 +57,10 @@ public:
 	Kernel MultiplyCL;
 	Kernel MaskingKernel;
 	Kernel TDSMaskingKernel;
+
+	// FD Only
+	Kernel GradKernel;
+	Kernel FiniteDifference;
 	
 	cl_int status;
 
@@ -65,6 +71,10 @@ public:
 	Buffer clWaveFunction2;
 	Buffer clWaveFunction3;
 	Buffer clWaveFunction4;
+
+	Buffer clWaveFunction1Minus;
+	Buffer clWaveFunction1Plus;
+
 	Buffer clImageWaveFunction;
 	Buffer clTDSDiff;
 	Buffer clTDSMaskDiff;
@@ -80,11 +90,19 @@ public:
 	float wavelength;
 	float bandwidthkmax;
 
+	// Variables for finite difference method.
+	int NumberOfFDSlices;
+	float FDdz;
+	bool FDMode;
+	float FDsigma;
+
 	// Image contrast limits (technically ew atm)
 	float imagemin;
 	float imagemax;
 	float ewmin;
 	float ewmax;
+	float ewmin2;
+	float ewmax2;
 	float diffmin;
 	float diffmax;
 	float tdsmin;

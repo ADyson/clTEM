@@ -118,5 +118,14 @@
     <None Include="CL\BinnedAtomicPotentialConventional2.cl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="CL\BinnedAtomicPotentialOptFD2.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CL\GradKernel.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CL\FiniteDifference.cl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

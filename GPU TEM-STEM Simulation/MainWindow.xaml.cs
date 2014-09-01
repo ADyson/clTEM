@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -40,6 +42,7 @@ namespace GPUTEMSTEMSimulation
         bool doTDS_STEM = false;
         bool doTDS_CBED = false;
         bool isFull3D = true;
+        bool isFD = false;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
@@ -56,6 +59,10 @@ namespace GPUTEMSTEMSimulation
 
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
+
+        // Simulation Options (updated before simulation call)
+        float dz = 1.0f;
+        int integrals = 10;
 
         /// <summary>
         /// Cancel event to halt calculation.
@@ -89,6 +96,7 @@ namespace GPUTEMSTEMSimulation
 		// Make the 3 default tabs...
         DisplayTab CTEMDisplay = new DisplayTab("CTEM");
         DisplayTab EWDisplay = new DisplayTab("EW");
+        DisplayTab EWDisplay2 = new DisplayTab("EW2");
         DisplayTab DiffDisplay = new DisplayTab("Diffraction");
 
         public MainWindow()
@@ -99,10 +107,12 @@ namespace GPUTEMSTEMSimulation
 			// add constant tabs to UI
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
+            LeftTab.Items.Add(EWDisplay2.Tab);
 			RightTab.Items.Add(DiffDisplay.Tab);
 
             CTEMDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
             EWDisplay.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            EWDisplay2.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
             DiffDisplay.SetPositionReadoutElements(ref RightXCoord, ref RightYCoord);
             DiffDisplay.Reciprocal = true;
 
@@ -133,6 +143,8 @@ namespace GPUTEMSTEMSimulation
             ImagingDf.Text = "0";
             ImagingA2.Text = "0";
             ImagingA2Phi.Text = "0";
+            SliceDz.Text = "1";
+            Full3DIntegrals.Text = "20";
 
 			BinningCombo.SelectedIndex = 0;
 			CCDCombo.SelectedIndex = 0;
@@ -293,6 +305,13 @@ namespace GPUTEMSTEMSimulation
             var cancellationToken = this.cancellationTokenSource.Token;
             var progressReporter = new ProgressReporter();
 
+            // Pull options from dialog
+            Single.TryParse(SliceDz.Text, out dz);
+            Int32.TryParse(Full3DIntegrals.Text, out integrals);
+
+
+
+
 			CancelButton.IsEnabled = false;
             var task = Task.Factory.StartNew(() =>
             {
@@ -398,6 +417,36 @@ namespace GPUTEMSTEMSimulation
 			var rect = new Int32Rect(0, 0, EWDisplay.ImgBmp.PixelWidth, EWDisplay.ImgBmp.PixelHeight);
 
 			EWDisplay.ImgBmp.WritePixels(rect, pixelArray, stride, 0);
+
+            EWDisplay2.xDim = CurrentResolution;
+            EWDisplay2.yDim = CurrentResolution;
+
+            EWDisplay2.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
+            EWDisplay2.tImage.Source = EWDisplay2.ImgBmp;
+
+            // When its completed we want to get data to c# for displaying in an image...
+            EWDisplay2.ImageData = new float[CurrentResolution * CurrentResolution];
+            mCL.GetEWImage2(EWDisplay2.ImageData, CurrentResolution);
+
+            min = mCL.GetEWMin2();
+            max = mCL.GetEWMax2();
+
+            if (min == max)
+                return;
+
+            for (var row = 0; row < EWDisplay2.ImgBmp.PixelHeight; row++)
+                for (var col = 0; col < EWDisplay2.ImgBmp.PixelWidth; col++)
+                {
+                    pixelArray[(row * EWDisplay2.ImgBmp.PixelWidth + col) * bytesPerPixel + 0] = Convert.ToByte(Math.Ceiling(((EWDisplay2.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * EWDisplay2.ImgBmp.PixelWidth + col) * bytesPerPixel + 1] = Convert.ToByte(Math.Ceiling(((EWDisplay2.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * EWDisplay2.ImgBmp.PixelWidth + col) * bytesPerPixel + 2] = Convert.ToByte(Math.Ceiling(((EWDisplay2.ImageData[col + row * CurrentResolution] - min) / (max - min)) * 254.0f));
+                    pixelArray[(row * EWDisplay2.ImgBmp.PixelWidth + col) * bytesPerPixel + 3] = 0;
+                }
+
+
+            rect = new Int32Rect(0, 0, EWDisplay2.ImgBmp.PixelWidth, EWDisplay2.ImgBmp.PixelHeight);
+
+            EWDisplay2.ImgBmp.WritePixels(rect, pixelArray, stride, 0);
 		}
 
 		private void SimulationMethod(bool select_TEM, bool select_STEM, bool select_CBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
@@ -538,14 +587,15 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
+		    
+		    mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD,dz,integrals);
 
 			// Reset atoms incase TDS has been used
 			mCL.SortStructure(false);
 
 			// Use Background worker to progress through each step
 			var NumberOfSlices = 0;
-			mCL.GetNumberSlices(ref NumberOfSlices);
+			mCL.GetNumberSlices(ref NumberOfSlices,isFD);
 	
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 			for (var i = 1; i <= NumberOfSlices; i++)
@@ -612,7 +662,7 @@ namespace GPUTEMSTEMSimulation
 
 		        numPix *= runs;
 
-		        mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
+		        mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,dz,integrals);
 
 		        var xInterval = LockedArea.getxInterval;
 		        var yInterval = LockedArea.getyInterval;
@@ -717,7 +767,7 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D);
+			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,dz,integrals);
 
 			//int posX = CurrentResolution / 2;
 			//int posY = CurrentResolution / 2;
@@ -892,10 +942,10 @@ namespace GPUTEMSTEMSimulation
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)
 		{
-			var tabs = new List<DisplayTab> {CTEMDisplay, EWDisplay};
+			var tabs = new List<DisplayTab> {CTEMDisplay,EWDisplay,EWDisplay2};
 		    tabs.AddRange(LockedDetectors);
 
-			SaveImageFromTabs(tabs);
+            SaveImageFromTabs(tabs);
 		}
 
         private void SaveImageButton2_Click(object sender, RoutedEventArgs e)
@@ -1022,5 +1072,6 @@ namespace GPUTEMSTEMSimulation
 		{
 			cancellationTokenSource.Cancel();
 		}
+
     }
 }

@@ -290,11 +290,28 @@ namespace GPUTEMSTEMSimulation
         private void Full3D_Checked(object sender, RoutedEventArgs e)
         {
             isFull3D = true;
+            if(ToggleFD != null)
+            { ToggleFD.IsChecked = false; }   
+            isFD = false;
         }
 
         private void Full3D_Unchecked(object sender, RoutedEventArgs e)
         {
             isFull3D = false;
+        }
+
+        private void FD_Checked(object sender, RoutedEventArgs e)
+        {
+            // Cant use full3d at same time
+            isFull3D = false;
+            if(ToggleFull3D!=null)
+                ToggleFull3D.IsChecked = false;
+            isFD = true;
+        }
+
+        private void FD_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isFD = false;
         }
 
         private void Show_detectors(object sender, RoutedEventArgs e)

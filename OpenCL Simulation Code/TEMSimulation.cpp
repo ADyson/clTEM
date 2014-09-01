@@ -14,11 +14,13 @@ TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparam
 
 };
 
-void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, bool Full3D)
+void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, bool Full3D, float dz, int full3dints)
 {
+	FDMode = false;
 
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = AtomicStructure->MaximumX-AtomicStructure->MinimumX;
@@ -217,11 +219,14 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, b
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
+void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 {
+	// Maintain whether we initialised for FD for later multislicestep calls...
+	FDMode = FD;
 
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx-startx;
@@ -246,6 +251,8 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	float	sigma2	= (2*Pi/(wavelength * V * 1000)) * ((9.11e-031f*9e+016f + echarge*V*1000)/(2*9.11e-031f*9e+016f + echarge*V*1000));
 	float	fix		= 300.8242834f/(4*Pi*Pi*a0a*echarge);
 	float	V2		= V*1000;
+
+	FDsigma = sigma2;
 
 	// Now we can set up frequencies and fourier transforms.
 
@@ -293,6 +300,48 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	bandwidthkmax = sqrt(bandwidthkmax);
 
 	// Bandlimit by FDdz size
+	float fnkx = resolution;
+	float fnky = resolution;
+
+	float p1 = fnkx / (2 * SimSizeX);
+	float p2 = fnky / (2 * SimSizeY);
+	float p12 = p1*p1;
+	float p22 = p2*p2;
+
+	float ke2 = (.666666f)*(p12 + p22);
+
+	float quadraticA = (ke2*ke2 * 16 * Pi*Pi*Pi*Pi) - (32 * Pi*Pi*Pi*ke2*sigma2*V2 / wavelength) + (16 * Pi*Pi*sigma2*sigma2*V2*V2 / (wavelength*wavelength));
+	float quadraticB = 16 * Pi*Pi*(ke2 - (sigma2*V2 / (Pi*wavelength)) - (1 / (4 * wavelength*wavelength)));
+	float quadraticC = 3;
+	float quadraticB24AC = quadraticB * quadraticB - 4 * quadraticA*quadraticC;
+
+	// Now use these to determine acceptable resolution or enforce extra band limiting beyond 2/3
+	if (quadraticB24AC<0)
+	{
+		//TODO: Need an actual exception and message for these circumstances..
+		/*
+		cout << "No stable solution exists for these conditions in FD Multislice" << endl;
+		return;
+		*/
+	}
+
+	float b24ac = sqrtf(quadraticB24AC);
+	float maxStableDz = (-quadraticB + b24ac) / (2 * quadraticA);
+	maxStableDz = 0.99*sqrtf(maxStableDz);
+
+	// Presumably because it would take ages otherwise???
+	if (maxStableDz>0.06)
+		maxStableDz = 0.06;
+
+	FDdz = maxStableDz;
+
+
+	int	nFDSlices = ceil((AtomicStructure->MaximumZ - AtomicStructure->MinimumZ) / maxStableDz);
+	// Prevent 0 slices for perfectly flat sample
+	nFDSlices += (nFDSlices == 0);
+
+	// Set class variables
+	NumberOfFDSlices = nFDSlices;
 
 	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
 	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
@@ -309,6 +358,12 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	clWaveFunction2 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
 	clWaveFunction3 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
 	clWaveFunction4 = Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 )));
+	
+	if(FD)
+	{
+		clWaveFunction1Minus = Buffer(new clMemory(resolution * resolution * sizeof(cl_float2)));
+		clWaveFunction1Plus = Buffer(new clMemory(resolution * resolution * sizeof(cl_float2)));
+	}
 
 	clTDSx.resize(resolution*resolution);
 	clTDSk.resize(resolution*resolution);
@@ -351,6 +406,12 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
+	if (FD)
+	{
+		InitialiseWavefunction->SetArgT(0, clWaveFunction1Minus);
+	}
+
+
 	InitialiseWavefunction->Enqueue(WorkSize);
 
 	if (Full3D)
@@ -358,11 +419,17 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialOpt",clState::clq));
 		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
 	}
+	else if(FD)
+	{
+		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOptFD", clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOptFD2.cl");
+	}
 	else
 	{
 		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
 		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");		
 	}
+
 	BinnedAtomicPotential->BuildKernel();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
@@ -389,6 +456,9 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	BinnedAtomicPotential->SetArgT(23,sigma2); // Not sure why i am using sigma 2 and not sigma...
 	BinnedAtomicPotential->SetArgT(24,startx); // Not sure why i am using sigma 2 and not sigma...
 	BinnedAtomicPotential->SetArgT(25,starty); // Not sure why i am using sigma 2 and not sigma...
+
+	if (Full3D)
+		BinnedAtomicPotential->SetArgT(26, full3dints);
 	
 	// Also need to generate propagator.
 	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
@@ -400,7 +470,17 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	GeneratePropagator->SetArgT(2,clYFrequencies);
 	GeneratePropagator->SetArgT(3,resolution);
 	GeneratePropagator->SetArgT(4,resolution);
-	GeneratePropagator->SetArgT(5,AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+
+	if (FD)
+	{
+		GeneratePropagator->SetArgT(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	}
+	else
+	{
+		GeneratePropagator->SetArgT(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins) 
+	}
+	
+	
 	GeneratePropagator->SetArgT(6,wavelength);
 	GeneratePropagator->SetArgT(7,bandwidthkmax);
 
@@ -418,15 +498,38 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	ImagingKernel = Kernel( new clKernel(imagingKernelSource,clState::context,clState::cldev,"clImagingKernel",clState::clq));
 	ImagingKernel->BuildKernelOld();
 
+	if(FD)
+	{
+		// Need Grad Kernel and FiniteDifference also
+		GradKernel = Kernel(new clKernel(clState::context, clState::cldev, "clGrad", clState::clq));
+		GradKernel->loadProgSource("GradKernel.cl");
+		GradKernel->BuildKernel();
+
+		FiniteDifference = Kernel(new clKernel(clState::context, clState::cldev, "clFiniteDifference", clState::clq));
+		FiniteDifference->loadProgSource("FiniteDifference.cl");
+		FiniteDifference->BuildKernel();
+
+		// We should initialise first and second wavefunction for FD mode (psiminus and psi).
+		//ComplexMultiply->SetArgT(0, clWaveFunction1Minus);
+		//ComplexMultiply->SetArgT(1, clPropagator);
+		//ComplexMultiply->SetArgT(2, clWaveFunction1);
+		//ComplexMultiply->Enqueue(WorkSize);
+		//^^ wrong because wavefunction has to be reciprocal to multiply with propagator...
+		InitialiseWavefunction->SetArgT(0, clWaveFunction1);
+		InitialiseWavefunction->Enqueue(WorkSize);
+
+	}
+	
 
 	clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D)
+void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 {
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
-
+	AtomicStructure->dz = dz;
+	
 	// Get size of input structure
 	float RealSizeX = endx-startx;
 	float RealSizeY = endy-starty;
@@ -602,6 +705,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	BinnedAtomicPotential->SetArgT(24,startx);
 	BinnedAtomicPotential->SetArgT(25,starty);
 
+	if (Full3D)
+		BinnedAtomicPotential->SetArgT(26, full3dints);
+
 	// Also need to generate propagator.
 	GeneratePropagator = Kernel( new clKernel(clState::context,clState::cldev,"clGeneratePropagator",clState::clq));
 	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
@@ -707,10 +813,15 @@ float TEMSimulation::MeasureSTEMPixel(float inner, float outer)
 
 void TEMSimulation::MultisliceStep(int stepno, int steps)
 {
+	if (FDMode)
+	{
+		MultisliceStepFD(stepno, steps);
+		return;
+	}
+
 	// Work out current z position based on step size and current step
 	// Should be one set of bins for each individual slice
 	
-
 	int slice = stepno - 1;
 	int slices = steps;
 
@@ -774,6 +885,104 @@ void TEMSimulation::MultisliceStep(int stepno, int steps)
 
 	clFinish(clState::clq->cmdQueue);
 	
+};
+
+void TEMSimulation::MultisliceStepFD(int stepno, int steps)
+{
+	// Work out current z position based on step size and current step
+	// Should be one set of bins for each individual slice
+
+
+	int slice = stepno - 1; // this slice needs to be which bunch of atoms we are in line with...
+	int slices = AtomicStructure->nSlices;
+
+	// Didn't have MinimumZ so it wasnt correctly rescaled z-axis from 0 to SizeZ...
+	float currentz = AtomicStructure->MaximumZ - AtomicStructure->MinimumZ - slice * FDdz;
+
+	int atomslice = floor(slice*FDdz / AtomicStructure->dz);
+
+
+	int topz = slice - ceil(3.0f / AtomicStructure->dz);
+	int bottomz = slice + ceil(3.0f / AtomicStructure->dz);
+
+	if (topz < 0)
+		topz = 0;
+	if (bottomz >= slices)
+		bottomz = slices - 1;
+
+	//	AtomicStructure->UploadConstantBlock(topz,bottomz);
+	BinnedAtomicPotential->SetArgT(1, AtomicStructure->clAtomx);
+	BinnedAtomicPotential->SetArgT(2, AtomicStructure->clAtomy);
+	BinnedAtomicPotential->SetArgT(3, AtomicStructure->clAtomz);
+	BinnedAtomicPotential->SetArgT(4, AtomicStructure->clAtomZ);
+	BinnedAtomicPotential->SetArgT(6, AtomicStructure->clBlockStartPositions);
+	BinnedAtomicPotential->SetArgT(9, atomslice);
+	BinnedAtomicPotential->SetArgT(10, slices);
+	BinnedAtomicPotential->SetArgT(11, currentz);
+
+	size_t* Work = new size_t[3];
+
+	Work[0] = resolution;
+	Work[1] = resolution;
+	Work[2] = 1;
+
+	size_t* LocalWork = new size_t[3];
+
+	LocalWork[0] = 16;
+	LocalWork[1] = 16;
+	LocalWork[2] = 1;
+
+	BinnedAtomicPotential->Enqueue3D(Work, LocalWork);
+
+	FourierTrans->Enqueue(clPotential, clWaveFunction3, CLFFT_FORWARD);
+	BandLimit->Enqueue(Work);
+	FourierTrans->Enqueue(clWaveFunction3, clPotential, CLFFT_BACKWARD);
+	
+	// Now for the rest of the multislice steps
+
+	// Psi = clWaveFunction1
+	// PsiMinus = clWaveFunction1Minus
+	// PsiPlus = clWaveFunction1Plus
+
+
+
+	//FT Psi into Grad2.
+	FourierTrans->Enqueue(clWaveFunction1, clWaveFunction3, CLFFT_FORWARD);
+
+	//Grad Kernel on Grad2.
+	GradKernel->SetArgS(clWaveFunction3, clXFrequencies, clYFrequencies, resolution, resolution);
+	GradKernel->Enqueue(Work);
+
+	//IFT Grad2 into Grad.
+	FourierTrans->Enqueue(clWaveFunction3, clWaveFunction4, CLFFT_BACKWARD);
+
+	//FD Kernel
+	FiniteDifference->SetArgS(clPotential, clWaveFunction4, clWaveFunction1Minus, clWaveFunction1, clWaveFunction1Plus, FDdz, wavelength, FDsigma, resolution, resolution);
+	FiniteDifference->Enqueue(Work);
+
+
+	//Bandlimit PsiPlus
+	FourierTrans->Enqueue(clWaveFunction1Plus, clWaveFunction3, CLFFT_FORWARD);
+	BandLimit->Enqueue(Work);
+	FourierTrans->Enqueue(clWaveFunction3, clWaveFunction1Plus, CLFFT_BACKWARD);
+
+	// Psi becomes PsiMinus
+	clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1->buffer, clWaveFunction1Minus->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+
+	// PsiPlus becomes Psi.
+	clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1Plus->buffer, clWaveFunction1->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+
+
+
+	// To maintain status with other versions resulting end arrays should still be as follows.
+	// Finished wavefunction in real space in clWaveFunction1.
+	// Finished wavefunction in reciprocal space in clWaveFunction2.
+	// 3 and 4 were previously temporary.
+
+	FourierTrans->Enqueue(clWaveFunction1, clWaveFunction2, CLFFT_FORWARD);
+
+	clFinish(clState::clq->cmdQueue);
+
 };
 
 void TEMSimulation::GetCTEMImage(float* data, int resolution)
@@ -980,6 +1189,38 @@ void TEMSimulation::GetEWImage(float* data, int resolution)
 	ewmax = max;
 
 	
+};
+
+void TEMSimulation::GetEWImage2(float* data, int resolution)
+{
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	clWaveFunction1->Read(compdata);
+
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	for (int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		//data[i] = sqrt(compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+
+		// Get sqrt abs value for display...	
+		data[i] = hypot(compdata[i].s[1], compdata[i].s[0]);
+
+		// Find max,min for contrast limits
+		if (data[i] > max)
+			max = data[i];
+		if (data[i] < min)
+			min = data[i];
+	}
+
+	ewmin2 = min;
+	ewmax2 = max;
+
+
 };
 
 void TEMSimulation::AddTDSDiffImage(float* data, int resolution)
