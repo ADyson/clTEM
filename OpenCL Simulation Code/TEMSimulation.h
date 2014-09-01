@@ -26,7 +26,7 @@ public:
 
 	void MultisliceStep(int stepno, int steps);
 	void MultisliceStepFD(int stepno, int steps);
-	float MeasureSTEMPixel(float inner, float outer);
+	float MeasureSTEMPixel(float inner, float outer, float xc, float yc);
 	void GetCTEMImage(float* data, int resolution);
 	void GetCTEMImage(float* data, int resolution, float dose, int binning, int detector);
 	void GetDiffImage(float* data, int resolution);

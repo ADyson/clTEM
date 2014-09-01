@@ -71,6 +71,10 @@ namespace GPUTEMSTEMSimulation
 
         public float Outer { get; set; }
 
+        public float xCentre { get; set; }
+
+        public float yCentre { get; set; }
+
         public float Min { get; set; }
 
         public float Max { get; set; }
@@ -117,33 +121,36 @@ namespace GPUTEMSTEMSimulation
             CurrentPixelScale = pxScale;
             CurrentWaveLength = wavelength;
 
-            var dashes = new DoubleCollection {4, 4};
+            var dashes = new DoubleCollection {4, 4}; // {on, off, on, etc}
             
             var innerRad = (res * pxScale) * Inner / (1000 * wavelength);
             var outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+            var xcRad = (res * pxScale) * xCentre / (1000 * wavelength);
+            var ycRad = (res * pxScale) * yCentre / (1000 * wavelength);
 
             var innerShift = (res) / 2 - innerRad;
             var outerShift = (res) / 2 - outerRad;
 
             InnerEllipse.Width = (innerRad * 2) + 0.5;
             InnerEllipse.Height = (innerRad * 2) + 0.5;
-            Canvas.SetTop(InnerEllipse, innerShift + 0.25);
-            Canvas.SetLeft(InnerEllipse, innerShift + 0.25);
+            Canvas.SetTop(InnerEllipse, innerShift + 0.25 - ycRad);
+            Canvas.SetLeft(InnerEllipse, innerShift + 0.25 + xcRad);
             InnerEllipse.StrokeDashArray = dashes;
 
             OuterEllipse.Width = (outerRad * 2) + 0.5;
             OuterEllipse.Height = (outerRad * 2) + 0.5;
-            Canvas.SetTop(OuterEllipse, outerShift + 0.25);
-            Canvas.SetLeft(OuterEllipse, outerShift + 0.25);
+            Canvas.SetTop(OuterEllipse, outerShift + 0.25 - ycRad);
+            Canvas.SetLeft(OuterEllipse, outerShift + 0.25 + xcRad);
             OuterEllipse.StrokeDashArray = dashes;
 
             RingEllipse.Width = outerRad * 2;
             RingEllipse.Height = outerRad * 2;
-            Canvas.SetTop(RingEllipse, outerShift + 0.5);
-            Canvas.SetLeft(RingEllipse, outerShift + 0.5);
+            Canvas.SetTop(RingEllipse, outerShift + 0.5 - ycRad);
+            Canvas.SetLeft(RingEllipse, outerShift + 0.5 + xcRad);
 
             var ratio = innerRad / outerRad;
             var LGB = new RadialGradientBrush();
+
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
             RingEllipse.OpacityMask = LGB;

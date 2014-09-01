@@ -351,7 +351,7 @@ const char* bandPassSource =
 ;
 
 const char* floatbandPassSource = 
-"__kernel void clFloatBandPass(__global float* Output, __global const float* Input, int width, int height, float inner, float outer)	\n"
+"__kernel void clFloatBandPass(__global float* Output, __global const float* Input, int width, int height, float inner, float outer, float xc, float yc)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -360,8 +360,8 @@ const char* floatbandPassSource =
 "	if(xid<width && yid<height) \n"
 "	{	\n"
 "		int Index = xid + yid*width; \n"
-"		float centX = width/2; \n"
-"		float centY = height/2; \n"
+"		float centX = width/2 + xc; \n"
+"		float centY = height/2 + yc; \n"
 "		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n" // hypot?
 "		if(radius < outer && radius > inner) \n"
 "		{	\n"
