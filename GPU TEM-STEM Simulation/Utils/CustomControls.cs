@@ -90,9 +90,9 @@ namespace ErrTextBox
 
         void setupAnimation()
         {
-            var tempBrush = this.Background;
+            this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF171717"));
 
-            var colbodge = (Color)ColorConverter.ConvertFromString("#FF171717");
+            var tempBrush = this.Background;
 
             NameScope.SetNameScope(this, new NameScope());
 
@@ -100,13 +100,13 @@ namespace ErrTextBox
             this.RegisterName(brushStr, tempBrush);
 
             ColorAnimation toRed = new ColorAnimation();
-            toRed.To = Colors.Red;
+            toRed.To = (Color)ColorConverter.ConvertFromString("#FFFE8432");
             toRed.BeginTime = TimeSpan.FromMilliseconds(1);
             toRed.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toRed.AutoReverse = false;
 
             ColorAnimation toWhite = new ColorAnimation();
-            toWhite.To = colbodge;
+            toWhite.To = (Color)ColorConverter.ConvertFromString("#FF171717");
             toWhite.BeginTime = TimeSpan.FromMilliseconds(1000);
             toWhite.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toWhite.AutoReverse = false;

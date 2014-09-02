@@ -10,14 +10,14 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="{x:Static metro:AccentBrushes.Blue}">
-                <!--<Border Grid.Row="0" BorderThickness="0,0,2,0" BorderBrush="Black">-->
-                    <TextBlock HorizontalAlignment="Center">
+            <Border Grid.Row="0" BorderThickness="0,0,2,0" BorderBrush="Black" Background="#FF252525">
+                <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="{x:Static metro:AccentBrushes.Blue}">
+                    <TextBlock HorizontalAlignment="Center" Margin="5">
                         <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
                     </TextBlock>
-                <!--</Border>-->
+                </Border>
             </Border>
-            <Border Grid.Row="1" BorderThickness="0,0,2,0" Background="#FF313131">
+            <Border Grid.Row="1" BorderThickness="0,0,2,0" Background="#FF252525">
                 <ContentPresenter Margin="4" />
             </Border>
         </Grid>

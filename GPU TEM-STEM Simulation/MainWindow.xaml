@@ -10,16 +10,22 @@
               params:Design.Theme="Dark"
               params:Design.AccentBrush="{x:Static metro:AccentBrushes.Blue}"
               params:Design.ContrastBrush="White"
+              params:Manager.Theme="Dark"
               Background="{DynamicResource BackgroundBrush}"
-              Title="Multislice Simulation" MinHeight="870" Height="870" MinWidth="1223" Width="1223">
+              Title="Multislice Simulation" MinHeight="880" Height="880" MinWidth="1223" Width="1223" HasDropShadow="True">
 
     <Grid HorizontalAlignment="Stretch">
-        <Grid.BitmapEffect>
-            <OuterGlowBitmapEffect GlowColor="Orange" GlowSize="20" />
-        </Grid.BitmapEffect>
+        
+        <!--<Grid.Effect>
+            <DropShadowEffect ShadowDepth="0"
+                          Color="Orange"
+                          Opacity="1"
+                          BlurRadius="12"/>
+        </Grid.Effect>-->
+        
         <Grid.RowDefinitions>
-            <RowDefinition Height="15"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="155"/>
             <RowDefinition Height="140*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -185,62 +191,62 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
-                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingDf" Text="" ToolTip="Angstroms" 
                          Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingDf_TextChanged"/>
 
                 <Label Content="Cs:" ToolTip="Spherical Aberration"
-                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingCs" Text="" ToolTip="Angstroms"
                          Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingCs_TextChanged"/>
 
                 <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
-                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingA1" Text=""  ToolTip="Angstroms"
                          Grid.Row="2" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1_TextChanged"/>
 
                 <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
-                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingA1theta" Text=""  ToolTip="Degrees"
                          Grid.Row="3" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA1theta_TextChanged"/>
 
                 <Label Content="kV:"  ToolTip="Accelerating Voltage"
-                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingkV" Text=""  ToolTip="kilo Volts"
                          Grid.Row="0" Grid.Column="3" m:Masking.Mask="^([\+]?[1-9][0-9]*\.?[0-9]*)*$"  HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingkV_TextChanged"/>
 
                 <Label Content="β:" ToolTip="Convergence Angle"
-                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="Imagingbeta" Text="" ToolTip="milliRadians"
                          Grid.Row="1" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="Imagingbeta_TextChanged"/>
 
                 <Label Content="Δ:" ToolTip="Defocus Spread"
-                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="Imagingdelta" Text="" ToolTip="nm"
                          Grid.Row="2" Grid.Column="3" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="Imagingdelta_TextChanged"/>
 
                 <Label Content="Aper:"  ToolTip="Objective Aperture"
-                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox Name="ImagingAperture" Text="" ToolTip="milliRadians"
                          Grid.Row="3" Grid.Column="3" m:Masking.Mask="^([\+]?[1-9][0-9]*\.?[0-9]*)*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingAperture_TextChanged"/>
 
                 <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
-                       Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox x:Name="ImagingA2" Text="" ToolTip="Angstroms"
                          Grid.Row="0" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="32"  TextChanged="ImagingA2_TextChanged" />
 
                 <Label Content="A2 θ:"  ToolTip="3-fold Astimatism Angle"
-                       Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox x:Name="ImagingA2Phi" Text="" ToolTip="Degrees"
                          Grid.Row="1" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingA2Phi_TextChanged" />
 
                 <Label Content="B2:"  ToolTip="Coma Magnitude"
-                       Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox x:Name="ImagingB2" Text="" ToolTip="Angstroms"
                          Grid.Row="2" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2_TextChanged" />
 
                 <Label Content="B2 θ:"  ToolTip="Coma Angle"
-                       Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White"/>
+                       Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="White" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                 <TextBox x:Name="ImagingB2Phi" Text="" ToolTip="Degrees"
                          Grid.Row="3" Grid.Column="5" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="55" TextChanged="ImagingB2Phi_TextChanged"/>
 
@@ -349,13 +355,13 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                     
                             <Label Content="X:  "  ToolTip="x position"
                                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="White"/>
                             <t:ErrTextBox x:Name="CBEDxpos" Text="0" ToolTip="Angstroms"
-                                     Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="72"  Margin="2.5,2.5"/>
+                                     Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
                     </Grid>
                 
                     <Grid Grid.Row="1" HorizontalAlignment="Center">
@@ -364,13 +370,13 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                     
                         <Label Content="Y:  "  ToolTip="y position"
                                Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="White"/>
                         <t:ErrTextBox x:Name="CBEDypos" Text="0" ToolTip="Angstroms"
-                                         Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Left" Height="32" TextWrapping="Wrap"  Width="72"  Margin="2.5,2.5"/>
+                                         Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
                     
                     </Grid>
 
@@ -463,10 +469,11 @@
             <Grid Grid.Row="0" Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="90"/>
-                </Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+                
                 <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,20,20,0" Grid.Row="0"/>
-                <Grid Grid.Row="1" Margin="20,5,20,40">
+                <Grid Grid.Row="1" Margin="20,5,20,60">
                     <Border BorderThickness="0" Background="#FF313131" BorderBrush="White">
                         <DockPanel HorizontalAlignment="Stretch">
                             <Label Name="LeftXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left" Foreground="White"/>
@@ -477,16 +484,16 @@
                         </DockPanel>
                     </Border>
                 </Grid>
-            </Grid>
+        </Grid>
 
             <!-- Right Image Tab Control-->
             <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="90"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TabControl Name="RightTab" Margin="20,20,20,0" Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-                <Grid Grid.Row="1" Grid.Column="1" Margin="20,5,20,40">
+                <Grid Grid.Row="1" Grid.Column="1" Margin="20,5,20,60">
                     <Border BorderThickness="0" Background="#FF313131" BorderBrush="White">
                         <DockPanel HorizontalAlignment="Stretch">
                             <Label Name="RightXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left" Foreground="White"/>
@@ -503,7 +510,7 @@
                 </Grid>
             </Grid>
 
-            <StatusBar HorizontalAlignment="Stretch" Height="34" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" BorderThickness="0,0,0,0" Background="{x:Static metro:AccentBrushes.Blue}" BorderBrush="#FFC1C1C1" HorizontalContentAlignment="Right">
+            <StatusBar HorizontalAlignment="Stretch" Height="Auto" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" BorderThickness="0,0,0,0" Background="{x:Static metro:AccentBrushes.Blue}" BorderBrush="#FFC1C1C1" HorizontalContentAlignment="Right">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>
@@ -553,4 +560,12 @@
         </Grid>
         <StackPanel HorizontalAlignment="Left" Height="100" Margin="-14,569,0,0" Grid.Row="2" VerticalAlignment="Top" Width="100"/>
     </Grid>
+
+    <metro:Window.Effect>
+        <DropShadowEffect ShadowDepth="0"
+                          Color="Orange"
+                          Opacity="1"
+                          BlurRadius="12"/>
+    </metro:Window.Effect>
+
 </metro:Window>
