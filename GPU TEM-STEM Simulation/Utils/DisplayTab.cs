@@ -73,7 +73,8 @@ namespace GPUTEMSTEMSimulation
             var bc = new BrushConverter();
 
             Tab = new TabItem {Header = tName};
-            var tempGrid = new Grid { Background = (Brush)bc.ConvertFrom("#FF252525") };
+            var panelCol = (SolidColorBrush)Application.Current.Resources["PanelDark"];
+            var tempGrid = new Grid { Background = panelCol };
             var tempZoom = new ZoomBorder {ClipToBounds = true};
             tImage = new Image();
 

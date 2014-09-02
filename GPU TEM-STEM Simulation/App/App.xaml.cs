@@ -14,10 +14,5 @@ namespace GPU_TEM_STEM_Simulation
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
-    {
-        private void StartupHandler(object sender, System.Windows.StartupEventArgs e)
-        {
-            this.Apply(Theme.Dark, AccentBrushes.Blue, Brushes.White);
-        }
-    }
+    { }
 }

@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:metro="http://schemas.codeplex.com/elysium"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Elysium;component/Themes/Generic.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+
+    <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
+    
+    
+    
+    <SolidColorBrush x:Key="TextBoxBackground" Color="#1C1C1C"/>
+    <SolidColorBrush x:Key="TextBoxForeground" Color="White"/>
+
+    <SolidColorBrush x:Key="PanelBackground" Color="#FF171717"/>
+    <SolidColorBrush x:Key="PanelDark" Color="#FF252525"/>
+    <SolidColorBrush x:Key="PanelLight" Color="#FF313131"/>
+    
+    <SolidColorBrush x:Key="TextColourLight" Color="White"/>
+
+    <SolidColorBrush x:Key="Contrast" Color="White"/>
+
+    <SolidColorBrush x:Key="ProgressEmpty" Color="#FF171717"/>
+    <SolidColorBrush x:Key="ProgressFull" Color="White"/>
+
+
+
+    <!--<SolidColorBrush x:Key="TextBoxBackground" Color="White"/>
+    <SolidColorBrush x:Key="TextBoxForeground" Color="Black"/>
+
+    <SolidColorBrush x:Key="PanelBackground" Color="White"/>
+    <SolidColorBrush x:Key="PanelDark" Color="#FFDADADA"/>
+    <SolidColorBrush x:Key="PanelLight" Color="#FFCECECE"/>
+
+    <SolidColorBrush x:Key="TextColourLight" Color="Black"/>
+
+    <SolidColorBrush x:Key="Contrast" Color="Black"/>
+
+    <SolidColorBrush x:Key="ProgressEmpty" Color="White"/>
+    <SolidColorBrush x:Key="ProgressFull" Color="Black"/>-->
+
+</ResourceDictionary>

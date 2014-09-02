@@ -90,7 +90,8 @@ namespace ErrTextBox
 
         void setupAnimation()
         {
-            this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF171717"));
+            this.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            this.Foreground = (SolidColorBrush)Application.Current.Resources["TextBoxForeground"];
 
             var tempBrush = this.Background;
 
