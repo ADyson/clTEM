@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using GPU_TEM_STEM_Simulation;
 
 namespace GPUTEMSTEMSimulation
 {
@@ -79,14 +80,20 @@ namespace ErrTextBox
 
         public ErrTextBox()
         {
+            this.Style = new Style(GetType(), this.FindResource(typeof(System.Windows.Controls.TextBox)) as Style);
             InitializeComponent();
+            setupAnimation();
         }
 
         public void InitializeComponent()
-        {
-            SolidColorBrush tempBrush = new SolidColorBrush();
+        { }
 
-            this.Background = tempBrush;
+        void setupAnimation()
+        {
+            var tempBrush = this.Background;
+
+            var colbodge = (Color)ColorConverter.ConvertFromString("#FF171717");
+
             NameScope.SetNameScope(this, new NameScope());
 
             string brushStr = "CustomBrush";
@@ -94,12 +101,12 @@ namespace ErrTextBox
 
             ColorAnimation toRed = new ColorAnimation();
             toRed.To = Colors.Red;
-            toRed.BeginTime = TimeSpan.Zero;
+            toRed.BeginTime = TimeSpan.FromMilliseconds(1);
             toRed.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toRed.AutoReverse = false;
 
             ColorAnimation toWhite = new ColorAnimation();
-            toWhite.To = Colors.White;
+            toWhite.To = colbodge;
             toWhite.BeginTime = TimeSpan.FromMilliseconds(1000);
             toWhite.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toWhite.AutoReverse = false;
@@ -121,9 +128,6 @@ namespace ErrTextBox
 
         public void RaiseTapEvent()
         {
-            //RoutedEventArgs newEventArgs = new RoutedEventArgs(ErrTextBox.TapEvent);
-            //RaiseEvent(newEventArgs);
-
             story.Begin(this);
 
         }

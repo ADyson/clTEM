@@ -34,7 +34,7 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Elysium.Controls.Window
     {
         bool IsResolutionSet = false;
         bool HaveStructure = false;
@@ -180,7 +180,7 @@ namespace GPUTEMSTEMSimulation
             if (result == true)
             {
                 var fName = openDialog.FileName;
-                fileNameLabel.Content = System.IO.Path.GetFileName(fName);
+                fileNameLabel.Text = System.IO.Path.GetFileName(fName);
                 fileNameLabel.ToolTip = fName;
 
                 // Now pass filename through to unmanaged where atoms can be imported inside structure class...
@@ -488,8 +488,8 @@ namespace GPUTEMSTEMSimulation
 			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(j) /
 								Convert.ToSingle(runs));
-			this.TimerMessage.Content = ms.ToString() + " ms";
-			this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
+			this.TimerMessage.Text = ms.ToString() + " ms";
+			this.MemUsageLabel.Text = mem / (1024 * 1024) + " MB";
 		}
 
 		private void UpdateDiffractionImage()
@@ -936,8 +936,8 @@ namespace GPUTEMSTEMSimulation
 			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(pix) /
 								Convert.ToSingle(numPix));
-			this.TimerMessage.Content = ms.ToString() + " ms";
-			this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
+			this.TimerMessage.Text = ms.ToString() + " ms";
+			this.MemUsageLabel.Text = mem / (1024 * 1024) + " MB";
 		}
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)

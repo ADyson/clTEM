@@ -113,6 +113,9 @@
     <Reference Include="BitMiracle.LibTiff.NET">
       <HintPath>..\BitMiracle.LibTiff.NET.dll</HintPath>
     </Reference>
+    <Reference Include="Elysium">
+      <HintPath>..\packages\Elysium.Theme.2.0.4\lib\net45\Elysium.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
@@ -205,6 +208,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

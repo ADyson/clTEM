@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
+using Elysium;
 
 namespace GPU_TEM_STEM_Simulation
 {
@@ -13,5 +15,9 @@ namespace GPU_TEM_STEM_Simulation
     /// </summary>
     public partial class App : Application
     {
+        private void StartupHandler(object sender, System.Windows.StartupEventArgs e)
+        {
+            this.Apply(Theme.Dark, AccentBrushes.Blue, Brushes.White);
+        }
     }
 }

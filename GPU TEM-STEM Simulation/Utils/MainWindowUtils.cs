@@ -29,7 +29,7 @@ using ColourGenerator;
 
 namespace GPUTEMSTEMSimulation
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Elysium.Controls.Window
     {
 
         private void ComboBoxSelectionChanged1(object sender, SelectionChangedEventArgs e)
