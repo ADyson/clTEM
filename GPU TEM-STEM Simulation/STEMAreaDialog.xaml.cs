@@ -17,7 +17,7 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for STEMAreaDialog.xaml
     /// </summary>
-    public partial class STEMAreaDialog : Window
+    public partial class STEMAreaDialog : Elysium.Controls.Window
     {
         public event EventHandler<StemAreaArgs> AddSTEMAreaEvent;
 

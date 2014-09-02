@@ -25,7 +25,7 @@ namespace GPUTEMSTEMSimulation
     /// Interaction logic for STEMDialog.xaml
     /// </summary>
 
-    public partial class STEMDetectorDialog : Window
+    public partial class STEMDetectorDialog : Elysium.Controls.Window
     {
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
@@ -43,9 +43,6 @@ namespace GPUTEMSTEMSimulation
 
             numDet = mainDetectors.Count;
 			NameTxtbx.Text = "Detector" + (numDet + 1).ToString();
-
-            // needed so it doesnt default to on when too many items are selected
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
@@ -152,22 +149,6 @@ namespace GPUTEMSTEMSimulation
                 // send changes to mainwindow
                 RemDetectorEvent(this, new DetectorArgs(selected));
             }
-        }
-
-
-        // To try and hide the scrollbar, maybe could be animated later?
-        private void DetectorListView_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (DetectorListView.Items.Count > 7) // bodged and hard coded
-            {
-                ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Visible);
-            }
-        }
-
-        private void DetectorListView_MouseLeave(object sender, MouseEventArgs e)
-        {
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
-            
         }
 
         private void tBox_GotFocus(object sender, RoutedEventArgs e)

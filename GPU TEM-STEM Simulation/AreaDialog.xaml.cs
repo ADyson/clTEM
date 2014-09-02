@@ -17,7 +17,7 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for AreaDialog.xaml
     /// </summary>
-    public partial class AreaDialog : Window
+    public partial class AreaDialog : Elysium.Controls.Window
     {
 
         public event EventHandler<AreaArgs> SetAreaEvent;

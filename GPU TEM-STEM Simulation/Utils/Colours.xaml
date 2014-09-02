@@ -9,9 +9,11 @@
 
 
     <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
-    
-    
-    
+    <SolidColorBrush x:Key="ErrorCol" Color="#FFFE8432"/>
+
+
+    <SolidColorBrush x:Key="ButtonHighlight" Color="#FFFFFFFF"/>
+
     <SolidColorBrush x:Key="TextBoxBackground" Color="#1C1C1C"/>
     <SolidColorBrush x:Key="TextBoxForeground" Color="White"/>
 
@@ -20,6 +22,7 @@
     <SolidColorBrush x:Key="PanelLight" Color="#FF313131"/>
     
     <SolidColorBrush x:Key="TextColourLight" Color="White"/>
+    <SolidColorBrush x:Key="TextColourDark" Color="Black"/>
 
     <SolidColorBrush x:Key="Contrast" Color="White"/>
 

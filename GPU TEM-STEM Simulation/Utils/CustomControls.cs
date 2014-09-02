@@ -86,28 +86,28 @@ namespace ErrTextBox
         }
 
         public void InitializeComponent()
-        { }
+        { this.Foreground = (SolidColorBrush)Application.Current.Resources["TextBoxForeground"]; }
 
         void setupAnimation()
         {
-            this.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
-            this.Foreground = (SolidColorBrush)Application.Current.Resources["TextBoxForeground"];
+            var BackCol = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            var ErrCol = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
 
-            var tempBrush = this.Background;
+            this.Background = BackCol;
 
             NameScope.SetNameScope(this, new NameScope());
 
             string brushStr = "CustomBrush";
-            this.RegisterName(brushStr, tempBrush);
+            this.RegisterName(brushStr, this.Background);
 
             ColorAnimation toRed = new ColorAnimation();
-            toRed.To = (Color)ColorConverter.ConvertFromString("#FFFE8432");
+            toRed.To = ErrCol.Color;
             toRed.BeginTime = TimeSpan.FromMilliseconds(1);
             toRed.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toRed.AutoReverse = false;
 
             ColorAnimation toWhite = new ColorAnimation();
-            toWhite.To = (Color)ColorConverter.ConvertFromString("#FF171717");
+            toWhite.To = BackCol.Color;
             toWhite.BeginTime = TimeSpan.FromMilliseconds(1000);
             toWhite.Duration = new Duration(TimeSpan.FromMilliseconds(500));
             toWhite.AutoReverse = false;
