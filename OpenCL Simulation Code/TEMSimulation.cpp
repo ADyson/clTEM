@@ -526,6 +526,8 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 
 void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 {
+	FDMode = false;
+
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
 	AtomicStructure->dz = dz;
@@ -677,6 +679,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 		BinnedAtomicPotential = Kernel( new clKernel(clState::context,clState::cldev,"clBinnedAtomicPotentialConventional",clState::clq));
 		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");		
 	}
+
 	BinnedAtomicPotential->BuildKernel();
 	//BinnedAtomicPotential->BuildKernelOld();
 
