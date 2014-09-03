@@ -526,6 +526,8 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 
 void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
 {
+	FDMode = false;
+
 	this->resolution = resolution;
 	this->AtomicStructure = Structure;
 	AtomicStructure->dz = dz;

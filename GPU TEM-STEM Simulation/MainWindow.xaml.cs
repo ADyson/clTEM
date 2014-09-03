@@ -256,8 +256,8 @@ namespace GPUTEMSTEMSimulation
 
             if (select_CBED)
             {
-                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
-                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
+                CBED_xpos = Convert.ToSingle(CBEDxpos.Text);
+                CBED_ypos = Convert.ToSingle(CBEDypos.Text);
 
                 var validCBED = true;
 
