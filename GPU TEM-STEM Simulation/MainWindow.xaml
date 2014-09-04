@@ -3,7 +3,6 @@
               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		      xmlns:p="clr-namespace:GPUTEMSTEMSimulation.Properties"
               xmlns:local="clr-namespace:PanAndZoom"
-              xmlns:t="clr-namespace:ErrTextBox"
               xmlns:m="clr-namespace:MaskedTextBox"
               xmlns:metro="http://schemas.codeplex.com/elysium"
               xmlns:params="http://schemas.codeplex.com/elysium/params"
@@ -358,8 +357,8 @@
                     
                             <Label Content="X:  "  ToolTip="x position"
                                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                            <t:ErrTextBox x:Name="CBEDxpos" Text="0" ToolTip="Angstroms"
-                                     Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
+                            <TextBox x:Name="CBEDxpos" Text="0" ToolTip="Angstroms"
+                                     Grid.Row="0" Grid.Column="1" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
                     </Grid>
                 
                     <Grid Grid.Row="1" HorizontalAlignment="Center">
@@ -373,8 +372,8 @@
                     
                         <Label Content="Y:  "  ToolTip="y position"
                                Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                        <t:ErrTextBox x:Name="CBEDypos" Text="0" ToolTip="Angstroms"
-                                         Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
+                        <TextBox x:Name="CBEDypos" Text="0" ToolTip="Angstroms"
+                                 Grid.Row="1" Grid.Column="1" m:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="32" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5"/>
                     
                     </Grid>
 
@@ -436,8 +435,8 @@
                     </Grid.ColumnDefinitions>
                     <Label Content="Slice Thickness:"  ToolTip="y position"
                            Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <t:ErrTextBox x:Name="SliceDz" Text="0" ToolTip="Angstroms"
-                             Grid.Row="1" Grid.Column="0" m:Masking.Mask="^([\+]?[0-9][0-9]*\.?[0-9]*)*$"  HorizontalAlignment="Center" Height="32" TextWrapping="Wrap"  Width="50"/>
+                    <TextBox x:Name="SliceDz" Text="0" ToolTip="Angstroms"
+                             Grid.Row="1" Grid.Column="0" m:Masking.Mask="^[0-9]*\.?([0-9]{1,2})?$"  HorizontalAlignment="Center" Height="32" TextWrapping="Wrap"  Width="50"/>
             </Grid>
             <Grid Grid.Row="1" HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
@@ -449,7 +448,7 @@
                     </Grid.ColumnDefinitions>
                     <Label Content="Full3D Integrals:"  ToolTip="y position"
                            Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <t:ErrTextBox x:Name="Full3DIntegrals" Text="0" ToolTip="Angstroms"
+                    <TextBox x:Name="Full3DIntegrals" Text="0" ToolTip="Angstroms"
                                      Grid.Row="1" Grid.Column="0" m:Masking.Mask="^([\+]?[1-9][0-9]*)*$"  HorizontalAlignment="Center" Height="32" TextWrapping="Wrap"  Width="50"/>
             </Grid>
            </Grid>

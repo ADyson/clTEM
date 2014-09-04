@@ -11,7 +11,7 @@
     <metro:Theme x:Key="ThemeCol">Dark</metro:Theme>
     
     <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
-    <SolidColorBrush x:Key="ErrorCol" Color="#FFFE8432"/>
+    <SolidColorBrush x:Key="ErrorCol" Color="#FFC93F18"/>
 
 
     <SolidColorBrush x:Key="ButtonHighlight" Color="#FFFFFFFF"/>

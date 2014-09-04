@@ -46,8 +46,15 @@ namespace GPUTEMSTEMSimulation
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
+        bool goodfinite = true;
+
+        bool CBED_posValid = true;
         float CBED_xpos = 0;
         float CBED_ypos = 0;
+
+        bool select_TEM = false;
+        bool select_STEM = false;
+        bool select_CBED = false;
 
         int Resolution;
         int CurrentResolution = 0;
@@ -102,6 +109,15 @@ namespace GPUTEMSTEMSimulation
         public MainWindow()
         {
             InitializeComponent();
+
+            //add event handlers here so they aren't called when creating controls
+            CBEDxpos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
+            CBEDypos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
+
+
+            Full3DIntegrals.TextChanged += new TextChangedEventHandler(FiniteValidCheck);
+            SliceDz.TextChanged += new TextChangedEventHandler(FiniteValidCheck);
+
 			CancelButton.IsEnabled = false;
             
 			// add constant tabs to UI
@@ -247,36 +263,12 @@ namespace GPUTEMSTEMSimulation
         // Simulation Button
         private void SimulationButton(object sender, RoutedEventArgs e)
         {
+            select_TEM = TEMRadioButton.IsChecked == true;
+            select_STEM = STEMRadioButton.IsChecked == true;
+            select_CBED = CBEDRadioButton.IsChecked == true;
+
 			if (!TestSimulationPrerequisites())
 				return;
-
-            var select_TEM = TEMRadioButton.IsChecked == true;
-            var select_STEM = STEMRadioButton.IsChecked == true;
-            var select_CBED = CBEDRadioButton.IsChecked == true;
-
-            if (select_CBED)
-            {
-                CBED_xpos = Convert.ToSingle(CBEDxpos.Text);
-                CBED_ypos = Convert.ToSingle(CBEDypos.Text);
-
-                var validCBED = true;
-
-                if (CBED_xpos < SimRegion.xStart || CBED_xpos > SimRegion.xFinish)
-                {
-                    CBEDxpos.RaiseTapEvent();
-                    validCBED = false;
-                }
-                if (CBED_ypos < SimRegion.yStart || CBED_ypos > SimRegion.yFinish)
-                {
-                    CBEDypos.RaiseTapEvent();
-                    validCBED = false;
-                }
-                if (!validCBED)
-                {
-					var result = MessageBox.Show("CBED Probe position outside simulated region", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
 
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
@@ -1066,12 +1058,5 @@ namespace GPUTEMSTEMSimulation
 
 			SimulateEWButton.IsEnabled = true;
         }
-
-
-		private void Cancel_Click(object sender, RoutedEventArgs e)
-		{
-			cancellationTokenSource.Cancel();
-		}
-
     }
 }
