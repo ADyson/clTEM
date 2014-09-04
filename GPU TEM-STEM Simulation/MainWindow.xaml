@@ -7,11 +7,11 @@
               xmlns:m="clr-namespace:MaskedTextBox"
               xmlns:metro="http://schemas.codeplex.com/elysium"
               xmlns:params="http://schemas.codeplex.com/elysium/params"
-              params:Design.Theme="Dark"
+              params:Design.Theme="{StaticResource  ThemeCol}"
               params:Design.AccentBrush="{StaticResource Accent}"
               params:Design.ContrastBrush="{StaticResource Contrast}"
               
-              params:Manager.Theme="Dark"
+              params:Manager.Theme="{StaticResource  ThemeCol}"
               params:Manager.AccentBrush="{StaticResource Accent}"
               params:Manager.ContrastBrush="{StaticResource Contrast}"
               
