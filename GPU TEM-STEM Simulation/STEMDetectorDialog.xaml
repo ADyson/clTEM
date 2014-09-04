@@ -26,7 +26,7 @@
 
         <DataGrid x:Name="DetectorListView" Style="{StaticResource StandardDataGrid}" ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="0,0,10,0"
                   Grid.Column="0" Grid.RowSpan="12" Width="535" MaxHeight="350" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"
-                  SelectionUnit="FullRow" VerticalContentAlignment="Center" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  SelectionUnit="FullRow" VerticalContentAlignment="Center" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="25">
                     <DataGridTemplateColumn.CellTemplate>
