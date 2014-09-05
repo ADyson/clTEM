@@ -23,10 +23,10 @@ namespace GPUTEMSTEMSimulation
 
         private float simxStart, simyStart, simxFinish, simyFinish;
 
-        private bool goodxpx;
-        private bool goodypx;
-        private bool goodxrange;
-        private bool goodyrange;
+        private bool goodxpx = true;
+        private bool goodypx = true;
+        private bool goodxrange = true;
+        private bool goodyrange = true;
 
         private int xpx;
         private int ypx;
