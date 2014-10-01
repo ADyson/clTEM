@@ -53,6 +53,8 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
+	
+
         /// <summary>
         /// Cancel event to halt calculation.
         /// </summary>
@@ -394,7 +396,7 @@ namespace GPUTEMSTEMSimulation
 			}
 			else if (select_STEM)
 			{
-				int multistem = 40;
+				int multistem = 50;
                 DiffDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct, multistem);
@@ -730,18 +732,27 @@ namespace GPUTEMSTEMSimulation
 			//List<float[]> TDSImages = new List<float[]>();
 			List<float> fCoordxs = new List<float>();
 
+
+			List<Tuple<Int32, Int32>> Pixels = new List<Tuple<Int32, Int32>>();
+
 			for (int posY = 0; posY < LockedArea.yPixels; posY++)
 			{
-				float fCoordy = (LockedArea.yStart + posY * yInterval) / pixelScale;
-
-				for (int posX = 0; posX < LockedArea.xPixels; posX+=multistem)
+				for (int posX = 0; posX < LockedArea.xPixels; posX++)
 				{
+					Pixels.Add(new Tuple<Int32,Int32>(posX, posY));
+				}
+			}
+
+			Shuffler.Shuffle< Tuple<Int32, Int32>>(Pixels);
+
+			for (int posY = 0; posY < LockedArea.yPixels* LockedArea.xPixels; posY+=multistem)
+			{
+				//float fCoordy = (LockedArea.yStart + posY * yInterval) / pixelScale;
 							
 					for (int i = 1; i <= multistem; i++)
 					{
 						//TDSImages.Add(new float[CurrentResolution * CurrentResolution]);
-						fCoordxs.Add((LockedArea.xStart + (i - 1 + posX) * xInterval) / pixelScale);
-
+						//fCoordxs.Add((LockedArea.xStart + (i - 1 + posX) * xInterval) / pixelScale);
 					}
 
 					for (int j = 0; j < runs; j++)
@@ -753,7 +764,9 @@ namespace GPUTEMSTEMSimulation
 
 						for (int i = 1; i <= multistem; i++)
 						{
-							mCL.MakeSTEMWaveFunction(fCoordxs[i-1] - SimRegion.xStart, fCoordy - SimRegion.yStart,i);
+
+							mCL.MakeSTEMWaveFunction(((LockedArea.xStart + Pixels[(posY+ i-1)].Item1 * xInterval) / pixelScale) - SimRegion.xStart,
+								((LockedArea.yStart + Pixels[(posY + i - 1)].Item2 * yInterval) / pixelScale) - SimRegion.yStart, i);
 						}
 
 						// Use Background worker to progress through each step
@@ -805,8 +818,8 @@ namespace GPUTEMSTEMSimulation
 							foreach (DetectorItem i in LockedDetectors)
 							{
 								float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer, p);
-								float newVal = i.ImageData[LockedArea.xPixels * posY + posX + p - 1] + pixelVal;
-								i.ImageData[LockedArea.xPixels * posY + posX + p - 1] = newVal;
+								float newVal = i.ImageData[LockedArea.xPixels * Pixels[posY + p - 1].Item2 + Pixels[posY + p - 1].Item1] + pixelVal;
+								i.ImageData[LockedArea.xPixels * Pixels[posY + p-1 ].Item2 + Pixels[posY + p-1 ].Item1] = newVal;
 
 								if (newVal < i.Min)
 								{
@@ -827,9 +840,7 @@ namespace GPUTEMSTEMSimulation
 							{
 								UpdateDetectorImage(i);
 							}
-						}, posX);
-
-					}
+						}, posY);
 
 					if (ct.IsCancellationRequested == true)
 						break;
@@ -839,7 +850,7 @@ namespace GPUTEMSTEMSimulation
 				// Reset TDS arrays after pixel values retrieved
 				//mCL.ClearTDS(multistem);
 
-				fCoordxs.Clear();
+				//fCoordxs.Clear();
 
 				if (ct.IsCancellationRequested == true)
 					break;
