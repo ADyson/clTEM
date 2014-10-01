@@ -533,7 +533,7 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 
 
 	// Initialise Wavefunctions and Create other buffers...
-	for(int i = i ; i <= waves ; i++)
+	for(int i = 1 ; i <= waves ; i++)
 	{
 		clWaveFunction1.push_back( Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 ))));
 		clWaveFunction2.push_back( Buffer(new clMemory(resolution * resolution * sizeof( cl_float2 ))));
@@ -1671,7 +1671,7 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 	Kernel SumReduction = Kernel(new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
 
-	clMemory outArray;
+	clMemory outArray(nGroups);
 	outArray.Create(nGroups*sizeof(cl_float2));
 
 	// Create host array to store reduction results.
@@ -1778,7 +1778,7 @@ float TEMSimulation::FloatSumReduction(Buffer &Array, size_t* globalSizeSum, siz
 	Kernel SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
 
-	clMemory outArray;
+	clMemory outArray(nGroups);
 	outArray.Create(nGroups*sizeof(cl_float));
 
 	// Create host array to store reduction results.
