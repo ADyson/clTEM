@@ -248,6 +248,11 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->AddTDS();
 	};
 
+	void ManagedOpenCL::GetSTEMDiff(int wave)
+	{
+		_UMOpenCL->TS->GetSTEMDiff(wave);
+	};
+
 	void ManagedOpenCL::ClearTDS()
 	{
 		_UMOpenCL->TS->ClearTDS();

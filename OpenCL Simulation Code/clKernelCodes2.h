@@ -267,7 +267,7 @@ const char* sumReductionsource2 =
 ;
 
 const char* floatSumReductionsource2 = 
-"__kernel void clFloatSumReduction(__global const float* input, __global float* output, const unsigned int size, __local float* buffer)	\n"
+"__kernel void clFloatSumReduction(__global const float* restrict input, __global float* restrict output, const unsigned int size, __local float* restrict buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"
@@ -351,7 +351,7 @@ const char* bandPassSource =
 ;
 
 const char* floatbandPassSource = 
-"__kernel void clFloatBandPass(__global float* Output, __global const float* Input, int width, int height, float inner, float outer)	\n"
+"__kernel void clFloatBandPass(__global float* restrict Output, __global const float* restrict Input, int width, int height, float inner, float outer)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -362,15 +362,8 @@ const char* floatbandPassSource =
 "		int Index = xid + yid*width; \n"
 "		float centX = width/2; \n"
 "		float centY = height/2; \n"
-"		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n" // hypot?
-"		if(radius < outer && radius > inner) \n"
-"		{	\n"
-"			Output[Index] = Input[Index];\n"
-"		} \n"
-"		else \n"
-"		{	\n"
-"			Output[Index] = 0; \n"	
-"		} \n"
+"		float radius = hypot(xid-centX,yid-centY); \n" // hypot?
+"		Output[Index] = (radius < outer && radius > inner) * Input[Index];\n"	
 "	}	\n"
 "}	\n"
 ;

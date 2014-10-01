@@ -43,6 +43,7 @@ namespace ManagedOpenCLWrapper {
 		float GetEWMin();
 		float GetSTEMPixel(float inner, float outer);
 		void AddTDS();
+		void GetSTEMDiff(int wave);
 		void ClearTDS();
 
 		// Multiwave variants

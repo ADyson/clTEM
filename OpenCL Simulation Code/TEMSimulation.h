@@ -13,8 +13,8 @@ public:
 	~TEMSimulation();
 
 	// Function to calculate sum of an opencl memory object
-	float SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-	float SumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
+	float ComplSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
+	float ComplSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 	float FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 	float FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
 
@@ -39,6 +39,7 @@ public:
 	void GetEWImage(float* data, int resolution, int wave);
 	void AddTDSDiffImage(float* data, int resolution);
 	void AddTDS();
+	void GetSTEMDiff(int wave);
 	void AddTDSDiffImage(float* data, int resolution, int wave);
 	void AddTDS(int wave);
 	void ClearTDS();
@@ -63,6 +64,7 @@ public:
 	Kernel MultiplyCL;
 	Kernel MaskingKernel;
 	Kernel TDSMaskingKernel;
+	Kernel SumReduction;
 	
 	cl_int status;
 

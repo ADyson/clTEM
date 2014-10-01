@@ -727,7 +727,7 @@ namespace GPUTEMSTEMSimulation
 			float xInterval = LockedArea.getxInterval;
 			float yInterval = LockedArea.getyInterval;
 
-			List<float[]> TDSImages = new List<float[]>();
+			//List<float[]> TDSImages = new List<float[]>();
 			List<float> fCoordxs = new List<float>();
 
 			for (int posY = 0; posY < LockedArea.yPixels; posY++)
@@ -739,7 +739,7 @@ namespace GPUTEMSTEMSimulation
 							
 					for (int i = 1; i <= multistem; i++)
 					{
-						TDSImages.Add(new float[CurrentResolution * CurrentResolution]);
+						//TDSImages.Add(new float[CurrentResolution * CurrentResolution]);
 						fCoordxs.Add((LockedArea.xStart + (i - 1 + posX) * xInterval) / pixelScale);
 
 					}
@@ -787,9 +787,10 @@ namespace GPUTEMSTEMSimulation
 						for (int i = 1; i <= multistem; i++)
 						{
 							// After a complete run if TDS need to sum up the DIFF...
-							mCL.AddTDSDiffImage(TDSImages[i-1], CurrentResolution,i);
+							//mCL.AddTDSDiffImage(TDSImages[i-1], CurrentResolution,i);
 							// Sum it in C++ also for the stem pixel measurement...
-							mCL.AddTDS(i);
+							//mCL.AddTDS(i);
+							mCL.GetSTEMDiff(i);
 						}
 
 						progressReporter.ReportProgress((val) =>
@@ -797,45 +798,46 @@ namespace GPUTEMSTEMSimulation
 							CancelButton.IsEnabled = false;
 							//UpdateTDSImage();
 						}, j);
+
+						for (int p = 1; p <= multistem; p++)
+						{
+							// loop through and get each STEM pixel for each detector at the same time
+							foreach (DetectorItem i in LockedDetectors)
+							{
+								float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer, p);
+								float newVal = i.ImageData[LockedArea.xPixels * posY + posX + p - 1] + pixelVal;
+								i.ImageData[LockedArea.xPixels * posY + posX + p - 1] = newVal;
+
+								if (newVal < i.Min)
+								{
+									i.Min = newVal;
+								}
+								if (newVal > i.Max)
+								{
+									i.Max = newVal;
+								}
+
+							}
+						}
+
+						// This will update display after each tds run...
+						progressReporter.ReportProgress((val) =>
+						{
+							foreach (DetectorItem i in LockedDetectors)
+							{
+								UpdateDetectorImage(i);
+							}
+						}, posX);
+
 					}
 
 					if (ct.IsCancellationRequested == true)
 						break;
 
-					for (int j = 1; j <= multistem; j++)
-					{
-						// loop through and get each STEM pixel for each detector at the same time
-						foreach (DetectorItem i in LockedDetectors)
-						{
-							float pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer, j);
-
-							i.ImageData[LockedArea.xPixels * posY + posX + j - 1] = pixelVal;
-
-							if (pixelVal < i.Min)
-							{
-								i.Min = pixelVal;
-							}
-							if (pixelVal > i.Max)
-							{
-								i.Max = pixelVal;
-							}
-
-						}
-					}
-
-					progressReporter.ReportProgress((val) =>
-					{
-
-						foreach (DetectorItem i in LockedDetectors)
-						{
-							UpdateDetectorImage(i);
-						}
-					}, posX);
-
-					// Reset TDS arrays after pixel values retrieved...
-					mCL.ClearTDS(multistem);
-
 				}
+
+				// Reset TDS arrays after pixel values retrieved
+				//mCL.ClearTDS(multistem);
 
 				fCoordxs.Clear();
 

@@ -121,6 +121,10 @@ void TEMSimulation::Initialise(int resolution, MultisliceStructure* Structure, b
 	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
 	InitialiseWavefunction->BuildKernelOld();
 
+	SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
+	SumReduction->BuildKernelOld();
+
+
 	BandLimit = Kernel(new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
 	BandLimit->BuildKernelOld();
 
@@ -333,6 +337,9 @@ void TEMSimulation::InitialiseReSized(int resolution, MultisliceStructure* Struc
 	// Set initial wavefunction to 1+0i
 	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
 	InitialiseWavefunction->BuildKernelOld();
+
+	SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
+	SumReduction->BuildKernelOld();
 
 	BandLimit = Kernel(new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
 	BandLimit->BuildKernelOld();
@@ -559,6 +566,9 @@ void TEMSimulation::InitialiseSTEM(int resolution, MultisliceStructure* Structur
 	// Set initial wavefunction to 1+0i
 	InitialiseSTEMWavefunction = Kernel( new clKernel(InitialiseSTEMWavefunctionSource,clState::context,clState::cldev,"clInitialiseSTEMWavefunction",clState::clq));
 	InitialiseSTEMWavefunction->BuildKernelOld();
+
+	SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
+	SumReduction->BuildKernelOld();
 
 	BandLimit = Kernel( new clKernel(BandLimitSource,clState::context,clState::cldev,"clBandLimit",clState::clq));
 	BandLimit->BuildKernelOld();
@@ -1123,6 +1133,48 @@ void TEMSimulation::GetCTEMImage(float* data, int resolution, float doseperpix, 
 	imagemax = max;
 };
 
+
+// Like add TDS but its not necessary to add the TDS waves together for stem
+// Just need the stem result from summing over array and add those together instead.
+void TEMSimulation::GetSTEMDiff(int wave)
+{
+	float max = CL_FLT_MIN;
+	float min = CL_MAXFLOAT;
+
+	// Original data is complex so copy complex version down first
+	std::vector<cl_float2> compdata;
+	compdata.resize(resolution*resolution);
+
+	size_t* Work = new size_t[3];
+
+	Work[0]=resolution;
+	Work[1]=resolution;
+	Work[2]=1;
+
+	fftShift->SetArgT(0,clWaveFunction2[wave-1]);
+	fftShift->Enqueue(Work);
+
+	clWaveFunction3[0]->Read(compdata);
+
+	max = CL_FLT_MIN;
+	min = CL_MAXFLOAT;
+
+	for(int i = 0; i < resolution * resolution; i++)
+	{
+		// Get absolute value for display...	
+		clTDSk[wave-1][i] = (compdata[i].s[0]*compdata[i].s[0] + compdata[i].s[1]*compdata[i].s[1]);
+	
+		// Find max,min for contrast limits
+		if(clTDSk[wave-1][i] > max)
+			max = clTDSk[wave-1][i];
+		if(clTDSk[wave-1][i] < min)
+			min = clTDSk[wave-1][i];	
+	}
+
+	tdsmin[wave-1] = min;
+	tdsmax[wave-1] = max;
+};
+
 void TEMSimulation::AddTDS()
 {
 	// Original data is complex so copy complex version down first
@@ -1666,7 +1718,7 @@ void TEMSimulation::SimulateCTEM(int detector, int binning)
 
 };
 
-float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+float TEMSimulation::ComplSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
 	Kernel SumReduction = Kernel(new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
@@ -1702,7 +1754,7 @@ float TEMSimulation::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* 
 
 }
 
-float TEMSimulation::SumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+float TEMSimulation::ComplSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
 	Kernel SumReduction = Kernel(new clKernel(sumReductionsource2,clState::context,clState::cldev,"clSumReduction",clState::clq));
 	SumReduction->BuildKernelOld();
@@ -1740,8 +1792,7 @@ float TEMSimulation::SumReduction(Buffer &Array, size_t* globalSizeSum, size_t* 
 
 float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
-	Kernel SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
-	SumReduction->BuildKernelOld();
+	
 
 	clMemory outArray;
 	outArray.Create(nGroups*sizeof(cl_float));
@@ -1775,8 +1826,6 @@ float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, siz
 
 float TEMSimulation::FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
 {
-	Kernel SumReduction = Kernel(new clKernel(floatSumReductionsource2,clState::context,clState::cldev,"clFloatSumReduction",clState::clq));
-	SumReduction->BuildKernelOld();
 
 	clMemory outArray(nGroups);
 	outArray.Create(nGroups*sizeof(cl_float));
