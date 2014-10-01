@@ -690,6 +690,10 @@ void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
+	// Fix inverted images
+	posx = resolution - posx;
+	posy = resolution - posy;
+
 	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2[0], resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
 
 	/**InitialiseSTEMWavefunction << clWaveFunction2 && resolution && resolution 
@@ -739,6 +743,9 @@ void TEMSimulation::MakeSTEMWaveFunction(float posx, float posy, int wave)
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
+	// Fix inverted images
+	posx = resolution - posx;
+	posy = resolution - posy;
 
 	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2[wave-1], resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
 

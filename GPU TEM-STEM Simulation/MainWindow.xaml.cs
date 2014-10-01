@@ -744,6 +744,18 @@ namespace GPUTEMSTEMSimulation
 			}
 
 			Shuffler.Shuffle< Tuple<Int32, Int32>>(Pixels);
+			for (int j = 0; j < runs; j++)
+			{
+				mCL.SortStructure(TDS);
+
+				// Reset image contrast limits for every run....
+				foreach (DetectorItem i in LockedDetectors)
+				{
+					i.Min = float.MaxValue;
+					i.Max = float.MinValue;
+				}
+
+
 
 			for (int posY = 0; posY < LockedArea.yPixels* LockedArea.xPixels; posY+=multistem)
 			{
@@ -755,11 +767,14 @@ namespace GPUTEMSTEMSimulation
 						//fCoordxs.Add((LockedArea.xStart + (i - 1 + posX) * xInterval) / pixelScale);
 					}
 
-					for (int j = 0; j < runs; j++)
-					{
+					
+
+						
+
+
 						// if TDS was used last atoms are in wrong place and need resetting via same function
 						// if (TDS)
-						mCL.SortStructure(TDS);
+						
 
 
 						for (int i = 1; i <= multistem; i++)
@@ -821,14 +836,17 @@ namespace GPUTEMSTEMSimulation
 								float newVal = i.ImageData[LockedArea.xPixels * Pixels[posY + p - 1].Item2 + Pixels[posY + p - 1].Item1] + pixelVal;
 								i.ImageData[LockedArea.xPixels * Pixels[posY + p-1 ].Item2 + Pixels[posY + p-1 ].Item1] = newVal;
 
-								if (newVal < i.Min)
-								{
-									i.Min = newVal;
-								}
-								if (newVal > i.Max)
-								{
-									i.Max = newVal;
-								}
+								//if (j == runs-1) // Only use final values to set contrast limits
+								//{
+									if (newVal < i.Min)
+									{
+										i.Min = newVal;
+									}
+									if (newVal > i.Max)
+									{
+										i.Max = newVal;
+									}
+								//}
 
 							}
 						}
