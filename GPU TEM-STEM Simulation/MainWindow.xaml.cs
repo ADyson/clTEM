@@ -757,8 +757,8 @@ namespace GPUTEMSTEMSimulation
 
 
 
-			for (int posY = 0; posY < LockedArea.yPixels* LockedArea.xPixels; posY+=multistem)
-			{
+				for (int posY = 0; posY < LockedArea.yPixels* LockedArea.xPixels; posY+=multistem)
+				{
 				//float fCoordy = (LockedArea.yStart + posY * yInterval) / pixelScale;
 							
 					for (int i = 1; i <= multistem; i++)
@@ -767,21 +767,15 @@ namespace GPUTEMSTEMSimulation
 						//fCoordxs.Add((LockedArea.xStart + (i - 1 + posX) * xInterval) / pixelScale);
 					}
 
-					
-
-						
-
-
+				
 						// if TDS was used last atoms are in wrong place and need resetting via same function
 						// if (TDS)
 						
-
-
 						for (int i = 1; i <= multistem; i++)
 						{
 
-							mCL.MakeSTEMWaveFunction(((LockedArea.xStart + Pixels[(posY+ i-1)].Item1 * xInterval) / pixelScale) - SimRegion.xStart,
-								((LockedArea.yStart + Pixels[(posY + i - 1)].Item2 * yInterval) / pixelScale) - SimRegion.yStart, i);
+							mCL.MakeSTEMWaveFunction(((LockedArea.xStart + Pixels[(posY+ i-1)].Item1 * xInterval - SimRegion.xStart)/pixelScale),
+								((LockedArea.yStart + Pixels[(posY + i - 1)].Item2 * yInterval - SimRegion.yStart) / pixelScale), i);
 						}
 
 						// Use Background worker to progress through each step
