@@ -60,4 +60,5 @@ public:
 
 	int getCLdevCount();
 	std::string getCLdevString(int i, bool getShort);
+	uint64_t getCLdevGlobalMemory();
 };

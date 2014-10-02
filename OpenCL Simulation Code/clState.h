@@ -32,5 +32,6 @@ public:
 	static size_t GetTotalSize();
 	static int GetNumDevices();
 	static std::string GetDeviceString(int i, bool getShort);
+	static cl_ulong GetDeviceGlobalMemory();
 };
 

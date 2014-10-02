@@ -174,6 +174,11 @@ std::string UnmanagedOpenCL::getCLdevString(int i, bool getShort)
 	return clState::GetDeviceString(i, getShort);
 }
 
+uint64_t UnmanagedOpenCL::getCLdevGlobalMemory()
+{
+	return clState::GetDeviceGlobalMemory();
+}
+
 UnmanagedOpenCL::~UnmanagedOpenCL() 
 {
 };

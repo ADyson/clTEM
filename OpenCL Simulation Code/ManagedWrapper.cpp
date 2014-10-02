@@ -279,7 +279,10 @@ namespace ManagedOpenCLWrapper
 		return clix::marshalString<clix::E_ANSI>(UMstring);
 	}
 
-
+	uint64_t ManagedOpenCL::getCLdevGlobalMemory()
+	{
+		return _UMOpenCL->getCLdevGlobalMemory();
+	}
 
 	float ManagedOpenCL::GetSTEMPixel(float inner, float outer, int wave)
 	{

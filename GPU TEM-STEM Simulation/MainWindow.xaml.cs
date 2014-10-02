@@ -396,7 +396,10 @@ namespace GPUTEMSTEMSimulation
 			}
 			else if (select_STEM)
 			{
-				int multistem = 50;
+				//int multistem = 50;
+                UInt64 mem = mCL.getCLdevGlobalMemory();
+                UInt64 multi64 = mem / ((UInt64)CurrentResolution * (UInt64)CurrentResolution * 8 * 4);
+                int multistem = (int)multi64;
                 DiffDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct, multistem);
