@@ -17,8 +17,13 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for AreaDialog.xaml
     /// </summary>
-    public partial class AreaDialog : Window
+    public partial class AreaDialog : Elysium.Controls.Window
     {
+
+        private bool goodxrange = true;
+        private bool goodyrange = true;
+
+        private float xstart, ystart, xfinish, yfinish;
 
         public event EventHandler<AreaArgs> SetAreaEvent;
 
@@ -27,53 +32,28 @@ namespace GPUTEMSTEMSimulation
             InitializeComponent();
 
             xStartBox.Text = Area.xStart.ToString("f2");
-            xEndBox.Text = Area.xFinish.ToString("f2");
+            xFinishBox.Text = Area.xFinish.ToString("f2");
             yStartBox.Text = Area.yStart.ToString("f2");
-            yEndBox.Text = Area.yFinish.ToString("f2");
+            yFinishBox.Text = Area.yFinish.ToString("f2");
 
+            xstart = Area.xStart;
+            ystart = Area.yStart;
+            xfinish = Area.xFinish;
+            yfinish = Area.yFinish;
+
+            xStartBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            yStartBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            xFinishBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            yFinishBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            float xs, xf, ys, yf;
-            bool valid = true;
-
-            try
-            {
-                // needed?
-                xs = Convert.ToSingle(xStartBox.Text);
-                ys = Convert.ToSingle(yStartBox.Text);
-                xf = Convert.ToSingle(xEndBox.Text);
-                yf = Convert.ToSingle(yEndBox.Text);
-            }
-            catch
-            {
-                return;
-            }
-
-            if (xs == xf)
-            {
-                xStartBox.RaiseTapEvent();
-                xEndBox.RaiseTapEvent();
-                valid = false;
-            }
-            if (ys == yf)
-            {
-                yStartBox.RaiseTapEvent();
-                yEndBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (!valid)
+           
+            if (!goodxrange || !goodyrange)
                 return;
 
-            // Need to decide whether to just use max/min or prompt user.
-            float xmin = Math.Min(xs, xf);
-            float xmax = Math.Max(xs, xf);
-            float ymin = Math.Min(ys, yf);
-            float ymax = Math.Max(ys, yf);
-
-            SimArea temp = new SimArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax };
+            SimArea temp = new SimArea { xStart = xstart, xFinish = xfinish, yStart = ystart, yFinish = yfinish };
 
             SetAreaEvent(this, new AreaArgs(temp));
 
@@ -86,6 +66,59 @@ namespace GPUTEMSTEMSimulation
             tBox.SelectAll();
         }
 
+
+        private void RangeValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            if (tbox == xStartBox)
+            {
+                doRangeTest(text, ref xstart, ref xstart, ref xfinish, ref tbox, ref xFinishBox, ref goodxrange);
+            }
+            else if (tbox == xFinishBox)
+            {
+                doRangeTest(text, ref xfinish, ref xstart, ref xfinish, ref tbox, ref xStartBox, ref goodxrange);
+            }
+            else if (tbox == yStartBox)
+            {
+                doRangeTest(text, ref ystart, ref ystart, ref yfinish, ref tbox, ref yFinishBox, ref goodyrange);
+            }
+            else if (tbox == yFinishBox)
+            {
+                doRangeTest(text, ref yfinish, ref ystart, ref yfinish, ref tbox, ref yStartBox, ref goodyrange);
+            }
+        }
+
+        private void doRangeTest(string text, ref float val, ref float start, ref float finish, ref TextBox tbox, ref TextBox otherbox, ref bool goodrange)
+        {
+            tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            otherbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            if (text.Length < 1 || text == ".")
+            {
+                goodrange = false;
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                return;
+            }
+            else
+                goodrange = true;
+
+            val = Convert.ToSingle(text);
+
+            var valid = (start < finish);
+
+            if (!valid)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                otherbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodrange = false;
+            }
+            else if (goodrange)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                otherbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            }
+        }
     }
 
     public class AreaArgs : EventArgs

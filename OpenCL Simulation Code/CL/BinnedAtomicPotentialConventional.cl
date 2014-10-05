@@ -113,37 +113,36 @@ __kernel void clBinnedAtomicPotentialConventional(__global float2* Potential,
 			{
 				int ZNum = atZ[l];
 			
-					float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]));
+				float rad = native_sqrt((xid*pixelscale-atx[l])*(xid*pixelscale-atx[l]) + (yid*pixelscale-aty[l])*(yid*pixelscale-aty[l]));
 
-					if(rad < 0.25f * pixelscale)
-						rad = 0.25f * pixelscale;
+				if(rad < 0.25f * pixelscale)
+					rad = 0.25f * pixelscale;
 
-					if( rad < 3.0f) // Should also make sure is not too small
-					{
-						int i;
-						float suml, sumg, x;
+				if( rad < 3.0f) // Should also make sure is not too small
+				{
+					int i;
+					float suml, sumg, x;
 
-						/* Lorenzian, Gaussian consts */
-						if( rad < 0.25f ) rad = 0.25f; // was 0.15
+					/* Lorenzian, Gaussian consts */
 
-						/* avoid singularity at r=0 */
-						suml = sumg = 0.0f;
+					/* avoid singularity at r=0 */
+					suml = sumg = 0.0f;
 
-						/* Lorenztians */
-						x = 2.0f*3.141592654f*rad;
+					/* Lorenztians */
+					x = 2.0f*3.141592654f*rad;
 
-						for( i=0; i<2*3; i+=2 )
-							suml += clfParams[(ZNum-1)*12+i]* bessk0( x*native_sqrt(clfParams[(ZNum-1)*12+i+1]) );
+					for( i=0; i<2*3; i+=2 )
+						suml += clfParams[(ZNum-1)*12+i]* bessk0( x*native_sqrt(clfParams[(ZNum-1)*12+i+1]) );
 
-						/* Gaussians */
-						x = 3.141592654f*rad;
-						x = x*x;
+					/* Gaussians */
+					x = 3.141592654f*rad;
+					x = x*x;
 
-						for( i=2*3; i<2*(3+3); i+=2 )
-							sumg += clfParams[(ZNum-1)*12+i] * native_exp (-x/clfParams[(ZNum-1)*12+i+1]) / clfParams[(ZNum-1)*12+i+1];
+					for( i=2*3; i<2*(3+3); i+=2 )
+						sumg += clfParams[(ZNum-1)*12+i] * native_exp (-x/clfParams[(ZNum-1)*12+i+1]) / clfParams[(ZNum-1)*12+i+1];
 
-						sumz += 300.8242834f*suml + 150.4121417f*sumg;
-					}
+					sumz += 300.8242834f*suml + 150.4121417f*sumg;
+				}
 
 			}
 

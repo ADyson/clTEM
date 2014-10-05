@@ -6,6 +6,7 @@ MultisliceStructure::MultisliceStructure()
 {
 	sorted = false;
 	srand(time(NULL));
+	dz = 1.0f;
 };
 
 float MultisliceStructure::TDSRand()
@@ -164,7 +165,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomy = Buffer(new clMemory(Atoms.size()*sizeof(float)));
 		clAtomz = Buffer(new clMemory(Atoms.size()*sizeof(float)));
 		clAtomZ = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
-		
+
 		clBlockIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
 		clZIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
 
@@ -182,7 +183,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		int NumberOfAtoms = Atoms.size();
 		xBlocks = 80;
 		yBlocks = 80;
-		dz		= 1.0f;
+		//dz		= 1.0f; now set in constructor and can be changed...
 		nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 		nSlices+=(nSlices==0);
 
@@ -203,7 +204,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomSort->SetArgT(13,clZIDs);
 		clAtomSort->SetArgT(14,dz);
 		clAtomSort->SetArgT(15,nSlices);
-	
+
 		size_t* SortSize = new size_t[3];
 		SortSize[0] = NumberOfAtoms;
 		SortSize[1] = 1;
@@ -211,7 +212,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 
 		clAtomSort->Enqueue(SortSize);
-	
+
 		//Malloc HBlockStuff
 		std::vector<int> HostBlockIDs (Atoms.size());
 		std::vector<int> HostZIDs (Atoms.size());
@@ -228,15 +229,15 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		vector < vector < vector < int > > > BinnedZ;
 		BinnedZ.resize(xBlocks*yBlocks);
 
-	
+
 		for(int i = 0 ; i < xBlocks*yBlocks ; i++){
 			Binnedx[i].resize(nSlices);
 			Binnedy[i].resize(nSlices);
 			Binnedz[i].resize(nSlices);
 			BinnedZ[i].resize(nSlices);
 		}
-	
-	
+
+
 		for(int i = 0; i < Atoms.size(); i++)
 		{
 			Binnedx[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomXPos[i]-MinimumX);
@@ -244,14 +245,14 @@ int MultisliceStructure::SortAtoms(bool TDS)
 			Binnedz[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZPos[i]-MinimumZ);
 			BinnedZ[HostBlockIDs[i]][HostZIDs[i]].push_back(AtomZNum[i]);
 		}
-		
+
 		int atomIterator(0);
 
 		std::vector<int> blockStartPositions;
 		blockStartPositions.resize(nSlices*xBlocks*yBlocks+1);
 
 		// Put all bins into a linear block of memory ordered by z then y then x and record start positions for every block.
-	
+
 		for(int slicei = 0; slicei < nSlices; slicei++)
 		{
 			for(int j = 0; j < yBlocks; j++)
@@ -315,7 +316,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clBlockStartPositions = Buffer( new clMemory((nSlices*xBlocks*yBlocks+1) * sizeof( cl_int )));
 
 		clBlockStartPositions->Write(blockStartPositions);
-	
+
 		// 7 is 2 * loadzslices + 1
 		//clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 
@@ -326,7 +327,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 };
 
 int MultisliceStructure::GetZNum(std::string atomSymbol) {
-		 
+
 	if (atomSymbol == "H")
 		return 1;
 	else if (atomSymbol == "He")

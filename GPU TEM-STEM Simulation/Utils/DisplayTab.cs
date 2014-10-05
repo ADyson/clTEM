@@ -43,25 +43,21 @@ namespace GPUTEMSTEMSimulation
 
 	    public Canvas tCanvas { get; set; }
 
+		// Set labels to be updated on mouse event.
         public Label xCoord { get; set; }
         public Label yCoord { get; set; }
 
-        private float _PixelScaleX;
+		// To display mouseover coordinates w.r.t original reference.
+		public float xStartPosition;
+		public float yStartPosition;
 
-        public float PixelScaleX
-        {
-            get { return _PixelScaleX; }
-            set { _PixelScaleX = value; }
-        }
+		// For displaying mouseover coordinates scaled correctly
 
-        private float _PixelScaleY;
+	    public float PixelScaleX { get; set; }
 
-        public float PixelScaleY
-        {
-            get { return _PixelScaleY; }
-            set { _PixelScaleY = value; }
-        }
+	    public float PixelScaleY { get; set; }
 
+	    // Mouseover coordinates displayed in reciprocal space if true.
         public bool Reciprocal;
 
         public DisplayTab(string tName)
@@ -69,21 +65,21 @@ namespace GPUTEMSTEMSimulation
             // Assume LeftTab by default
             // Could just make 2 classes for Left and RightTab...
             Reciprocal = false;
+
             PixelScaleX = PixelScaleY = 1;
-
+			xStartPosition = yStartPosition = 0;
             xDim = yDim = 0;
-            BrushConverter bc = new BrushConverter();
 
-            Tab = new TabItem();
-            Tab.Header = tName;
-            Grid tempGrid = new Grid();
-            tempGrid.Background = (Brush)bc.ConvertFrom("#FFE5E5E5");
-            ZoomBorder tempZoom = new ZoomBorder();
-            tempZoom.ClipToBounds = true;
+            var bc = new BrushConverter();
+
+            Tab = new TabItem {Header = tName};
+            var panelCol = (SolidColorBrush)Application.Current.Resources["PanelDark"];
+            var tempGrid = new Grid { Background = panelCol };
+            var tempZoom = new ZoomBorder {ClipToBounds = true};
             tImage = new Image();
 
-            Viewbox tvBox = new Viewbox();
-            Grid temptempGrid = new Grid();
+            var tvBox = new Viewbox();
+            var temptempGrid = new Grid();
             tCanvas = new Canvas();
 
             tempGrid.PreviewMouseRightButtonDown += new MouseButtonEventHandler(tempZoom.public_PreviewMouseRightButtonDown);
@@ -95,32 +91,32 @@ namespace GPUTEMSTEMSimulation
             tempGrid.Children.Add(tempZoom);
             Tab.Content = tempGrid;
 
-            tImage.MouseMove += new MouseEventHandler(MouseMove);
+			// To get mouseover over detectors
+			tCanvas.MouseEnter += new MouseEventHandler(MouseEnter);
+			tCanvas.MouseLeave += new MouseEventHandler(MouseLeave);
+			tCanvas.MouseMove += new MouseEventHandler(MouseMove);
+            
+			// To get mouseover over image
+			tImage.MouseMove += new MouseEventHandler(MouseMove);
 			tImage.MouseEnter += new MouseEventHandler(MouseEnter);
 			tImage.MouseLeave += new MouseEventHandler(MouseLeave);
         }
 
-	    private WriteableBitmap ImgBMP;
+	    public WriteableBitmap ImgBmp { get; set; }
 
-	    public WriteableBitmap _ImgBMP
-	    {
-	        get { return ImgBMP; }
-	        set { ImgBMP = value; }
-	    }
-
-        public void MouseMove(object sender, MouseEventArgs e)
+	    public void MouseMove(object sender, MouseEventArgs e)
         {
-            Point p = e.GetPosition(tImage);
-            if (Reciprocal)
+            var p = e.GetPosition(tImage);
+			            
+			if (Reciprocal)
             {
-                xCoord.Content = ((2 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
-                yCoord.Content = ((2 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
-
+                xCoord.Content = ((1 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
+                yCoord.Content = ((1 / (yDim * PixelScaleY)) * (yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
             }
             else
             {
-				xCoord.Content = (PixelScaleX * p.X).ToString("f2") + " Å";
-				yCoord.Content = (PixelScaleY * p.Y).ToString("f2") + " Å";
+                xCoord.Content = (xStartPosition + PixelScaleX * p.X).ToString("f2") + " Å";
+                yCoord.Content = (yStartPosition + PixelScaleY * p.Y).ToString("f2") + " Å";
             }
         }
 

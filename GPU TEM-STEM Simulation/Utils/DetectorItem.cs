@@ -34,20 +34,20 @@ namespace GPUTEMSTEMSimulation
     {
         public DetectorItem(string tabName) : base(tabName)
         {
-            innerEllipse = new Ellipse();
-            outerEllipse = new Ellipse();
-            ringEllipse = new Ellipse();
+            InnerEllipse = new Ellipse();
+            OuterEllipse = new Ellipse();
+            RingEllipse = new Ellipse();
 
-            _CurrentResolution = 0;
-            _CurrentPixelScale = 0;
-            _CurrentWaveLength = 0;
+            CurrentResolution = 0;
+            CurrentPixelScale = 0;
+            CurrentWaveLength = 0;
         }
 
-        private int _CurrentResolution;
+        private int CurrentResolution;
 
-        private float _CurrentPixelScale;
+        private float CurrentPixelScale;
 
-        private float _CurrentWaveLength;
+        private float CurrentWaveLength;
 
         public Brush ColBrush { get; set; }
 
@@ -59,8 +59,8 @@ namespace GPUTEMSTEMSimulation
             }
             set
             {
-                BrushConverter bc = new BrushConverter();
-                ColourGenerator.ColourGenerator cgen = new ColourGenerator.ColourGenerator();
+                var bc = new BrushConverter();
+                var cgen = new ColourGenerator.ColourGenerator();
                 ColBrush = (Brush)bc.ConvertFromString("#FF" + cgen.IndexColour(value));
             }
         }
@@ -71,15 +71,19 @@ namespace GPUTEMSTEMSimulation
 
         public float Outer { get; set; }
 
+        public float xCentre { get; set; }
+
+        public float yCentre { get; set; }
+
         public float Min { get; set; }
 
         public float Max { get; set; }
 
-        public Ellipse innerEllipse { get; set; }
+        public Ellipse InnerEllipse { get; set; }
 
-        public Ellipse outerEllipse { get; set; }
+        public Ellipse OuterEllipse { get; set; }
 
-        public Ellipse ringEllipse { get; set; }
+        public Ellipse RingEllipse { get; set; }
 
         private bool Added { get; set; }
 
@@ -88,102 +92,101 @@ namespace GPUTEMSTEMSimulation
             return Math.Max(Math.Min(ImageData[index], Max), Min);
         }
 
-        public void setColour()
+        public void SetColour()
         {
-            innerEllipse.Stroke = ColBrush;
-            outerEllipse.Stroke = ColBrush;
-            ringEllipse.Fill = ColBrush;
+            InnerEllipse.Stroke = ColBrush;
+            OuterEllipse.Stroke = ColBrush;
+            RingEllipse.Fill = ColBrush;
         }
 
-        public void setColour(Brush userBrush)
+        public void SetColour(Brush userBrush)
         {
-            innerEllipse.Stroke = userBrush;
-            outerEllipse.Stroke = userBrush;
-            ringEllipse.Fill = userBrush;
+            InnerEllipse.Stroke = userBrush;
+            OuterEllipse.Stroke = userBrush;
+            RingEllipse.Fill = userBrush;
         }
 
 
-        public void setEllipse(int res, float pxScale, float wavelength, bool vis)
+        public void SetEllipse(int res, float pxScale, float wavelength, bool vis)
         {
             // check image has been created, values arent constructor values
             if(res == 0 || pxScale == 0 || wavelength == 0)
                 return;
 
             // check if detector needs to be redrawn
-            if(_CurrentResolution == res && _CurrentPixelScale == pxScale && _CurrentWaveLength == wavelength)
+            if(CurrentResolution == res && CurrentPixelScale == pxScale && CurrentWaveLength == wavelength)
                 return;
 
-            _CurrentResolution = res;
-            _CurrentPixelScale = pxScale;
-            _CurrentWaveLength = wavelength;
+            CurrentResolution = res;
+            CurrentPixelScale = pxScale;
+            CurrentWaveLength = wavelength;
 
-            DoubleCollection dashes = new DoubleCollection();
-            dashes.Add(4); //on
-            dashes.Add(4); //off
-            //dashes.Add(2); //on
-            //dashes.Add(4); //off
+            var dashes = new DoubleCollection {4, 4}; // {on, off, on, etc}
+            
+            var innerRad = (res * pxScale) * Inner / (1000 * wavelength);
+            var outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+            var xcRad = (res * pxScale) * xCentre / (1000 * wavelength);
+            var ycRad = (res * pxScale) * yCentre / (1000 * wavelength);
 
-            float innerRad = (res * pxScale) * Inner / (1000 * wavelength);
-            float outerRad = (res * pxScale) * Outer / (1000 * wavelength);
+            var innerShift = (res) / 2 - innerRad;
+            var outerShift = (res) / 2 - outerRad;
 
-            float innerShift = (res) / 2 - innerRad;
-            float outerShift = (res) / 2 - outerRad;
+            InnerEllipse.Width = (innerRad * 2) + 0.5;
+            InnerEllipse.Height = (innerRad * 2) + 0.5;
+            Canvas.SetTop(InnerEllipse, innerShift + 0.25 - ycRad);
+            Canvas.SetLeft(InnerEllipse, innerShift + 0.25 + xcRad);
+            InnerEllipse.StrokeDashArray = dashes;
 
-            innerEllipse.Width = (innerRad * 2) + 0.5;
-            innerEllipse.Height = (innerRad * 2) + 0.5;
-            Canvas.SetTop(innerEllipse, innerShift + 0.25);
-            Canvas.SetLeft(innerEllipse, innerShift + 0.25);
-            innerEllipse.StrokeDashArray = dashes;
+            OuterEllipse.Width = (outerRad * 2) + 0.5;
+            OuterEllipse.Height = (outerRad * 2) + 0.5;
+            Canvas.SetTop(OuterEllipse, outerShift + 0.25 - ycRad);
+            Canvas.SetLeft(OuterEllipse, outerShift + 0.25 + xcRad);
+            OuterEllipse.StrokeDashArray = dashes;
 
-            outerEllipse.Width = (outerRad * 2) + 0.5;
-            outerEllipse.Height = (outerRad * 2) + 0.5;
-            Canvas.SetTop(outerEllipse, outerShift + 0.25);
-            Canvas.SetLeft(outerEllipse, outerShift + 0.25);
-            outerEllipse.StrokeDashArray = dashes;
+            RingEllipse.Width = outerRad * 2;
+            RingEllipse.Height = outerRad * 2;
+            Canvas.SetTop(RingEllipse, outerShift + 0.5 - ycRad);
+            Canvas.SetLeft(RingEllipse, outerShift + 0.5 + xcRad);
 
-            ringEllipse.Width = outerRad * 2;
-            ringEllipse.Height = outerRad * 2;
-            Canvas.SetTop(ringEllipse, outerShift + 0.5);
-            Canvas.SetLeft(ringEllipse, outerShift + 0.5);
+            var ratio = innerRad / outerRad;
+            var LGB = new RadialGradientBrush();
 
-            float ratio = innerRad / outerRad;
-            RadialGradientBrush LGB = new RadialGradientBrush();
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#22000000"), ratio));
             LGB.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#00000000"), ratio - 0.00001)); // small difference to give impression of sharp edge.
-            ringEllipse.OpacityMask = LGB;
+            RingEllipse.OpacityMask = LGB;
 
-            setColour();
-            setVisibility(vis);
+            SetColour();
+            SetVisibility(vis);
         }
 
-        public void setVisibility(bool show)
+        public void SetVisibility(bool show)
         {
             if(show)
             {
-                ringEllipse.Visibility = System.Windows.Visibility.Visible;
-                outerEllipse.Visibility = System.Windows.Visibility.Visible;
-                innerEllipse.Visibility = System.Windows.Visibility.Visible;
+                RingEllipse.Visibility = System.Windows.Visibility.Visible;
+                OuterEllipse.Visibility = System.Windows.Visibility.Visible;
+                InnerEllipse.Visibility = System.Windows.Visibility.Visible;
             }
             else
             {
-                ringEllipse.Visibility = System.Windows.Visibility.Hidden;
-                outerEllipse.Visibility = System.Windows.Visibility.Hidden;
-                innerEllipse.Visibility = System.Windows.Visibility.Hidden;
+                RingEllipse.Visibility = System.Windows.Visibility.Hidden;
+                OuterEllipse.Visibility = System.Windows.Visibility.Hidden;
+                InnerEllipse.Visibility = System.Windows.Visibility.Hidden;
             }
         }
 
         public void AddToCanvas(Canvas destination)
         {
-            destination.Children.Add(innerEllipse);
-            destination.Children.Add(outerEllipse);
-            destination.Children.Add(ringEllipse);
+            destination.Children.Add(InnerEllipse);
+            destination.Children.Add(OuterEllipse);
+            destination.Children.Add(RingEllipse);
         }
 
         public void RemoveFromCanvas(Canvas destination)
         {
-            destination.Children.Remove(innerEllipse);
-            destination.Children.Remove(outerEllipse);
-            destination.Children.Remove(ringEllipse);
+            destination.Children.Remove(InnerEllipse);
+            destination.Children.Remove(OuterEllipse);
+            destination.Children.Remove(RingEllipse);
         }
     }
 }

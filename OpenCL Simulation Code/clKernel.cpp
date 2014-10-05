@@ -63,10 +63,12 @@ void clKernel::BuildKernel()
 	char *buildlog = (char*)malloc(log*sizeof(char));
 	this->status = clGetProgramBuildInfo(kernelprogram, cldev->devices, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
 
+	std::string blog(buildlog,log);
+
 	if(!status==0)
 	{
 		std::string error = t_to_string(status);
-		std::string message = "Problem with Kernel Building" + error;
+		std::string message = "Problem with Kernel Building for " + kernelname + error + blog;
 		throw std::exception (message.c_str());
 	}
 
@@ -76,7 +78,7 @@ void clKernel::BuildKernel()
 
 	if(!status==0)
 	{
-		std::string message = "Problem with Kernel Creation";
+		std::string message = "Problem with Kernel Creation for "+kernelname;
 		std::string error = message + t_to_string(status);
 		throw std::exception (error.c_str());
 	}
