@@ -146,10 +146,10 @@ void UnmanagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, flo
 	TS->initialiseCTEMSimulation(resolution, Structure, startx, starty, endx, endy, Full3D, FD, dz, full3dints);
 };
 
-void UnmanagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints, int waves)
+void UnmanagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 {
 	TS = SimulationPtr(new TEMSimulation(TEMParams, STEMParams));
-	TS->initialiseSTEMSimulation(resolution, Structure, startx, starty, endx, endy, Full3D, dz, full3dints, waves);
+	TS->initialiseSTEMSimulation(resolution, Structure, startx, starty, endx, endy, Full3D,FD, dz, full3dints, waves);
 };
 
 void UnmanagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy, int waves)

@@ -24,7 +24,7 @@ public:
 	// used for TEM, needs to be renamed
 	//InitialiseReSized
 	void initialiseCTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
-	void initialiseSTEMSimulation(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints, int waves = 1);
+	void initialiseSTEMSimulation(int resolution, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1);
 
 	void initialiseSTEMWaveFunction(float posx, float posy, int wave);
 

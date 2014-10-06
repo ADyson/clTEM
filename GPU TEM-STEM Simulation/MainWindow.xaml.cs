@@ -466,7 +466,7 @@ namespace GPUTEMSTEMSimulation
 			{
                 UInt64 mem = mCL.getCLdevGlobalMemory();
                 UInt64 multi64 = mem / ((UInt64)CurrentResolution * (UInt64)CurrentResolution * 8 * 4);
-                int multistem = (int)multi64;
+                int multistem = 5;
                 DiffDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct, multistem);
@@ -655,7 +655,7 @@ namespace GPUTEMSTEMSimulation
 
 			int totalPix = numPix * runs;
 
-            mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, dz, integrals, multistem);
+            mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,isFD, dz, integrals, multistem);
 
 			float xInterval = LockedArea.getxInterval;
 			float yInterval = LockedArea.getyInterval;
@@ -715,7 +715,7 @@ namespace GPUTEMSTEMSimulation
 
                     // Use Background worker to progress through each step
                     int NumberOfSlices = 0;
-                    mCL.getNumberSlices(ref NumberOfSlices, isFull3D);
+                    mCL.getNumberSlices(ref NumberOfSlices, isFD);
                     // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
                     for (int i = 1; i <= NumberOfSlices; i++)
@@ -805,7 +805,7 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, dz, integrals);
+			mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD, dz, integrals,1);
 
 			//int posX = CurrentResolution / 2;
 			//int posY = CurrentResolution / 2;
@@ -815,7 +815,7 @@ namespace GPUTEMSTEMSimulation
 
 			// Use Background worker to progress through each step
 			var NumberOfSlices = 0;
-            mCL.getNumberSlices(ref NumberOfSlices, isFull3D);
+            mCL.getNumberSlices(ref NumberOfSlices, isFD);
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
 			var runs = 1;
@@ -829,7 +829,7 @@ namespace GPUTEMSTEMSimulation
 			for (var j = 0; j < runs; j++)
 			{
 				mCL.sortStructure(doTDS_CBED);
-                mCL.initialiseSTEMWaveFunction(posx, posy);
+                mCL.initialiseSTEMWaveFunction(posx, posy,1);
 
 
 				for (var i = 1; i <= NumberOfSlices; i++)

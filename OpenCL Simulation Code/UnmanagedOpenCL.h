@@ -42,7 +42,7 @@ public:
 	void setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
 
 	void initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
-	void initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints, int waves);
+	void initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD,float dz, int full3dints, int waves);
 
 	void initialiseSTEMWaveFunction(float posx, float posy, int wave);
 

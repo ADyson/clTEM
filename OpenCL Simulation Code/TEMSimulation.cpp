@@ -153,7 +153,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	clWaveFunction3.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
 	clWaveFunction4.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
 
-	// might not need to be vectors, onbly if stem needs them
+	// might not need to be vectors, only if stem needs them
 	if (FD)
 	{
 		clWaveFunction1Minus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
@@ -198,7 +198,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 
 	if (FD)
 	{
-		InitialiseWavefunction->SetArgT(0, clWaveFunction1Minus);
+		InitialiseWavefunction->SetArgT(0, clWaveFunction1Minus[0]);
 	}
 
 	InitialiseWavefunction->Enqueue(WorkSize);
@@ -315,9 +315,9 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	 clFinish(clState::clq->cmdQueue);
 };
 
-void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints, int waves)
+void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 {
-	FDMode = false;
+	FDMode = FD;
 
 	resolution = res;
 	AtomicStructure = Structure;
@@ -346,6 +346,9 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	float	sigma2 = (2 * Pi / (wavelength * V * 1000)) * ((9.11e-031f*9e+016f + echarge*V * 1000) / (2 * 9.11e-031f*9e+016f + echarge*V * 1000));
 	float	fix = 300.8242834f / (4 * Pi*Pi*a0a*echarge);
 	float	V2 = V * 1000;
+
+	FDsigma = sigma2;
+
 
 	// Now we can set up frequencies and fourier transforms.
 	int imidx = floor(resolution / 2 + 0.5);
@@ -391,6 +394,48 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	bandwidthkmax = sqrt(bandwidthkmax);
 
 	// Bandlimit by FDdz size
+	// Bandlimit by FDdz size
+	float fnkx = resolution;
+	float fnky = resolution;
+
+	float p1 = fnkx / (2 * SimSizeX);
+	float p2 = fnky / (2 * SimSizeY);
+	float p12 = p1*p1;
+	float p22 = p2*p2;
+
+	float ke2 = (.666666f)*(p12 + p22);
+
+	float quadraticA = (ke2*ke2 * 16 * Pi*Pi*Pi*Pi) - (32 * Pi*Pi*Pi*ke2*sigma2*V2 / wavelength) + (16 * Pi*Pi*sigma2*sigma2*V2*V2 / (wavelength*wavelength));
+	float quadraticB = 16 * Pi*Pi*(ke2 - (sigma2*V2 / (Pi*wavelength)) - (1 / (4 * wavelength*wavelength)));
+	float quadraticC = 3;
+	float quadraticB24AC = quadraticB * quadraticB - 4 * quadraticA*quadraticC;
+
+	// Now use these to determine acceptable resolution or enforce extra band limiting beyond 2/3
+	if (quadraticB24AC<0)
+	{
+		//TODO: Need an actual exception and message for these circumstances..
+		/*
+		cout << "No stable solution exists for these conditions in FD Multislice" << endl;
+		return;
+		*/
+	}
+
+	float b24ac = sqrtf(quadraticB24AC);
+	float maxStableDz = (-quadraticB + b24ac) / (2 * quadraticA);
+	maxStableDz = 0.99*sqrtf(maxStableDz);
+
+	// Presumably because it would take ages otherwise???
+	if (maxStableDz>0.06)
+		maxStableDz = 0.06;
+
+	FDdz = maxStableDz;
+
+	int	nFDSlices = ceil((AtomicStructure->MaximumZ - AtomicStructure->MinimumZ) / maxStableDz);
+	// Prevent 0 slices for perfectly flat sample
+	nFDSlices += (nFDSlices == 0);
+
+	// Set class variables
+	NumberOfFDSlices = nFDSlices;
 
 	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
 	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
@@ -415,6 +460,12 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 
 		clTDSx[i - 1].resize(resolution*resolution);
 		clTDSk[i - 1].resize(resolution*resolution);
+
+		if(FD)
+		{
+			clWaveFunction1Minus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+			clWaveFunction1Plus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+		}
 	}
 
 	clWaveFunction3.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
@@ -474,6 +525,11 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOpt", clState::clq));
 		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
 	}
+	else if (FD)
+	{
+		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOptFD", clState::clq));
+		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOptFD2.cl");
+	}
 	else
 	{
 		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialConventional", clState::clq));
@@ -520,7 +576,15 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	GeneratePropagator->SetArgT(2, clYFrequencies);
 	GeneratePropagator->SetArgT(3, resolution);
 	GeneratePropagator->SetArgT(4, resolution);
-	GeneratePropagator->SetArgT(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	
+	if (FD)
+	{
+		GeneratePropagator->SetArgT(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	}
+	else
+	{
+		GeneratePropagator->SetArgT(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+	}
 	GeneratePropagator->SetArgT(6, wavelength);
 	GeneratePropagator->SetArgT(7, bandwidthkmax);
 
@@ -545,6 +609,19 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	tdsmin.resize(waves);
 	tdsmax.resize(waves);
 
+	if (FD)
+	{
+		// Need Grad Kernel and FiniteDifference also
+		GradKernel = Kernel(new clKernel(clState::context, clState::cldev, "clGrad", clState::clq));
+		GradKernel->loadProgSource("GradKernel.cl");
+		GradKernel->BuildKernel();
+
+		FiniteDifference = Kernel(new clKernel(clState::context, clState::cldev, "clFiniteDifference", clState::clq));
+		FiniteDifference->loadProgSource("FiniteDifference.cl");
+		FiniteDifference->BuildKernel();
+	}
+
+
 	clFinish(clState::clq->cmdQueue);
 };
 
@@ -565,6 +642,12 @@ void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 
 	// IFFT
 	FourierTrans->Enqueue(clWaveFunction2[wave - 1], clWaveFunction1[wave - 1], CLFFT_BACKWARD);
+
+	if(FDMode)
+	{
+		// Copy into both initialwavefunctions
+		clEnqueueCopyBuffer(clState::clq->cmdQueue,clWaveFunction1[wave-1]->buffer,clWaveFunction1Minus[wave-1]->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+	}
 };
 
 void TEMSimulation::doMultisliceStep(int stepno, int steps, int waves)
@@ -689,31 +772,35 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 	BandLimit->Enqueue(Work);
 	FourierTrans->Enqueue(clWaveFunction3[0], clPotential, CLFFT_BACKWARD);
 
+	// Now for the rest of the multislice steps
+	for (int i = 1; i <= waves; i++)
+	{
+
 	// //FT Psi into Grad2.
-	// FourierTrans->Enqueue(clWaveFunction1, clWaveFunction3, CLFFT_FORWARD);
+		FourierTrans->Enqueue(clWaveFunction1[i-1], clWaveFunction3[0], CLFFT_FORWARD);
 
 	// //Grad Kernel on Grad2.
-	// GradKernel->SetArgS(clWaveFunction3, clXFrequencies, clYFrequencies, resolution, resolution);
-	// GradKernel->Enqueue(Work);
+		GradKernel->SetArgS(clWaveFunction3[0], clXFrequencies, clYFrequencies, resolution, resolution);
+		GradKernel->Enqueue(Work);
 
 	// //IFT Grad2 into Grad.
-	// FourierTrans->Enqueue(clWaveFunction3, clWaveFunction4, CLFFT_BACKWARD);
+		FourierTrans->Enqueue(clWaveFunction3[0], clWaveFunction4[i-1], CLFFT_BACKWARD);
 
 	// //FD Kernel
-	// FiniteDifference->SetArgS(clPotential, clWaveFunction4, clWaveFunction1Minus, clWaveFunction1, clWaveFunction1Plus, FDdz, wavelength, FDsigma, resolution, resolution);
-	// FiniteDifference->Enqueue(Work);
+		FiniteDifference->SetArgS(clPotential, clWaveFunction4[i-1], clWaveFunction1Minus[i-1], clWaveFunction1[i-1], clWaveFunction1Plus[i-1], FDdz, wavelength, FDsigma, resolution, resolution);
+		FiniteDifference->Enqueue(Work);
 
 
 	// //Bandlimit PsiPlus
-	// FourierTrans->Enqueue(clWaveFunction1Plus, clWaveFunction3, CLFFT_FORWARD);
-	// BandLimit->Enqueue(Work);
-	// FourierTrans->Enqueue(clWaveFunction3, clWaveFunction1Plus, CLFFT_BACKWARD);
+		FourierTrans->Enqueue(clWaveFunction1Plus[i-1], clWaveFunction3[0], CLFFT_FORWARD);
+		BandLimit->Enqueue(Work);
+		FourierTrans->Enqueue(clWaveFunction3[0], clWaveFunction1Plus[i-1], CLFFT_BACKWARD);
 
 	// // Psi becomes PsiMinus
-	// clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1->buffer, clWaveFunction1Minus->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1[i-1]->buffer, clWaveFunction1Minus[i-1]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 	// // PsiPlus becomes Psi.
-	// clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1Plus->buffer, clWaveFunction1->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1Plus[i-1]->buffer, clWaveFunction1[i-1]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 
 
@@ -722,9 +809,10 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 	// // Finished wavefunction in reciprocal spaaaaaace in clWaveFunction2.
 	// // 3 and 4 were previously temporary.
 
-	// FourierTrans->Enqueue(clWaveFunction1, clWaveFunction2, CLFFT_FORWARD);
+		FourierTrans->Enqueue(clWaveFunction1[i-1], clWaveFunction2[i-1], CLFFT_FORWARD);
 
-	// clFinish(clState::clq->cmdQueue);
+	}
+	clFinish(clState::clq->cmdQueue);
 };
 
 float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
