@@ -68,7 +68,7 @@ namespace GPUTEMSTEMSimulation
         TEMParams ProbeParameters;
 
 //<<<<<<< HEAD
-//	
+//
 //=======
         // Simulation Options (updated before simulation call)
         float dz = 1.0f;
@@ -123,7 +123,7 @@ namespace GPUTEMSTEMSimulation
             SliceDz.TextChanged += new TextChangedEventHandler(FiniteValidCheck);
 
 			CancelButton.IsEnabled = false;
-            
+
 			// add constant tabs to UI
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
@@ -258,7 +258,7 @@ namespace GPUTEMSTEMSimulation
 
             }
         }
-        
+
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
@@ -321,7 +321,7 @@ namespace GPUTEMSTEMSimulation
                 mCL.setSTEMParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical, ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
 				SimulationMethod(select_TEM, select_STEM, select_CBED, TDSruns, ref progressReporter, ref timer, ref cancellationToken);
-                
+
             }, cancellationToken);
 
             // This runs on UI Thread so can access UI, probably better way of doing image though.
@@ -367,7 +367,7 @@ namespace GPUTEMSTEMSimulation
 
                 SimulateEWButton.IsEnabled = true;
             });
-        
+
         }
 
 		private void UpdateEWImage()
@@ -383,7 +383,7 @@ namespace GPUTEMSTEMSimulation
 			mCL.getEWImage(EWDisplay.ImageData, CurrentResolution);
 
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (EWDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -466,7 +466,7 @@ namespace GPUTEMSTEMSimulation
 			{
                 UInt64 mem = mCL.getCLdevGlobalMemory();
                 UInt64 multi64 = mem / ((UInt64)CurrentResolution * (UInt64)CurrentResolution * 8 * 4);
-                int multistem = 5;
+                int multistem = (int)multi64;
                 DiffDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct, multistem);
@@ -477,7 +477,7 @@ namespace GPUTEMSTEMSimulation
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateCBED(TDSruns, ref progressReporter,ref timer, ref ct);
 			}
-		}	
+		}
 
 		private void UI_UpdateSimulationProgress(float ms, int NumberOfSlices, int runs, int j, int i, int mem)
 		{
@@ -496,14 +496,14 @@ namespace GPUTEMSTEMSimulation
 
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
-			
+
 			DiffDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			DiffDisplay.tImage.Source = DiffDisplay.ImgBmp;
 
 			DiffDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
 			mCL.getDiffImage(DiffDisplay.ImageData, CurrentResolution);
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -546,12 +546,12 @@ namespace GPUTEMSTEMSimulation
 
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
-			DiffDisplay.ImageData = TDSImage;	
-	
+			DiffDisplay.ImageData = TDSImage;
+
             DiffDisplay.tCanvas.Width = CurrentResolution;
             DiffDisplay.tCanvas.Height = CurrentResolution;
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -586,7 +586,7 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-		    
+
 		    mCL.initialiseCTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD,dz,integrals);
 
 			// Reset atoms incase TDS has been used
@@ -595,7 +595,7 @@ namespace GPUTEMSTEMSimulation
 			// Use Background worker to progress through each step
 			var NumberOfSlices = 0;
 			mCL.getNumberSlices(ref NumberOfSlices, isFD);
-	
+
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 			for (var i = 1; i <= NumberOfSlices; i++)
 			{
@@ -606,7 +606,7 @@ namespace GPUTEMSTEMSimulation
 				mCL.doMultisliceStep(i, NumberOfSlices);
 				timer.Stop();
 				var mem = mCL.getCLMemoryUsed();
-				// Report progress of the work. 
+				// Report progress of the work.
 
 				float ms = timer.ElapsedMilliseconds;
 				progressReporter.ReportProgress((val) =>
@@ -618,7 +618,7 @@ namespace GPUTEMSTEMSimulation
 			}
 
 		}
-        
+
 		private void SimulateSTEM(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct, int multistem)
 		{
 			LockedDetectors = Detectors;
@@ -674,10 +674,9 @@ namespace GPUTEMSTEMSimulation
 				}
 			}
 
-			Shuffler.Shuffle< Tuple<Int32, Int32>>(Pixels);
 			for (int j = 0; j < runs; j++)
 			{
-                mCL.sortStructure(doTDS_STEM);
+                Shuffler.Shuffle<Tuple<Int32, Int32>>(Pixels);
 
 				// Reset image contrast limits for every run....
 				foreach (DetectorItem i in LockedDetectors)
@@ -696,6 +695,8 @@ namespace GPUTEMSTEMSimulation
                 // multistem
                 while (posY < numPix)
                 {
+                    mCL.sortStructure(doTDS_STEM);
+
                     int thisPosY = posY;
 
                     if (posY + multistem > numPix && posY + multistem - numPix + 1 < multistem)
@@ -732,7 +733,7 @@ namespace GPUTEMSTEMSimulation
                         progressReporter.ReportProgress((val) =>
                         {
                             CancelButton.IsEnabled = true;
-                            // Note: code passed to "ReportProgress" can access UI elements freely. 
+                            // Note: code passed to "ReportProgress" can access UI elements freely.
                             UI_UpdateSimulationProgressSTEM(ms, totalPix, pix, NumberOfSlices, i, mem);
                         }, i);
                     }
@@ -843,11 +844,11 @@ namespace GPUTEMSTEMSimulation
 					var mem = mCL.getCLMemoryUsed();
 					float ms = timer.ElapsedMilliseconds;
 
-					// Report progress of the work. 
+					// Report progress of the work.
 					progressReporter.ReportProgress((val) =>
 					{
 						CancelButton.IsEnabled = true;
-						// Note: code passed to "ReportProgress" can access UI elements freely. 
+						// Note: code passed to "ReportProgress" can access UI elements freely.
 						UI_UpdateSimulationProgress(ms, NumberOfSlices, runs, j, i, mem);
 					}, i);
 				}
@@ -879,7 +880,7 @@ namespace GPUTEMSTEMSimulation
 
 			RenderOptions.SetBitmapScalingMode(i.tImage, BitmapScalingMode.NearestNeighbor);
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (i.ImgBmp.Format.BitsPerPixel + 7) / 8;
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
@@ -933,7 +934,7 @@ namespace GPUTEMSTEMSimulation
 			else
 				mCL.getCTEMImage(CTEMDisplay.ImageData, CurrentResolution);
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (CTEMDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -966,7 +967,7 @@ namespace GPUTEMSTEMSimulation
 
 			CTEMDisplay.Tab.IsSelected = true;
 		}
-		
+
 		private void UI_UpdateSimulationProgressSTEM(float ms, int numPix, int pix, int NumberOfSlices, int i, int mem)
 		{
 			this.ProgressBar1.Value =
@@ -995,7 +996,7 @@ namespace GPUTEMSTEMSimulation
         }
 
 		private void SaveImageFromTabs(IEnumerable<DisplayTab> tabs)
-		{				
+		{
 			foreach (var dt in tabs)
 			{
 				if (dt.xDim != 0 || dt.yDim != 0)
