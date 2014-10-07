@@ -1,6 +1,8 @@
 ﻿<Application x:Class="GPU_TEM_STEM_Simulation.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:metro="http://schemas.codeplex.com/elysium"
              StartupUri="../MainWindow.xaml">
     <Application.Resources>
          
@@ -10,7 +12,42 @@
                 <ResourceDictionary Source="../Utils/Colours.xaml"/>
                 <ResourceDictionary Source="/Elysium;component/Themes/Generic.xaml"/>
     		</ResourceDictionary.MergedDictionaries>
-    	</ResourceDictionary>
-         
+
+            <metro:Theme x:Key="ThemeCol">Dark</metro:Theme>
+
+            <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
+            <SolidColorBrush x:Key="ErrorCol" Color="#FFC93F18"/>
+
+            <SolidColorBrush x:Key="ButtonHighlight" Color="#FFFFFFFF"/>
+
+            <SolidColorBrush x:Key="TextBoxBackground" Color="#1C1C1C"/>
+            <SolidColorBrush x:Key="TextBoxForeground" Color="White"/>
+
+            <SolidColorBrush x:Key="PanelBackground" Color="#FF171717"/>
+            <SolidColorBrush x:Key="PanelDark" Color="#FF252525"/>
+            <SolidColorBrush x:Key="PanelLight" Color="#FF313131"/>
+
+            <SolidColorBrush x:Key="TextColourLight" Color="White"/>
+            <SolidColorBrush x:Key="TextColourDark" Color="Black"/>
+
+            <SolidColorBrush x:Key="Contrast" Color="White"/>
+
+            <SolidColorBrush x:Key="ProgressEmpty" Color="#FF171717"/>
+            <SolidColorBrush x:Key="ProgressFull" Color="White"/>
+
+            <!--Default for ELysium style would be 120 and 32-->
+            <!--<System:Double x:Key="ControlWidth">120</System:Double>
+            <System:Double x:Key="ControlHeight">32</System:Double>
+            <Thickness x:Key="ControlPadding">3</Thickness>
+            <Thickness x:Key="ControlMargins">2.5</Thickness>-->
+
+            <!--small controls-->
+            <System:Double x:Key="ControlWidth">120</System:Double>
+            <System:Double x:Key="ControlHeight">25</System:Double>
+            <Thickness x:Key="ControlPadding">3,0</Thickness>
+            <Thickness x:Key="ControlMargins">2.5</Thickness>
+
+        </ResourceDictionary>
+
     </Application.Resources>
 </Application>

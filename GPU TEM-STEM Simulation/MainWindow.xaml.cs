@@ -274,6 +274,8 @@ namespace GPUTEMSTEMSimulation
 			if (!TestSimulationPrerequisites())
 				return;
 
+            Application.Current.Resources["Accent"] = Application.Current.Resources["ErrorColOrig"];
+
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
 
@@ -304,7 +306,6 @@ namespace GPUTEMSTEMSimulation
             // Pull options from dialog
             Single.TryParse(SliceDz.Text, out dz);
             Int32.TryParse(Full3DIntegrals.Text, out integrals);
-
 
 
 
@@ -365,6 +366,7 @@ namespace GPUTEMSTEMSimulation
                     SimulateImageButton.IsEnabled = true;
                 }
 
+                Application.Current.Resources["Accent"] = Application.Current.Resources["AccentOrig"];
                 SimulateEWButton.IsEnabled = true;
             });
 
