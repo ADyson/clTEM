@@ -1,0 +1,131 @@
+html {
+  min-width: 1040px;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  margin: 0 auto 4em auto;
+  position: relative;
+  tab-size: 2;
+  width: 100%;
+}
+
+h1 {
+  font-size: 64px;
+  font-weight: 300;
+  letter-spacing: -2px;
+  margin: .3em 0 .1em 0;
+}
+
+h2 {
+   margin-top: 2em;
+   display: block;
+   font-size: 1.5em;
+-webkit-margin-before: 0.83em;
+-webkit-margin-after: 0.83em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+font-weight: bold;
+}
+
+.column {
+margin: auto;
+width: 720px;
+padding-right: 240px;
+position: relative;
+}
+
+h1, h2 {
+  text-rendering: optimizeLegibility;
+}
+
+h2 a {
+  color: #ccc;
+  left: -20px;
+  position: absolute;
+  width: 740px;
+}
+
+h3 {
+   font-size: 20px;
+}
+
+h4 {
+   font-size: 14px;
+}
+
+footer {
+  margin-top: 8em;
+}
+
+aside {
+  font-size: small;
+  left: 780px;
+  position: absolute;
+  text-align: right;
+  width: 180px;
+}
+
+p {
+  line-height: 1.5em;
+  width: 720px;
+  display: block;
+-webkit-margin-before: 1em;
+-webkit-margin-after: 1em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+}
+.header {
+   background: #F9F9FF;
+   width: 100%;
+}
+
+blockquote {
+  width: 640px;
+}
+
+li {
+  width: 680px;
+}
+
+a {
+  color: steelblue;
+}
+
+a:not(:hover) {
+  text-decoration: none;
+}
+
+hr {
+   width: 100%;
+}
+
+#title {
+  border: 0;
+  outline: none;
+  margin: 0 0 50px 0;
+}
+
+
+#title span {
+  font-size: 10px;
+}
+
+#title .credits {
+  font-size: 11px;
+  font-family: 'OpenSansRegular', "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  color: #696969;
+  margin-top: -10px;
+}
+
+#title .credits.left {
+  float: left;
+}
+#title .credits.right {
+  float: right;
+}
+
+#graph text {
+   font-size: 10px;
+}
