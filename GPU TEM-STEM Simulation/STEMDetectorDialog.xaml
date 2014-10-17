@@ -1,113 +1,107 @@
-﻿<Window x:Class="GPUTEMSTEMSimulation.STEMDetectorDialog"
+﻿<metro:Window x:Class="GPUTEMSTEMSimulation.STEMDetectorDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:l="clr-namespace:FixedWidthColumnSample"
-        xmlns:t="clr-namespace:ErrTextBox"
         xmlns:MaskNameSpace="clr-namespace:MaskedTextBox"
-        Title="STEM Detectors" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight" Height="324" Width="514">
+        Title="STEM Detectors" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" SizeToContent="WidthAndHeight"
+              
+        xmlns:metro="http://schemas.codeplex.com/elysium"
+        xmlns:params="http://schemas.codeplex.com/elysium/params"
+        params:Design.Theme="{StaticResource  ThemeCol}"
+        params:Design.AccentBrush="{StaticResource Accent}"
+        params:Design.ContrastBrush="{StaticResource Contrast}"
+              
+        params:Manager.Theme="{StaticResource  ThemeCol}"
+        params:Manager.AccentBrush="{StaticResource Accent}"
+        params:Manager.ContrastBrush="{StaticResource Contrast}">
 
-    <Grid Margin="5,5,10,5">
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
+
+
+        <DataGrid x:Name="DetectorListView" Style="{StaticResource StandardDataGrid}" ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="0,0,10,0"
+                  Grid.Column="0" Grid.RowSpan="12" Width="535" MaxHeight="350" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"
+                  SelectionUnit="FullRow" VerticalContentAlignment="Center" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="25">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Rectangle Width="10" Height="10" Fill="{Binding Path=ColBrush}" HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="100"/>
+                <DataGridTextColumn Header="Inner" Binding="{Binding Path=Inner}" Width="100"/>
+                <DataGridTextColumn Header="Outer" Binding="{Binding Path=Outer}" Width="100"/>
+                <DataGridTextColumn Header="X offset" Binding="{Binding Path=xCentre}" Width="100"/>
+                <DataGridTextColumn Header="Y offset" Binding="{Binding Path=yCentre}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Name:"
+                       Grid.Row="0"/>
+            <TextBox x:Name="NameTxtbx"
+                          Grid.Row="1"
+                          TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="36" Width="120" Margin="0,2"/>
+
+            <TextBlock Text="Inner Radius:"
+                       Grid.Row="2"/>
+            <TextBox x:Name="InnerTxtbx"
+                          Grid.Row="3"
+                          MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="36" Width="120" Margin="0,2"/>
+
+            <TextBlock Text="Outer Radius:"
+                       Grid.Row="4"/>
+            <TextBox x:Name="OuterTxtbx"
+                          Grid.Row="5"
+                          MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="36" Width="120" Margin="0,2"/>
+
+            <TextBlock Text="x Centre:"
+                       Grid.Row="6"/>
+            <TextBox x:Name="xcTxtbx"
+                          Grid.Row="7"
+                          MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="36" Width="120" Margin="0,2"/>
+
+            <TextBlock Text="y Centre:"
+                       Grid.Row="8"/>
+            <TextBox x:Name="ycTxtbx"
+                          Grid.Row="9"
+                          MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="36" Width="120" Margin="0,2"/>
         
-        <ListView x:Name="DetectorListView"
-                  Grid.Row="0" Grid.Column="0" Grid.RowSpan="12"
-                  Width="Auto" Margin="0,0,5,0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" MouseEnter="DetectorListView_MouseEnter" MouseLeave="DetectorListView_MouseLeave">
-            <ListView.View>
-                <GridView x:Name="DetectorListGrid" AllowsColumnReorder="False">
-                    <l:FixedWidthColumn FixedWidth ="25">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader HorizontalContentAlignment="Center"/>
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Rectangle Width="10" Height="10" Fill="{Binding Path=ColBrush}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </l:FixedWidthColumn>
-                    <l:FixedWidthColumn FixedWidth ="110" DisplayMemberBinding="{Binding Name}">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader Content="Name" HorizontalContentAlignment="Left"/>
-                        </GridViewColumn.Header>
-                    </l:FixedWidthColumn>
-                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding Inner}">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader Content="Inner" HorizontalContentAlignment="Left"/>
-                        </GridViewColumn.Header>
-                    </l:FixedWidthColumn>
-                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding Outer}">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader Content="Outer" HorizontalContentAlignment="Left"/>
-                        </GridViewColumn.Header>
-                    </l:FixedWidthColumn>
-                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding xCentre}">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader Content="x Centre" HorizontalContentAlignment="Left"/>
-                        </GridViewColumn.Header>
-                    </l:FixedWidthColumn>
-                    <l:FixedWidthColumn FixedWidth ="66" DisplayMemberBinding="{Binding yCentre}">
-                        <GridViewColumn.Header>
-                            <GridViewColumnHeader Content="y Centre" HorizontalContentAlignment="Left"/>
-                        </GridViewColumn.Header>
-                    </l:FixedWidthColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+            <Button x:Name="AddButton"
+                    Grid.Row="10"
+                    Content="Add" Click="AddButton_Click" Width="120" Height="36" Margin="0,2"/>
 
-        <TextBlock Text="Name:"
-                   Grid.Row="0" Grid.Column="1"/>
-        <t:ErrTextBox x:Name="NameTxtbx" Text="Detector1"
-                      Grid.Row="1" Grid.Column="1"
-                      TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
-
-        <TextBlock Text="Inner Radius:"
-                   Grid.Row="2" Grid.Column="1"/>
-        <t:ErrTextBox x:Name="InnerTxtbx" Text="0"
-                      Grid.Row="3" Grid.Column="1"
-                      MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
-
-        <TextBlock Text="Outer Radius:"
-                   Grid.Row="4" Grid.Column="1"/>
-        <t:ErrTextBox x:Name="OuterTxtbx" Text="30"
-                      Grid.Row="5" Grid.Column="1"
-                      MaskNameSpace:Masking.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
-
-        <TextBlock Text="x Centre:"
-                   Grid.Row="6" Grid.Column="1"/>
-        <t:ErrTextBox x:Name="xcTxtbx" Text="0"
-                      Grid.Row="7" Grid.Column="1"
-                      MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
-
-        <TextBlock Text="y Centre:"
-                   Grid.Row="8" Grid.Column="1"/>
-        <t:ErrTextBox x:Name="ycTxtbx" Text="0"
-                      Grid.Row="9" Grid.Column="1"
-                      MaskNameSpace:Masking.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" GotFocus="tBox_GotFocus" Height="22" Width="75" Margin="0,2"/>
-        
-        <Button x:Name="AddButton"
-                Grid.Row="10" Grid.Column="1"
-                Content="Add" Click="AddButton_Click" Width="75" Height="24" Margin="0,2"/>
-
-        <Button x:Name="DeleteButton" 
-                Grid.Row="11" Grid.Column="1"
-                Content="Delete" Click="DeleteButton_Click" Width="75" Height="24" Margin="0,2"/>
+            <Button x:Name="DeleteButton" 
+                    Grid.Row="11"
+                    Content="Delete" Click="DeleteButton_Click" Width="120" Height="36" Margin="0,2"/>
+            
+        </Grid>
 
     </Grid>
 
-</Window>
+</metro:Window>

@@ -29,7 +29,7 @@ using ColourGenerator;
 
 namespace GPUTEMSTEMSimulation
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Elysium.Controls.Window
     {
 
         private void ComboBoxSelectionChanged1(object sender, SelectionChangedEventArgs e)
@@ -397,7 +397,7 @@ namespace GPUTEMSTEMSimulation
             CB.SelectedIndex = index;
             if (index != -1) // Later, might want to check for index the same as before
             {
-                mCL.SetDevice(CB.SelectedIndex);
+                mCL.setCLdev(CB.SelectedIndex);
                 //CB.IsEnabled = false;
 				SimulateImageButton.IsEnabled = false;
             }
@@ -496,7 +496,17 @@ namespace GPUTEMSTEMSimulation
 				var result = MessageBox.Show("Aperture should not be zero, do you want to continue?", "Continue?", MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
 				return result.Equals(MessageBoxResult.Yes);
 			}
-			else return true;
+            if (!CBED_posValid && select_CBED)
+            {
+                var result = MessageBox.Show("CBED probe position outside simulated region", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            if (ToggleFD.IsChecked == true && !goodfinite)
+            {
+                var result = MessageBox.Show("Incorrect finite difference settings", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+			return true;
 		}
 
 		private bool TestImagePrerequisites()
@@ -508,5 +518,75 @@ namespace GPUTEMSTEMSimulation
 			}
 			else return true;
 		}
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            cancellationTokenSource.Cancel();
+        }
+
+        private void FiniteValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            if (text.Length < 1 || text == ".")
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodfinite = false;
+            }
+            else
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                goodfinite = goodfinite && true;
+            }
+        }
+
+        //private void CBEDValidCheck(object sender, TextCompositionEventArgs e)
+        private void CBEDValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+
+            float lower;
+            float upper;
+            var isx = false;
+
+            if (tbox == CBEDxpos)
+            {
+                lower = SimRegion.xStart;
+                upper = SimRegion.xFinish;
+                isx = true;
+            }
+            else if (tbox == CBEDypos)
+            {
+                lower = SimRegion.yStart;
+                upper = SimRegion.yFinish;
+            }
+            else
+                return;
+
+            var text = tbox.Text;
+
+            if (text.Length < 1 || text == ".")
+                CBED_posValid = false;
+            else
+                CBED_posValid = true;
+
+            if (CBED_posValid)
+            {
+                var pos = Convert.ToSingle(text);
+
+                if (isx)
+                    CBED_xpos = pos;
+                else
+                    CBED_xpos = pos;
+
+                CBED_posValid = pos >= lower && pos <= upper;
+            }
+
+            if (!CBED_posValid)
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            else
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+        }
     }
 }

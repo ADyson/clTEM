@@ -1,7 +1,11 @@
 ﻿<ResourceDictionary x:Class="GPUTEMSTEMSimulation.resourceDictionary"
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:t="clr-namespace:ErrTextBox">
+                    xmlns:metro="http://schemas.codeplex.com/elysium">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colours.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
 
     <ControlTemplate x:Key="gbox" TargetType="GroupBox">
         <Grid>
@@ -9,72 +13,133 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" BorderThickness="0,0,1,0" BorderBrush="PaleGoldenrod" Background="WhiteSmoke">
-                <Label Foreground="Black" HorizontalAlignment="Center" FontFamily="Calibri">
-                    <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
-                </Label>
+            <Border Grid.Row="0" BorderThickness="0,0,2,0" BorderBrush="{DynamicResource PanelBackground}" Background="{DynamicResource PanelDark}">
+                <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="{DynamicResource Accent}">
+                    <TextBlock HorizontalAlignment="Center" Margin="5">
+                        <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
+                    </TextBlock>
+                </Border>
             </Border>
-            <Border Grid.Row="1" BorderThickness="0,0,1,1" BorderBrush="PaleGoldenrod" Background="Snow">
+            <Border Grid.Row="1" BorderThickness="0,0,2,0" Background="{DynamicResource PanelDark}">
                 <ContentPresenter Margin="4" />
             </Border>
         </Grid>
     </ControlTemplate>
 
-    <Style
-        x:Key="ButtonFocusVisual">
-        <Setter
-            Property="Control.Template">
-            <Setter.Value>
-                <ControlTemplate>
-                    <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+
+
+
+    <Style x:Key="StandardDataGrid" TargetType="DataGrid">
+        <Setter Property="SelectionUnit" Value="Cell"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource PanelDark}"/>
+        <Style.Resources>
+            <Style x:Key="ColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
+                <Setter Property="Width" Value="8"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Cursor" Value="SizeWE"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Thumb}">
+                            <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="{x:Type DataGridColumnHeader}">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="MinWidth" Value="120"/>
+                <Setter Property="MinHeight" Value="28"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                            <Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="BackgroundBorder" Grid.ColumnSpan="2" Background="{DynamicResource PanelDark}"/>
+                                    <TextBlock x:Name="HeaderText" Foreground="{DynamicResource TextColourLight}" FontSize="14" FontWeight="SemiBold">
+                                        <ContentPresenter Margin="6,3,6,3" VerticalAlignment="Center"/>
+                                    </TextBlock>
+                                    <Path x:Name="SortArrow" Visibility="Collapsed" Data="M0,0 L1,0 0.5,1 z" Stretch="Fill" 
+                                      Grid.Column="1" Width="8" Height="6" Fill="{DynamicResource Accent}" Margin="0,0,8,0" 
+                                      VerticalAlignment="Center" RenderTransformOrigin="0.5,0.4" />
+                                </Grid>
+                                <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{StaticResource ColumnHeaderGripperStyle}"/>
+                                <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Style="{StaticResource ColumnHeaderGripperStyle}"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="SortDirection" Value="{x:Null}">
+                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{DynamicResource Accent}"/>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="true" />
+                                        <Condition Property="SortDirection" Value="{x:Null}" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{StaticResource ButtonHighlight}"/>
+                                    <Setter TargetName="HeaderText" Property="Foreground" Value="{StaticResource TextColourDark}"/>
+                                </MultiTrigger>
+                                <Trigger Property="SortDirection" Value="Ascending">
+                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="SortArrow" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="180"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="SortDirection" Value="Descending">
+                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="DisplayIndex" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" TargetName="PART_LeftHeaderGripper"></Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="{x:Type DataGridCell}">
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="MinHeight" Value="28" />
+                <Setter Property="Foreground" Value="{DynamicResource TextColourLight}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                            <Border Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                <ContentPresenter Margin="6,3,6,3" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <Style TargetType="{x:Type DataGridRow}">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+        </Style.Resources>
     </Style>
 
-    <Style x:Key="MetroButton" TargetType="{x:Type Button}">
-        <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
-        <Setter Property="Background" Value="#EEEEEEEE"/>
-        <Setter Property="Foreground" Value="Black"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="5 2"/>
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="LightGray" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <Grid>
-                        <Border
-                                x:Name="Border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" />
 
-                        <ContentPresenter
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                Margin="{TemplateBinding Padding}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                RecognizesAccessKey="True" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Background" Value="PaleGoldenrod"/>
-                            <Setter Property="Foreground" Value="Black"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="LightSkyBlue"/>
-                            <Setter Property="Margin" Value="2 1" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="#ADADAD"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+
 </ResourceDictionary>

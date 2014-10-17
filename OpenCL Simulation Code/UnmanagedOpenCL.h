@@ -9,51 +9,50 @@
 #include "clState.h"
 #include <memory>
 
-
 #pragma unmanaged
+
 
 typedef std::unique_ptr<TEMSimulation> SimulationPtr;
 
+
 struct AtomParameterisation
 {
-	float a,b,c,d,e,f,g,h,i,j,k,l;
+	float a, b, c, d, e, f, g, h, i, j, k, l;
 };
 
 
 class UnmanagedOpenCL
 {
 public:
-	// Structure Stuff
+	UnmanagedOpenCL();
+	~UnmanagedOpenCL();
+
+	void setCLdev(int i); //SetDevice
+	int getCLdevCount();
+	std::string getCLdevString(int i, bool getShort);
+	uint64_t getCLdevGlobalMemory();
+	size_t getCLMemoryUsed(); //MemoryUsed
+
+	int importStructure(std::string filepath); //SetupStructure
+	int uploadParameterisation();
+
+	void doMultisliceStep(int stepno, int steps, int waves);
+
+	void setCTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang);
+	void setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
+
+	void initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
+	void initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD,float dz, int full3dints, int waves);
+
+	void initialiseSTEMWaveFunction(float posx, float posy, int wave);
+
 	bool GotStruct;
-
 	bool GotDevice;
-
 
 	MultisliceStructure* Structure;
 	SimulationPtr TS;
 
-	TEMParameters* temparams;
-	STEMParameters* stemparams;
+	TEMParameters* TEMParams;
+	STEMParameters* STEMParams;
 
-	// Methods
-	int SetupStructure(std::string filepath);
-	int UploadParameterisation();
-
-	void SetParamsTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang);
-	void SetParamsSTEM(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
-
-	void InitialiseSimulation(int resolution, bool Full3D, float dz, int full3dints);
-	void InitialiseReSizedSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
-	void InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints);
-	void MultisliceStep(int stepno, int steps);
-	void MakeSTEMWaveFunction(float posx, float posy);
-
-	void SetDevice(int index);
-	size_t MemoryUsed();
-
-	UnmanagedOpenCL();
-	~UnmanagedOpenCL();
-
-	int getCLdevCount();
-	std::string getCLdevString(int i, bool getShort);
 };

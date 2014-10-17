@@ -113,6 +113,9 @@
     <Reference Include="BitMiracle.LibTiff.NET">
       <HintPath>..\BitMiracle.LibTiff.NET.dll</HintPath>
     </Reference>
+    <Reference Include="Elysium">
+      <HintPath>..\packages\Elysium.Theme.2.0.4\lib\net45\Elysium.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
@@ -142,6 +145,7 @@
     <Compile Include="AreaDialog.xaml.cs">
       <DependentUpon>AreaDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Shuffler.cs" />
     <Compile Include="Utils\Areas.cs" />
     <Compile Include="Utils\DetectorItem.cs" />
     <Compile Include="Utils\DisplayTab.cs" />
@@ -186,6 +190,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Utils\Colours.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -205,6 +213,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
+using Elysium;
 
 namespace GPU_TEM_STEM_Simulation
 {
@@ -12,6 +14,5 @@ namespace GPU_TEM_STEM_Simulation
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
-    {
-    }
+    { }
 }

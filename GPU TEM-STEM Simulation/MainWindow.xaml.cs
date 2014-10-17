@@ -34,7 +34,7 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Elysium.Controls.Window
     {
         bool IsResolutionSet = false;
         bool HaveStructure = false;
@@ -46,8 +46,15 @@ namespace GPUTEMSTEMSimulation
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
 
+        bool goodfinite = true;
+
+        bool CBED_posValid = true;
         float CBED_xpos = 0;
         float CBED_ypos = 0;
+
+        bool select_TEM = false;
+        bool select_STEM = false;
+        bool select_CBED = false;
 
         int Resolution;
         int CurrentResolution = 0;
@@ -60,9 +67,13 @@ namespace GPUTEMSTEMSimulation
         TEMParams ImagingParameters;
         TEMParams ProbeParameters;
 
+//<<<<<<< HEAD
+//
+//=======
         // Simulation Options (updated before simulation call)
         float dz = 1.0f;
         int integrals = 10;
+//>>>>>>> Elysium
 
         /// <summary>
         /// Cancel event to halt calculation.
@@ -102,8 +113,17 @@ namespace GPUTEMSTEMSimulation
         public MainWindow()
         {
             InitializeComponent();
+
+            //add event handlers here so they aren't called when creating controls
+            CBEDxpos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
+            CBEDypos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
+
+
+            Full3DIntegrals.TextChanged += new TextChangedEventHandler(FiniteValidCheck);
+            SliceDz.TextChanged += new TextChangedEventHandler(FiniteValidCheck);
+
 			CancelButton.IsEnabled = false;
-            
+
 			// add constant tabs to UI
 			LeftTab.Items.Add(CTEMDisplay.Tab);
 			LeftTab.Items.Add(EWDisplay.Tab);
@@ -180,12 +200,12 @@ namespace GPUTEMSTEMSimulation
             if (result == true)
             {
                 var fName = openDialog.FileName;
-                fileNameLabel.Content = System.IO.Path.GetFileName(fName);
+                fileNameLabel.Text = System.IO.Path.GetFileName(fName);
                 fileNameLabel.ToolTip = fName;
 
                 // Now pass filename through to unmanaged where atoms can be imported inside structure class...
-                mCL.ImportStructure(openDialog.FileName);
-                mCL.UploadParameterisation();
+                mCL.importStructure(openDialog.FileName);
+                mCL.uploadParameterisation();
 
                 // Update some dialogs if everything went OK.
                 var Len = 0;
@@ -196,7 +216,7 @@ namespace GPUTEMSTEMSimulation
                 float MaxY = 0;
                 float MaxZ = 0;
 
-                mCL.GetStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
+                mCL.getStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
 
                 HaveStructure = true;
 
@@ -226,7 +246,7 @@ namespace GPUTEMSTEMSimulation
                 var task = Task.Factory.StartNew(() =>
                 {
                     // This is where we start sorting the atoms in the background ready to be processed later...
-                    mCL.SortStructure(false);
+                    mCL.sortStructure(false);
                     return 0;
                 },cancellationToken);
 
@@ -238,7 +258,7 @@ namespace GPUTEMSTEMSimulation
 
             }
         }
-        
+
         private void ImportUnitCellButton(object sender, RoutedEventArgs e)
         {
             // No idea what to do here just yet, will just have to programatically make potentials based on unit cell and number of unit cells in each direction.
@@ -247,36 +267,14 @@ namespace GPUTEMSTEMSimulation
         // Simulation Button
         private void SimulationButton(object sender, RoutedEventArgs e)
         {
+            select_TEM = TEMRadioButton.IsChecked == true;
+            select_STEM = STEMRadioButton.IsChecked == true;
+            select_CBED = CBEDRadioButton.IsChecked == true;
+
 			if (!TestSimulationPrerequisites())
 				return;
 
-            var select_TEM = TEMRadioButton.IsChecked == true;
-            var select_STEM = STEMRadioButton.IsChecked == true;
-            var select_CBED = CBEDRadioButton.IsChecked == true;
-
-            if (select_CBED)
-            {
-                CBED_xpos = Convert.ToInt32(CBEDxpos.Text);
-                CBED_ypos = Convert.ToInt32(CBEDypos.Text);
-
-                var validCBED = true;
-
-                if (CBED_xpos < SimRegion.xStart || CBED_xpos > SimRegion.xFinish)
-                {
-                    CBEDxpos.RaiseTapEvent();
-                    validCBED = false;
-                }
-                if (CBED_ypos < SimRegion.yStart || CBED_ypos > SimRegion.yFinish)
-                {
-                    CBEDypos.RaiseTapEvent();
-                    validCBED = false;
-                }
-                if (!validCBED)
-                {
-					var result = MessageBox.Show("CBED Probe position outside simulated region", "", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
+            Application.Current.Resources["Accent"] = Application.Current.Resources["ErrorColOrig"];
 
             CurrentResolution = Resolution;
             CurrentPixelScale = pixelScale;
@@ -311,7 +309,6 @@ namespace GPUTEMSTEMSimulation
 
 
 
-
 			CancelButton.IsEnabled = false;
             var task = Task.Factory.StartNew(() =>
             {
@@ -320,12 +317,12 @@ namespace GPUTEMSTEMSimulation
                 var timer = new Stopwatch();
 
                 // Upload Simulation Parameters to c++ class
-                mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical, ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
+                mCL.setCTEMParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, ImagingParameters.kilovoltage, ImagingParameters.spherical, ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
-                mCL.SetStemParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical, ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
+                mCL.setSTEMParams(ProbeParameters.df, ProbeParameters.astigmag, ProbeParameters.astigang, ProbeParameters.kilovoltage, ProbeParameters.spherical, ProbeParameters.beta, ProbeParameters.delta, ProbeParameters.aperturemrad);
 
 				SimulationMethod(select_TEM, select_STEM, select_CBED, TDSruns, ref progressReporter, ref timer, ref cancellationToken);
-                
+
             }, cancellationToken);
 
             // This runs on UI Thread so can access UI, probably better way of doing image though.
@@ -369,9 +366,10 @@ namespace GPUTEMSTEMSimulation
                     SimulateImageButton.IsEnabled = true;
                 }
 
+                Application.Current.Resources["Accent"] = Application.Current.Resources["AccentOrig"];
                 SimulateEWButton.IsEnabled = true;
             });
-        
+
         }
 
 		private void UpdateEWImage()
@@ -384,10 +382,10 @@ namespace GPUTEMSTEMSimulation
 
 			// When its completed we want to get data to c# for displaying in an image...
 			EWDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
-			mCL.GetEWImage(EWDisplay.ImageData, CurrentResolution);
+			mCL.getEWImage(EWDisplay.ImageData, CurrentResolution);
 
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (EWDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -398,8 +396,8 @@ namespace GPUTEMSTEMSimulation
 			var arraySize = stride * EWDisplay.ImgBmp.PixelHeight;
 			var pixelArray = new byte[arraySize];
 
-			var min = mCL.GetEWMin();
-			var max = mCL.GetEWMax();
+			var min = mCL.getEWMin();
+			var max = mCL.getEWMax();
 
 			if (min == max)
 				return;
@@ -426,10 +424,10 @@ namespace GPUTEMSTEMSimulation
 
             // When its completed we want to get data to c# for displaying in an image...
             EWDisplay2.ImageData = new float[CurrentResolution * CurrentResolution];
-            mCL.GetEWImage2(EWDisplay2.ImageData, CurrentResolution);
+            mCL.getEWImage2(EWDisplay2.ImageData, CurrentResolution);
 
-            min = mCL.GetEWMin2();
-            max = mCL.GetEWMax2();
+            min = mCL.getEWMin2();
+            max = mCL.getEWMax2();
 
             if (min == max)
                 return;
@@ -468,9 +466,12 @@ namespace GPUTEMSTEMSimulation
 			}
 			else if (select_STEM)
 			{
+                UInt64 mem = mCL.getCLdevGlobalMemory();
+                UInt64 multi64 = mem / ((UInt64)CurrentResolution * (UInt64)CurrentResolution * 8 * 4);
+                int multistem = (int)multi64;
                 DiffDisplay.PixelScaleX = pixelScale;
                 DiffDisplay.PixelScaleY = pixelScale;
-				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct);
+				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct, multistem);
 			}
 			else if (select_CBED)
 			{
@@ -478,7 +479,7 @@ namespace GPUTEMSTEMSimulation
                 DiffDisplay.PixelScaleY = pixelScale;
 				SimulateCBED(TDSruns, ref progressReporter,ref timer, ref ct);
 			}
-		}	
+		}
 
 		private void UI_UpdateSimulationProgress(float ms, int NumberOfSlices, int runs, int j, int i, int mem)
 		{
@@ -488,8 +489,8 @@ namespace GPUTEMSTEMSimulation
 			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(j) /
 								Convert.ToSingle(runs));
-			this.TimerMessage.Content = ms.ToString() + " ms";
-			this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
+			this.TimerMessage.Text = ms.ToString() + " ms";
+			this.MemUsageLabel.Text = mem / (1024 * 1024) + " MB";
 		}
 
 		private void UpdateDiffractionImage()
@@ -497,14 +498,14 @@ namespace GPUTEMSTEMSimulation
 
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
-			
+
 			DiffDisplay.ImgBmp = new WriteableBitmap(CurrentResolution, CurrentResolution, 96, 96, PixelFormats.Bgr32, null);
 			DiffDisplay.tImage.Source = DiffDisplay.ImgBmp;
 
 			DiffDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
-			mCL.GetDiffImage(DiffDisplay.ImageData, CurrentResolution);
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			mCL.getDiffImage(DiffDisplay.ImageData, CurrentResolution);
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -515,8 +516,8 @@ namespace GPUTEMSTEMSimulation
 			var arraySize2 = stride2 * DiffDisplay.ImgBmp.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
-			var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
+			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.getDiffMin()+1.0f)));
+			var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.getDiffMax()+1.0f)));
 
 			if (min2 == max2)
 				return;
@@ -547,12 +548,12 @@ namespace GPUTEMSTEMSimulation
 
 			DiffDisplay.xDim = CurrentResolution;
 			DiffDisplay.yDim = CurrentResolution;
-			DiffDisplay.ImageData = TDSImage;	
-	
+			DiffDisplay.ImageData = TDSImage;
+
             DiffDisplay.tCanvas.Width = CurrentResolution;
             DiffDisplay.tCanvas.Height = CurrentResolution;
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel2 = (DiffDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -563,8 +564,8 @@ namespace GPUTEMSTEMSimulation
 			var arraySize2 = stride2 * DiffDisplay.ImgBmp.PixelHeight;
 			var pixelArray2 = new byte[arraySize2];
 
-			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMin()+1.0f)));
-            var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.GetDiffMax()+1.0f)));
+			var min2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.getDiffMin()+1.0f)));
+            var max2 = Convert.ToSingle(Math.Log(Convert.ToDouble(mCL.getDiffMax()+1.0f)));
 
             for (var row = 0; row < DiffDisplay.ImgBmp.PixelHeight; row++)
                 for (var col = 0; col < DiffDisplay.ImgBmp.PixelWidth; col++)
@@ -587,16 +588,16 @@ namespace GPUTEMSTEMSimulation
 
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-		    
-		    mCL.InitialiseSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD,dz,integrals);
+
+		    mCL.initialiseCTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD,dz,integrals);
 
 			// Reset atoms incase TDS has been used
-			mCL.SortStructure(false);
+			mCL.sortStructure(false);
 
 			// Use Background worker to progress through each step
 			var NumberOfSlices = 0;
-			mCL.GetNumberSlices(ref NumberOfSlices,isFD);
-	
+			mCL.getNumberSlices(ref NumberOfSlices, isFD);
+
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 			for (var i = 1; i <= NumberOfSlices; i++)
 			{
@@ -604,10 +605,10 @@ namespace GPUTEMSTEMSimulation
 					break;
 
 				timer.Start();
-				mCL.MultisliceStep(i, NumberOfSlices);
+				mCL.doMultisliceStep(i, NumberOfSlices);
 				timer.Stop();
-				var mem = mCL.MemoryUsed();
-				// Report progress of the work. 
+				var mem = mCL.getCLMemoryUsed();
+				// Report progress of the work.
 
 				float ms = timer.ElapsedMilliseconds;
 				progressReporter.ReportProgress((val) =>
@@ -620,21 +621,17 @@ namespace GPUTEMSTEMSimulation
 
 		}
 
-		private void SimulateSTEM(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+		private void SimulateSTEM(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct, int multistem)
 		{
 			LockedDetectors = Detectors;
 			LockedArea = STEMRegion;
 
-            foreach (var dt in LockedDetectors)
-            {
-                dt.PixelScaleX = LockedArea.getxInterval;
-                dt.PixelScaleY = LockedArea.getyInterval;
-
-				dt.xStartPosition = STEMRegion.xStart;
-				dt.yStartPosition = STEMRegion.yStart;
-
-                dt.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
-            }
+			foreach (DetectorItem dt in LockedDetectors)
+			{
+				dt.PixelScaleX = LockedArea.getxInterval;
+				dt.PixelScaleY = LockedArea.getyInterval;
+				dt.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+			}
 
 			if (LockedDetectors.Count == 0)
 			{
@@ -642,132 +639,176 @@ namespace GPUTEMSTEMSimulation
 				return;
 			}
 
-		    if (LockedArea != null)
-		    {
-		        var numPix = LockedArea.xPixels * LockedArea.yPixels;
-		        var pix = 0;
+			int numPix = LockedArea.xPixels * LockedArea.yPixels;
+			int pix = 0;
 
-		        foreach (var i in LockedDetectors)
-		        {
-		            i.ImageData = new float[numPix];
-		            i.Min = float.MaxValue;
-		            i.Max = float.MinValue;
-		        }
+			foreach (DetectorItem i in LockedDetectors)
+			{
+				i.ImageData = new float[numPix];
+				i.Min = float.MaxValue;
+				i.Max = float.MinValue;
+			}
 
-		        var runs = 1;
-		        if (doTDS_STEM)
-		        {
-		            runs = TDSruns;
-		        }
+			int runs = 1;
+            if (doTDS_STEM)
+			{
+				runs = TDSruns;
+			}
 
-		        numPix *= runs;
+			int totalPix = numPix * runs;
 
-		        mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,dz,integrals);
+            mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,isFD, dz, integrals, multistem);
 
-		        var xInterval = LockedArea.getxInterval;
-		        var yInterval = LockedArea.getyInterval;
+			float xInterval = LockedArea.getxInterval;
+			float yInterval = LockedArea.getyInterval;
 
-		        for (var posY = 0; posY < LockedArea.yPixels; posY++)
-		        {
-		            var fCoordy = (LockedArea.yStart + posY * yInterval - SimRegion.yStart) / pixelScale;
+			//List<float[]> TDSImages = new List<float[]>();
+			List<float> fCoordxs = new List<float>();
 
-		            for (var posX = 0; posX < LockedArea.xPixels; posX++)
-		            {
-		                TDSImage = new float[CurrentResolution * CurrentResolution];
 
-		                for (var j = 0; j < runs; j++)
-		                {
-		                    // if TDS was used last atoms are in wrong place and need resetting via same function
-		                    // if (TDS)
-		                    mCL.SortStructure(doTDS_STEM);
+			List<Tuple<Int32, Int32>> Pixels = new List<Tuple<Int32, Int32>>();
 
-		                    var fCoordx = (LockedArea.xStart + posX * xInterval - SimRegion.xStart) / pixelScale;
+			for (int posY = 0; posY < LockedArea.yPixels; posY++)
+			{
+				for (int posX = 0; posX < LockedArea.xPixels; posX++)
+				{
+					Pixels.Add(new Tuple<Int32,Int32>(posX, posY));
+				}
+			}
 
-		                    mCL.MakeSTEMWaveFunction(fCoordx, fCoordy);
+			for (int j = 0; j < runs; j++)
+			{
+                Shuffler.Shuffle<Tuple<Int32, Int32>>(Pixels);
 
-		                    // Use Background worker to progress through each step
-		                    var NumberOfSlices = 0;
-		                    mCL.GetNumberSlices(ref NumberOfSlices);
-		                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
-						
-		                    for (var i = 1; i <= NumberOfSlices; i++)
-		                    {
-		                        if (ct.IsCancellationRequested == true)
-		                            break;
+				// Reset image contrast limits for every run....
+				foreach (DetectorItem i in LockedDetectors)
+				{
+					i.Min = float.MaxValue;
+					i.Max = float.MinValue;
+				}
 
-		                        timer.Start();
-		                        mCL.MultisliceStep(i, NumberOfSlices);
-		                        timer.Stop();
-		                        var mem = mCL.MemoryUsed();
-		                        var ms = timer.ElapsedMilliseconds;
 
-		                        progressReporter.ReportProgress((val) =>
-		                        {
-		                            CancelButton.IsEnabled = true;
-		                            // Note: code passed to "ReportProgress" can access UI elements freely. 
-		                            UI_UpdateSimulationProgressSTEM(ms, numPix, pix, NumberOfSlices, i, mem);
-		                        }, i);
-		                    }
-		                    pix++;
 
-		                    if (ct.IsCancellationRequested == true)
-		                        break;
+				//for (int posY = 0; posY < LockedArea.yPixels * LockedArea.xPixels; posY+=multistem) // won't loop over end?
+				//{
+                int posY = 0;
+                int conPix = multistem;
+                // numPix
+                // multistem
+                while (posY < numPix)
+                {
+                    mCL.sortStructure(doTDS_STEM);
 
-		                    // After a complete run if TDS need to sum up the DIFF...
-		                    mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
-		                    // Sum it in C++ also for the stem pixel measurement...
-		                    mCL.AddTDS();
+                    int thisPosY = posY;
 
-		                    progressReporter.ReportProgress((val) =>
-		                    {
-		                        CancelButton.IsEnabled = false;
-		                        UpdateTDSImage();
-		                    }, j);
-		                }
+                    if (posY + multistem > numPix && posY + multistem - numPix + 1 < multistem)
+                    {
+                        conPix = numPix - posY;
+                        posY = numPix;
+                    }
+                    else
+                        posY += multistem;
 
-		                if (ct.IsCancellationRequested == true)
-		                    break;
 
-		                // loop through and get each STEM pixel for each detector at the same time
-		                foreach (DetectorItem i in LockedDetectors)
-		                {
-		                    var pixelVal = mCL.GetSTEMPixel(i.Inner, i.Outer, i.xCentre, i.yCentre);
+                    for (int i = 1; i <= conPix; i++)
+                    {
+                        mCL.initialiseSTEMWaveFunction(((LockedArea.xStart + Pixels[(thisPosY + i - 1)].Item1 * xInterval - SimRegion.xStart) / pixelScale),
+                            ((LockedArea.yStart + Pixels[(thisPosY + i - 1)].Item2 * yInterval - SimRegion.yStart) / pixelScale), i);
+                    }
 
-		                    i.ImageData[LockedArea.xPixels * posY + posX] = pixelVal;
+                    // Use Background worker to progress through each step
+                    int NumberOfSlices = 0;
+                    mCL.getNumberSlices(ref NumberOfSlices, isFD);
+                    // Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
-		                    if (pixelVal < i.Min)
-		                    {
-		                        i.Min = pixelVal;
-		                    }
-		                    if (pixelVal > i.Max)
-		                    {
-		                        i.Max = pixelVal;
-		                    }
+                    for (int i = 1; i <= NumberOfSlices; i++)
+                    {
+                        if (ct.IsCancellationRequested == true)
+                            break;
 
-		                }
+                        timer.Start();
+                        mCL.doMultisliceStep(i, NumberOfSlices, conPix);
+                        timer.Stop();
+                        int mem = mCL.getCLMemoryUsed();
+                        float ms = timer.ElapsedMilliseconds;
 
-		                progressReporter.ReportProgress((val) =>
-		                {
+                        progressReporter.ReportProgress((val) =>
+                        {
+                            CancelButton.IsEnabled = true;
+                            // Note: code passed to "ReportProgress" can access UI elements freely.
+                            UI_UpdateSimulationProgressSTEM(ms, totalPix, pix, NumberOfSlices, i, mem);
+                        }, i);
+                    }
+                    pix += conPix;
 
-		                    foreach (var i in LockedDetectors)
-		                    {
-		                        UpdateDetectorImage(i);
-		                    }
-		                }, posX);
+                    if (ct.IsCancellationRequested == true)
+                        break;
 
-		                // Reset TDS arrays after pixel values retrieved...
-		                mCL.ClearTDS();
+                    for (int i = 1; i <= conPix; i++)
+                    {
+                        // After a complete run if TDS need to sum up the DIFF...
+                        //mCL.AddTDSDiffImage(TDSImages[i-1], CurrentResolution,i);
+                        // Sum it in C++ also for the stem pixel measurement...
+                        //mCL.AddTDS(i);
+                        mCL.getSTEMDiff(i);
+                    }
 
-		            }
-		            if (ct.IsCancellationRequested == true)
-		                break;
-		        }
-		    }
+                    progressReporter.ReportProgress((val) =>
+                    {
+                        CancelButton.IsEnabled = false;
+                        //UpdateTDSImage();
+                    }, j);
+
+                    for (int p = 1; p <= conPix; p++)
+                    {
+                        // loop through and get each STEM pixel for each detector at the same time
+                        foreach (DetectorItem i in LockedDetectors)
+                        {
+                            float pixelVal = mCL.getSTEMPixel(i.Inner, i.Outer, i.xCentre, i.yCentre, p);
+                            float newVal = i.ImageData[LockedArea.xPixels * Pixels[thisPosY + p - 1].Item2 + Pixels[thisPosY + p - 1].Item1] + pixelVal;
+                            i.ImageData[LockedArea.xPixels * Pixels[thisPosY + p - 1].Item2 + Pixels[thisPosY + p - 1].Item1] = newVal;
+
+                            //if (j == runs-1) // Only use final values to set contrast limits
+                            //{
+                            if (newVal < i.Min)
+                            {
+                                i.Min = newVal;
+                            }
+                            if (newVal > i.Max)
+                            {
+                                i.Max = newVal;
+                            }
+                            //}
+
+                        }
+                    }
+
+                    // This will update display after each tds run...
+                    progressReporter.ReportProgress((val) =>
+                    {
+                        foreach (DetectorItem i in LockedDetectors)
+                        {
+                            UpdateDetectorImage(i);
+                        }
+                    }, thisPosY);
+
+                    if (ct.IsCancellationRequested == true)
+                        break;
+                }
+
+				// Reset TDS arrays after pixel values retrieved
+				//mCL.ClearTDS(multistem);
+
+				//fCoordxs.Clear();
+
+				if (ct.IsCancellationRequested == true)
+					break;
+			}
 		}
 
 		private void SimulateCBED(int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-			mCL.InitialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D,dz,integrals);
+			mCL.initialiseSTEMSimulation(CurrentResolution, SimRegion.xStart, SimRegion.yStart, SimRegion.xFinish, SimRegion.yFinish, isFull3D, isFD, dz, integrals,1);
 
 			//int posX = CurrentResolution / 2;
 			//int posY = CurrentResolution / 2;
@@ -777,7 +818,7 @@ namespace GPUTEMSTEMSimulation
 
 			// Use Background worker to progress through each step
 			var NumberOfSlices = 0;
-			mCL.GetNumberSlices(ref NumberOfSlices);
+            mCL.getNumberSlices(ref NumberOfSlices, isFD);
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 
 			var runs = 1;
@@ -790,8 +831,8 @@ namespace GPUTEMSTEMSimulation
 
 			for (var j = 0; j < runs; j++)
 			{
-				mCL.SortStructure(doTDS_CBED);
-                mCL.MakeSTEMWaveFunction(posx, posy);
+				mCL.sortStructure(doTDS_CBED);
+                mCL.initialiseSTEMWaveFunction(posx, posy,1);
 
 
 				for (var i = 1; i <= NumberOfSlices; i++)
@@ -800,25 +841,26 @@ namespace GPUTEMSTEMSimulation
 						break;
 
 					timer.Start();
-					mCL.MultisliceStep(i, NumberOfSlices);
+					mCL.doMultisliceStep(i, NumberOfSlices);
 					timer.Stop();
-					var mem = mCL.MemoryUsed();
+					var mem = mCL.getCLMemoryUsed();
 					float ms = timer.ElapsedMilliseconds;
 
-					// Report progress of the work. 
+					// Report progress of the work.
 					progressReporter.ReportProgress((val) =>
 					{
 						CancelButton.IsEnabled = true;
-						// Note: code passed to "ReportProgress" can access UI elements freely. 
+						// Note: code passed to "ReportProgress" can access UI elements freely.
 						UI_UpdateSimulationProgress(ms, NumberOfSlices, runs, j, i, mem);
 					}, i);
 				}
 
 				// After a complete run if TDS need to sum up the DIFF...
-				mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
+				//mCL.AddTDSDiffImage(TDSImage, CurrentResolution);
+                mCL.getDiffImage(TDSImage, CurrentResolution);
 
 				// Sum it in C++ also for the stem pixel measurement...
-				mCL.AddTDS();
+				//mCL.AddTDS();
 
 				if (ct.IsCancellationRequested == true)
 					break;
@@ -840,7 +882,7 @@ namespace GPUTEMSTEMSimulation
 
 			RenderOptions.SetBitmapScalingMode(i.tImage, BitmapScalingMode.NearestNeighbor);
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (i.ImgBmp.Format.BitsPerPixel + 7) / 8;
 			// Stride is bytes per pixel times the number of pixels.
 			// Stride is the byte width of a single rectangle row.
@@ -890,11 +932,11 @@ namespace GPUTEMSTEMSimulation
 			CTEMDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 
 			if (CCD != 0)
-				mCL.GetCTEMImage(CTEMDisplay.ImageData, CurrentResolution, dpp, binning, CCD);
+				mCL.getCTEMImage(CTEMDisplay.ImageData, CurrentResolution, dpp, binning, CCD);
 			else
-				mCL.GetCTEMImage(CTEMDisplay.ImageData, CurrentResolution);
+				mCL.getCTEMImage(CTEMDisplay.ImageData, CurrentResolution);
 
-			// Calculate the number of bytes per pixel (should be 4 for this format). 
+			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (CTEMDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
 			// Stride is bytes per pixel times the number of pixels.
@@ -905,8 +947,8 @@ namespace GPUTEMSTEMSimulation
 			var arraySize = stride * CTEMDisplay.ImgBmp.PixelHeight;
 			var pixelArray = new byte[arraySize];
 
-			var min = mCL.GetIMMin();
-			var max = mCL.GetIMMax();
+			var min = mCL.getCTEMMin();
+			var max = mCL.getCTEMMax();
 
 			if (min == max)
 				return;
@@ -927,7 +969,7 @@ namespace GPUTEMSTEMSimulation
 
 			CTEMDisplay.Tab.IsSelected = true;
 		}
-		
+
 		private void UI_UpdateSimulationProgressSTEM(float ms, int numPix, int pix, int NumberOfSlices, int i, int mem)
 		{
 			this.ProgressBar1.Value =
@@ -936,8 +978,8 @@ namespace GPUTEMSTEMSimulation
 			this.ProgressBar2.Value =
 				Convert.ToInt32(100 * Convert.ToSingle(pix) /
 								Convert.ToSingle(numPix));
-			this.TimerMessage.Content = ms.ToString() + " ms";
-			this.MemUsageLabel.Content = mem / (1024 * 1024) + " MB";
+			this.TimerMessage.Text = ms.ToString() + " ms";
+			this.MemUsageLabel.Text = mem / (1024 * 1024) + " MB";
 		}
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)
@@ -956,7 +998,7 @@ namespace GPUTEMSTEMSimulation
         }
 
 		private void SaveImageFromTabs(IEnumerable<DisplayTab> tabs)
-		{				
+		{
 			foreach (var dt in tabs)
 			{
 				if (dt.xDim != 0 || dt.yDim != 0)
@@ -1043,7 +1085,7 @@ namespace GPUTEMSTEMSimulation
 			//Disable simulate EW button for the duration
 			SimulateEWButton.IsEnabled = false;
 
-            mCL.SetTemParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, CurrentVoltage, ImagingParameters.spherical,
+            mCL.setCTEMParams(ImagingParameters.df, ImagingParameters.astigmag, ImagingParameters.astigang, CurrentVoltage, ImagingParameters.spherical,
                                    ImagingParameters.beta, ImagingParameters.delta, ImagingParameters.aperturemrad, ImagingParameters.astig2mag, ImagingParameters.astig2ang, ImagingParameters.b2mag, ImagingParameters.b2ang);
 
 			// Calculate Dose Per Pixel
@@ -1056,9 +1098,9 @@ namespace GPUTEMSTEMSimulation
 			var CCD = CCDCombo.SelectedIndex;
 
 			if (CCD != 0)
-				mCL.SimulateCTEMImage(CCD,binning);
+				mCL.simulateCTEM(CCD,binning);
 			else
-				mCL.SimulateCTEMImage();
+				mCL.simulateCTEM();
 
             //Update the displays
 			UpdateCTEMImage(dpp, binning, CCD);
@@ -1066,12 +1108,5 @@ namespace GPUTEMSTEMSimulation
 
 			SimulateEWButton.IsEnabled = true;
         }
-
-
-		private void Cancel_Click(object sender, RoutedEventArgs e)
-		{
-			cancellationTokenSource.Cancel();
-		}
-
     }
 }

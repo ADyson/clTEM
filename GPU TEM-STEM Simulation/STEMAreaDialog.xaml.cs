@@ -17,11 +17,23 @@ namespace GPUTEMSTEMSimulation
     /// <summary>
     /// Interaction logic for STEMAreaDialog.xaml
     /// </summary>
-    public partial class STEMAreaDialog : Window
+    public partial class STEMAreaDialog : Elysium.Controls.Window
     {
         public event EventHandler<StemAreaArgs> AddSTEMAreaEvent;
 
-        float simxStart, simyStart, simxFinish, simyFinish;
+        private float simxStart, simyStart, simxFinish, simyFinish;
+
+        private bool goodxpx = true;
+        private bool goodypx = true;
+        private bool goodxrange = true;
+        private bool goodyrange = true;
+
+        private int xpx;
+        private int ypx;
+        private float xstart;
+        private float xfinish;
+        private float ystart;
+        private float yfinish;
 
         public STEMAreaDialog(STEMArea Area, SimArea simArea)
         {
@@ -35,164 +47,36 @@ namespace GPUTEMSTEMSimulation
             xPxBox.Text = Area.xPixels.ToString();
             yPxBox.Text = Area.yPixels.ToString();
 
+            xstart = Area.xStart;
+            ystart = Area.yStart;
+            xfinish = Area.xFinish;
+            yfinish = Area.yFinish;
+
+            xpx = Area.xPixels;
+            ypx = Area.yPixels;
+
             simxStart = simArea.xStart;
             simxFinish = simArea.xFinish;
             simyStart = simArea.yStart;
             simyFinish = simArea.yFinish;
+
+            xPxBox.TextChanged += new TextChangedEventHandler(PixelValidCheck);
+            yPxBox.TextChanged += new TextChangedEventHandler(PixelValidCheck);
+            xStartBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            yStartBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            xFinishBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
+            yFinishBox.TextChanged += new TextChangedEventHandler(RangeValidCheck);
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-
-            string Sxs, Sxf, Sys, Syf, Sxp, Syp;
-            float xs, xf, ys, yf, xmin, xmax, ymin, ymax;
-            int xp, yp;
-            bool valid, xvalid, yvalid;
-
-            valid = xvalid = yvalid = true;
-            xmin = xmax = ymin = ymax = 0;
-            xp = yp = 0;
-            
-
-            Sxs = xStartBox.Text;
-            Sys = yStartBox.Text;
-            Sxf = xFinishBox.Text;
-            Syf = yFinishBox.Text;
-            Sxp = xPxBox.Text;
-            Syp = yPxBox.Text;
-
-            if (Sxp.Length == 0)
+            if (!goodxpx || !goodxrange || !goodypx || !goodyrange)
             {
-                xPxBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (Syp.Length == 0)
-            {
-                yPxBox.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (valid)
-            {
-                xp = Convert.ToInt32(Sxp);
-                yp = Convert.ToInt32(Syp);
-
-                if ( xp == 0 )
-                {
-                    xPxBox.RaiseTapEvent();
-                    valid = false;
-                }
-
-                if ( yp == 0 ) 
-                {
-                    yPxBox.RaiseTapEvent();
-                    valid = false;
-                }
-            }
-
-            if (Sxs.Length == 0)
-            {
-                xStartBox.RaiseTapEvent();
-                xvalid = false;
-            }
-
-            if (Sxf.Length == 0)
-            {
-                xFinishBox.RaiseTapEvent();
-                xvalid = false;
-            }
-
-            if (xvalid)
-            {
-                xs = Convert.ToSingle(Sxs);
-                xf = Convert.ToSingle(Sxf);
-
-                xmin = Math.Min(xs, xf);
-                xmax = Math.Max(xs, xf);
-
-                if (xs == xf)
-                {
-                    xStartBox.RaiseTapEvent();
-                    xFinishBox.RaiseTapEvent();
-                    xvalid = false;
-                }
-
-                if (xmin < simxStart || xmin > simxFinish)
-                {
-					if(xmin==xs)
-						xStartBox.RaiseTapEvent();
-					else if(xmin==xf)
-						xFinishBox.RaiseTapEvent();
-                    xvalid = false;
-                }
-
-                if (xmax < simxStart || xmax > simxFinish)
-                {
-					if (xmax == xs)
-						xStartBox.RaiseTapEvent();
-					else if (xmax == xf)
-						xFinishBox.RaiseTapEvent();
-
-                    xvalid = false;
-                }
-            }
-
-            if (Sys.Length == 0)
-            {
-                yStartBox.RaiseTapEvent();
-                yvalid = false;
-            }
-
-            if (Syf.Length == 0)
-            {
-                yFinishBox.RaiseTapEvent();
-                yvalid = false;
-            }
-
-            if (yvalid)
-            {
-                ys = Convert.ToSingle(Sys);
-                yf = Convert.ToSingle(Syf);
-
-                ymin = Math.Min(ys, yf);
-                ymax = Math.Max(ys, yf);
-
-                if (ys == yf)
-                {
-                    yStartBox.RaiseTapEvent();
-                    yFinishBox.RaiseTapEvent();
-                    yvalid = false;
-                }
-
-                if (ymin < simyStart || ymin > simyFinish)
-                {
-					if (ymin == ys)
-						yStartBox.RaiseTapEvent();
-					else if (ymax == yf)
-						yFinishBox.RaiseTapEvent();
-                    yvalid = false;
-                }
-
-                if (ymax < simyStart || ymax > simyFinish)
-                {
-					if (ymax == ys)
-						yStartBox.RaiseTapEvent();
-					else if (ymax == yf)
-						yFinishBox.RaiseTapEvent();
-                    yvalid = false;
-                }
-            }
-
-            if (!(valid && xvalid && yvalid))
+                //some sort error
                 return;
+            }
 
-            xStartBox.Text = xmin.ToString();
-            xFinishBox.Text = xmax.ToString();
-            yStartBox.Text = ymin.ToString();
-            yFinishBox.Text = ymax.ToString();
-
-            var temp = new STEMArea { xStart = xmin, xFinish = xmax, yStart = ymin, yFinish = ymax, xPixels = xp, yPixels = yp };
+            var temp = new STEMArea { xStart = xstart, xFinish = xfinish, yStart = ystart, yFinish = yfinish, xPixels = xpx, yPixels = ypx };
 
             AddSTEMAreaEvent(this, new StemAreaArgs(temp));
 
@@ -204,6 +88,118 @@ namespace GPUTEMSTEMSimulation
             var tBox = sender as TextBox;
             tBox.SelectAll();
         }
+
+        private void PixelValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            var goodpx = false;
+
+            if (text.Length < 1 || Convert.ToInt32(text) == 0)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodpx = false;
+            }
+            else
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                goodpx = true;
+            }
+
+            if (tbox == xPxBox)
+            {
+                if (!goodpx)
+                {
+                    goodxpx = false;
+                    return;
+                }
+                else
+                    goodxpx = true;
+                xpx = Convert.ToInt32(text);
+            }
+            else if (tbox == yPxBox)
+            {
+                if (!goodpx)
+                {
+                    goodypx = false;
+                    return;
+                }
+                else
+                    goodypx = true;
+                ypx = Convert.ToInt32(text);
+            }
+        }
+
+        private void RangeValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            if (tbox == xStartBox)
+            {
+                bool lt = true;
+                doRangeTest(text, ref xstart, ref xstart, ref xfinish, ref tbox, ref xFinishBox, simxStart, simxFinish, ref goodxrange, lt);
+            }
+            else if (tbox == xFinishBox)
+            {
+                bool lt = false;
+                doRangeTest(text, ref xfinish, ref xstart, ref xfinish, ref tbox, ref xStartBox, simxStart, simxFinish, ref goodxrange, lt);
+            }
+            else if (tbox == yStartBox)
+            {
+                bool lt = true;
+                doRangeTest(text, ref ystart, ref ystart, ref yfinish, ref tbox, ref yFinishBox, simyStart, simyFinish, ref goodyrange, lt);
+            }
+            else if (tbox == yFinishBox)
+            {
+                bool lt = false;
+                doRangeTest(text, ref yfinish, ref ystart, ref yfinish, ref tbox, ref yStartBox, simyStart, simyFinish, ref goodyrange, lt);
+            }
+            
+        }
+
+        private void doRangeTest(string text, ref float val, ref float start, ref float finish, ref TextBox tbox, ref TextBox otherbox, float min, float max, ref bool goodrange, bool lt)
+        {
+            tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            otherbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            if (text.Length < 1 || text == ".")
+            {
+                goodrange = false;
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                return;
+            }
+            else
+                goodrange = true;
+
+            val = Convert.ToSingle(text);
+
+            if (lt && val < min)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodrange = false;
+            }
+            else if (!lt && val > max)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodrange = false;
+            }
+
+            var valid = (start < finish) && !(finish > max && start > max) && !(start < min && finish < min);
+
+            if (!valid)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                otherbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodrange = false;
+            }
+            else if (goodrange)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                otherbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            }
+        }
+
     }
 
     public class StemAreaArgs : EventArgs

@@ -25,13 +25,26 @@ namespace GPUTEMSTEMSimulation
     /// Interaction logic for STEMDialog.xaml
     /// </summary>
 
-    public partial class STEMDetectorDialog : Window
+    public partial class STEMDetectorDialog : Elysium.Controls.Window
     {
         public event EventHandler<DetectorArgs> AddDetectorEvent;
         public event EventHandler<DetectorArgs> RemDetectorEvent;
 
         public List<DetectorItem> mainDetectors;
         int numDet;
+
+        // these are used for text input validation
+        private string dname;
+        private float din;
+        private float dout;
+        private float dxc;
+        private float dyc;
+
+        private bool isname = true;
+        private bool uniquename = true;
+        private bool goodradii = true;
+        private bool goodcent = true;
+
 
         public STEMDetectorDialog(List<DetectorItem> MainDet)
         {
@@ -42,79 +55,38 @@ namespace GPUTEMSTEMSimulation
             DetectorListView.ItemsSource = mainDetectors;
 
             numDet = mainDetectors.Count;
-			NameTxtbx.Text = "Detector" + (numDet + 1).ToString();
 
-            // needed so it doesnt default to on when too many items are selected
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
+			dname = "Detector" + (numDet + 1).ToString();
+            din = 0;
+            dout = 30;
+            dxc = 0;
+            dyc = 0;
+
+            NameTxtbx.Text = dname.ToString();
+            InnerTxtbx.Text = din.ToString();
+            OuterTxtbx.Text = dout.ToString();
+            xcTxtbx.Text = dxc.ToString();
+            ycTxtbx.Text = dyc.ToString();
+
+            // add event handlers
+            NameTxtbx.TextChanged += new TextChangedEventHandler(NameValidCheck);
+            InnerTxtbx.TextChanged += new TextChangedEventHandler(RadValidCheck);
+            OuterTxtbx.TextChanged += new TextChangedEventHandler(RadValidCheck);
+            xcTxtbx.TextChanged += new TextChangedEventHandler(CentValidCheck);
+            ycTxtbx.TextChanged += new TextChangedEventHandler(CentValidCheck);
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            // to check if entry is valid
-            var valid = true;
 
-            // get the strings from the textboxes
-            var Sname = NameTxtbx.Text;
-            var Sin = InnerTxtbx.Text;
-            var Sout = OuterTxtbx.Text;
-            var Sxc = xcTxtbx.Text;
-            var Syc = ycTxtbx.Text;
-
-            float Fin = 0;
-            float Fout = 0;
-            float Fxc = 0;
-            float Fyc = 0;
-
-            // must have name
-            if (Sname.Length == 0)
+            if (!goodradii || !isname || !uniquename)
             {
-                NameTxtbx.RaiseTapEvent();
-                valid = false;
-            }
-
-            // check for duplicate names
-            if (mainDetectors.Any(i => i.Name.Equals(Sname)))
-            {
-                valid = false;
-                NameTxtbx.RaiseTapEvent();
-            }
-
-            // convert inputs to floats (error checking should be handled by regular expression)
-            if (Sout.Length == 0)
-            {
-                OuterTxtbx.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (Sin.Length == 0)
-            {
-                InnerTxtbx.RaiseTapEvent();
-                valid = false;
-            }
-
-            if (!valid)
+                // show some sort of error
                 return;
-
-            Fout = Convert.ToSingle(Sout);
-            Fin = Convert.ToSingle(Sin);
-            Fxc = Convert.ToSingle(Sxc);
-            Fyc = Convert.ToSingle(Syc);
-
-            // check the outer radii is bigger than the inner
-            // could just auto place the larger number as outer?
-            if (Fin >= Fout)
-            {
-                InnerTxtbx.RaiseTapEvent();
-                OuterTxtbx.RaiseTapEvent();
-                valid = false;
             }
-
-            // if anything went wrong above, exit here
-            if (!valid)
-                return;
 
             // add everything to detector class
-            var temp = new DetectorItem(Sname) { Name = Sname, Inner = Fin, Outer = Fout, xCentre = Fxc, yCentre = Fyc, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
+            var temp = new DetectorItem(dname) { Name = dname, Inner = din, Outer = dout, xCentre = dxc, yCentre = dyc, Min = float.MaxValue, Max = 0, ColourIndex = mainDetectors.Count };
 
             // add to the listview
             mainDetectors.Add(temp);
@@ -154,29 +126,96 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
-
-        // To try and hide the scrollbar, maybe could be animated later?
-        private void DetectorListView_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (DetectorListView.Items.Count > 7) // bodged and hard coded
-            {
-                ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Visible);
-            }
-        }
-
-        private void DetectorListView_MouseLeave(object sender, MouseEventArgs e)
-        {
-            ScrollViewer.SetVerticalScrollBarVisibility(DetectorListView, ScrollBarVisibility.Hidden);
-            
-        }
-
         private void tBox_GotFocus(object sender, RoutedEventArgs e)
         {
             var tBox = sender as TextBox;
             tBox.SelectAll();
         }
 
+        private void NameValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            if (tbox != NameTxtbx)
+                return;
+
+            var valid = true;
+
+            dname = tbox.Text;
+            isname = dname.Length > 0;
+
+            if (mainDetectors.Any(i => i.Name.Equals(dname)))
+                uniquename = false;
+            else
+                uniquename = true;
+
+            valid = valid && isname && uniquename;
+
+            if (!valid)
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            else
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+
+        }
+
+        private void RadValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            if (text.Length < 1 || text == ".")
+            {
+                goodradii = false;
+                InnerTxtbx.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                OuterTxtbx.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                return;
+            }
+            else
+                goodradii = true;
+
+            if (tbox == InnerTxtbx)
+                din = Convert.ToSingle(text);
+            else if (tbox == OuterTxtbx)
+                dout = Convert.ToSingle(text);
+
+            goodradii = din < dout;
+
+            if (!goodradii)
+            {
+                InnerTxtbx.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                OuterTxtbx.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            }
+            else
+            {
+                InnerTxtbx.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                OuterTxtbx.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            }
+        }
+
+        private void CentValidCheck(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            var text = tbox.Text;
+
+            if (text.Length < 1 || text == "-" || text == ".")
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodcent = false;
+                return;
+            }
+            else
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                goodcent = true;
+            }
+
+            if (tbox == xcTxtbx)
+                dxc = Convert.ToSingle(text);
+            else if (tbox == ycTxtbx)
+                dyc = Convert.ToSingle(text);
+        }
     }
+
 
     public class DetectorArgs : EventArgs
     {

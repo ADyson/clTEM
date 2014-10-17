@@ -73,7 +73,8 @@ namespace GPUTEMSTEMSimulation
             var bc = new BrushConverter();
 
             Tab = new TabItem {Header = tName};
-            var tempGrid = new Grid {Background = (Brush) bc.ConvertFrom("#FFE5E5E5")};
+            var panelCol = (SolidColorBrush)Application.Current.Resources["PanelDark"];
+            var tempGrid = new Grid { Background = panelCol };
             var tempZoom = new ZoomBorder {ClipToBounds = true};
             tImage = new Image();
 
@@ -110,12 +111,12 @@ namespace GPUTEMSTEMSimulation
 			if (Reciprocal)
             {
                 xCoord.Content = ((1 / (xDim*PixelScaleX))*(p.X - xDim / 2)).ToString("f2") + "1/Å";
-                yCoord.Content = ((1 / (yDim*PixelScaleY))*(yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
+                yCoord.Content = ((1 / (yDim * PixelScaleY)) * (yDim / 2 - p.Y)).ToString("f2") + " 1/Å";
             }
             else
             {
-				xCoord.Content = (xStartPosition + PixelScaleX * p.X).ToString("f2") + " Å";
-				yCoord.Content = (yStartPosition + PixelScaleY * p.Y).ToString("f2") + " Å";
+                xCoord.Content = (xStartPosition + PixelScaleX * p.X).ToString("f2") + " Å";
+                yCoord.Content = (yStartPosition + PixelScaleY * p.Y).ToString("f2") + " Å";
             }
         }
 
