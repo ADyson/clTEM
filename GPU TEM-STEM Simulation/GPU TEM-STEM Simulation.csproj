@@ -145,6 +145,7 @@
     <Compile Include="AreaDialog.xaml.cs">
       <DependentUpon>AreaDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Shuffler.cs" />
     <Compile Include="Utils\Areas.cs" />
     <Compile Include="Utils\DetectorItem.cs" />
     <Compile Include="Utils\DisplayTab.cs" />

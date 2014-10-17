@@ -1,6 +1,6 @@
 #pragma once
 
-const char* InitialiseWavefunctionSource = 
+const char* InitialiseWavefunctionSource =
 "__kernel void clInitialiseWavefunction(__global float2* InputWavefunction, int width, int height, float value) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
@@ -20,7 +20,7 @@ const char* InitialiseWavefunctionSource =
 // Includes atoms onmultiple slices where they contribute
 // Could be alot faster will try other methods like one kernel for each atom type with pre tabulated potentials.
 // z is height of top of slice...
-const char* BinnedAtomicPotentialSource = 
+const char* BinnedAtomicPotentialSource =
 "__kernel void clBinnedAtomicPotential(__global float2* Potential, __global float* clAtomXPos, __global float* clAtomYPos, __global float* clAtomZPos, __global int* clAtomZNum, __constant float* clfParams, __global const int* clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
@@ -76,7 +76,7 @@ const char* BinnedAtomicPotentialSource =
 "}	\n"
 ;
 
-const char* BinnedAtomicPotentialSource2 = 
+const char* BinnedAtomicPotentialSource2 =
 "__kernel void clBinnedAtomicPotential(__global float2* Potential, __global float* clAtomXPos, __global float* clAtomYPos, __global float* clAtomZPos, __global int* clAtomZNum, __global float* clfParams, __local float* clfParamsl, __constant int* clBlockStartPositions, int width, int height, int slice, int slices, float z, float dz, float pixelscale, int xBlocks, int yBlocks, float MaxX, float MinX, float MaxY, float MinY, int loadBlocksX, int loadBlocksY, int loadSlicesZ, float sigma) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
@@ -132,7 +132,7 @@ const char* BinnedAtomicPotentialSource2 =
 "}	\n"
 ;
 
-const char* BandLimitSource = 
+const char* BandLimitSource =
 "__kernel void clBandLimit(__global float2* InputWavefunction, int width, int height, float kmax, __global float* kx, __global float* ky) \n"
 "{		\n"
 "	int xid = get_global_id(0);	\n"
@@ -147,7 +147,7 @@ const char* BandLimitSource =
 "}		\n"
 ;
 
-const char* fftShiftSource = 
+const char* fftShiftSource =
 "__kernel void clfftShift(__global const float2* Input, __global float2* Output, int width, int height) \n"
 "{        \n"
 "    //Get the work items ID \n"
@@ -163,28 +163,28 @@ const char* fftShiftSource =
 "        if( xid < Xmid && yid < Ymid ) \n"
 "        { \n"
 "            Output[Index+Yshift+Xshift].x = Input[Index].x; \n"
-"            Output[Index+Yshift+Xshift].y = Input[Index].y; \n"    
+"            Output[Index+Yshift+Xshift].y = Input[Index].y; \n"
 "        } \n"
 "        else if( xid >= Xmid && yid < Ymid ) \n"
 "        { \n"
 "            Output[Index+Yshift-Xshift].x = Input[Index].x; \n"
-"            Output[Index+Yshift-Xshift].y = Input[Index].y; \n"    
+"            Output[Index+Yshift-Xshift].y = Input[Index].y; \n"
 "        } \n"
 "        else if( xid < Xmid && yid >= Ymid ) \n"
 "        { \n"
 "            Output[Index-Yshift+Xshift].x = Input[Index].x; \n"
-"            Output[Index-Yshift+Xshift].y = Input[Index].y; \n"    
+"            Output[Index-Yshift+Xshift].y = Input[Index].y; \n"
 "        } \n"
 "        else if( xid >= Xmid && yid >= Ymid ) \n"
 "        { \n"
 "            Output[Index-Yshift-Xshift].x = Input[Index].x; \n"
-"            Output[Index-Yshift-Xshift].y = Input[Index].y; \n"    
-"        } \n"    
+"            Output[Index-Yshift-Xshift].y = Input[Index].y; \n"
+"        } \n"
 "    }    \n"
 "}    \n"
 ;
 
-const char* imagingKernelSource = 
+const char* imagingKernelSource =
 "__kernel void clImagingKernel(__global const float2* Input, __global float2* Output, int width, int height, float Cs, float df, float a2, float a2phi, float a3, float a3phi, float objap, float wavel, __global float* clXFrequencies, __global float* clYFrequencies, float beta, float delta) \n"
 "{        \n"
 "    //Get the work items ID \n"
@@ -214,7 +214,7 @@ const char* imagingKernelSource =
 "} \n"
 ;
 
-const char* InitialiseSTEMWavefunctionSource = 
+const char* InitialiseSTEMWavefunctionSource =
 "__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height, __global const float* clXFrequencies, __global const float* clYFrequencies, float posx, float posy, float apert, float pixelscale, float df, float Cs, float wavel) \n"
 "{ \n"
 "	//Get the work items ID \n"
@@ -242,7 +242,7 @@ const char* InitialiseSTEMWavefunctionSource =
 "} \n"
 ;
 
-const char* sumReductionsource2 = 
+const char* sumReductionsource2 =
 "__kernel void clSumReduction(__global const float2* input, __global float2* output, const unsigned int size, __local float2* buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
@@ -266,8 +266,8 @@ const char* sumReductionsource2 =
 "}																																		\n"
 ;
 
-const char* floatSumReductionsource2 = 
-"__kernel void clFloatSumReduction(__global const float* input, __global float* output, const unsigned int size, __local float* buffer)	\n"
+const char* floatSumReductionsource2 =
+"__kernel void clFloatSumReduction(__global const float* restrict input, __global float* restrict output, const unsigned int size, __local float* restrict buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"
@@ -289,7 +289,7 @@ const char* floatSumReductionsource2 =
 "}																																		\n"
 ;
 
-const char* abssource2 = 
+const char* abssource2 =
 "__kernel void clAbs(__global float2* clEW, int sizeX, int sizeY)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -307,7 +307,7 @@ const char* abssource2 =
 "}	\n"
 ;
 
-const char* multiplySource = 
+const char* multiplySource =
 "__kernel void clMultiply(__global float2* Input, float factor, int sizeX, int sizeY)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -323,7 +323,7 @@ const char* multiplySource =
 "}	\n"
 ;
 
-const char* bandPassSource = 
+const char* bandPassSource =
 "__kernel void clBandPass(__global float2* Output, __global const float2* Input, int width, int height, float inner, float outer)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -339,19 +339,19 @@ const char* bandPassSource =
 "		if(radius < outer && radius > inner) \n"
 "		{	\n"
 "			Output[Index].x = Input[Index].x; \n"
-"			Output[Index].y = Input[Index].y; \n"	
+"			Output[Index].y = Input[Index].y; \n"
 "		} \n"
 "		else \n"
 "		{	\n"
 "			Output[Index].x = 0; \n"
-"			Output[Index].y = 0; \n"	
+"			Output[Index].y = 0; \n"
 "		} \n"
 "	}	\n"
 "}	\n"
 ;
 
-const char* floatbandPassSource = 
-"__kernel void clFloatBandPass(__global float* Output, __global const float* Input, int width, int height, float inner, float outer, float xc, float yc)	\n"
+const char* floatbandPassSource =
+"__kernel void clFloatBandPass(__global float* restrict Output, __global const float* restrict Input, int width, int height, float inner, float outer, float xc, float yc)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -360,22 +360,15 @@ const char* floatbandPassSource =
 "	if(xid<width && yid<height) \n"
 "	{	\n"
 "		int Index = xid + yid*width; \n"
-"		float centX = width/2 + xc; \n"
-"		float centY = height/2 + yc; \n"
-"		float radius = sqrt((xid-centX)*(xid-centX)+(yid-centY)*(yid-centY)); \n" // hypot?
-"		if(radius < outer && radius > inner) \n"
-"		{	\n"
-"			Output[Index] = Input[Index];\n"
-"		} \n"
-"		else \n"
-"		{	\n"
-"			Output[Index] = 0; \n"	
-"		} \n"
+"       float centX = width/2 + xc; \n"
+"       float centY = height/2 + yc; \n"
+"       float radius = hypot(xid-centX,yid-centY); \n" // hypot?
+"		Output[Index] = (radius < outer && radius > inner) * Input[Index];\n"
 "	}	\n"
 "}	\n"
 ;
 
-const char* SqAbsSource = 
+const char* SqAbsSource =
 "__kernel void clSqAbs(__global const float2* clIm, __global float2* clAbsSq, int sizeX, int sizeY)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -393,7 +386,7 @@ const char* SqAbsSource =
 "}	\n"
 ;
 
-const char* DQESource = 
+const char* DQESource =
 "__kernel void clDQE(__global const float2* clIm, __global float* DQE, int sizeX, int sizeY, int binning)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -430,7 +423,7 @@ const char* DQESource =
 "}	\n"
 ;
 
-const char* NTFSource = 
+const char* NTFSource =
 "__kernel void clNTF(__global const float2* clIm, __global float* NTF, int sizeX, int sizeY, int binning)	\n"
 "{	\n"
 "	//Get the work items ID \n"

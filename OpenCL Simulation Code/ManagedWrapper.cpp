@@ -1,30 +1,68 @@
 #include "ManagedWrapper.h"
 #include "clix.h"
-//#include <msclr\marshal_cppstd.h>
 
 
 namespace ManagedOpenCLWrapper
 {
-
-	ManagedOpenCL::ManagedOpenCL() 
+	ManagedOpenCL::ManagedOpenCL()
 	{
 		_UMOpenCL = new UnmanagedOpenCL();
 	};
 
-	ManagedOpenCL::~ManagedOpenCL() 
+	ManagedOpenCL::~ManagedOpenCL()
 	{
-
+		// do nothing
 	};
 
-	void ManagedOpenCL::ImportStructure(String^ filepath) 
+	void ManagedOpenCL::setCLdev(int i)
+	{
+		_UMOpenCL->setCLdev(i);
+	};
+
+	int ManagedOpenCL::getCLdevCount()
+	{
+		return _UMOpenCL->getCLdevCount();
+	}
+
+	String^ ManagedOpenCL::getCLdevString(int i, bool getShort)
+	{
+		std::string UMstring = _UMOpenCL->getCLdevString(i, getShort);
+		return clix::marshalString<clix::E_ANSI>(UMstring);
+	}
+
+	uint64_t ManagedOpenCL::getCLdevGlobalMemory()
+	{
+		return _UMOpenCL->getCLdevGlobalMemory();
+	}
+
+	int ManagedOpenCL::getCLMemoryUsed()
+	{
+		return _UMOpenCL->getCLMemoryUsed();
+	}
+
+	void ManagedOpenCL::importStructure(String^ filepath)
 	{
 		using namespace clix;
-
 		std::string cfilename = marshalString<E_ANSI>(filepath);
-		_UMOpenCL->SetupStructure(cfilename);
+		_UMOpenCL->importStructure(cfilename);
 	};
-	
-	void ManagedOpenCL::GetStructureDetails(Int32% Len, float% MinX, float% MinY, float% MinZ, float% MaxX, float% MaxY, float% MaxZ )
+
+	void ManagedOpenCL::uploadParameterisation()
+	{
+		try
+		{
+			_UMOpenCL->uploadParameterisation();
+		}
+		catch (std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	};
+
+	void ManagedOpenCL::getStructureDetails(Int32% Len, float% MinX, float% MinY, float% MinZ, float% MaxX, float% MaxY, float% MaxZ)
 	{
 		// Probably unnecessary to do this way...
 		int _Len = _UMOpenCL->Structure->Length;
@@ -44,13 +82,7 @@ namespace ManagedOpenCLWrapper
 		MaxZ = _MaxZ;
 	}
 
-	void ManagedOpenCL::GetNumberSlices(Int32% Slices)
-	{
-		int _NSlices= _UMOpenCL->Structure->nSlices;
-		Slices = _NSlices;
-	};
-
-	void ManagedOpenCL::GetNumberSlices(Int32% Slices, bool FD)
+	void ManagedOpenCL::getNumberSlices(Int32% Slices, bool FD)
 	{
 		if (FD)
 		{
@@ -62,33 +94,16 @@ namespace ManagedOpenCLWrapper
 			int _NSlices = _UMOpenCL->Structure->nSlices;
 			Slices = _NSlices;
 		}
-		
-		
 	};
 
-	void ManagedOpenCL::UploadParameterisation()
-	{
-		try
-		{
-			_UMOpenCL->UploadParameterisation();
-		}
-		catch(std::exception ex)
-		{
-			// Get Message, pass onwards
-			std::string message = ex.what();
-			System::String^ sys_str = gcnew System::String(message.c_str());
-			throw gcnew System::Exception(sys_str);
-		}
-	};
-
-	void ManagedOpenCL::SortStructure(bool tds)
+	void ManagedOpenCL::sortStructure(bool tds)
 	{
 		// This works, could handle other exception from C# with try catch also
 		try
 		{
 			_UMOpenCL->Structure->SortAtoms(tds);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -97,23 +112,13 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::SetTemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
-	{
-		_UMOpenCL->SetParamsTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture, astig2mag, astig2ang, b2mag, b2ang);
-	};
-
-	void ManagedOpenCL::SetStemParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
-	{
-		_UMOpenCL->SetParamsSTEM(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
-	};
-
-	void ManagedOpenCL::InitialiseSimulation(int resolution, bool Full3D, float dz, int full3dints)
+	void ManagedOpenCL::doMultisliceStep(int stepno, int steps)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSimulation(resolution,Full3D,dz,full3dints);
+			_UMOpenCL->doMultisliceStep(stepno, steps, 1);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -122,13 +127,13 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
+	void ManagedOpenCL::doMultisliceStep(int stepno, int steps, int waves)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseReSizedSimulation(resolution,startx,starty,endx,endy,Full3D,FD,dz,full3dints);
+			_UMOpenCL->doMultisliceStep(stepno, steps, waves);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -137,13 +142,23 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::InitialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, float dz, int full3dints)
+	void ManagedOpenCL::setCTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
+	{
+		_UMOpenCL->setCTEMParams(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture, astig2mag, astig2ang, b2mag, b2ang);
+	};
+
+	void ManagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
+	{
+		_UMOpenCL->setSTEMParams(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
+	};
+
+	void ManagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 	{
 		try
 		{
-			_UMOpenCL->InitialiseSTEMSimulation(resolution,startx,starty,endx,endy,Full3D,dz,full3dints);
+			_UMOpenCL->initialiseCTEMSimulation(resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -152,13 +167,13 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::MakeSTEMWaveFunction(float posx, float posy)
+	void ManagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 	{
 		try
 		{
-			_UMOpenCL->MakeSTEMWaveFunction(posx, posy);
+			_UMOpenCL->initialiseSTEMSimulation(resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -167,13 +182,28 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::MultisliceStep(int stepno, int steps)
+	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy)
 	{
 		try
 		{
-			_UMOpenCL->MultisliceStep(stepno,steps);
+			_UMOpenCL->initialiseSTEMWaveFunction(posx, posy, 1);
 		}
-		catch(std::exception ex)
+		catch (std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	};
+	
+	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy, int wave)
+	{
+		try
+		{
+			_UMOpenCL->initialiseSTEMWaveFunction(posx, posy, wave);
+		}
+		catch (std::exception ex)
 		{
 			// Get Message, pass onwards
 			std::string message = ex.what();
@@ -182,126 +212,143 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::GetCTEMImage(array<float>^ data, int resolution)
+	void ManagedOpenCL::simulateCTEM()
+	{
+		_UMOpenCL->TS->simulateCTEM();
+	};
+
+	void ManagedOpenCL::simulateCTEM(int detector, int binning)
+	{
+		_UMOpenCL->TS->simulateCTEM(detector, binning);
+	};
+
+	void ManagedOpenCL::getCTEMImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->GetCTEMImage(pdata,resolution);
+		_UMOpenCL->TS->getCTEMImage(pdata, resolution);
 	};
 
-	void ManagedOpenCL::GetCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector)
+	void ManagedOpenCL::getCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->GetCTEMImage(pdata,resolution,dose,binning,detector);
+		_UMOpenCL->TS->getCTEMImage(pdata, resolution, dose, binning, detector);
 	};
 
-	void ManagedOpenCL::GetEWImage(array<float>^ data, int resolution)
+	// possibly phase
+	void ManagedOpenCL::getEWImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->GetEWImage(pdata,resolution);
+		_UMOpenCL->TS->getEWImage(pdata, resolution, 1);
 	};
 
-	void ManagedOpenCL::GetEWImage2(array<float>^ data, int resolution)
+	void ManagedOpenCL::getEWImage(array<float>^ data, int resolution, int wave)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->GetEWImage2(pdata, resolution);
+		_UMOpenCL->TS->getEWImage(pdata, resolution, wave);
 	};
 
-	float ManagedOpenCL::GetIMMax()
-	{	
+	// possibly amplitude
+	void ManagedOpenCL::getEWImage2(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->getEWImage2(pdata, resolution, 1);
+	};
+
+	void ManagedOpenCL::getEWImage2(array<float>^ data, int resolution, int wave)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->getEWImage2(pdata, resolution, wave);
+	};
+
+	void ManagedOpenCL::getDiffImage(array<float>^ data, int resolution)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->getDiffImage(pdata, resolution, 1);
+	};
+
+	void ManagedOpenCL::getDiffImage(array<float>^ data, int resolution, int wave)
+	{
+		pin_ptr<float> pdata = &data[0];
+		_UMOpenCL->TS->getDiffImage(pdata, resolution, wave);
+	};
+
+	float ManagedOpenCL::getCTEMMax()
+	{
 		return _UMOpenCL->TS->imagemax;
 	};
 
-	float ManagedOpenCL::GetIMMin()
-	{	
+	float ManagedOpenCL::getCTEMMin()
+	{
 		return _UMOpenCL->TS->imagemin;
 	};
 
-	float ManagedOpenCL::GetEWMax()
-	{	
-		return _UMOpenCL->TS->ewmax;
-	};
-
-	float ManagedOpenCL::GetEWMin()
-	{	
-		return _UMOpenCL->TS->ewmin;
-	};
-
-	float ManagedOpenCL::GetEWMax2()
+	float ManagedOpenCL::getEWMax()
 	{
-		return _UMOpenCL->TS->ewmax2;
+		return _UMOpenCL->TS->ewmax[0];
 	};
 
-	float ManagedOpenCL::GetEWMin2()
+	float ManagedOpenCL::getEWMin()
 	{
-		return _UMOpenCL->TS->ewmin2;
+		return _UMOpenCL->TS->ewmin[0];
 	};
-	void ManagedOpenCL::GetDiffImage(array<float>^ data, int resolution)
+
+	float ManagedOpenCL::getEWMax2()
 	{
-		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->GetDiffImage(pdata,resolution);
+		return _UMOpenCL->TS->ewmax2[0];
 	};
 
-	void ManagedOpenCL::AddTDSDiffImage(array<float>^ data, int resolution)
+	float ManagedOpenCL::getEWMin2()
 	{
-		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->AddTDSDiffImage(pdata,resolution);
+		return _UMOpenCL->TS->ewmin2[0];
 	};
 
-
-	float ManagedOpenCL::GetDiffMax()
-	{	
-		return _UMOpenCL->TS->diffmax;
-	};
-
-	float ManagedOpenCL::GetDiffMin()
-	{	
-		return _UMOpenCL->TS->diffmin;
-	};
-
-	void ManagedOpenCL::SimulateCTEMImage()
-	{	
-		_UMOpenCL->TS->SimulateCTEM();
-	};
-
-	
-	void ManagedOpenCL::SimulateCTEMImage(int detector, int binning)
-	{	
-		_UMOpenCL->TS->SimulateCTEM(detector,binning);
-	};
-
-	float ManagedOpenCL::GetSTEMPixel(float inner, float outer, float xc, float yc)
+	float ManagedOpenCL::getDiffMax()
 	{
-		return _UMOpenCL->TS->MeasureSTEMPixel(inner, outer, xc, yc);
-	};
-		
-	void ManagedOpenCL::AddTDS()
-	{
-		_UMOpenCL->TS->AddTDS();
+		return _UMOpenCL->TS->diffmax[0];
 	};
 
-	void ManagedOpenCL::ClearTDS()
+	float ManagedOpenCL::getDiffMax(int wave)
 	{
-		_UMOpenCL->TS->ClearTDS();
+		return _UMOpenCL->TS->diffmax[wave - 1];
 	};
 
-	void ManagedOpenCL::SetDevice(int index)
+	float ManagedOpenCL::getDiffMin()
 	{
-		_UMOpenCL->SetDevice(index);
+		return _UMOpenCL->TS->diffmin[0];
 	};
 
-	int ManagedOpenCL::MemoryUsed()
+	float ManagedOpenCL::getDiffMin(int wave)
 	{
-		return _UMOpenCL->MemoryUsed();
-	}
+		return _UMOpenCL->TS->diffmin[wave - 1];
+	};
 
-	int ManagedOpenCL::getCLdevCount()
+	void ManagedOpenCL::getSTEMDiff(int wave)
 	{
-		return _UMOpenCL->getCLdevCount();
-	}
+		_UMOpenCL->TS->getSTEMDiff(wave);
+	};
 
-	String^ ManagedOpenCL::getCLdevString(int i, bool getShort)
+	float ManagedOpenCL::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 	{
-		std::string UMstring = _UMOpenCL->getCLdevString(i, getShort);
-		return clix::marshalString<clix::E_ANSI>(UMstring);
-	}
+		return _UMOpenCL->TS->getSTEMPixel(inner, outer, xc, yc, wave);
+	};
+
+	void ManagedOpenCL::addTDS()
+	{
+		_UMOpenCL->TS->addTDS(1);
+	};
+
+	void ManagedOpenCL::addTDS(int wave)
+	{
+		_UMOpenCL->TS->addTDS(wave);
+	};
+
+	void ManagedOpenCL::clearTDS()
+	{
+		_UMOpenCL->TS->clearTDS(1);
+	};
+
+	void ManagedOpenCL::clearTDS(int wave)
+	{
+		_UMOpenCL->TS->clearTDS(wave);
+	};
 }

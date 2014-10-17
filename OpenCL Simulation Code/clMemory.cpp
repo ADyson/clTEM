@@ -6,8 +6,11 @@ clMemory::clMemory()
 {
 	context = clState::context;
 	clq = clState::clq;
+
 	Created=false;
+
 }
+
 
 clMemory::clMemory(size_t size)
 {

@@ -13,14 +13,14 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" BorderThickness="0,0,2,0" BorderBrush="{StaticResource PanelBackground}" Background="{StaticResource PanelDark}">
-                <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="{StaticResource Accent}">
+            <Border Grid.Row="0" BorderThickness="0,0,2,0" BorderBrush="{DynamicResource PanelBackground}" Background="{DynamicResource PanelDark}">
+                <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="{DynamicResource Accent}">
                     <TextBlock HorizontalAlignment="Center" Margin="5">
                         <ContentPresenter Margin="1" ContentSource="Header" RecognizesAccessKey="True" />
                     </TextBlock>
                 </Border>
             </Border>
-            <Border Grid.Row="1" BorderThickness="0,0,2,0" Background="{StaticResource PanelDark}">
+            <Border Grid.Row="1" BorderThickness="0,0,2,0" Background="{DynamicResource PanelDark}">
                 <ContentPresenter Margin="4" />
             </Border>
         </Grid>
@@ -34,8 +34,8 @@
         <Setter Property="GridLinesVisibility" Value="None"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="Background" Value="{StaticResource PanelDark}"/>
-        <Setter Property="RowBackground" Value="{StaticResource PanelDark}"/>
+        <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource PanelDark}"/>
         <Style.Resources>
             <Style x:Key="ColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
                 <Setter Property="Width" Value="8"/>
@@ -63,12 +63,12 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border x:Name="BackgroundBorder" Grid.ColumnSpan="2" Background="{StaticResource PanelLight}"/>
-                                    <TextBlock x:Name="HeaderText" Foreground="{StaticResource TextColourLight}" FontSize="14" FontWeight="SemiBold">
+                                    <Border x:Name="BackgroundBorder" Grid.ColumnSpan="2" Background="{DynamicResource PanelDark}"/>
+                                    <TextBlock x:Name="HeaderText" Foreground="{DynamicResource TextColourLight}" FontSize="14" FontWeight="SemiBold">
                                         <ContentPresenter Margin="6,3,6,3" VerticalAlignment="Center"/>
                                     </TextBlock>
                                     <Path x:Name="SortArrow" Visibility="Collapsed" Data="M0,0 L1,0 0.5,1 z" Stretch="Fill" 
-                                      Grid.Column="1" Width="8" Height="6" Fill="{StaticResource Accent}" Margin="0,0,8,0" 
+                                      Grid.Column="1" Width="8" Height="6" Fill="{DynamicResource Accent}" Margin="0,0,8,0" 
                                       VerticalAlignment="Center" RenderTransformOrigin="0.5,0.4" />
                                 </Grid>
                                 <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{StaticResource ColumnHeaderGripperStyle}"/>
@@ -76,7 +76,7 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="SortDirection" Value="{x:Null}">
-                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{StaticResource Accent}"/>
+                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{DynamicResource Accent}"/>
                                 </Trigger>
                                 <MultiTrigger>
                                     <MultiTrigger.Conditions>
@@ -109,7 +109,7 @@
                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="MinHeight" Value="28" />
-                <Setter Property="Foreground" Value="{StaticResource TextColourLight}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextColourLight}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -118,10 +118,10 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource PanelLight}"/>
+                                    <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource PanelBackground}"/>
+                                    <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -132,7 +132,7 @@
             <Style TargetType="{x:Type DataGridRow}">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{StaticResource PanelLight}"/>
+                        <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>

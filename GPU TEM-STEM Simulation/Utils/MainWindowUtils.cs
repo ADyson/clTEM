@@ -397,7 +397,7 @@ namespace GPUTEMSTEMSimulation
             CB.SelectedIndex = index;
             if (index != -1) // Later, might want to check for index the same as before
             {
-                mCL.SetDevice(CB.SelectedIndex);
+                mCL.setCLdev(CB.SelectedIndex);
                 //CB.IsEnabled = false;
 				SimulateImageButton.IsEnabled = false;
             }

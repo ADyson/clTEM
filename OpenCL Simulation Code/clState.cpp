@@ -124,6 +124,14 @@ void clState::SetDevice(int index)
 	}
 }
 
+cl_ulong clState::GetDeviceGlobalMemory()
+{
+	cl_ulong size;
+	status = clGetDeviceInfo(cldev->devices, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &size, NULL);
+
+	return size;
+}
+
 
 cl_context clState::GetContext()
 {
