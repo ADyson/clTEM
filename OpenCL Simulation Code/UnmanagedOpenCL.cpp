@@ -1,11 +1,13 @@
 #include "UnmanagedOpenCL.h"
 
+ clContext UnmanagedOpenCL::ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
+
 UnmanagedOpenCL::UnmanagedOpenCL()
 {
 	GotStruct = false;
 	GotDevice = false;
 
-	clState::Setup();
+	//clState::Setup();
 	//clState::SetDevice(1);
 
 	TEMParams = new TEMParameters();
@@ -22,17 +24,21 @@ void UnmanagedOpenCL::setCLdev(int index)
 	if (GotDevice)
 	{
 		if (GotStruct)
-		if (Structure->sorted)
-			Structure->ClearStructure();
+			if (Structure->sorted)
+				Structure->ClearStructure();
 	}
 
-	// Get new device
-	clState::SetDevice(index);
+	// TODO: can select device by index
+	// Get new device (GPU only atm)
+	ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
 	GotDevice = true;
+
+	
 
 	// reupload new structure. (and param).
 	if (GotStruct)
 	{
+		Structure->ctx = &ctx;
 		Structure->GotDevice = true;
 		uploadParameterisation();
 		Structure->SortAtoms(false);
@@ -41,22 +47,24 @@ void UnmanagedOpenCL::setCLdev(int index)
 
 int UnmanagedOpenCL::getCLdevCount()
 {
-	return clState::GetNumDevices();
+	return OpenCL::GetDeviceList().size();
 };
 
 std::string UnmanagedOpenCL::getCLdevString(int i, bool getShort)
 {
-	return clState::GetDeviceString(i, getShort);
+	auto ls = OpenCL::GetDeviceList();
+	return ls.front().GetDeviceName();
 };
 
 uint64_t UnmanagedOpenCL::getCLdevGlobalMemory()
 {
-	return clState::GetDeviceGlobalMemory();
+	// Not implemented yet
+	return 0;
 };
 
 size_t UnmanagedOpenCL::getCLMemoryUsed()
 {
-	return clState::GetTotalSize();
+	return ctx.GetOccupiedMemorySize();
 };
 
 int UnmanagedOpenCL::importStructure(std::string filepath)
@@ -66,6 +74,7 @@ int UnmanagedOpenCL::importStructure(std::string filepath)
 	}
 
 	Structure = new MultisliceStructure();
+	Structure->ctx = &ctx;
 	Structure->ImportAtoms(filepath);
 	Structure->filepath = filepath;
 	Structure->GotDevice = GotDevice;
@@ -84,7 +93,7 @@ int UnmanagedOpenCL::uploadParameterisation()
 		std::ifstream inparams;
 		inparams.open(inputparamsFilename, std::ios::in);
 
-		std::vector<AtomParameterisation> fparams;
+		std::vector<float> fparams;
 		AtomParameterisation buffer;
 
 		if (!inparams)
@@ -94,12 +103,23 @@ int UnmanagedOpenCL::uploadParameterisation()
 
 		while ((inparams >> buffer.a >> buffer.b >> buffer.c >> buffer.d >> buffer.e >> buffer.f >> buffer.g >> buffer.h >> buffer.i >> buffer.j >> buffer.k >> buffer.l))
 		{
-			fparams.push_back(buffer);
+			fparams.push_back(buffer.a);
+			fparams.push_back(buffer.b);
+			fparams.push_back(buffer.c);
+			fparams.push_back(buffer.d);
+			fparams.push_back(buffer.e);
+			fparams.push_back(buffer.f);
+			fparams.push_back(buffer.g);
+			fparams.push_back(buffer.h);
+			fparams.push_back(buffer.i);
+			fparams.push_back(buffer.j);
+			fparams.push_back(buffer.k);
+			fparams.push_back(buffer.l);
 		}
 
 		inparams.close();
 
-		Structure->AtomicStructureParameterisation = Buffer(new clMemory(12 * 103 * sizeof(float), CL_MEM_READ_ONLY));
+		Structure->AtomicStructureParameterisation = ctx.CreateBuffer<float,Manual>(12*103);
 		Structure->AtomicStructureParameterisation->Write(fparams);
 		fparams.clear();
 	}

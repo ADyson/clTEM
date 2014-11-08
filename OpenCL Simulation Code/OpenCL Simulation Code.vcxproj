@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\clWrapper;C:\Program Files\Boost\boost_1_56_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -132,22 +132,16 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenCL.lib; clFFT.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenCL.lib; clFFT.lib; clWrapper.lib;</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)CL" "$(SolutionDir)GPU TEM-STEM Simulation\bin\x64\Release\"  /s /i /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="clDevice.h" />
-    <ClInclude Include="clFourier.h" />
     <ClInclude Include="clix.h" />
-    <ClInclude Include="clKernel.h" />
     <ClInclude Include="clKernelCodes.h" />
     <ClInclude Include="clKernelCodes2.h" />
-    <ClInclude Include="clMemory.h" />
-    <ClInclude Include="clQueue.h" />
-    <ClInclude Include="clState.h" />
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="mtf.h" />
     <ClInclude Include="stringFunc.h" />
@@ -157,9 +151,6 @@
     <ClInclude Include="UnmanagedOpenCL.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="clDevice.cpp" />
-    <ClCompile Include="clFourier.cpp" />
-    <ClCompile Include="clKernel.cpp" />
     <None Include="CL\BinnedAtomicPotentialConventional.cl" />
     <None Include="CL\BinnedAtomicPotentialConventional2.cl" />
     <None Include="CL\BinnedAtomicPotentialOpt.cl" />
@@ -167,9 +158,6 @@
     <None Include="CL\BinnedAtomicPotentialOptFD2.cl" />
     <None Include="CL\FiniteDifference.cl" />
     <None Include="CL\GeneratePropagator.cl" />
-    <ClCompile Include="clMemory.cpp" />
-    <ClCompile Include="clQueue.cpp" />
-    <ClCompile Include="clState.cpp" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />
     <ClCompile Include="TEMSimulation.cpp" />

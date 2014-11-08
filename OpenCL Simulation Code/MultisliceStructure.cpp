@@ -161,13 +161,13 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 
 		//Alloc Device Memory
-		clAtomx = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomy = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomz = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomZ = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
+		clAtomx = ctx->CreateBuffer<float,Manual>(Atoms.size());
+		clAtomy = ctx->CreateBuffer<float,Manual>(Atoms.size());
+		clAtomz = ctx->CreateBuffer<float,Manual>(Atoms.size());
+		clAtomZ = ctx->CreateBuffer<int,Manual>(Atoms.size());;
 
-		clBlockIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
-		clZIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
+		clBlockIDs = ctx->CreateBuffer<int,Manual>(Atoms.size());
+		clZIDs = ctx->CreateBuffer<int,Manual>(Atoms.size());
 
 		clAtomx->Write(AtomXPos);
 		clAtomy->Write(AtomYPos);
@@ -175,8 +175,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomZ->Write(AtomZNum);
 
 		// Make Kernel and set parameters
-		Kernel clAtomSort = Kernel(new clKernel(AtomSortSource,clState::context,clState::cldev,"clAtomSort",clState::clq));
-		clAtomSort->BuildKernelOld();
+		clKernel clAtomSort = clKernel(*ctx,AtomSortSource,16,"clAtomSort");
 
 		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 		// Or fix it so they are all referencing same variable.
@@ -188,22 +187,22 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		nSlices+=(nSlices==0);
 
 
-		clAtomSort->SetArgT(0,clAtomx);
-		clAtomSort->SetArgT(1,clAtomy);
-		clAtomSort->SetArgT(2,clAtomz);
-		clAtomSort->SetArgT(3,NumberOfAtoms);
-		clAtomSort->SetArgT(4,MinimumX);
-		clAtomSort->SetArgT(5,MaximumX);
-		clAtomSort->SetArgT(6,MinimumY);
-		clAtomSort->SetArgT(7,MaximumY);
-		clAtomSort->SetArgT(8,MinimumZ);
-		clAtomSort->SetArgT(9,MaximumZ);
-		clAtomSort->SetArgT(10,xBlocks);
-		clAtomSort->SetArgT(11,yBlocks);
-		clAtomSort->SetArgT(12,clBlockIDs);
-		clAtomSort->SetArgT(13,clZIDs);
-		clAtomSort->SetArgT(14,dz);
-		clAtomSort->SetArgT(15,nSlices);
+		clAtomSort.SetArg(0,clAtomx);
+		clAtomSort.SetArg(1,clAtomy);
+		clAtomSort.SetArg(2,clAtomz);
+		clAtomSort.SetArg(3,NumberOfAtoms);
+		clAtomSort.SetArg(4,MinimumX);
+		clAtomSort.SetArg(5,MaximumX);
+		clAtomSort.SetArg(6,MinimumY);
+		clAtomSort.SetArg(7,MaximumY);
+		clAtomSort.SetArg(8,MinimumZ);
+		clAtomSort.SetArg(9,MaximumZ);
+		clAtomSort.SetArg(10,xBlocks);
+		clAtomSort.SetArg(11,yBlocks);
+		clAtomSort.SetArg(12,clBlockIDs);
+		clAtomSort.SetArg(13,clZIDs);
+		clAtomSort.SetArg(14,dz);
+		clAtomSort.SetArg(15,nSlices);
 
 		size_t* SortSize = new size_t[3];
 		SortSize[0] = NumberOfAtoms;
@@ -211,7 +210,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		SortSize[2] = 1;
 
 
-		clAtomSort->Enqueue(SortSize);
+		clAtomSort(SortSize);
 
 		//Malloc HBlockStuff
 		std::vector<int> HostBlockIDs (Atoms.size());
@@ -313,14 +312,14 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomz->Write(AtomZPos);
 		clAtomZ->Write(AtomZNum);
 
-		clBlockStartPositions = Buffer( new clMemory((nSlices*xBlocks*yBlocks+1) * sizeof( cl_int )));
+		clBlockStartPositions = ctx->CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
 
 		clBlockStartPositions->Write(blockStartPositions);
 
 		// 7 is 2 * loadzslices + 1
 		//clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 
-		clFinish(clState::clq->cmdQueue);
+		ctx->WaitForQueueFinish();
 		sorted = true;
 	}
 	return 1;
