@@ -21,8 +21,6 @@ public:
 	/// </summary>
 	~TEMSimulation();
 
-	clContext ctx;
-
 	// used for TEM, needs to be renamed
 	//InitialiseReSized
 	void initialiseCTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);

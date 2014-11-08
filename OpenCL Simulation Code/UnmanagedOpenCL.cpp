@@ -16,6 +16,8 @@ UnmanagedOpenCL::UnmanagedOpenCL()
 
 UnmanagedOpenCL::~UnmanagedOpenCL()
 {
+	if(GotStruct)
+		delete Structure;
 };
 
 void UnmanagedOpenCL::setCLdev(int index)
@@ -32,8 +34,6 @@ void UnmanagedOpenCL::setCLdev(int index)
 	// Get new device (GPU only atm)
 	ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
 	GotDevice = true;
-
-	
 
 	// reupload new structure. (and param).
 	if (GotStruct)
@@ -71,6 +71,7 @@ int UnmanagedOpenCL::importStructure(std::string filepath)
 {
 	if (GotStruct) {
 		Structure->ClearStructure();
+		delete Structure;
 	}
 
 	Structure = new MultisliceStructure();
@@ -162,13 +163,13 @@ void UnmanagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, fl
 void UnmanagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 {
 	// Note, shouldnt pass any of the clstate should, should just change all accesses to the clState static version instead.
-	TS = SimulationPtr(new TEMSimulation(TEMParams, STEMParams));
+	TS.reset(new TEMSimulation(TEMParams, STEMParams));
 	TS->initialiseCTEMSimulation(resolution, Structure, startx, starty, endx, endy, Full3D, FD, dz, full3dints);
 };
 
 void UnmanagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 {
-	TS = SimulationPtr(new TEMSimulation(TEMParams, STEMParams));
+	TS.reset(new TEMSimulation(TEMParams, STEMParams));
 	TS->initialiseSTEMSimulation(resolution, Structure, startx, starty, endx, endy, Full3D,FD, dz, full3dints, waves);
 };
 

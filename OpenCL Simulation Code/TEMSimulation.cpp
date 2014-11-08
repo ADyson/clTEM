@@ -5,7 +5,7 @@
 #include "UnmanagedOpenCL.h"
 
 
-TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams):ctx(UnmanagedOpenCL::ctx), FourierTrans(UnmanagedOpenCL::ctx,1024,1024)
+TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams): FourierTrans(UnmanagedOpenCL::ctx,1024,1024)
 {
 	TEMParams = temparams;
 	STEMParams = stemparams;
@@ -138,26 +138,26 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	// Set class variables
 	NumberOfFDSlices = nFDSlices;
 
-	clXFrequencies = ctx.CreateBuffer<float,Manual>(resolution);
-	clYFrequencies = ctx.CreateBuffer<float,Manual>(resolution);
+	clXFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
+	clYFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
 
 	clXFrequencies->Write(k0x);
 	clYFrequencies->Write(k0y);
 
 	// Setup Fourier Transforms
-	FourierTrans = clFourier(ctx,resolution,resolution);
+	FourierTrans = clFourier(UnmanagedOpenCL::ctx,resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
-	clWaveFunction1.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-	clWaveFunction2.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-	clWaveFunction3.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-	clWaveFunction4.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction3.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 
 	// might not need to be vectors, only if stem needs them
 	if (FD)
 	{
-		clWaveFunction1Minus.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-		clWaveFunction1Plus.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction1Minus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 	}
 
 	clTDSk.resize(1);
@@ -166,18 +166,18 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	clTDSx[0].resize(resolution*resolution);
 	clTDSk[0].resize(resolution*resolution);
 
-	clImageWaveFunction = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	clPropagator = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	clPotential = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	clKernel InitialiseWavefunction(ctx,InitialiseWavefunctionSource,4, "clInitialiseWavefunction");
+	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSource,4, "clInitialiseWavefunction");
 	
-	SumReduction = clKernel(ctx,floatSumReductionsource2,4, "clFloatSumReduction");
+	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
-	BandLimit = clKernel(ctx,BandLimitSource, 6, "clBandLimit");
+	BandLimit = clKernel(UnmanagedOpenCL::ctx,BandLimitSource, 6, "clBandLimit");
 
-	fftShift = clKernel(ctx,fftShiftSource,4, "clfftShift");
+	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource,4, "clfftShift");
 
 	fftShift.SetArg(0,clWaveFunction2[0]);
 	fftShift.SetArg(1,clWaveFunction3[0]);
@@ -208,15 +208,15 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = clKernel(ctx,opt2source,26, "clBinnedAtomicPotentialOpt");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,27, "clBinnedAtomicPotentialOpt");
 	}
 	else if (FD)
 	{
-		BinnedAtomicPotential = clKernel(ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
 	}
 	else
 	{
-		BinnedAtomicPotential = clKernel(ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
 	}
 
 
@@ -249,7 +249,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 		BinnedAtomicPotential.SetArg(26, full3dints);
 
 	// Also need to generate propagator.
-	GeneratePropagator = clKernel(ctx,propsource,8, "clGeneratePropagator");
+	GeneratePropagator = clKernel(UnmanagedOpenCL::ctx,propsource,8, "clGeneratePropagator");
 
 	GeneratePropagator.SetArg(0, clPropagator);
 	GeneratePropagator.SetArg(1, clXFrequencies);
@@ -273,13 +273,13 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	GeneratePropagator(WorkSize);
 
 	// And multiplication kernel
-	ComplexMultiply = clKernel(ctx,multisource,5 ,"clComplexMultiply");
+	ComplexMultiply = clKernel(UnmanagedOpenCL::ctx,multisource,5 ,"clComplexMultiply");
 
 	ComplexMultiply.SetArg(3, resolution);
 	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = clKernel(ctx,imagingKernelSource,16, "clImagingKernel");
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
 
 	int waves = 1;
 	ewmin.resize(waves);
@@ -294,16 +294,13 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	if (FD)
 	{
 		// Need Grad Kernel and FiniteDifference also
-		GradKernel = clKernel(ctx,gradsource,5, "clGrad");
-
-		FiniteDifference = clKernel(ctx,fdsource,10, "clFiniteDifference");
-
-
+		GradKernel = clKernel(UnmanagedOpenCL::ctx,gradsource,5, "clGrad");
+		FiniteDifference = clKernel(UnmanagedOpenCL::ctx,fdsource,10, "clFiniteDifference");
 		InitialiseWavefunction.SetArg(0, clWaveFunction1[0]);
 		InitialiseWavefunction(WorkSize);
 	}
 
-	ctx.WaitForQueueFinish();
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
@@ -428,14 +425,14 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Set class variables
 	NumberOfFDSlices = nFDSlices;
 
-	clXFrequencies = ctx.CreateBuffer<float,Manual>(resolution);
-	clYFrequencies = ctx.CreateBuffer<float,Manual>(resolution);
+	clXFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
+	clYFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
 
 	clXFrequencies->Write(k0x);
 	clYFrequencies->Write(k0y);
 
 	// Setup Fourier Transforms
-	FourierTrans = clFourier(ctx,resolution,resolution);
+	FourierTrans = clFourier(UnmanagedOpenCL::ctx,resolution,resolution);
 
 	clTDSk.resize(waves);
 	clTDSx.resize(waves);
@@ -443,47 +440,47 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Initialise Wavefunctions and Create other buffers...
 	for (int i = 1; i <= waves; i++)
 	{
-		clWaveFunction1.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-		clWaveFunction2.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-		clWaveFunction4.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-		clTDSDiff.push_back(ctx.CreateBuffer<cl_float,Manual>(resolution*resolution));
+		clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clTDSDiff.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(resolution*resolution));
 
 		clTDSx[i - 1].resize(resolution*resolution);
 		clTDSk[i - 1].resize(resolution*resolution);
 
 		if (FD)
 		{
-			clWaveFunction1Minus.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-			clWaveFunction1Plus.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+			clWaveFunction1Minus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+			clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 		}
 	}
 
-	clWaveFunction3.push_back(ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction3.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 
-	clImageWaveFunction = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
-	clTDSMaskDiff = ctx.CreateBuffer<cl_float,Manual>(resolution*resolution);
+	clTDSMaskDiff = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(resolution*resolution);
 
-	clPropagator = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	clPotential = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	InitialiseSTEMWavefunction = clKernel(ctx,InitialiseSTEMWavefunctionSource,12, "clInitialiseSTEMWavefunction");
+	InitialiseSTEMWavefunction = clKernel(UnmanagedOpenCL::ctx,InitialiseSTEMWavefunctionSource,12, "clInitialiseSTEMWavefunction");
 
-	SumReduction = clKernel(ctx,floatSumReductionsource2,4, "clFloatSumReduction");
+	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
-	BandLimit = clKernel(ctx,BandLimitSource, 6, "clBandLimit");
+	BandLimit = clKernel(UnmanagedOpenCL::ctx,BandLimitSource, 6, "clBandLimit");
 
-	fftShift = clKernel(ctx,fftShiftSource,4, "clfftShift");
+	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource,4, "clfftShift");
 
 	fftShift.SetArg(0, clWaveFunction2[0]);
 	fftShift.SetArg(1, clWaveFunction3[0]);
 	fftShift.SetArg(2, resolution);
 	fftShift.SetArg(3, resolution);
 
-	MultiplyCL = clKernel(ctx,multiplySource,4 , "clMultiply");
-	MaskingKernel = clKernel(ctx,bandPassSource, 6, "clBandPass");
-	TDSMaskingKernel = clKernel(ctx,floatbandPassSource,8, "clFloatBandPass");
+	MultiplyCL = clKernel(UnmanagedOpenCL::ctx,multiplySource,4 , "clMultiply");
+	MaskingKernel = clKernel(UnmanagedOpenCL::ctx,bandPassSource, 6, "clBandPass");
+	TDSMaskingKernel = clKernel(UnmanagedOpenCL::ctx,floatbandPassSource,8, "clFloatBandPass");
 
 
 	BandLimit.SetArg(0, clWaveFunction3[0]);
@@ -499,19 +496,19 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	WorkSize[1] = resolution;
 	WorkSize[2] = 1;
 
-	WFabsolute = clKernel(ctx,abssource2,3, "clAbs");
+	WFabsolute = clKernel(UnmanagedOpenCL::ctx,abssource2,3, "clAbs");
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = clKernel(ctx,opt2source,26, "clBinnedAtomicPotentialOpt");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,26, "clBinnedAtomicPotentialOpt");
 	}
 	else if (FD)
 	{
-		BinnedAtomicPotential = clKernel(ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
 	}
 	else
 	{
-		BinnedAtomicPotential = clKernel(ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
 	}
 
 
@@ -544,7 +541,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 		BinnedAtomicPotential.SetArg(26, full3dints);
 
 	// Also need to generate propagator.
-	GeneratePropagator = clKernel(ctx,propsource,8, "clGeneratePropagator");
+	GeneratePropagator = clKernel(UnmanagedOpenCL::ctx,propsource,8, "clGeneratePropagator");
 
 	GeneratePropagator.SetArg(0, clPropagator);
 	GeneratePropagator.SetArg(1, clXFrequencies);
@@ -566,13 +563,13 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	GeneratePropagator(WorkSize);
 
 	// And multiplication kernel
-	ComplexMultiply = clKernel(ctx,multisource,5 ,"clComplexMultiply");
+	ComplexMultiply = clKernel(UnmanagedOpenCL::ctx,multisource,5 ,"clComplexMultiply");
 
 	ComplexMultiply.SetArg(3, resolution);
 	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = clKernel(ctx,imagingKernelSource,16, "clImagingKernel");
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
 
 	ewmin.resize(waves);
 	ewmax.resize(waves);
@@ -584,13 +581,13 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	if (FD)
 	{
 		// Need Grad Kernel and FiniteDifference also
-		GradKernel = clKernel(ctx,gradsource,5, "clGrad");
+		GradKernel = clKernel(UnmanagedOpenCL::ctx,gradsource,5, "clGrad");
 
-		FiniteDifference = clKernel(ctx,fdsource,10, "clFiniteDifference");
+		FiniteDifference = clKernel(UnmanagedOpenCL::ctx,fdsource,10, "clFiniteDifference");
 
 	}
 
-	ctx.WaitForQueueFinish();
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 
 };
 
@@ -625,7 +622,7 @@ void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 	if(FDMode)
 	{
 		// Copy into both initialwavefunctions
-		clEnqueueCopyBuffer(ctx.GetQueue(),clWaveFunction1[wave-1]->GetBuffer(),clWaveFunction1Minus[wave-1]->GetBuffer(),0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(),clWaveFunction1[wave-1]->GetBuffer(),clWaveFunction1Minus[wave-1]->GetBuffer(),0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 	}
 };
 
@@ -701,7 +698,7 @@ void TEMSimulation::doMultisliceStep(int stepno, int steps, int waves)
 
 		FourierTrans(clWaveFunction2[i - 1], clWaveFunction1[i - 1], Direction::Inverse);
 	}
-	ctx.WaitForQueueFinish();
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
@@ -789,10 +786,10 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 		FourierTrans(clWaveFunction3[0], clWaveFunction1Plus[i-1], Direction::Inverse);
 
 	// // Psi becomes PsiMinus
-		clEnqueueCopyBuffer(ctx.GetQueue(), clWaveFunction1[i-1]->GetBuffer(), clWaveFunction1Minus[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clWaveFunction1[i-1]->GetBuffer(), clWaveFunction1Minus[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 	// // PsiPlus becomes Psi.
-		clEnqueueCopyBuffer(ctx.GetQueue(), clWaveFunction1Plus[i-1]->GetBuffer(), clWaveFunction1[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clWaveFunction1Plus[i-1]->GetBuffer(), clWaveFunction1[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 
 
@@ -805,7 +802,7 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 
 	}
 
-	ctx.WaitForQueueFinish();
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
@@ -864,10 +861,7 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 void TEMSimulation::getCTEMImage(float* data, int resolution)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -896,8 +890,8 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 	ntfs.push_back(oriusNTF);
 	ntfs.push_back(k2NTF);
 
-	auto Temp1 = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	auto ntfbuffer = ctx.CreateBuffer<cl_float2,Manual>(725);
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto ntfbuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(725);
 
 	size_t* Work = new size_t[3];
 
@@ -905,17 +899,14 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 	Work[1] = resolution;
 	Work[2] = 1;
 
-	clKernel NTF = clKernel(ctx,NTFSource,5, "clNTF");
-	clKernel ABS = clKernel(ctx,SqAbsSource, 4, "clSqAbs");
+	clKernel NTF = clKernel(UnmanagedOpenCL::ctx,NTFSource,5, "clNTF");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	float conversionfactor = 8; //CCD counts per electron.
 	float Ntot = doseperpix*binning*binning; // Get this passed in, its dose per pixel i think.
 
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -934,7 +925,7 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 
 	FourierTrans(clWaveFunction1[0], Temp1, Direction::Forwards);
 
-	clEnqueueWriteBuffer(ctx.GetQueue(), ntfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetQueue(), ntfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
 
 	NTF.SetArg(0,Temp1);
 	NTF.SetArg(1,ntfbuffer);
@@ -945,7 +936,7 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 
 	FourierTrans(Temp1, clWaveFunction1[0], Direction::Inverse);
 
-	clWaveFunction1[0]->Read(compdata);
+	compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -971,13 +962,13 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 void TEMSimulation::simulateCTEM()
 {
 	// Set up some temporary memory objects for the image simulation
-	auto Temp1 = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	auto dqebuffer = ctx.CreateBuffer<cl_float,Manual>(725);
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto dqebuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(725);
 
-	clKernel DQE = clKernel(ctx,DQESource, 5, "clDQE");
+	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
 
 
-	clKernel ABS = clKernel(ctx,SqAbsSource, 4, "clSqAbs");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// Set arguments for imaging kernel
 	ImagingKernel.SetArg(0, clWaveFunction2[0]);
@@ -1032,7 +1023,7 @@ void TEMSimulation::simulateCTEM()
 	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::simulateCTEM(int detector, int binning)
@@ -1044,13 +1035,13 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	dqes.push_back(k2DQE);
 
 	// Set up some temporary memory objects for the image simulation
-	auto Temp1 = ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
-	auto dqebuffer = ctx.CreateBuffer<cl_float,Manual>(725);
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto dqebuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(725);
 
-	clKernel DQE = clKernel(ctx,DQESource, 5, "clDQE");
+	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
 
 
-	clKernel ABS = clKernel(ctx,SqAbsSource, 4, "clSqAbs");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// Set arguments for imaging kernel
 	ImagingKernel.SetArg(0, clWaveFunction2[0]);
@@ -1089,7 +1080,7 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 
 	FourierTrans(Temp1, clImageWaveFunction, Direction::Forwards);
 	binning = 1;
-	clEnqueueWriteBuffer(ctx.GetQueue(), dqebuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetQueue(), dqebuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
 
 	DQE.SetArg(0,clImageWaveFunction);
 	DQE.SetArg(1,dqebuffer);
@@ -1107,14 +1098,13 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	;
 
 	size_t* Work = new size_t[3];
 
@@ -1125,7 +1115,7 @@ void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
 
-	clWaveFunction3[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -1152,8 +1142,7 @@ void TEMSimulation::getSTEMDiff(int wave)
 	float min = CL_MAXFLOAT;
 
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	
 
 	size_t* Work = new size_t[3];
 
@@ -1164,7 +1153,7 @@ void TEMSimulation::getSTEMDiff(int wave)
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
 
-	clWaveFunction3[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
 	max = CL_FLT_MIN;
 	min = CL_MAXFLOAT;
@@ -1188,10 +1177,7 @@ void TEMSimulation::getSTEMDiff(int wave)
 void TEMSimulation::getEWImage(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[wave - 1]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -1215,10 +1201,7 @@ void TEMSimulation::getEWImage(float* data, int resolution, int wave)
 void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -1242,10 +1225,7 @@ void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 void TEMSimulation::addTDS(int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[wave - 1]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -1276,7 +1256,7 @@ void TEMSimulation::addTDS(int wave)
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
 
-	clWaveFunction3[0]->Read(compdata);
+	compdata = clWaveFunction3[0]->CreateLocalCopy();
 
 	max = CL_FLT_MIN;
 	min = CL_MAXFLOAT;
@@ -1310,10 +1290,10 @@ float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, siz
 {
 
 
-	clMemory<float,Manual>::Ptr outArray = ctx.CreateBuffer<float,Manual>(nGroups);
+	clMemory<float,Manual>::Ptr outArray = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(nGroups);
 
 	// Create host array to store reduction results.
-	std::vector< float> sums(nGroups);
+	
 
 	SumReduction.SetArg(0, Array);
 
@@ -1325,7 +1305,7 @@ float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, siz
 	SumReduction(globalSizeSum, localSizeSum);
 
 	// Now copy back 
-	outArray->Read(sums);
+	std::vector< float> sums = outArray->CreateLocalCopy();
 
 	// Find out which numbers to read back
 	float sum = 0;
