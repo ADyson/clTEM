@@ -32,13 +32,12 @@ void UnmanagedOpenCL::setCLdev(int index)
 
 	// TODO: can select device by index
 	// Get new device (GPU only atm)
-	ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
+	ctx = OpenCL::MakeTwoQueueContext(OpenCL::GetDeviceList());
 	GotDevice = true;
 
 	// reupload new structure. (and param).
 	if (GotStruct)
 	{
-		Structure->ctx = &ctx;
 		Structure->GotDevice = true;
 		uploadParameterisation();
 		Structure->SortAtoms(false);
@@ -75,7 +74,6 @@ int UnmanagedOpenCL::importStructure(std::string filepath)
 	}
 
 	Structure = new MultisliceStructure();
-	Structure->ctx = &ctx;
 	Structure->ImportAtoms(filepath);
 	Structure->filepath = filepath;
 	Structure->GotDevice = GotDevice;

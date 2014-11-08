@@ -622,7 +622,7 @@ void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 	if(FDMode)
 	{
 		// Copy into both initialwavefunctions
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(),clWaveFunction1[wave-1]->GetBuffer(),clWaveFunction1Minus[wave-1]->GetBuffer(),0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(),clWaveFunction1[wave-1]->GetBuffer(),clWaveFunction1Minus[wave-1]->GetBuffer(),0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 	}
 };
 
@@ -786,10 +786,10 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 		FourierTrans(clWaveFunction3[0], clWaveFunction1Plus[i-1], Direction::Inverse);
 
 	// // Psi becomes PsiMinus
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clWaveFunction1[i-1]->GetBuffer(), clWaveFunction1Minus[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1[i-1]->GetBuffer(), clWaveFunction1Minus[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 	// // PsiPlus becomes Psi.
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clWaveFunction1Plus[i-1]->GetBuffer(), clWaveFunction1[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1Plus[i-1]->GetBuffer(), clWaveFunction1[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 
 
@@ -925,7 +925,7 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 
 	FourierTrans(clWaveFunction1[0], Temp1, Direction::Forwards);
 
-	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetQueue(), ntfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), ntfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
 
 	NTF.SetArg(0,Temp1);
 	NTF.SetArg(1,ntfbuffer);
@@ -1023,7 +1023,7 @@ void TEMSimulation::simulateCTEM()
 	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::simulateCTEM(int detector, int binning)
@@ -1080,7 +1080,7 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 
 	FourierTrans(Temp1, clImageWaveFunction, Direction::Forwards);
 	binning = 1;
-	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetQueue(), dqebuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), dqebuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
 
 	DQE.SetArg(0,clImageWaveFunction);
 	DQE.SetArg(1,dqebuffer);
@@ -1098,7 +1098,7 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::getDiffImage(float* data, int resolution, int wave)

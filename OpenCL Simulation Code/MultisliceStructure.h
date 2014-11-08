@@ -32,9 +32,6 @@ class MultisliceStructure
 public:
 	std::string filepath;
 	bool GotDevice;
-
-	clContext* ctx;
-
 	cl_int status;
 
 	clMemory<float,Manual>::Ptr clAtomx;

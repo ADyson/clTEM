@@ -1,6 +1,7 @@
 #include "MultisliceStructure.h"
 #include "clKernelCodes.h"
 #include <ctime>
+#include "UnmanagedOpenCL.h"
 
 MultisliceStructure::MultisliceStructure()
 {
@@ -161,13 +162,13 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 
 		//Alloc Device Memory
-		clAtomx = ctx->CreateBuffer<float,Manual>(Atoms.size());
-		clAtomy = ctx->CreateBuffer<float,Manual>(Atoms.size());
-		clAtomz = ctx->CreateBuffer<float,Manual>(Atoms.size());
-		clAtomZ = ctx->CreateBuffer<int,Manual>(Atoms.size());;
+		clAtomx = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomy = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomz = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomZ = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());;
 
-		clBlockIDs = ctx->CreateBuffer<int,Manual>(Atoms.size());
-		clZIDs = ctx->CreateBuffer<int,Manual>(Atoms.size());
+		clBlockIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
+		clZIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
 
 		clAtomx->Write(AtomXPos);
 		clAtomy->Write(AtomYPos);
@@ -175,7 +176,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomZ->Write(AtomZNum);
 
 		// Make Kernel and set parameters
-		clKernel clAtomSort = clKernel(*ctx,AtomSortSource,16,"clAtomSort");
+		clKernel clAtomSort = clKernel(UnmanagedOpenCL::ctx,AtomSortSource,16,"clAtomSort");
 
 		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 		// Or fix it so they are all referencing same variable.
@@ -213,11 +214,8 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomSort(SortSize);
 
 		//Malloc HBlockStuff
-		std::vector<int> HostBlockIDs (Atoms.size());
-		std::vector<int> HostZIDs (Atoms.size());
-
-		clBlockIDs->Read(HostBlockIDs);
-		clZIDs->Read(HostZIDs);
+		std::vector<int> HostBlockIDs = clBlockIDs->CreateLocalCopy();
+		std::vector<int> HostZIDs = clZIDs->CreateLocalCopy();
 
 		vector < vector < vector < float > > > Binnedx;
 		Binnedx.resize(xBlocks*yBlocks);
@@ -312,14 +310,15 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomz->Write(AtomZPos);
 		clAtomZ->Write(AtomZNum);
 
-		clBlockStartPositions = ctx->CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
+		clBlockStartPositions = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
 
 		clBlockStartPositions->Write(blockStartPositions);
 
 		// 7 is 2 * loadzslices + 1
 		//clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
 
-		ctx->WaitForQueueFinish();
+		UnmanagedOpenCL::ctx.WaitForQueueFinish();
+		UnmanagedOpenCL::ctx.WaitForIOQueueFinish();
 		sorted = true;
 	}
 	return 1;
