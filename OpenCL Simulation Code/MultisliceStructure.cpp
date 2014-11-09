@@ -281,7 +281,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 		clBlockStartPositions->Write(blockStartPositions);
 
-		//UnmanagedOpenCL::ctx.WaitForIOQueueFinish();
+		UnmanagedOpenCL::ctx.WaitForIOQueueFinish();
 		sorted = true;
 	}
 	return 1;
