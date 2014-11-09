@@ -6,10 +6,6 @@ UnmanagedOpenCL::UnmanagedOpenCL()
 {
 	GotStruct = false;
 	GotDevice = false;
-
-	//clState::Setup();
-	//clState::SetDevice(1);
-
 	TEMParams = new TEMParameters();
 	STEMParams = new STEMParameters();
 };
@@ -30,9 +26,7 @@ void UnmanagedOpenCL::setCLdev(int index)
 				Structure->ClearStructure();
 	}
 
-	// TODO: can select device by index
-	// Get new device (GPU only atm)
-	ctx = OpenCL::MakeTwoQueueContext(OpenCL::GetDeviceList());
+	ctx = OpenCL::MakeTwoQueueContext(OpenCL::GetDeviceByIndex(OpenCL::GetDeviceList(),index));
 	GotDevice = true;
 
 	// reupload new structure. (and param).
@@ -52,7 +46,7 @@ int UnmanagedOpenCL::getCLdevCount()
 std::string UnmanagedOpenCL::getCLdevString(int i, bool getShort)
 {
 	auto ls = OpenCL::GetDeviceList();
-	return ls.front().GetDeviceName();
+	return OpenCL::GetDeviceByIndex(ls,i).GetDeviceName();
 };
 
 uint64_t UnmanagedOpenCL::getCLdevGlobalMemory()
