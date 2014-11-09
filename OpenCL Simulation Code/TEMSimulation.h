@@ -48,7 +48,7 @@ public:
 	void addTDS(int wave);
 	void clearTDS(int wave);
 
-	float FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
+	float FloatSumReduction(cl_mem &Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize);
 
 	TEMParameters* TEMParams;
 	STEMParameters* STEMParams;

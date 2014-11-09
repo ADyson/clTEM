@@ -55,16 +55,12 @@ public:
 	int SortAtoms(bool TDS);
 	float TDSRand();
 	void ClearStructure();
-	void MultisliceStructure::UploadConstantBlock(int topz, int bottomz);
 
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);
-
 	// Check atoms for same position and remove one.
 	void CheckOcc(AtomOcc a, AtomOcc b);
-
 	std::vector<Atom> Atoms;
-
 	// Coordinates encompassing all atom positions
 	float MaximumX;
 	float MinimumX;
@@ -72,9 +68,7 @@ public:
 	float MinimumY;
 	float MaximumZ;
 	float MinimumZ;
-
 	int Length;
-
 	int xBlocks;
 	int yBlocks;
 	float dz;

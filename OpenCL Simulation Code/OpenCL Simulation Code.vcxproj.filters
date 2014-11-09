@@ -60,36 +60,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="CL\BinnedAtomicPotential.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\GeneratePropagator.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Multiply.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOpt.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOpt2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialConventional.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialConventional2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOptFD2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\GradKernel.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\FiniteDifference.cl">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>

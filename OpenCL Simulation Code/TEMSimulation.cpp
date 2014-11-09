@@ -193,11 +193,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	BandLimit.SetArg(0,clWaveFunction3[0]);
 	BandLimit.SetArg(1,resolution);BandLimit.SetArg(2,resolution);BandLimit.SetArg(3,bandwidthkmax);BandLimit.SetArg(4,clXFrequencies);BandLimit.SetArg(5,clYFrequencies);
 
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	if (FD)
 	{
@@ -490,11 +486,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	BandLimit.SetArg(4, clXFrequencies);
 	BandLimit.SetArg(5, clYFrequencies);
 
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	WFabsolute = clKernel(UnmanagedOpenCL::ctx,abssource2,3, "clAbs");
 
@@ -593,11 +585,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 
 void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 {
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	// Fix inverted images
 	posx = resolution - 1 - posx;
@@ -659,17 +647,9 @@ void TEMSimulation::doMultisliceStep(int stepno, int steps, int waves)
 	BinnedAtomicPotential.SetArg(10, slices);
 	BinnedAtomicPotential.SetArg(11, currentz);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
-
-	size_t* LocalWork = new size_t[3];
-
-	LocalWork[0] = 16;
-	LocalWork[1] = 16;
-	LocalWork[2] = 1;
+	clWorkGroup LocalWork(16,16,1);
 
 	BinnedAtomicPotential(Work, LocalWork);
 
@@ -730,17 +710,9 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 	BinnedAtomicPotential.SetArg(10, slices);
 	BinnedAtomicPotential.SetArg(11, currentz);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
-
-	size_t* LocalWork = new size_t[3];
-
-	LocalWork[0] = 16;
-	LocalWork[1] = 16;
-	LocalWork[2] = 1;
+	clWorkGroup LocalWork(16,16,1);
 
 	BinnedAtomicPotential(Work, LocalWork);
 
@@ -809,11 +781,7 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 {
 	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
 	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	float pxFreq = (resolution * pixelscale);
 
@@ -845,15 +813,8 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 	int totalSize = resolution*resolution;
 	int nGroups = totalSize / 256;
 
-	size_t* globalSizeSum = new size_t[3];
-	size_t* localSizeSum = new size_t[3];
-
-	globalSizeSum[0] = totalSize;
-	globalSizeSum[1] = 1;
-	globalSizeSum[2] = 1;
-	localSizeSum[0] = 256;
-	localSizeSum[1] = 1;
-	localSizeSum[2] = 1;
+	clWorkGroup globalSizeSum(totalSize,1,1);
+	clWorkGroup localSizeSum(256,1,1);
 
 	return FloatSumReduction(clTDSMaskDiff->GetBuffer(), globalSizeSum, localSizeSum, nGroups, totalSize);
 };
@@ -893,11 +854,7 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 	auto ntfbuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(725);
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	clKernel NTF = clKernel(UnmanagedOpenCL::ctx,NTFSource,5, "clNTF");
 	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
@@ -988,11 +945,7 @@ void TEMSimulation::simulateCTEM()
 	ImagingKernel.SetArg(14, TEMParams->beta);
 	ImagingKernel.SetArg(15, TEMParams->delta);
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	ImagingKernel(Work);
 
@@ -1061,11 +1014,7 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	ImagingKernel.SetArg(14, TEMParams->beta);
 	ImagingKernel.SetArg(15, TEMParams->delta);
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	ImagingKernel(Work);
 
@@ -1104,13 +1053,8 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	;
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
@@ -1144,11 +1088,7 @@ void TEMSimulation::getSTEMDiff(int wave)
 	// Original data is complex so copy complex version down first
 	
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
@@ -1247,11 +1187,7 @@ void TEMSimulation::addTDS(int wave)
 
 	// Original data is complex so copy complex version down first
 
-	size_t* Work = new size_t[3];
-
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup Work(resolution,resolution,1);
 
 	fftShift.SetArg(0, clWaveFunction2[wave - 1]);
 	fftShift(Work);
@@ -1286,7 +1222,7 @@ void TEMSimulation::clearTDS(int waves)
 	}
 };
 
-float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+float TEMSimulation::FloatSumReduction(cl_mem &Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {
 
 
