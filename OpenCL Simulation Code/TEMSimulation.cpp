@@ -820,7 +820,7 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 	clWorkGroup globalSizeSum(totalSize,1,1);
 	clWorkGroup localSizeSum(256,1,1);
 
-	return FloatSumReduction(clTDSMaskDiff->GetBuffer(), globalSizeSum, localSizeSum, nGroups, totalSize);
+	return FloatSumReduction(clTDSMaskDiff, globalSizeSum, localSizeSum, nGroups, totalSize);
 };
 
 void TEMSimulation::getCTEMImage(float* data, int resolution)
@@ -1224,7 +1224,7 @@ void TEMSimulation::clearTDS(int waves)
 	}
 };
 
-float TEMSimulation::FloatSumReduction(cl_mem &Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
+float TEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {
 	clMemory<float,Manual>::Ptr outArray = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(nGroups);
 	SumReduction.SetArg(0, Array,ArgumentType::Input);
