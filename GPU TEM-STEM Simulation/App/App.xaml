@@ -9,19 +9,20 @@
     	<ResourceDictionary>
     		<ResourceDictionary.MergedDictionaries>
     			<ResourceDictionary Source="../Utils/CustomControls.xaml"/>
-                <ResourceDictionary Source="../Utils/Colours.xaml"/>
                 <ResourceDictionary Source="/Elysium;component/Themes/Generic.xaml"/>
     		</ResourceDictionary.MergedDictionaries>
 
+             <!--Dark-->
             <metro:Theme x:Key="ThemeCol">Dark</metro:Theme>
 
             <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
-            <SolidColorBrush x:Key="ErrorCol" Color="#FFC93F18"/>
+            <SolidColorBrush x:Key="ErrorCol" Color="#FFca5100"/>
+            <SolidColorBrush x:Key="AccentOrig" Color="#FF339933"/>
+            <SolidColorBrush x:Key="ErrorColOrig" Color="#FFca5100"/>
 
             <SolidColorBrush x:Key="ButtonHighlight" Color="#FFFFFFFF"/>
 
             <SolidColorBrush x:Key="TextBoxBackground" Color="#1C1C1C"/>
-            <SolidColorBrush x:Key="TextBoxForeground" Color="White"/>
 
             <SolidColorBrush x:Key="PanelBackground" Color="#FF171717"/>
             <SolidColorBrush x:Key="PanelDark" Color="#FF252525"/>
@@ -34,14 +35,44 @@
 
             <SolidColorBrush x:Key="ProgressEmpty" Color="#FF171717"/>
             <SolidColorBrush x:Key="ProgressFull" Color="White"/>
+            
+            <!--Light-->
+            <!--
+            <metro:Theme x:Key="ThemeCol">Light</metro:Theme>
 
-            <!--Default for ELysium style would be 120 and 32-->
-            <!--<System:Double x:Key="ControlWidth">120</System:Double>
+            <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
+            <SolidColorBrush x:Key="ErrorCol" Color="#FFED7B00"/>
+            <SolidColorBrush x:Key="AccentOrig" Color="#FF339933"/>
+            <SolidColorBrush x:Key="ErrorColOrig" Color="#FFED7B00"/>
+
+            <SolidColorBrush x:Key="ButtonHighlight" Color="#FFFFFFFF"/>
+
+            <SolidColorBrush x:Key="TextBoxBackground" Color="White"/>
+
+            <SolidColorBrush x:Key="PanelBackground" Color="#FF171717"/>
+            <SolidColorBrush x:Key="PanelDark" Color="#FFD6D6D6"/>
+            <SolidColorBrush x:Key="PanelLight" Color="#FFC9C9C9"/>
+
+            <SolidColorBrush x:Key="TextColourLight" Color="Black"/>
+            <SolidColorBrush x:Key="TextColourDark" Color="Black"/>
+
+            <SolidColorBrush x:Key="Contrast" Color="Black"/>
+
+            <SolidColorBrush x:Key="ProgressEmpty" Color="White"/>
+            <SolidColorBrush x:Key="ProgressFull" Color="#b8b5b2"/>
+            -->
+
+
+
+            <!--Large Controls-->
+            <!--
+            <System:Double x:Key="ControlWidth">120</System:Double>
             <System:Double x:Key="ControlHeight">32</System:Double>
             <Thickness x:Key="ControlPadding">3</Thickness>
-            <Thickness x:Key="ControlMargins">2.5</Thickness>-->
+            <Thickness x:Key="ControlMargins">2.5</Thickness>
+            -->
 
-            <!--small controls-->
+            <!--Small controls-->
             <System:Double x:Key="ControlWidth">120</System:Double>
             <System:Double x:Key="ControlHeight">25</System:Double>
             <Thickness x:Key="ControlPadding">3,0</Thickness>
