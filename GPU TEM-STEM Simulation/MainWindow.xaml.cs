@@ -386,7 +386,6 @@ namespace GPUTEMSTEMSimulation
 			EWDisplay.ImageData = new float[CurrentResolution * CurrentResolution];
 			mCL.getEWImage(EWDisplay.ImageData, CurrentResolution);
 
-
 			// Calculate the number of bytes per pixel (should be 4 for this format).
 			var bytesPerPixel = (EWDisplay.ImgBmp.Format.BitsPerPixel + 7) / 8;
 

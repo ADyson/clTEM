@@ -1,6 +1,7 @@
 #include "MultisliceStructure.h"
 #include "clKernelCodes.h"
 #include <ctime>
+#include "UnmanagedOpenCL.h"
 
 MultisliceStructure::MultisliceStructure()
 {
@@ -161,13 +162,13 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 
 		//Alloc Device Memory
-		clAtomx = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomy = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomz = Buffer(new clMemory(Atoms.size()*sizeof(float)));
-		clAtomZ = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
+		clAtomx = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomy = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomz = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomZ = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());;
 
-		clBlockIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
-		clZIDs = Buffer(new clMemory(Atoms.size()*sizeof(cl_int)));
+		clBlockIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
+		clZIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
 
 		clAtomx->Write(AtomXPos);
 		clAtomy->Write(AtomYPos);
@@ -175,50 +176,39 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomZ->Write(AtomZNum);
 
 		// Make Kernel and set parameters
-		Kernel clAtomSort = Kernel(new clKernel(AtomSortSource,clState::context,clState::cldev,"clAtomSort",clState::clq));
-		clAtomSort->BuildKernelOld();
+		clKernel clAtomSort = clKernel(UnmanagedOpenCL::ctx,AtomSortSource,16,"clAtomSort");
 
 		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 		// Or fix it so they are all referencing same variable.
 		int NumberOfAtoms = Atoms.size();
 		xBlocks = 80;
 		yBlocks = 80;
-		//dz		= 1.0f; now set in constructor and can be changed...
 		nSlices	= ceil((MaximumZ-MinimumZ)/dz);
 		nSlices+=(nSlices==0);
 
+		clAtomSort.SetArg(0,clAtomx,ArgumentType::Input);
+		clAtomSort.SetArg(1,clAtomy,ArgumentType::Input);
+		clAtomSort.SetArg(2,clAtomz,ArgumentType::Input);
+		clAtomSort.SetArg(3,NumberOfAtoms);
+		clAtomSort.SetArg(4,MinimumX);
+		clAtomSort.SetArg(5,MaximumX);
+		clAtomSort.SetArg(6,MinimumY);
+		clAtomSort.SetArg(7,MaximumY);
+		clAtomSort.SetArg(8,MinimumZ);
+		clAtomSort.SetArg(9,MaximumZ);
+		clAtomSort.SetArg(10,xBlocks);
+		clAtomSort.SetArg(11,yBlocks);
+		clAtomSort.SetArg(12,clBlockIDs,ArgumentType::Output);
+		clAtomSort.SetArg(13,clZIDs,ArgumentType::Output);
+		clAtomSort.SetArg(14,dz);
+		clAtomSort.SetArg(15,nSlices);
 
-		clAtomSort->SetArgT(0,clAtomx);
-		clAtomSort->SetArgT(1,clAtomy);
-		clAtomSort->SetArgT(2,clAtomz);
-		clAtomSort->SetArgT(3,NumberOfAtoms);
-		clAtomSort->SetArgT(4,MinimumX);
-		clAtomSort->SetArgT(5,MaximumX);
-		clAtomSort->SetArgT(6,MinimumY);
-		clAtomSort->SetArgT(7,MaximumY);
-		clAtomSort->SetArgT(8,MinimumZ);
-		clAtomSort->SetArgT(9,MaximumZ);
-		clAtomSort->SetArgT(10,xBlocks);
-		clAtomSort->SetArgT(11,yBlocks);
-		clAtomSort->SetArgT(12,clBlockIDs);
-		clAtomSort->SetArgT(13,clZIDs);
-		clAtomSort->SetArgT(14,dz);
-		clAtomSort->SetArgT(15,nSlices);
-
-		size_t* SortSize = new size_t[3];
-		SortSize[0] = NumberOfAtoms;
-		SortSize[1] = 1;
-		SortSize[2] = 1;
-
-
-		clAtomSort->Enqueue(SortSize);
+		clWorkGroup SortSize(NumberOfAtoms,1,1);
+		clAtomSort(SortSize);
 
 		//Malloc HBlockStuff
-		std::vector<int> HostBlockIDs (Atoms.size());
-		std::vector<int> HostZIDs (Atoms.size());
-
-		clBlockIDs->Read(HostBlockIDs);
-		clZIDs->Read(HostZIDs);
+		std::vector<int> HostBlockIDs = clBlockIDs->CreateLocalCopy();
+		std::vector<int> HostZIDs = clZIDs->CreateLocalCopy();
 
 		vector < vector < vector < float > > > Binnedx;
 		Binnedx.resize(xBlocks*yBlocks);
@@ -230,7 +220,8 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		BinnedZ.resize(xBlocks*yBlocks);
 
 
-		for(int i = 0 ; i < xBlocks*yBlocks ; i++){
+		for(int i = 0 ; i < xBlocks*yBlocks ; i++)
+		{
 			Binnedx[i].resize(nSlices);
 			Binnedy[i].resize(nSlices);
 			Binnedz[i].resize(nSlices);
@@ -277,33 +268,6 @@ int MultisliceStructure::SortAtoms(bool TDS)
 			}
 		}
 
-		// Trying to store rows of yBlocks consecutively for faster coalesced loading in GPU
-		// Atoms still consecutive in terms of xBlock (not sure this is possible)
-		//for(int slicei = 0; slicei < nSlices; slicei++)
-		//{
-		//	for(int j = 0; j < yBlocks; j++)
-		//	{
-		//		for(int k = 0; k < xBlocks; k++)
-		//		{
-		//			blockStartPositions[slicei*xBlocks*yBlocks+ k*yBlocks + j] = atomIterator;
-
-		//			if(Binnedx[j*xBlocks+k][slicei].size() > 0)
-		//			{
-		//				for(int l = 0; l < Binnedx[j*xBlocks+k][slicei].size(); l++)
-		//				{
-		//					// cout <<"Block " << j <<" , " << k << endl;
-		//					AtomXPos[atomIterator] = Binnedx[j*xBlocks+k][slicei][l];
-		//					AtomYPos[atomIterator] = Binnedy[j*xBlocks+k][slicei][l];
-		//					AtomZPos[atomIterator] = Binnedz[j*xBlocks+k][slicei][l];
-		//					AtomZNum[atomIterator] = BinnedZ[j*xBlocks+k][slicei][l];
-		//					atomIterator++;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
-
-
 		// Last element indicates end of last block as total number of atoms.
 		blockStartPositions[nSlices*xBlocks*yBlocks] = Atoms.size();
 
@@ -313,14 +277,11 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomz->Write(AtomZPos);
 		clAtomZ->Write(AtomZNum);
 
-		clBlockStartPositions = Buffer( new clMemory((nSlices*xBlocks*yBlocks+1) * sizeof( cl_int )));
+		clBlockStartPositions = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
 
 		clBlockStartPositions->Write(blockStartPositions);
 
-		// 7 is 2 * loadzslices + 1
-		//clConstantBlockStartPositions = clCreateBuffer ( clState::context, CL_MEM_READ_ONLY, (7*xBlocks*yBlocks+1) * sizeof( cl_int ), 0, &status);
-
-		clFinish(clState::clq->cmdQueue);
+		UnmanagedOpenCL::ctx.WaitForIOQueueFinish();
 		sorted = true;
 	}
 	return 1;
@@ -544,9 +505,4 @@ void MultisliceStructure::ClearStructure() {
 	// This would not be necessary if we just created a new structure object for each file.
 
 	sorted=false;
-};
-
-void MultisliceStructure::UploadConstantBlock(int topz, int bottomz)
-{
-	//clEnqueueWriteBuffer( clq->cmdQueue, clConstantBlockStartPositions, CL_TRUE, 0,((bottomz-topz)*xBlocks*yBlocks+1) * sizeof( cl_int ) , &blockStartPositions[ topz*xBlocks*yBlocks ], 0, NULL, NULL );
 };

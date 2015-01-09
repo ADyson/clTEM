@@ -3,9 +3,7 @@
 #include <sstream>
 #include <vector>
 #include "CL\cl.h"
-#include "clKernel.h"
-#include "clMemory.h"
-#include "clState.h"
+#include "clWrapper.h"
 
 #pragma once
 
@@ -34,23 +32,19 @@ class MultisliceStructure
 public:
 	std::string filepath;
 	bool GotDevice;
-
-	cl_context context;
-	clQueue* clq;
-	clDevice* cldev;
 	cl_int status;
 
-	Buffer clAtomx;
-	Buffer clAtomy;
-	Buffer clAtomz;
-	Buffer clAtomZ;
-	Buffer clBlockStartPositions;
-	Buffer clConstantBlockStartPositions;
-	Buffer clBlockIDs;
-	Buffer clZIDs;
+	clMemory<float,Manual>::Ptr clAtomx;
+	clMemory<float,Manual>::Ptr clAtomy;
+	clMemory<float,Manual>::Ptr clAtomz;
+	clMemory<int,Manual>::Ptr clAtomZ;
+	clMemory<int,Manual>::Ptr clBlockStartPositions;
+	clMemory<int,Manual>::Ptr clConstantBlockStartPositions;
+	clMemory<int,Manual>::Ptr clBlockIDs;
+	clMemory<int,Manual>::Ptr clZIDs;
 		
 	// OpenCL Memory
-	Buffer AtomicStructureParameterisation;
+	clMemory<float,Manual>::Ptr AtomicStructureParameterisation;
 
 	std::vector<int> blockStartPositions;
 	MultisliceStructure();
@@ -61,16 +55,12 @@ public:
 	int SortAtoms(bool TDS);
 	float TDSRand();
 	void ClearStructure();
-	void MultisliceStructure::UploadConstantBlock(int topz, int bottomz);
 
 	// Convert atomic symbol i.e. Fe to Atomic Number e.g. 53
 	static int GetZNum(std::string AtomSymbol);
-
 	// Check atoms for same position and remove one.
 	void CheckOcc(AtomOcc a, AtomOcc b);
-
 	std::vector<Atom> Atoms;
-
 	// Coordinates encompassing all atom positions
 	float MaximumX;
 	float MinimumX;
@@ -78,9 +68,7 @@ public:
 	float MinimumY;
 	float MaximumZ;
 	float MinimumZ;
-
 	int Length;
-
 	int xBlocks;
 	int yBlocks;
 	float dz;

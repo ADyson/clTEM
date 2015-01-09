@@ -1,9 +1,9 @@
 #include "CommonStructs.h"
 #include "MultisliceStructure.h"
-#include "clFourier.h"
-#include "clMemory.h"
-#include "clState.h"
+#include "clWrapper.h"
 #include <memory>
+
+#pragma once
 
 class TEMSimulation
 {
@@ -48,7 +48,7 @@ public:
 	void addTDS(int wave);
 	void clearTDS(int wave);
 
-	float FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
+	float FloatSumReduction(cl_mem &Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize);
 
 	TEMParameters* TEMParams;
 	STEMParameters* STEMParams;
@@ -81,37 +81,37 @@ public:
 
 	// openCL stuff
 	cl_int status;
-	Buffer clImageWaveFunction;
-	Buffer clXFrequencies;
-	Buffer clYFrequencies;
-	Buffer clTDSMaskDiff;
-	Buffer clPropagator;
-	Buffer clPotential;
-	std::vector<Buffer> clWaveFunction1;
-	std::vector<Buffer> clWaveFunction2;
-	std::vector<Buffer> clWaveFunction3;
-	std::vector<Buffer> clWaveFunction4;
-	std::vector<Buffer> clWaveFunction1Minus;
-	std::vector<Buffer> clWaveFunction1Plus;
-	std::vector<Buffer> clTDSDiff;
+	clMemory<cl_float2,Manual>::Ptr clImageWaveFunction;
+	clMemory<float,Manual>::Ptr clXFrequencies;
+	clMemory<float,Manual>::Ptr clYFrequencies;
+	clMemory<float,Manual>::Ptr clTDSMaskDiff;
+	clMemory<cl_float2,Manual>::Ptr clPropagator;
+	clMemory<cl_float2,Manual>::Ptr clPotential;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction1;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction2;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction3;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction4;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction1Minus;
+	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction1Plus;
+	std::vector<clMemory<float,Manual>::Ptr> clTDSDiff;
 
 	//Kernels
-	FourierKernel FourierTrans;
-	Kernel BinnedAtomicPotential;
-	Kernel GeneratePropagator;
-	Kernel ComplexMultiply;
-	Kernel BandLimit;
-	Kernel fftShift;
-	Kernel ImagingKernel;
-	Kernel InitialiseSTEMWavefunction;
-	Kernel WFabsolute;
-	Kernel MultiplyCL;
-	Kernel MaskingKernel;
-	Kernel TDSMaskingKernel;
-	Kernel SumReduction;
+	clFourier FourierTrans;
+	clKernel BinnedAtomicPotential;
+	clKernel GeneratePropagator;
+	clKernel ComplexMultiply;
+	clKernel BandLimit;
+	clKernel fftShift;
+	clKernel ImagingKernel;
+	clKernel InitialiseSTEMWavefunction;
+	clKernel WFabsolute;
+	clKernel MultiplyCL;
+	clKernel MaskingKernel;
+	clKernel TDSMaskingKernel;
+	clKernel SumReduction;
 	// FD Only
-	Kernel GradKernel;
-	Kernel FiniteDifference;
+	clKernel GradKernel;
+	clKernel FiniteDifference;
 
 //private:
 	// no idea if these are used

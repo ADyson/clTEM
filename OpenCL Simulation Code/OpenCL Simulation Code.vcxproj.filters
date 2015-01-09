@@ -27,9 +27,6 @@
     <ClInclude Include="clix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clKernel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="clKernelCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,22 +36,7 @@
     <ClInclude Include="CommonStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clFourier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="clKernelCodes2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clMemory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stringFunc.h">
@@ -74,58 +56,8 @@
     <ClCompile Include="MultisliceStructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clKernel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TEMSimulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clFourier.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clMemory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CL\BinnedAtomicPotential.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\GeneratePropagator.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Multiply.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOpt.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOpt2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialConventional.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialConventional2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\BinnedAtomicPotentialOptFD2.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\GradKernel.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="CL\FiniteDifference.cl">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

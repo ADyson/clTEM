@@ -78,7 +78,6 @@ namespace GPUTEMSTEMSimulation
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-
             if (!goodradii || !isname || !uniquename)
             {
                 // show some sort of error

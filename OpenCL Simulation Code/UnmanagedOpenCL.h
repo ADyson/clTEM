@@ -1,16 +1,15 @@
 #include <CL\OpenCL.h>
-#include "clKernel.h"
 #include "MultisliceStructure.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include "TEMSimulation.h"
 #include "CommonStructs.h"
-#include "clState.h"
+#include "clWrapper.h"
 #include <memory>
 
 #pragma unmanaged
-
+#pragma once
 
 typedef std::unique_ptr<TEMSimulation> SimulationPtr;
 
@@ -26,6 +25,8 @@ class UnmanagedOpenCL
 public:
 	UnmanagedOpenCL();
 	~UnmanagedOpenCL();
+
+	static clContext ctx;
 
 	void setCLdev(int i); //SetDevice
 	int getCLdevCount();

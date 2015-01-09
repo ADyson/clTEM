@@ -2,9 +2,10 @@
 #include "clKernelCodes2.h"
 #include <minmax.h>
 #include "mtf.h"
+#include "UnmanagedOpenCL.h"
 
 
-TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams)
+TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams): FourierTrans(UnmanagedOpenCL::ctx,1024,1024)
 {
 	TEMParams = temparams;
 	STEMParams = stemparams;
@@ -137,27 +138,26 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	// Set class variables
 	NumberOfFDSlices = nFDSlices;
 
-	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
-	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+	clXFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
+	clYFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
 
 	clXFrequencies->Write(k0x);
 	clYFrequencies->Write(k0y);
 
 	// Setup Fourier Transforms
-	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
-	FourierTrans->Setup(resolution, resolution);
+	FourierTrans = clFourier(UnmanagedOpenCL::ctx,resolution,resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
-	clWaveFunction1.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-	clWaveFunction2.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-	clWaveFunction3.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-	clWaveFunction4.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+	clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction3.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+	clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 
 	// might not need to be vectors, only if stem needs them
 	if (FD)
 	{
-		clWaveFunction1Minus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-		clWaveFunction1Plus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+		clWaveFunction1Minus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 	}
 
 	clTDSk.resize(1);
@@ -166,60 +166,59 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	clTDSx[0].resize(resolution*resolution);
 	clTDSk[0].resize(resolution*resolution);
 
-	clImageWaveFunction = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	clPropagator = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	clPotential = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	Kernel InitialiseWavefunction = Kernel(new clKernel(InitialiseWavefunctionSource, clState::context, clState::cldev, "clInitialiseWavefunction", clState::clq));
-	InitialiseWavefunction->BuildKernelOld();
+	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSource,4, "clInitialiseWavefunction");
+	
+	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
-	SumReduction = Kernel(new clKernel(floatSumReductionsource2, clState::context, clState::cldev, "clFloatSumReduction", clState::clq));
-	SumReduction->BuildKernelOld();
+	BandLimit = clKernel(UnmanagedOpenCL::ctx,BandLimitSource, 6, "clBandLimit");
 
-	BandLimit = Kernel(new clKernel(BandLimitSource, clState::context, clState::cldev, "clBandLimit", clState::clq));
-	BandLimit->BuildKernelOld();
+	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource,4, "clfftShift");
 
-	fftShift = Kernel(new clKernel(fftShiftSource, clState::context, clState::cldev, "clfftShift", clState::clq));
-	fftShift->BuildKernelOld();
-
-	fftShift->SetArgS(clWaveFunction2[0], clWaveFunction3[0], resolution, resolution);
+	fftShift.SetArg(0,clWaveFunction2[0],ArgumentType::Input);
+	fftShift.SetArg(1,clWaveFunction3[0]),ArgumentType::Output;
+	fftShift.SetArg(2,resolution);
+	fftShift.SetArg(3,resolution);
 
 	float InitialValue = 1.0f;
-	InitialiseWavefunction->SetArgS(clWaveFunction1[0], resolution, resolution, InitialValue);
+	InitialiseWavefunction.SetArg(0,clWaveFunction1[0],ArgumentType::Output);
+	InitialiseWavefunction.SetArg(1,resolution);
+	InitialiseWavefunction.SetArg(2,resolution);
+	InitialiseWavefunction.SetArg(3,InitialValue);
 
-	BandLimit->SetArgS(clWaveFunction3[0], resolution, resolution, bandwidthkmax, clXFrequencies, clYFrequencies);
+	BandLimit.SetArg(0,clWaveFunction3[0],ArgumentType::InputOutput);
+	BandLimit.SetArg(1,resolution);
+	BandLimit.SetArg(2,resolution);
+	BandLimit.SetArg(3,bandwidthkmax);
+	BandLimit.SetArg(4,clXFrequencies,ArgumentType::Input);
+	BandLimit.SetArg(5,clYFrequencies,ArgumentType::Input);
 
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	if (FD)
 	{
-		InitialiseWavefunction->SetArgT(0, clWaveFunction1Minus[0]);
+		InitialiseWavefunction.SetArg(0, clWaveFunction1Minus[0],ArgumentType::Output);
 	}
 
-	InitialiseWavefunction->Enqueue(WorkSize);
+	InitialiseWavefunction(WorkSize);
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOpt", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,27, "clBinnedAtomicPotentialOpt");
 	}
 	else if (FD)
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOptFD", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOptFD2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
 	}
 	else
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialConventional", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
 	}
 
-	BinnedAtomicPotential->BuildKernel();
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
 	int loadblocksx = ceil(3.0f / BlockScaleX);
@@ -227,65 +226,60 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	int loadblocksz = ceil(3.0f / AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
-	BinnedAtomicPotential->SetArgT(0, clPotential);
-	BinnedAtomicPotential->SetArgT(5, AtomicStructure->AtomicStructureParameterisation);
-	BinnedAtomicPotential->SetArgT(7, resolution);
-	BinnedAtomicPotential->SetArgT(8, resolution);
-	BinnedAtomicPotential->SetArgT(12, AtomicStructure->dz);
-	BinnedAtomicPotential->SetArgT(13, pixelscale);
-	BinnedAtomicPotential->SetArgT(14, AtomicStructure->xBlocks);
-	BinnedAtomicPotential->SetArgT(15, AtomicStructure->yBlocks);
-	BinnedAtomicPotential->SetArgT(16, AtomicStructure->MaximumX);
-	BinnedAtomicPotential->SetArgT(17, AtomicStructure->MinimumX);
-	BinnedAtomicPotential->SetArgT(18, AtomicStructure->MaximumY);
-	BinnedAtomicPotential->SetArgT(19, AtomicStructure->MinimumY);
-	BinnedAtomicPotential->SetArgT(20, loadblocksx);
-	BinnedAtomicPotential->SetArgT(21, loadblocksy);
-	BinnedAtomicPotential->SetArgT(22, loadblocksz);
-	BinnedAtomicPotential->SetArgT(23, sigma2); // Not sure why i am using sigma 2 and not sigma...
-	BinnedAtomicPotential->SetArgT(24, startx); // Not sure why i am using sigma 2 and not sigma...
-	BinnedAtomicPotential->SetArgT(25, starty); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential.SetArg(0, clPotential,ArgumentType::Output);
+	BinnedAtomicPotential.SetArg(5, AtomicStructure->AtomicStructureParameterisation,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(7, resolution);
+	BinnedAtomicPotential.SetArg(8, resolution);
+	BinnedAtomicPotential.SetArg(12, AtomicStructure->dz);
+	BinnedAtomicPotential.SetArg(13, pixelscale);
+	BinnedAtomicPotential.SetArg(14, AtomicStructure->xBlocks);
+	BinnedAtomicPotential.SetArg(15, AtomicStructure->yBlocks);
+	BinnedAtomicPotential.SetArg(16, AtomicStructure->MaximumX);
+	BinnedAtomicPotential.SetArg(17, AtomicStructure->MinimumX);
+	BinnedAtomicPotential.SetArg(18, AtomicStructure->MaximumY);
+	BinnedAtomicPotential.SetArg(19, AtomicStructure->MinimumY);
+	BinnedAtomicPotential.SetArg(20, loadblocksx);
+	BinnedAtomicPotential.SetArg(21, loadblocksy);
+	BinnedAtomicPotential.SetArg(22, loadblocksz);
+	BinnedAtomicPotential.SetArg(23, sigma2); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential.SetArg(24, startx); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential.SetArg(25, starty); // Not sure why i am using sigma 2 and not sigma...
 
 	if (Full3D)
-		BinnedAtomicPotential->SetArgT(26, full3dints);
+		BinnedAtomicPotential.SetArg(26, full3dints);
 
 	// Also need to generate propagator.
-	GeneratePropagator = Kernel(new clKernel(clState::context, clState::cldev, "clGeneratePropagator", clState::clq));
-	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
-	GeneratePropagator->BuildKernel();
+	GeneratePropagator = clKernel(UnmanagedOpenCL::ctx,propsource,8, "clGeneratePropagator");
 
-	GeneratePropagator->SetArgT(0, clPropagator);
-	GeneratePropagator->SetArgT(1, clXFrequencies);
-	GeneratePropagator->SetArgT(2, clYFrequencies);
-	GeneratePropagator->SetArgT(3, resolution);
-	GeneratePropagator->SetArgT(4, resolution);
+	GeneratePropagator.SetArg(0, clPropagator,ArgumentType::Output);
+	GeneratePropagator.SetArg(1, clXFrequencies,ArgumentType::Input);
+	GeneratePropagator.SetArg(2, clYFrequencies,ArgumentType::Input);
+	GeneratePropagator.SetArg(3, resolution);
+	GeneratePropagator.SetArg(4, resolution);
 
 	if (FD)
 	{
-		GeneratePropagator->SetArgT(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+		GeneratePropagator.SetArg(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
 	}
 	else
 	{
-		GeneratePropagator->SetArgT(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+		GeneratePropagator.SetArg(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
 	}
 
 
-	GeneratePropagator->SetArgT(6, wavelength);
-	GeneratePropagator->SetArgT(7, bandwidthkmax);
+	GeneratePropagator.SetArg(6, wavelength);
+	GeneratePropagator.SetArg(7, bandwidthkmax);
 
-	GeneratePropagator->Enqueue(WorkSize);
+	GeneratePropagator(WorkSize);
 
 	// And multiplication kernel
-	ComplexMultiply = Kernel(new clKernel(clState::context, clState::cldev, "clComplexMultiply", clState::clq));
-	ComplexMultiply->loadProgSource("Multiply.cl");
-	ComplexMultiply->BuildKernel();
+	ComplexMultiply = clKernel(UnmanagedOpenCL::ctx,multisource,5 ,"clComplexMultiply");
 
-	ComplexMultiply->SetArgT(3, resolution);
-	ComplexMultiply->SetArgT(4, resolution);
+	ComplexMultiply.SetArg(3, resolution);
+	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = Kernel(new clKernel(imagingKernelSource, clState::context, clState::cldev, "clImagingKernel", clState::clq));
-	ImagingKernel->BuildKernelOld();
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
 
 	int waves = 1;
 	ewmin.resize(waves);
@@ -300,19 +294,13 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	if (FD)
 	{
 		// Need Grad Kernel and FiniteDifference also
-		GradKernel = Kernel(new clKernel(clState::context, clState::cldev, "clGrad", clState::clq));
-		GradKernel->loadProgSource("GradKernel.cl");
-		GradKernel->BuildKernel();
-
-		FiniteDifference = Kernel(new clKernel(clState::context, clState::cldev, "clFiniteDifference", clState::clq));
-		FiniteDifference->loadProgSource("FiniteDifference.cl");
-		FiniteDifference->BuildKernel();
-
-		InitialiseWavefunction->SetArgT(0, clWaveFunction1[0]);
-		InitialiseWavefunction->Enqueue(WorkSize);
+		GradKernel = clKernel(UnmanagedOpenCL::ctx,gradsource,5, "clGrad");
+		FiniteDifference = clKernel(UnmanagedOpenCL::ctx,fdsource,10, "clFiniteDifference");
+		InitialiseWavefunction.SetArg(0, clWaveFunction1[0],ArgumentType::Output);
+		InitialiseWavefunction(WorkSize);
 	}
 
-	 clFinish(clState::clq->cmdQueue);
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
@@ -437,15 +425,14 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Set class variables
 	NumberOfFDSlices = nFDSlices;
 
-	clXFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
-	clYFrequencies = Buffer(new clMemory(resolution*sizeof(cl_float)));
+	clXFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
+	clYFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(resolution);
 
 	clXFrequencies->Write(k0x);
 	clYFrequencies->Write(k0y);
 
 	// Setup Fourier Transforms
-	FourierTrans = FourierKernel(new clFourier(clState::context, clState::clq));
-	FourierTrans->Setup(resolution, resolution);
+	FourierTrans = clFourier(UnmanagedOpenCL::ctx,resolution,resolution);
 
 	clTDSk.resize(waves);
 	clTDSx.resize(waves);
@@ -453,90 +440,73 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Initialise Wavefunctions and Create other buffers...
 	for (int i = 1; i <= waves; i++)
 	{
-		clWaveFunction1.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-		clWaveFunction2.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-		clWaveFunction4.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-		clTDSDiff.push_back(Buffer(new clMemory(resolution*resolution*sizeof(cl_float))));
+		clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+		clTDSDiff.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(resolution*resolution));
 
 		clTDSx[i - 1].resize(resolution*resolution);
 		clTDSk[i - 1].resize(resolution*resolution);
 
-		if(FD)
+		if (FD)
 		{
-			clWaveFunction1Minus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
-			clWaveFunction1Plus.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+			clWaveFunction1Minus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
+			clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 		}
 	}
 
-	clWaveFunction3.push_back(Buffer(new clMemory(resolution * resolution * sizeof(cl_float2))));
+	clWaveFunction3.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 
-	clImageWaveFunction = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
-	clTDSMaskDiff = Buffer(new clMemory(resolution*resolution*sizeof(cl_float)));
+	clTDSMaskDiff = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(resolution*resolution);
 
-	clPropagator = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	clPotential = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
+	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	InitialiseSTEMWavefunction = Kernel(new clKernel(InitialiseSTEMWavefunctionSource, clState::context, clState::cldev, "clInitialiseSTEMWavefunction", clState::clq));
-	InitialiseSTEMWavefunction->BuildKernelOld();
+	InitialiseSTEMWavefunction = clKernel(UnmanagedOpenCL::ctx,InitialiseSTEMWavefunctionSource,12, "clInitialiseSTEMWavefunction");
 
-	SumReduction = Kernel(new clKernel(floatSumReductionsource2, clState::context, clState::cldev, "clFloatSumReduction", clState::clq));
-	SumReduction->BuildKernelOld();
+	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
-	BandLimit = Kernel(new clKernel(BandLimitSource, clState::context, clState::cldev, "clBandLimit", clState::clq));
-	BandLimit->BuildKernelOld();
+	BandLimit = clKernel(UnmanagedOpenCL::ctx,BandLimitSource, 6, "clBandLimit");
 
-	fftShift = Kernel(new clKernel(fftShiftSource, clState::context, clState::cldev, "clfftShift", clState::clq));
-	fftShift->BuildKernelOld();
+	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource,4, "clfftShift");
 
-	fftShift->SetArgT(0, clWaveFunction2[0]);
-	fftShift->SetArgT(1, clWaveFunction3[0]);
-	fftShift->SetArgT(2, resolution);
-	fftShift->SetArgT(3, resolution);
+	fftShift.SetArg(0, clWaveFunction2[0]);
+	fftShift.SetArg(1, clWaveFunction3[0]);
+	fftShift.SetArg(2, resolution);
+	fftShift.SetArg(3, resolution);
 
-	MultiplyCL = Kernel(new clKernel(multiplySource, clState::context, clState::cldev, "clMultiply", clState::clq));
-	MultiplyCL->BuildKernelOld();
+	MultiplyCL = clKernel(UnmanagedOpenCL::ctx,multiplySource,4 , "clMultiply");
+	MaskingKernel = clKernel(UnmanagedOpenCL::ctx,bandPassSource, 6, "clBandPass");
+	TDSMaskingKernel = clKernel(UnmanagedOpenCL::ctx,floatbandPassSource,8, "clFloatBandPass");
 
-	MaskingKernel = Kernel(new clKernel(bandPassSource, clState::context, clState::cldev, "clBandPass", clState::clq));
-	MaskingKernel->BuildKernelOld();
 
-	TDSMaskingKernel = Kernel(new clKernel(floatbandPassSource, clState::context, clState::cldev, "clFloatBandPass", clState::clq));
-	TDSMaskingKernel->BuildKernelOld();
+	BandLimit.SetArg(0, clWaveFunction3[0]);
+	BandLimit.SetArg(1, resolution);
+	BandLimit.SetArg(2, resolution);
+	BandLimit.SetArg(3, bandwidthkmax);
+	BandLimit.SetArg(4, clXFrequencies);
+	BandLimit.SetArg(5, clYFrequencies);
 
-	BandLimit->SetArgT(0, clWaveFunction3[0]);
-	BandLimit->SetArgT(1, resolution);
-	BandLimit->SetArgT(2, resolution);
-	BandLimit->SetArgT(3, bandwidthkmax);
-	BandLimit->SetArgT(4, clXFrequencies);
-	BandLimit->SetArgT(5, clYFrequencies);
+	clWorkGroup WorkSize(resolution,resolution,1);
 
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
-
-	WFabsolute = Kernel(new clKernel(abssource2, clState::context, clState::cldev, "clAbs", clState::clq));
-	WFabsolute->BuildKernelOld();
+	WFabsolute = clKernel(UnmanagedOpenCL::ctx,abssource2,3, "clAbs");
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOpt", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOpt2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,26, "clBinnedAtomicPotentialOpt");
 	}
 	else if (FD)
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialOptFD", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialOptFD2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,fd2source,26, "clBinnedAtomicPotentialOptFD");
 	}
 	else
 	{
-		BinnedAtomicPotential = Kernel(new clKernel(clState::context, clState::cldev, "clBinnedAtomicPotentialConventional", clState::clq));
-		BinnedAtomicPotential->loadProgSource("BinnedAtomicPotentialConventional2.cl");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,conv2source,26, "clBinnedAtomicPotentialConventional");
 	}
-	BinnedAtomicPotential->BuildKernel();
-	//BinnedAtomicPotential->BuildKernelOld();
+
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
 	int loadblocksx = ceil(3.0f / ((AtomicStructure->MaximumX - AtomicStructure->MinimumX) / (AtomicStructure->xBlocks)));
@@ -544,63 +514,58 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	int loadblocksz = ceil(3.0f / AtomicStructure->dz);
 
 	// Set some of the arguments which dont change each iteration
-	BinnedAtomicPotential->SetArgT(0, clPotential);
-	BinnedAtomicPotential->SetArgT(5, AtomicStructure->AtomicStructureParameterisation);
-	BinnedAtomicPotential->SetArgT(7, resolution);
-	BinnedAtomicPotential->SetArgT(8, resolution);
-	BinnedAtomicPotential->SetArgT(12, AtomicStructure->dz);
-	BinnedAtomicPotential->SetArgT(13, pixelscale);
-	BinnedAtomicPotential->SetArgT(14, AtomicStructure->xBlocks);
-	BinnedAtomicPotential->SetArgT(15, AtomicStructure->yBlocks);
-	BinnedAtomicPotential->SetArgT(16, AtomicStructure->MaximumX);
-	BinnedAtomicPotential->SetArgT(17, AtomicStructure->MinimumX);
-	BinnedAtomicPotential->SetArgT(18, AtomicStructure->MaximumY);
-	BinnedAtomicPotential->SetArgT(19, AtomicStructure->MinimumY);
-	BinnedAtomicPotential->SetArgT(20, loadblocksx);
-	BinnedAtomicPotential->SetArgT(21, loadblocksy);
-	BinnedAtomicPotential->SetArgT(22, loadblocksz);
-	BinnedAtomicPotential->SetArgT(23, sigma2); // Not sure why i am using sigma 2 and not sigma...
-	BinnedAtomicPotential->SetArgT(24, startx);
-	BinnedAtomicPotential->SetArgT(25, starty);
+	BinnedAtomicPotential.SetArg(0, clPotential);
+	BinnedAtomicPotential.SetArg(5, AtomicStructure->AtomicStructureParameterisation);
+	BinnedAtomicPotential.SetArg(7, resolution);
+	BinnedAtomicPotential.SetArg(8, resolution);
+	BinnedAtomicPotential.SetArg(12, AtomicStructure->dz);
+	BinnedAtomicPotential.SetArg(13, pixelscale);
+	BinnedAtomicPotential.SetArg(14, AtomicStructure->xBlocks);
+	BinnedAtomicPotential.SetArg(15, AtomicStructure->yBlocks);
+	BinnedAtomicPotential.SetArg(16, AtomicStructure->MaximumX);
+	BinnedAtomicPotential.SetArg(17, AtomicStructure->MinimumX);
+	BinnedAtomicPotential.SetArg(18, AtomicStructure->MaximumY);
+	BinnedAtomicPotential.SetArg(19, AtomicStructure->MinimumY);
+	BinnedAtomicPotential.SetArg(20, loadblocksx);
+	BinnedAtomicPotential.SetArg(21, loadblocksy);
+	BinnedAtomicPotential.SetArg(22, loadblocksz);
+	BinnedAtomicPotential.SetArg(23, sigma2); // Not sure why i am using sigma 2 and not sigma...
+	BinnedAtomicPotential.SetArg(24, startx);
+	BinnedAtomicPotential.SetArg(25, starty);
 
 	if (Full3D)
-		BinnedAtomicPotential->SetArgT(26, full3dints);
+		BinnedAtomicPotential.SetArg(26, full3dints);
 
 	// Also need to generate propagator.
-	GeneratePropagator = Kernel(new clKernel(clState::context, clState::cldev, "clGeneratePropagator", clState::clq));
-	GeneratePropagator->loadProgSource("GeneratePropagator.cl");
-	GeneratePropagator->BuildKernel();
+	GeneratePropagator = clKernel(UnmanagedOpenCL::ctx,propsource,8, "clGeneratePropagator");
 
-	GeneratePropagator->SetArgT(0, clPropagator);
-	GeneratePropagator->SetArgT(1, clXFrequencies);
-	GeneratePropagator->SetArgT(2, clYFrequencies);
-	GeneratePropagator->SetArgT(3, resolution);
-	GeneratePropagator->SetArgT(4, resolution);
+	GeneratePropagator.SetArg(0, clPropagator);
+	GeneratePropagator.SetArg(1, clXFrequencies);
+	GeneratePropagator.SetArg(2, clYFrequencies);
+	GeneratePropagator.SetArg(3, resolution);
+	GeneratePropagator.SetArg(4, resolution);
 	
 	if (FD)
 	{
-		GeneratePropagator->SetArgT(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+		GeneratePropagator.SetArg(5, FDdz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
 	}
 	else
 	{
-		GeneratePropagator->SetArgT(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
+		GeneratePropagator.SetArg(5, AtomicStructure->dz); // Is this the right dz? (Propagator needs slice thickness not spacing between atom bins)
 	}
-	GeneratePropagator->SetArgT(6, wavelength);
-	GeneratePropagator->SetArgT(7, bandwidthkmax);
+	GeneratePropagator.SetArg(6, wavelength);
+	GeneratePropagator.SetArg(7, bandwidthkmax);
 
-	GeneratePropagator->Enqueue(WorkSize);
+	GeneratePropagator(WorkSize);
 
 	// And multiplication kernel
-	ComplexMultiply = Kernel(new clKernel(clState::context, clState::cldev, "clComplexMultiply", clState::clq));
-	ComplexMultiply->loadProgSource("Multiply.cl");
-	ComplexMultiply->BuildKernel();
+	ComplexMultiply = clKernel(UnmanagedOpenCL::ctx,multisource,5 ,"clComplexMultiply");
 
-	ComplexMultiply->SetArgT(3, resolution);
-	ComplexMultiply->SetArgT(4, resolution);
+	ComplexMultiply.SetArg(3, resolution);
+	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = Kernel(new clKernel(imagingKernelSource, clState::context, clState::cldev, "clImagingKernel", clState::clq));
-	ImagingKernel->BuildKernelOld();
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
 
 	ewmin.resize(waves);
 	ewmax.resize(waves);
@@ -608,45 +573,48 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	diffmax.resize(waves);
 	tdsmin.resize(waves);
 	tdsmax.resize(waves);
-
+	
 	if (FD)
 	{
 		// Need Grad Kernel and FiniteDifference also
-		GradKernel = Kernel(new clKernel(clState::context, clState::cldev, "clGrad", clState::clq));
-		GradKernel->loadProgSource("GradKernel.cl");
-		GradKernel->BuildKernel();
+		GradKernel = clKernel(UnmanagedOpenCL::ctx,gradsource,5, "clGrad");
 
-		FiniteDifference = Kernel(new clKernel(clState::context, clState::cldev, "clFiniteDifference", clState::clq));
-		FiniteDifference->loadProgSource("FiniteDifference.cl");
-		FiniteDifference->BuildKernel();
+		FiniteDifference = clKernel(UnmanagedOpenCL::ctx,fdsource,10, "clFiniteDifference");
+
 	}
 
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 
-	clFinish(clState::clq->cmdQueue);
 };
 
 void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 {
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	// Fix inverted images
 	posx = resolution - 1 - posx;
 	posy = resolution - 1 - posy;
 
-	InitialiseSTEMWavefunction->SetArgS(clWaveFunction2[wave - 1], resolution, resolution, clXFrequencies, clYFrequencies, posx, posy, STEMParams->aperturesizemrad, pixelscale, STEMParams->defocus, STEMParams->spherical, wavelength);
-	InitialiseSTEMWavefunction->Enqueue(WorkSize);
+	InitialiseSTEMWavefunction.SetArg(0,clWaveFunction2[wave - 1]);InitialiseSTEMWavefunction.SetArg(1, resolution);
+	InitialiseSTEMWavefunction.SetArg(2,resolution);
+	InitialiseSTEMWavefunction.SetArg(3,clXFrequencies);
+	InitialiseSTEMWavefunction.SetArg(4,clYFrequencies);
+	InitialiseSTEMWavefunction.SetArg(5,posx);
+	InitialiseSTEMWavefunction.SetArg(6,posy);
+	InitialiseSTEMWavefunction.SetArg(7,STEMParams->aperturesizemrad);
+	InitialiseSTEMWavefunction.SetArg(8,pixelscale);
+	InitialiseSTEMWavefunction.SetArg(9,STEMParams->defocus);
+	InitialiseSTEMWavefunction.SetArg(10,STEMParams->spherical);
+	InitialiseSTEMWavefunction.SetArg(11,wavelength);
+	InitialiseSTEMWavefunction(WorkSize);
 
 	// IFFT
-	FourierTrans->Enqueue(clWaveFunction2[wave - 1], clWaveFunction1[wave - 1], CLFFT_BACKWARD);
+	FourierTrans(clWaveFunction2[wave - 1], clWaveFunction1[wave - 1], Direction::Inverse);
 
 	if(FDMode)
 	{
 		// Copy into both initialwavefunctions
-		clEnqueueCopyBuffer(clState::clq->cmdQueue,clWaveFunction1[wave-1]->buffer,clWaveFunction1Minus[wave-1]->buffer,0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(),clWaveFunction1[wave-1]->GetBuffer(),clWaveFunction1Minus[wave-1]->GetBuffer(),0,0,resolution*resolution*sizeof(cl_float2),0,0,0);
 	}
 };
 
@@ -674,55 +642,47 @@ void TEMSimulation::doMultisliceStep(int stepno, int steps, int waves)
 	if (bottomz >= slices)
 		bottomz = slices - 1;
 
-	BinnedAtomicPotential->SetArgT(1, AtomicStructure->clAtomx);
-	BinnedAtomicPotential->SetArgT(2, AtomicStructure->clAtomy);
-	BinnedAtomicPotential->SetArgT(3, AtomicStructure->clAtomz);
-	BinnedAtomicPotential->SetArgT(4, AtomicStructure->clAtomZ);
-	BinnedAtomicPotential->SetArgT(6, AtomicStructure->clBlockStartPositions);
-	BinnedAtomicPotential->SetArgT(9, slice);
-	BinnedAtomicPotential->SetArgT(10, slices);
-	BinnedAtomicPotential->SetArgT(11, currentz);
+	BinnedAtomicPotential.SetArg(1, AtomicStructure->clAtomx,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(2, AtomicStructure->clAtomy,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(3, AtomicStructure->clAtomz,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(4, AtomicStructure->clAtomZ,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(6, AtomicStructure->clBlockStartPositions,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(9, slice);
+	BinnedAtomicPotential.SetArg(10, slices);
+	BinnedAtomicPotential.SetArg(11, currentz);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup LocalWork(16,16,1);
 
-	size_t* LocalWork = new size_t[3];
+	BinnedAtomicPotential(Work, LocalWork);
 
-	LocalWork[0] = 16;
-	LocalWork[1] = 16;
-	LocalWork[2] = 1;
-
-	BinnedAtomicPotential->Enqueue3D(Work, LocalWork);
-
-	FourierTrans->Enqueue(clPotential, clWaveFunction3[0], CLFFT_FORWARD);
-	BandLimit->Enqueue(Work);
-	FourierTrans->Enqueue(clWaveFunction3[0], clPotential, CLFFT_BACKWARD);
+	FourierTrans(clPotential, clWaveFunction3[0], Direction::Forwards);
+	BandLimit(Work);
+	FourierTrans(clWaveFunction3[0], clPotential, Direction::Inverse);
 
 	// Now for the rest of the multislice steps
 	for (int i = 1; i <= waves; i++)
 	{
 		//Multiply with wavefunction
-		ComplexMultiply->SetArgT(0, clPotential);
-		ComplexMultiply->SetArgT(1, clWaveFunction1[i - 1]);
-		ComplexMultiply->SetArgT(2, clWaveFunction2[i - 1]);
-		ComplexMultiply->Enqueue(Work);
+		ComplexMultiply.SetArg(0, clPotential,ArgumentType::Input);
+		ComplexMultiply.SetArg(1, clWaveFunction1[i - 1],ArgumentType::Input);
+		ComplexMultiply.SetArg(2, clWaveFunction2[i - 1],ArgumentType::Output);
+		ComplexMultiply(Work);
 
 		// Propagate
-		FourierTrans->Enqueue(clWaveFunction2[i - 1], clWaveFunction3[0], CLFFT_FORWARD);
+		FourierTrans(clWaveFunction2[i - 1], clWaveFunction3[0], Direction::Forwards);
 
 		// BandLimit OK here?
-		ComplexMultiply->SetArgT(0, clWaveFunction3[0]);
-		ComplexMultiply->SetArgT(1, clPropagator);
-		ComplexMultiply->SetArgT(2, clWaveFunction2[i - 1]);
-		ComplexMultiply->Enqueue(Work);
+		ComplexMultiply.SetArg(0, clWaveFunction3[0] , ArgumentType::Input);
+		ComplexMultiply.SetArg(1, clPropagator , ArgumentType::Input);
+		ComplexMultiply.SetArg(2, clWaveFunction2[i - 1] , ArgumentType::Output);
+		ComplexMultiply(Work);
 
 
-		FourierTrans->Enqueue(clWaveFunction2[i - 1], clWaveFunction1[i - 1], CLFFT_BACKWARD);
+		FourierTrans(clWaveFunction2[i - 1], clWaveFunction1[i - 1], Direction::Inverse);
 	}
-	clFinish(clState::clq->cmdQueue);
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
@@ -745,62 +705,67 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 	if (bottomz >= slices)
 		bottomz = slices - 1;
 
-	BinnedAtomicPotential->SetArgT(1, AtomicStructure->clAtomx);
-	BinnedAtomicPotential->SetArgT(2, AtomicStructure->clAtomy);
-	BinnedAtomicPotential->SetArgT(3, AtomicStructure->clAtomz);
-	BinnedAtomicPotential->SetArgT(4, AtomicStructure->clAtomZ);
-	BinnedAtomicPotential->SetArgT(6, AtomicStructure->clBlockStartPositions);
-	BinnedAtomicPotential->SetArgT(9, atomslice);
-	BinnedAtomicPotential->SetArgT(10, slices);
-	BinnedAtomicPotential->SetArgT(11, currentz);
+	BinnedAtomicPotential.SetArg(1, AtomicStructure->clAtomx,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(2, AtomicStructure->clAtomy,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(3, AtomicStructure->clAtomz,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(4, AtomicStructure->clAtomZ,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(6, AtomicStructure->clBlockStartPositions,ArgumentType::Input);
+	BinnedAtomicPotential.SetArg(9, atomslice);
+	BinnedAtomicPotential.SetArg(10, slices);
+	BinnedAtomicPotential.SetArg(11, currentz);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	clWorkGroup LocalWork(16,16,1);
 
-	size_t* LocalWork = new size_t[3];
+	BinnedAtomicPotential(Work, LocalWork);
 
-	LocalWork[0] = 16;
-	LocalWork[1] = 16;
-	LocalWork[2] = 1;
-
-	BinnedAtomicPotential->Enqueue3D(Work, LocalWork);
-
-	FourierTrans->Enqueue(clPotential, clWaveFunction3[0], CLFFT_FORWARD);
-	BandLimit->Enqueue(Work);
-	FourierTrans->Enqueue(clWaveFunction3[0], clPotential, CLFFT_BACKWARD);
+	FourierTrans(clPotential, clWaveFunction3[0], Direction::Forwards);
+	BandLimit(Work);
+	FourierTrans(clWaveFunction3[0], clPotential, Direction::Inverse);
 
 	// Now for the rest of the multislice steps
 	for (int i = 1; i <= waves; i++)
 	{
 
 	// //FT Psi into Grad2.
-		FourierTrans->Enqueue(clWaveFunction1[i-1], clWaveFunction3[0], CLFFT_FORWARD);
+		FourierTrans(clWaveFunction1[i-1], clWaveFunction3[0], Direction::Forwards);
 
 	// //Grad Kernel on Grad2.
-		GradKernel->SetArgS(clWaveFunction3[0], clXFrequencies, clYFrequencies, resolution, resolution);
-		GradKernel->Enqueue(Work);
+		GradKernel.SetArg(0,clWaveFunction3[0],ArgumentType::Input);
+		GradKernel.SetArg(1,clXFrequencies,ArgumentType::Input);
+		GradKernel.SetArg(2,clYFrequencies,ArgumentType::Input);
+		GradKernel.SetArg(3,resolution);
+		GradKernel.SetArg(4,resolution);
+		GradKernel(Work);
 
 	// //IFT Grad2 into Grad.
-		FourierTrans->Enqueue(clWaveFunction3[0], clWaveFunction4[i-1], CLFFT_BACKWARD);
+		FourierTrans(clWaveFunction3[0], clWaveFunction4[i-1], Direction::Inverse);
 
 	// //FD Kernel
-		FiniteDifference->SetArgS(clPotential, clWaveFunction4[i-1], clWaveFunction1Minus[i-1], clWaveFunction1[i-1], clWaveFunction1Plus[i-1], FDdz, wavelength, FDsigma, resolution, resolution);
-		FiniteDifference->Enqueue(Work);
+		FiniteDifference.SetArg(0,clPotential,ArgumentType::Input);
+		FiniteDifference.SetArg(1,clWaveFunction4[i-1],ArgumentType::Input);
+		FiniteDifference.SetArg(2,clWaveFunction1Minus[i-1],ArgumentType::Input);
+		FiniteDifference.SetArg(3,clWaveFunction1[i-1],ArgumentType::Input);
+		FiniteDifference.SetArg(4,clWaveFunction1Plus[i-1],ArgumentType::Output);
+		FiniteDifference.SetArg(5,FDdz);
+		FiniteDifference.SetArg(6,wavelength);
+		FiniteDifference.SetArg(7,FDsigma);
+		FiniteDifference.SetArg(8,resolution);
+		FiniteDifference.SetArg(9,resolution);
+		FiniteDifference(Work);
 
 
 	// //Bandlimit PsiPlus
-		FourierTrans->Enqueue(clWaveFunction1Plus[i-1], clWaveFunction3[0], CLFFT_FORWARD);
-		BandLimit->Enqueue(Work);
-		FourierTrans->Enqueue(clWaveFunction3[0], clWaveFunction1Plus[i-1], CLFFT_BACKWARD);
+		FourierTrans(clWaveFunction1Plus[i-1], clWaveFunction3[0], Direction::Forwards);
+		BandLimit(Work);
+		FourierTrans(clWaveFunction3[0], clWaveFunction1Plus[i-1], Direction::Inverse);
 
 	// // Psi becomes PsiMinus
-		clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1[i-1]->buffer, clWaveFunction1Minus[i-1]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1[i-1]->GetBuffer(), clWaveFunction1Minus[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 	// // PsiPlus becomes Psi.
-		clEnqueueCopyBuffer(clState::clq->cmdQueue, clWaveFunction1Plus[i-1]->buffer, clWaveFunction1[i-1]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1Plus[i-1]->GetBuffer(), clWaveFunction1[i-1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 
 
@@ -809,21 +774,18 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 	// // Finished wavefunction in reciprocal spaaaaaace in clWaveFunction2.
 	// // 3 and 4 were previously temporary.
 
-		FourierTrans->Enqueue(clWaveFunction1[i-1], clWaveFunction2[i-1], CLFFT_FORWARD);
+		FourierTrans(clWaveFunction1[i-1], clWaveFunction2[i-1],Direction::Forwards);
 
 	}
-	clFinish(clState::clq->cmdQueue);
+
+	UnmanagedOpenCL::ctx.WaitForQueueFinish();
 };
 
 float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 {
 	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
 	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
-	size_t* WorkSize = new size_t[3];
-
-	WorkSize[0] = resolution;
-	WorkSize[1] = resolution;
-	WorkSize[2] = 1;
+	clWorkGroup WorkSize(resolution,resolution,1);
 
 	float pxFreq = (resolution * pixelscale);
 
@@ -841,33 +803,30 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 
 	clTDSDiff[wave - 1]->Write(clTDSk[wave - 1]);
 
-	TDSMaskingKernel->SetArgS(clTDSMaskDiff, clTDSDiff[wave - 1], resolution, resolution, innerPx, outerPx, xcPx, ycPx);
+	TDSMaskingKernel.SetArg(0,clTDSMaskDiff);
+	TDSMaskingKernel.SetArg(1,clTDSDiff[wave - 1]);
+	TDSMaskingKernel.SetArg(2,resolution);
+	TDSMaskingKernel.SetArg(3,resolution);
+	TDSMaskingKernel.SetArg(4,innerPx);
+	TDSMaskingKernel.SetArg(5,outerPx);
+	TDSMaskingKernel.SetArg(6,xcPx);
+	TDSMaskingKernel.SetArg(7,ycPx);
 
-	TDSMaskingKernel->Enqueue(WorkSize);
+	TDSMaskingKernel(WorkSize);
 
 	int totalSize = resolution*resolution;
 	int nGroups = totalSize / 256;
 
-	size_t* globalSizeSum = new size_t[3];
-	size_t* localSizeSum = new size_t[3];
+	clWorkGroup globalSizeSum(totalSize,1,1);
+	clWorkGroup localSizeSum(256,1,1);
 
-	globalSizeSum[0] = totalSize;
-	globalSizeSum[1] = 1;
-	globalSizeSum[2] = 1;
-	localSizeSum[0] = 256;
-	localSizeSum[1] = 1;
-	localSizeSum[2] = 1;
-
-	return FloatSumReduction(clTDSMaskDiff->buffer, globalSizeSum, localSizeSum, nGroups, totalSize);
+	return FloatSumReduction(clTDSMaskDiff->GetBuffer(), globalSizeSum, localSizeSum, nGroups, totalSize);
 };
 
 void TEMSimulation::getCTEMImage(float* data, int resolution)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -896,29 +855,19 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 	ntfs.push_back(oriusNTF);
 	ntfs.push_back(k2NTF);
 
-	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	Buffer ntfbuffer = Buffer(new clMemory(725 * sizeof(cl_float)));
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto ntfbuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(725);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
-
-	Kernel NTF = Kernel(new clKernel(NTFSource, clState::context, clState::cldev, "clNTF", clState::clq));
-	NTF->BuildKernelOld();
-
-	Kernel ABS = Kernel(new clKernel(SqAbsSource, clState::context, clState::cldev, "clSqAbs", clState::clq));
-	ABS->BuildKernelOld();
+	clKernel NTF = clKernel(UnmanagedOpenCL::ctx,NTFSource,5, "clNTF");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	float conversionfactor = 8; //CCD counts per electron.
 	float Ntot = doseperpix*binning*binning; // Get this passed in, its dose per pixel i think.
 
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
-
-	clWaveFunction1[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -935,16 +884,20 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 
 	clWaveFunction1[0]->Write(compdata);
 
-	FourierTrans->Enqueue(clWaveFunction1[0], Temp1, CLFFT_FORWARD);
+	FourierTrans(clWaveFunction1[0], Temp1, Direction::Forwards);
 
-	clEnqueueWriteBuffer(clState::clq->cmdQueue, ntfbuffer->buffer, CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), ntfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
 
-	NTF->SetArgS(Temp1, ntfbuffer, resolution, resolution, binning);
-	NTF->Enqueue(Work);
+	NTF.SetArg(0,Temp1,ArgumentType::InputOutput);
+	NTF.SetArg(1,ntfbuffer,ArgumentType::Input);
+	NTF.SetArg(2,resolution);
+	NTF.SetArg(3,resolution);
+	NTF.SetArg(4,binning);
+	NTF(Work);
 
-	FourierTrans->Enqueue(Temp1, clWaveFunction1[0], CLFFT_BACKWARD);
+	FourierTrans(Temp1, clWaveFunction1[0], Direction::Inverse);
 
-	clWaveFunction1[0]->Read(compdata);
+	compdata = clWaveFunction1[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -970,59 +923,62 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 void TEMSimulation::simulateCTEM()
 {
 	// Set up some temporary memory objects for the image simulation
-	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	Buffer dqebuffer = Buffer(new clMemory(725 * sizeof(cl_float)));
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto dqebuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(725);
 
-	Kernel DQE = Kernel(new clKernel(DQESource, clState::context, clState::cldev, "clDQE", clState::clq));
-	DQE->BuildKernelOld();
-
-	Kernel ABS = Kernel(new clKernel(SqAbsSource, clState::context, clState::cldev, "clSqAbs", clState::clq));
-	ABS->BuildKernelOld();
+	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// Set arguments for imaging kernel
-	ImagingKernel->SetArgT(0, clWaveFunction2[0]);
-	ImagingKernel->SetArgT(1, clImageWaveFunction);
-	ImagingKernel->SetArgT(2, resolution);
-	ImagingKernel->SetArgT(3, resolution);
-	ImagingKernel->SetArgT(4, TEMParams->spherical);
-	ImagingKernel->SetArgT(5, TEMParams->defocus);
-	ImagingKernel->SetArgT(6, TEMParams->astigmag);
-	ImagingKernel->SetArgT(7, TEMParams->astigang);
-	ImagingKernel->SetArgT(8, TEMParams->astig2mag);
-	ImagingKernel->SetArgT(9, TEMParams->astig2ang);
-	ImagingKernel->SetArgT(10, TEMParams->aperturesizemrad);
-	ImagingKernel->SetArgT(11, wavelength);
-	ImagingKernel->SetArgT(12, clXFrequencies);
-	ImagingKernel->SetArgT(13, clYFrequencies);
-	ImagingKernel->SetArgT(14, TEMParams->beta);
-	ImagingKernel->SetArgT(15, TEMParams->delta);
+	ImagingKernel.SetArg(0, clWaveFunction2[0],ArgumentType::Input);
+	ImagingKernel.SetArg(1, clImageWaveFunction,ArgumentType::Output);
+	ImagingKernel.SetArg(2, resolution);
+	ImagingKernel.SetArg(3, resolution);
+	ImagingKernel.SetArg(4, TEMParams->spherical);
+	ImagingKernel.SetArg(5, TEMParams->defocus);
+	ImagingKernel.SetArg(6, TEMParams->astigmag);
+	ImagingKernel.SetArg(7, TEMParams->astigang);
+	ImagingKernel.SetArg(8, TEMParams->astig2mag);
+	ImagingKernel.SetArg(9, TEMParams->astig2ang);
+	ImagingKernel.SetArg(10, TEMParams->aperturesizemrad);
+	ImagingKernel.SetArg(11, wavelength);
+	ImagingKernel.SetArg(12, clXFrequencies,ArgumentType::Input);
+	ImagingKernel.SetArg(13, clYFrequencies,ArgumentType::Input);
+	ImagingKernel.SetArg(14, TEMParams->beta);
+	ImagingKernel.SetArg(15, TEMParams->delta);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
-
-	ImagingKernel->Enqueue(Work);
+	ImagingKernel(Work);
 
 	// Now get and display absolute value
-	FourierTrans->Enqueue(clImageWaveFunction, clWaveFunction1[0], CLFFT_BACKWARD);
+	FourierTrans(clImageWaveFunction, clWaveFunction1[0], Direction::Inverse);
 
-	ABS->SetArgS(clWaveFunction1[0], Temp1, resolution, resolution);
-	ABS->Enqueue(Work);
+	ABS.SetArg(0,clWaveFunction1[0],ArgumentType::Input);
+	ABS.SetArg(1,Temp1,ArgumentType::Output);
+	ABS.SetArg(2,resolution);
+	ABS.SetArg(3,resolution);
+	ABS(Work);
 
-	FourierTrans->Enqueue(Temp1, clImageWaveFunction, CLFFT_FORWARD);
+	FourierTrans(Temp1, clImageWaveFunction, Direction::Forwards);
 	int binning = 1;
-	DQE->SetArgS(clImageWaveFunction, dqebuffer, resolution, resolution, binning);
-	DQE->Enqueue(Work);
+	DQE.SetArg(0,clImageWaveFunction,ArgumentType::InputOutput);
+	DQE.SetArg(1,dqebuffer,ArgumentType::Input);
+	DQE.SetArg(2,resolution);
+	DQE.SetArg(3,resolution);
+	DQE.SetArg(4,binning);
+	DQE(Work);
 
-	FourierTrans->Enqueue(clImageWaveFunction, Temp1, CLFFT_BACKWARD);
+	FourierTrans(clImageWaveFunction, Temp1, Direction::Inverse);
 
-	ABS->SetArgS(Temp1, clImageWaveFunction, resolution, resolution);
-	ABS->Enqueue(Work);
+	ABS.SetArg(0,Temp1,ArgumentType::Input);
+	ABS.SetArg(1,clImageWaveFunction,ArgumentType::Output);
+	ABS.SetArg(2,resolution);
+	ABS.SetArg(3,resolution);
+	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(clState::clq->cmdQueue, clImageWaveFunction->buffer, clWaveFunction4[0]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::simulateCTEM(int detector, int binning)
@@ -1034,80 +990,78 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	dqes.push_back(k2DQE);
 
 	// Set up some temporary memory objects for the image simulation
-	Buffer Temp1 = Buffer(new clMemory(resolution*resolution*sizeof(cl_float2)));
-	Buffer dqebuffer = Buffer(new clMemory(725 * sizeof(cl_float)));
+	auto Temp1 = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
+	auto dqebuffer = UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(725);
 
-	Kernel DQE = Kernel(new clKernel(DQESource, clState::context, clState::cldev, "clDQE", clState::clq));
-	DQE->BuildKernelOld();
-
-	Kernel ABS = Kernel(new clKernel(SqAbsSource, clState::context, clState::cldev, "clSqAbs", clState::clq));
-	ABS->BuildKernelOld();
+	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// Set arguments for imaging kernel
-	ImagingKernel->SetArgT(0, clWaveFunction2[0]);
-	ImagingKernel->SetArgT(1, clImageWaveFunction);
-	ImagingKernel->SetArgT(2, resolution);
-	ImagingKernel->SetArgT(3, resolution);
-	ImagingKernel->SetArgT(4, TEMParams->spherical);
-	ImagingKernel->SetArgT(5, TEMParams->defocus);
-	ImagingKernel->SetArgT(6, TEMParams->astigmag);
-	ImagingKernel->SetArgT(7, TEMParams->astigang);
-	ImagingKernel->SetArgT(8, TEMParams->astig2mag);
-	ImagingKernel->SetArgT(9, TEMParams->astig2ang);
-	ImagingKernel->SetArgT(10, TEMParams->aperturesizemrad);
-	ImagingKernel->SetArgT(11, wavelength);
-	ImagingKernel->SetArgT(12, clXFrequencies);
-	ImagingKernel->SetArgT(13, clYFrequencies);
-	ImagingKernel->SetArgT(14, TEMParams->beta);
-	ImagingKernel->SetArgT(15, TEMParams->delta);
+	ImagingKernel.SetArg(0, clWaveFunction2[0],ArgumentType::Input);
+	ImagingKernel.SetArg(1, clImageWaveFunction,ArgumentType::Output);
+	ImagingKernel.SetArg(2, resolution);
+	ImagingKernel.SetArg(3, resolution);
+	ImagingKernel.SetArg(4, TEMParams->spherical);
+	ImagingKernel.SetArg(5, TEMParams->defocus);
+	ImagingKernel.SetArg(6, TEMParams->astigmag);
+	ImagingKernel.SetArg(7, TEMParams->astigang);
+	ImagingKernel.SetArg(8, TEMParams->astig2mag);
+	ImagingKernel.SetArg(9, TEMParams->astig2ang);
+	ImagingKernel.SetArg(10, TEMParams->aperturesizemrad);
+	ImagingKernel.SetArg(11, wavelength);
+	ImagingKernel.SetArg(12, clXFrequencies,ArgumentType::Input);
+	ImagingKernel.SetArg(13, clYFrequencies,ArgumentType::Input);
+	ImagingKernel.SetArg(14, TEMParams->beta);
+	ImagingKernel.SetArg(15, TEMParams->delta);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
-
-	ImagingKernel->Enqueue(Work);
+	ImagingKernel(Work);
 
 	// Now get and display absolute value
-	FourierTrans->Enqueue(clImageWaveFunction, clWaveFunction1[0], CLFFT_BACKWARD);
+	FourierTrans(clImageWaveFunction, clWaveFunction1[0], Direction::Inverse);
 
-	ABS->SetArgS(clWaveFunction1[0], Temp1, resolution, resolution);
-	ABS->Enqueue(Work);
+	ABS.SetArg(0,clWaveFunction1[0],ArgumentType::Input);
+	ABS.SetArg(1,Temp1,ArgumentType::Output);
+	ABS.SetArg(2,resolution);
+	ABS.SetArg(3,resolution);
+	ABS(Work);
 
-	FourierTrans->Enqueue(Temp1, clImageWaveFunction, CLFFT_FORWARD);
+	FourierTrans(Temp1, clImageWaveFunction, Direction::Forwards);
+	binning = 1;
+	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), dqebuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
 
-	clEnqueueWriteBuffer(clState::clq->cmdQueue, dqebuffer->buffer, CL_TRUE, 0, 725 * sizeof(float), dqes[detector], 0, NULL, NULL);
-	DQE->SetArgS(clImageWaveFunction, dqebuffer, resolution, resolution, binning);
-	DQE->Enqueue(Work);
+	DQE.SetArg(0,clImageWaveFunction,ArgumentType::InputOutput);
+	DQE.SetArg(1,dqebuffer,ArgumentType::Input);
+	DQE.SetArg(2,resolution);
+	DQE.SetArg(3,resolution);
+	DQE.SetArg(4,binning);
+	DQE(Work);
 
-	FourierTrans->Enqueue(clImageWaveFunction, Temp1, CLFFT_BACKWARD);
+	FourierTrans(clImageWaveFunction, Temp1, Direction::Inverse);
 
-	ABS->SetArgS(Temp1, clImageWaveFunction, resolution, resolution);
-	ABS->Enqueue(Work);
+	ABS.SetArg(0,Temp1,ArgumentType::Input);
+	ABS.SetArg(1,clImageWaveFunction,ArgumentType::Output);
+	ABS.SetArg(2,resolution);
+	ABS.SetArg(3,resolution);
+	ABS(Work);
 
 	// Maybe update diffractogram image also...
-	clEnqueueCopyBuffer(clState::clq->cmdQueue, clImageWaveFunction->buffer, clWaveFunction4[0]->buffer, 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+	clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clImageWaveFunction->GetBuffer(), clWaveFunction4[0]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 };
 
 void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
+	fftShift(Work);
 
-	fftShift->SetArgT(0, clWaveFunction2[wave - 1]);
-	fftShift->Enqueue(Work);
+	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
-	clWaveFunction3[0]->Read(compdata);
-
-	float max = CL_FLT_MIN;
+	float max = -CL_MAXFLOAT;
 	float min = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
@@ -1128,23 +1082,18 @@ void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 
 void TEMSimulation::getSTEMDiff(int wave)
 {
-	float max = CL_FLT_MIN;
+	float max = -CL_MAXFLOAT;
 	float min = CL_MAXFLOAT;
 
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
+	fftShift(Work);
 
-	fftShift->SetArgT(0, clWaveFunction2[wave - 1]);
-	fftShift->Enqueue(Work);
-
-	clWaveFunction3[0]->Read(compdata);
+	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
 	max = CL_FLT_MIN;
 	min = CL_MAXFLOAT;
@@ -1168,12 +1117,9 @@ void TEMSimulation::getSTEMDiff(int wave)
 void TEMSimulation::getEWImage(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
-	clWaveFunction1[wave - 1]->Read(compdata);
-
-	float max = CL_FLT_MIN;
+	float max = -CL_MAXFLOAT;
 	float min = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
@@ -1195,18 +1141,17 @@ void TEMSimulation::getEWImage(float* data, int resolution, int wave)
 void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
-	clWaveFunction1[0]->Read(compdata);
-
-	float max = CL_FLT_MIN;
+	float max = -CL_MAXFLOAT;
 	float min = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
+
 		// Get sqrt abs value for display...
-		data[i] = hypot(compdata[i].s[1], compdata[i].s[0]);
+		data[i] = atan2(compdata[i].s[1], compdata[i].s[0]);
+		//data[i] = compdata[i].s[1];
 
 		// Find max,min for contrast limits
 		if (data[i] > max)
@@ -1222,12 +1167,9 @@ void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 void TEMSimulation::addTDS(int wave)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata;
-	compdata.resize(resolution*resolution);
+	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
 
-	clWaveFunction1[wave - 1]->Read(compdata);
-
-	float max = CL_FLT_MIN;
+	float max = -CL_MAXFLOAT;
 	float min = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
@@ -1247,18 +1189,14 @@ void TEMSimulation::addTDS(int wave)
 
 	// Original data is complex so copy complex version down first
 
-	size_t* Work = new size_t[3];
+	clWorkGroup Work(resolution,resolution,1);
 
-	Work[0] = resolution;
-	Work[1] = resolution;
-	Work[2] = 1;
+	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
+	fftShift(Work);
 
-	fftShift->SetArgT(0, clWaveFunction2[wave - 1]);
-	fftShift->Enqueue(Work);
+	compdata = clWaveFunction3[0]->CreateLocalCopy();
 
-	clWaveFunction3[0]->Read(compdata);
-
-	max = CL_FLT_MIN;
+	max = -CL_MAXFLOAT;
 	min = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
@@ -1286,35 +1224,25 @@ void TEMSimulation::clearTDS(int waves)
 	}
 };
 
-float TEMSimulation::FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
+float TEMSimulation::FloatSumReduction(cl_mem &Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {
-
-
-	clMemory outArray;
-	outArray.Create(nGroups*sizeof(cl_float));
-
-	// Create host array to store reduction results.
-	std::vector< float> sums(nGroups);
-
-	SumReduction->SetArgT(0, Array);
+	clMemory<float,Manual>::Ptr outArray = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(nGroups);
+	SumReduction.SetArg(0, Array,ArgumentType::Input);
 
 	// Only really need to do these 3 once...
-	SumReduction->SetArgT(1, outArray);
-	SumReduction->SetArgT(2, totalSize);
-	SumReduction->SetArgLocalMemory(3, 256, clFloat);
-
-	SumReduction->Enqueue3D(globalSizeSum, localSizeSum);
+	SumReduction.SetArg(1, outArray,ArgumentType::Output);
+	SumReduction.SetArg(2, totalSize);
+	SumReduction.SetLocalMemoryArg<float>(3, 256);
+	SumReduction(globalSizeSum, localSizeSum);
 
 	// Now copy back 
-	clEnqueueReadBuffer(clState::clq->cmdQueue, outArray.buffer, CL_TRUE, 0, nGroups*sizeof(cl_float), &sums[0], 0, NULL, NULL);
+	std::vector< float> sums = outArray->CreateLocalCopy();
 
 	// Find out which numbers to read back
 	float sum = 0;
-
 	for (int i = 0; i < nGroups; i++)
 	{
 		sum += sums[i];
 	}
-
 	return sum;
 };
