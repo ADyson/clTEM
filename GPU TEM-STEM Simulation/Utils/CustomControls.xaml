@@ -63,7 +63,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border x:Name="BackgroundBorder" Grid.ColumnSpan="2" Background="{DynamicResource PanelDark}"/>
+                                    <Border x:Name="BackgroundBorder" Grid.ColumnSpan="2" Background="{DynamicResource PanelLight}"/>
                                     <TextBlock x:Name="HeaderText" Foreground="{DynamicResource TextColourLight}" FontSize="14" FontWeight="SemiBold">
                                         <ContentPresenter Margin="6,3,6,3" VerticalAlignment="Center"/>
                                     </TextBlock>
@@ -71,8 +71,8 @@
                                       Grid.Column="1" Width="8" Height="6" Fill="{DynamicResource Accent}" Margin="0,0,8,0" 
                                       VerticalAlignment="Center" RenderTransformOrigin="0.5,0.4" />
                                 </Grid>
-                                <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{StaticResource ColumnHeaderGripperStyle}"/>
-                                <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Style="{StaticResource ColumnHeaderGripperStyle}"/>
+                                <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Style="{DynamicResource ColumnHeaderGripperStyle}"/>
+                                <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Style="{DynamicResource ColumnHeaderGripperStyle}"/>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="SortDirection" Value="{x:Null}">
@@ -83,8 +83,8 @@
                                         <Condition Property="IsMouseOver" Value="true" />
                                         <Condition Property="SortDirection" Value="{x:Null}" />
                                     </MultiTrigger.Conditions>
-                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{StaticResource ButtonHighlight}"/>
-                                    <Setter TargetName="HeaderText" Property="Foreground" Value="{StaticResource TextColourDark}"/>
+                                    <Setter TargetName="BackgroundBorder" Property="Background" Value="{DynamicResource ButtonHighlight}"/>
+                                    <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource TextColourDark}"/>
                                 </MultiTrigger>
                                 <Trigger Property="SortDirection" Value="Ascending">
                                     <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
@@ -118,7 +118,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+                                    <Setter Property="Background" Value="{DynamicResource PanelLight}"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
@@ -132,7 +132,7 @@
             <Style TargetType="{x:Type DataGridRow}">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource PanelDark}"/>
+                        <Setter Property="Background" Value="{DynamicResource PanelLight}"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>

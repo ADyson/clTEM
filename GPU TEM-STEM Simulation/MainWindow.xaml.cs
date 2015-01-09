@@ -114,6 +114,8 @@ namespace GPUTEMSTEMSimulation
         {
             InitializeComponent();
 
+            System.Diagnostics.PresentationTraceSources.DataBindingSource.Switch.Level = System.Diagnostics.SourceLevels.Critical;
+
             //add event handlers here so they aren't called when creating controls
             CBEDxpos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
             CBEDypos.TextChanged += new TextChangedEventHandler(CBEDValidCheck);
@@ -783,14 +785,20 @@ namespace GPUTEMSTEMSimulation
                         }
                     }
 
+                    // to be set in some settings thing later
+                    bool liveUpdate = false;
+
                     // This will update display after each tds run...
-                    progressReporter.ReportProgress((val) =>
+                    if (liveUpdate)
                     {
-                        foreach (DetectorItem i in LockedDetectors)
+                        progressReporter.ReportProgress((val) =>
                         {
-                            UpdateDetectorImage(i);
-                        }
-                    }, thisPosY);
+                            foreach (DetectorItem i in LockedDetectors)
+                            {
+                                UpdateDetectorImage(i);
+                            }
+                        }, thisPosY);
+                    }
 
                     if (ct.IsCancellationRequested == true)
                         break;

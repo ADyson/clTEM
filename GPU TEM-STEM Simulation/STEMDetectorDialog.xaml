@@ -6,13 +6,13 @@
               
         xmlns:metro="http://schemas.codeplex.com/elysium"
         xmlns:params="http://schemas.codeplex.com/elysium/params"
-        params:Design.Theme="{StaticResource  ThemeCol}"
-        params:Design.AccentBrush="{StaticResource Accent}"
-        params:Design.ContrastBrush="{StaticResource Contrast}"
+        params:Design.Theme="{DynamicResource  ThemeCol}"
+        params:Design.AccentBrush="{DynamicResource Accent}"
+        params:Design.ContrastBrush="{DynamicResource Contrast}"
               
-        params:Manager.Theme="{StaticResource  ThemeCol}"
-        params:Manager.AccentBrush="{StaticResource Accent}"
-        params:Manager.ContrastBrush="{StaticResource Contrast}">
+        params:Manager.Theme="{DynamicResource  ThemeCol}"
+        params:Manager.AccentBrush="{DynamicResource Accent}"
+        params:Manager.ContrastBrush="{DynamicResource Contrast}">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -24,7 +24,7 @@
         </Grid.ColumnDefinitions>
 
 
-        <DataGrid x:Name="DetectorListView" Style="{StaticResource StandardDataGrid}" ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="0,0,10,0"
+        <DataGrid x:Name="DetectorListView" Style="{DynamicResource StandardDataGrid}" ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="0,0,10,0"
                   Grid.Column="0" Grid.RowSpan="12" Width="535" MaxHeight="350" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"
                   SelectionUnit="FullRow" VerticalContentAlignment="Center" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True">
             <DataGrid.Columns>
