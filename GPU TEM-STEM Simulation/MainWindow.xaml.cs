@@ -638,6 +638,7 @@ namespace GPUTEMSTEMSimulation
 			if (LockedDetectors.Count == 0)
 			{
 				var result = MessageBox.Show("No Detectors Have Been Set", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Resources["Accent"] = Application.Current.Resources["AccentOrig"];
 				return;
 			}
 
