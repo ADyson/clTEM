@@ -1,33 +1,11 @@
-using System;
-using System.IO;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using System.Threading;
-using Microsoft.Win32;
-using ManagedOpenCLWrapper;
-using BitMiracle.LibTiff.Classic;
 using PanAndZoom;
-using ColourGenerator;
 
-namespace GPUTEMSTEMSimulation
+namespace GPUTEMSTEMSimulation.Utils
 {
 	public class DisplayTab
 	{
@@ -38,6 +16,39 @@ namespace GPUTEMSTEMSimulation
 		public Image tImage { get; set; }
 
 	    public float[] ImageData { get; set; }
+
+        /// <summary>
+        /// Maximum value of image data
+        /// </summary>
+        public float Max { get; set; }
+
+        /// <summary>
+        /// Minimum value of image data
+        /// </summary>
+        public float Min { get; set; }
+
+        /// <summary>
+        /// Sets images sizes with the square dimensions
+        /// </summary>
+        /// <param name="sz">The size of x and y</param>
+        public void SetSize(int sz)
+        {
+            xDim = sz;
+            yDim = sz;
+            ImageData = new float[sz * sz];
+        }
+
+        /// <summary>
+        /// Sets image sizes with size x by y
+        /// </summary>
+        /// <param name="x">width of image</param>
+        /// <param name="y">height of image</param>
+	    public void SetSize(int x, int y)
+	    {
+	        xDim = x;
+	        yDim = y;
+            ImageData = new float[x*y];
+	    }
 
 		public TabItem Tab { get; set; }
 

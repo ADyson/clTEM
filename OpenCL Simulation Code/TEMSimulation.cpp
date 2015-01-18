@@ -4,6 +4,11 @@
 #include "mtf.h"
 #include "UnmanagedOpenCL.h"
 
+//#include <boost/lexical_cast.hpp>
+//#include <Windows.h>
+
+#include <time.h>
+#include <numeric>
 
 TEMSimulation::TEMSimulation(TEMParameters* temparams, STEMParameters* stemparams): FourierTrans(UnmanagedOpenCL::ctx,1024,1024)
 {
@@ -22,7 +27,8 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 
 	resolution = res;
 	AtomicStructure = Structure;
-	AtomicStructure->dz = dz;
+	if (FDMode)
+		AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx - startx;
@@ -160,11 +166,11 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 		clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 	}
 
-	clTDSk.resize(1);
-	clTDSx.resize(1);
+	//clTDSk.resize(1);
+	//clTDSx.resize(1);
 
-	clTDSx[0].resize(resolution*resolution);
-	clTDSk[0].resize(resolution*resolution);
+	clTDSk.resize(resolution*resolution);
+	//clTDSk[0].resize(resolution*resolution);
 
 	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
@@ -288,8 +294,8 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	ewmax2.resize(waves);
 	diffmin.resize(waves);
 	diffmax.resize(waves);
-	tdsmin.resize(waves);
-	tdsmax.resize(waves);
+	//tdsmin.resize(waves);
+	//tdsmax.resize(waves);
 
 	if (FD)
 	{
@@ -309,7 +315,8 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 
 	resolution = res;
 	AtomicStructure = Structure;
-	AtomicStructure->dz = dz;
+	if (FDMode)
+		AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx - startx;
@@ -434,8 +441,11 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Setup Fourier Transforms
 	FourierTrans = clFourier(UnmanagedOpenCL::ctx,resolution,resolution);
 
-	clTDSk.resize(waves);
-	clTDSx.resize(waves);
+	//clTDSk.resize(waves);
+	//clTDSx.resize(waves
+	clTDSk.resize(resolution*resolution);
+
+	clTDSDiff = UnmanagedOpenCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
 	for (int i = 1; i <= waves; i++)
@@ -443,10 +453,9 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 		clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 		clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
 		clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution));
-		clTDSDiff.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float,Manual>(resolution*resolution));
 
-		clTDSx[i - 1].resize(resolution*resolution);
-		clTDSk[i - 1].resize(resolution*resolution);
+		//clTDSx[i - 1].resize(resolution*resolution);
+		//clTDSk[i - 1].resize(resolution*resolution);
 
 		if (FD)
 		{
@@ -481,6 +490,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	MultiplyCL = clKernel(UnmanagedOpenCL::ctx,multiplySource,4 , "clMultiply");
 	MaskingKernel = clKernel(UnmanagedOpenCL::ctx,bandPassSource, 6, "clBandPass");
 	TDSMaskingKernel = clKernel(UnmanagedOpenCL::ctx,floatbandPassSource,8, "clFloatBandPass");
+	TDSMaskingAbsKernel = clKernel(UnmanagedOpenCL::ctx, floatabsbandPassSource, 8, "clFloatAbsBandPass");
 
 
 	BandLimit.SetArg(0, clWaveFunction3[0]);
@@ -571,8 +581,8 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	ewmax.resize(waves);
 	diffmin.resize(waves);
 	diffmax.resize(waves);
-	tdsmin.resize(waves);
-	tdsmax.resize(waves);
+	//tdsmin.resize(waves);
+	//tdsmax.resize(waves);
 	
 	if (FD)
 	{
@@ -783,10 +793,6 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 
 float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 {
-	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
-	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
-	clWorkGroup WorkSize(resolution,resolution,1);
-
 	float pxFreq = (resolution * pixelscale);
 
 	float innerFreq = inner / (1000 * wavelength);
@@ -801,18 +807,25 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 	float ycFreq = yc / (1000 * wavelength);
 	float ycPx = ycFreq*pxFreq;
 
-	clTDSDiff[wave - 1]->Write(clTDSk[wave - 1]);
+	// make the stem diff part
+	clWorkGroup WorkSize(resolution, resolution, 1);
 
-	TDSMaskingKernel.SetArg(0,clTDSMaskDiff);
-	TDSMaskingKernel.SetArg(1,clTDSDiff[wave - 1]);
-	TDSMaskingKernel.SetArg(2,resolution);
-	TDSMaskingKernel.SetArg(3,resolution);
-	TDSMaskingKernel.SetArg(4,innerPx);
-	TDSMaskingKernel.SetArg(5,outerPx);
-	TDSMaskingKernel.SetArg(6,xcPx);
-	TDSMaskingKernel.SetArg(7,ycPx);
+	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
+	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
+	
+	//clTDSDiff[wave - 1]->Write(clTDSk[wave - 1]);
+	//clTDSDiff->Write(clTDSk);
 
-	TDSMaskingKernel(WorkSize);
+	TDSMaskingAbsKernel.SetArg(0, clTDSMaskDiff, ArgumentType::Output);
+	TDSMaskingAbsKernel.SetArg(1, clWaveFunction3[0], ArgumentType::Input);
+	TDSMaskingAbsKernel.SetArg(2, resolution);
+	TDSMaskingAbsKernel.SetArg(3, resolution);
+	TDSMaskingAbsKernel.SetArg(4, innerPx);
+	TDSMaskingAbsKernel.SetArg(5, outerPx);
+	TDSMaskingAbsKernel.SetArg(6, xcPx);
+	TDSMaskingAbsKernel.SetArg(7, ycPx);
+
+	TDSMaskingAbsKernel(WorkSize);
 
 	int totalSize = resolution*resolution;
 	int nGroups = totalSize / 256;
@@ -1082,36 +1095,42 @@ void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 
 void TEMSimulation::getSTEMDiff(int wave)
 {
-	float max = -CL_MAXFLOAT;
-	float min = CL_MAXFLOAT;
+	//clock_t startTime = clock();
+
+	//float max = -CL_MAXFLOAT;
+	//float min = CL_MAXFLOAT;
 
 	// Original data is complex so copy complex version down first
 	
 
 	clWorkGroup Work(resolution,resolution,1);
 
-	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
+	fftShift.SetArg(0, clWaveFunction2[wave - 1], ArgumentType::Input);
 	fftShift(Work);
 
-	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
+	//std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
-	max = CL_FLT_MIN;
-	min = CL_MAXFLOAT;
+	//max = CL_FLT_MIN;
+	//min = CL_MAXFLOAT;
 
-	for (int i = 0; i < resolution * resolution; i++)
-	{
-		// Get absolute value for display...
-		clTDSk[wave - 1][i] = (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
+	//for (int i = 0; i < resolution * resolution; i++)
+	//{
+	////	// Get absolute value for display...
+	//	clTDSk[i] = (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]); //SQRT?
 
-		// Find max,min for contrast limits
-		if (clTDSk[wave - 1][i] > max)
-			max = clTDSk[wave - 1][i];
-		if (clTDSk[wave - 1][i] < min)
-			min = clTDSk[wave - 1][i];
-	}
+	////	// Find max,min for contrast limits
+	////	if (clTDSk[i] > max)
+	////		max = clTDSk[i];
+	////	if (clTDSk[i] < min)
+	////		min = clTDSk[i];
+	//}
 
-	tdsmin[wave - 1] = min;
-	tdsmax[wave - 1] = max;
+	//tdsmin[wave - 1] = *std::min_element(clTDSk.begin(), clTDSk.end());
+	//tdsmax[wave - 1] = *std::max_element(clTDSk.begin(), clTDSk.end());
+
+	//std::string msgbuf = "[clTEM] Got STEM diff in " + boost::lexical_cast<std::string>(double(clock() - startTime) / (double)CLOCKS_PER_SEC) + " seconds\n";
+	//std::wstring wmsgbuf(msgbuf.begin(), msgbuf.end());
+	//OutputDebugString(wmsgbuf.c_str());
 };
 
 void TEMSimulation::getEWImage(float* data, int resolution, int wave)
@@ -1164,65 +1183,65 @@ void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 	ewmax2[wave - 1] = max;
 };
 
-void TEMSimulation::addTDS(int wave)
-{
-	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
+//void TEMSimulation::addTDS(int wave)
+//{
+//	// Original data is complex so copy complex version down first
+//	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
+//
+//	float max = -CL_MAXFLOAT;
+//	float min = CL_MAXFLOAT;
+//
+//	for (int i = 0; i < resolution * resolution; i++)
+//	{
+//		// Get absolute value for display...
+//		clTDSx[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
+//
+//		// Find max,min for contrast limits
+//		if (clTDSx[wave - 1][i] > max)
+//			max = clTDSx[wave - 1][i];
+//		if (clTDSx[wave - 1][i] < min)
+//			min = clTDSx[wave - 1][i];
+//	}
+//
+//	ewmin[wave - 1] = min;
+//	ewmax[wave - 1] = max;
+//
+//	// Original data is complex so copy complex version down first
+//
+//	clWorkGroup Work(resolution,resolution,1);
+//
+//	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
+//	fftShift(Work);
+//
+//	compdata = clWaveFunction3[0]->CreateLocalCopy();
+//
+//	max = -CL_MAXFLOAT;
+//	min = CL_MAXFLOAT;
+//
+//	for (int i = 0; i < resolution * resolution; i++)
+//	{
+//		// Get absolute value for display...
+//		clTDSk[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
+//
+//		// Find max,min for contrast limits
+//		if (clTDSk[wave - 1][i] > max)
+//			max = clTDSk[wave - 1][i];
+//		if (clTDSk[wave - 1][i] < min)
+//			min = clTDSk[wave - 1][i];
+//	}
+//
+//	tdsmin[wave - 1] = min;
+//	tdsmax[wave - 1] = max;
+//};
 
-	float max = -CL_MAXFLOAT;
-	float min = CL_MAXFLOAT;
-
-	for (int i = 0; i < resolution * resolution; i++)
-	{
-		// Get absolute value for display...
-		clTDSx[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
-
-		// Find max,min for contrast limits
-		if (clTDSx[wave - 1][i] > max)
-			max = clTDSx[wave - 1][i];
-		if (clTDSx[wave - 1][i] < min)
-			min = clTDSx[wave - 1][i];
-	}
-
-	ewmin[wave - 1] = min;
-	ewmax[wave - 1] = max;
-
-	// Original data is complex so copy complex version down first
-
-	clWorkGroup Work(resolution,resolution,1);
-
-	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
-	fftShift(Work);
-
-	compdata = clWaveFunction3[0]->CreateLocalCopy();
-
-	max = -CL_MAXFLOAT;
-	min = CL_MAXFLOAT;
-
-	for (int i = 0; i < resolution * resolution; i++)
-	{
-		// Get absolute value for display...
-		clTDSk[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
-
-		// Find max,min for contrast limits
-		if (clTDSk[wave - 1][i] > max)
-			max = clTDSk[wave - 1][i];
-		if (clTDSk[wave - 1][i] < min)
-			min = clTDSk[wave - 1][i];
-	}
-
-	tdsmin[wave - 1] = min;
-	tdsmax[wave - 1] = max;
-};
-
-void TEMSimulation::clearTDS(int waves)
-{
-	for (int i = 1; i <= waves; i++)
-	{
-		fill(clTDSk[i - 1].begin(), clTDSk[i - 1].end(), 0);
-		fill(clTDSx[i - 1].begin(), clTDSx[i - 1].end(), 0);
-	}
-};
+//void TEMSimulation::clearTDS(int waves)
+//{
+//	for (int i = 1; i <= waves; i++)
+//	{
+//		fill(clTDSk[i - 1].begin(), clTDSk[i - 1].end(), 0);
+//		fill(clTDSx[i - 1].begin(), clTDSx[i - 1].end(), 0);
+//	}
+//};
 
 float TEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {
@@ -1240,9 +1259,6 @@ float TEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWor
 
 	// Find out which numbers to read back
 	float sum = 0;
-	for (int i = 0; i < nGroups; i++)
-	{
-		sum += sums[i];
-	}
+	sum = std::accumulate(sums.begin(), sums.end(), 0); // is this any faster?
 	return sum;
 };

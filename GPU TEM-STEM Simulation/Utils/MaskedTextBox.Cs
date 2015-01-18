@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 
-namespace MaskedTextBox
+namespace Masking
 {
     /// <summary>
     /// Provides masking behavior for any <see cref="TextBox"/>.
     /// </summary>
-    public static class Masking
+    public static class MaskedTextBox
     {
         private static readonly DependencyPropertyKey _maskExpressionPropertyKey = DependencyProperty.RegisterAttachedReadOnly("MaskExpression",
             typeof(Regex),
-            typeof(Masking),
+            typeof(MaskedTextBox),
             new FrameworkPropertyMetadata());
 
         /// <summary>
@@ -26,7 +22,7 @@ namespace MaskedTextBox
         /// </summary>
         public static readonly DependencyProperty MaskProperty = DependencyProperty.RegisterAttached("Mask",
             typeof(string),
-            typeof(Masking),
+            typeof(MaskedTextBox),
             new FrameworkPropertyMetadata(OnMaskChanged));
 
         /// <summary>

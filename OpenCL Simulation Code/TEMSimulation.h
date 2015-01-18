@@ -3,6 +3,8 @@
 #include "clWrapper.h"
 #include <memory>
 
+#include <boost/shared_ptr.hpp>
+
 #pragma once
 
 class TEMSimulation
@@ -45,8 +47,8 @@ public:
 	void getEWImage2(float* data, int resolution, int wave);
 
 	//void AddTDSDiffImage(float* data, int resolution); same as GetDiffImage
-	void addTDS(int wave);
-	void clearTDS(int wave);
+	//void addTDS(int wave);
+	//void clearTDS(int wave);
 
 	float FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize);
 
@@ -59,8 +61,9 @@ public:
 	float wavelength;
 	float bandwidthkmax;
 
-	std::vector<std::vector<float>> clTDSx;
-	std::vector<std::vector<float>> clTDSk;
+	//std::vector<std::vector<float>> clTDSx;
+	//std::vector<std::vector<float>> clTDSk;
+	std::vector<float> clTDSk;
 	float imagemin;
 	float imagemax;
 
@@ -93,7 +96,7 @@ public:
 	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction4;
 	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction1Minus;
 	std::vector<clMemory<cl_float2,Manual>::Ptr> clWaveFunction1Plus;
-	std::vector<clMemory<float,Manual>::Ptr> clTDSDiff;
+	clMemory<float,Manual>::Ptr clTDSDiff;
 
 	//Kernels
 	clFourier FourierTrans;
@@ -108,6 +111,7 @@ public:
 	clKernel MultiplyCL;
 	clKernel MaskingKernel;
 	clKernel TDSMaskingKernel;
+	clKernel TDSMaskingAbsKernel;
 	clKernel SumReduction;
 	// FD Only
 	clKernel GradKernel;

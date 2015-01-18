@@ -67,10 +67,10 @@ namespace ManagedOpenCLWrapper
 		void getSTEMDiff(int wave);
 		float getSTEMPixel(float inner, float outer, float xc, float yc, int wave);
 
-		void addTDS();
-		void addTDS(int wave);
-		void clearTDS();
-		void clearTDS(int wave);
+		//void addTDS();
+		//void addTDS(int wave);
+		//void clearTDS();
+		//void clearTDS(int wave);
 
 	};
 }

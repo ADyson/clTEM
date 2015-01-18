@@ -427,6 +427,24 @@ const char* floatbandPassSource =
 "}	\n"
 ;
 
+const char* floatabsbandPassSource =
+"__kernel void clFloatAbsBandPass(__global float* restrict Output, __global const float2* restrict Input, int width, int height, float inner, float outer, float xc, float yc)	\n"
+"{	\n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+"	\n"
+"	if(xid<width && yid<height) \n"
+"	{	\n"
+"		int Index = xid + yid*width; \n"
+"       float centX = width/2 + xc; \n"
+"       float centY = height/2 + yc; \n"
+"       float radius = hypot(xid-centX,yid-centY); \n" // hypot?
+"		Output[Index] = (radius < outer && radius > inner) * ( hypot(Input[Index].x, Input[Index].y) );\n"
+"	}	\n"
+"}	\n"
+;
+
 const char* SqAbsSource =
 "__kernel void clSqAbs(__global const float2* clIm, __global float2* clAbsSq, int sizeX, int sizeY)	\n"
 "{	\n"

@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\clWrapper;C:\Program Files\Boost\boost_1_56_0;$(BOOST_1_55_0);D:\JonP\Git\clWrapper\clWrapper\clWrapper;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\x64\Release;D:\JonP\Git\clWrapper\clWrapper\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\clWrapper;C:\Program Files\Boost\boost_1_56_0;$(BOOST_1_55_0);D:\JonP\Git\clWrapper\clWrapper\clWrapper;D:\Programming\clWrapper\clWrapper\clWrapper;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;C:\Users\Adam\Documents\GitHub\clWrapper\clWrapper\x64\Release;D:\JonP\Git\clWrapper\clWrapper\x64\Release;D:\Programming\clWrapper\clWrapper\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

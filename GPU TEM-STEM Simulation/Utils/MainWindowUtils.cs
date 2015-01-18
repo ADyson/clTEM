@@ -1,53 +1,49 @@
 ﻿using System;
-using System.IO;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using System.Threading;
-using Microsoft.Win32;
-using ManagedOpenCLWrapper;
-using BitMiracle.LibTiff.Classic;
 using PanAndZoom;
-using ColourGenerator;
+using Window = Elysium.Controls.Window;
 
 namespace GPUTEMSTEMSimulation
 {
-    public partial class MainWindow : Elysium.Controls.Window
+    public partial class MainWindow : Window
     {
-
-        private void ComboBoxSelectionChanged1(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// Check CBED positions are in simulation range.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CheckCBEDValid(object sender, TextChangedEventArgs e)
         {
-            Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
+            var tbox = sender as TextBox;
 
-            IsResolutionSet = true;
+            float val;
 
-            if (!userSTEMarea)
+            if (Equals(tbox, txtCBEDx))
             {
-                STEMRegion.xPixels = Resolution;
-                STEMRegion.yPixels = Resolution;
+                float.TryParse(txtCBEDx.Text, out val);
+                CBED_posValid = val >= SimRegion.xStart && val <= SimRegion.xFinish;
             }
+            else if (Equals(tbox, txtCBEDy))
+            {
+                float.TryParse(txtCBEDy.Text, out val);
+                CBED_posValid = val >= SimRegion.yStart && val <= SimRegion.yFinish;
+            }
+            else
+                return;
 
-            UpdatePx();
+            if (!CBED_posValid)
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            else
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
         }
 
-        private void UpdatePx()
+        /// <summary>
+        /// Updates the pixel scale and also the maximum milliradians
+        /// </summary>
+        private void UpdatePixelScale()
         {
             if (HaveStructure && IsResolutionSet)
             {
@@ -59,9 +55,11 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
+        /// <summary>
+        /// Updates maximum milliradians visible in reciprocal space
+        /// </summary>
         private void UpdateMaxMrad()
         {
-
             if (!HaveStructure)
                 return;
 
@@ -75,11 +73,11 @@ namespace GPUTEMSTEMSimulation
             // Determine max mrads for reciprocal space, (need wavelength)...
             var MaxFreq = 1 / (2 * BiggestSize / Resolution);
 
-            if (ImagingParameters.kilovoltage != 0 && IsResolutionSet)
+            if (_microscopeParams.kv.val != 0 && IsResolutionSet)
             {
                 const float echarge = 1.6e-19f;
-                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * ImagingParameters.kilovoltage * 1000 * 
-                    (2 * 9.11e-031 * 9e+016 + echarge * ImagingParameters.kilovoltage * 1000))) * 1e+010);
+                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * _microscopeParams.kv.val * 1000 *
+                    (2 * 9.11e-031 * 9e+016 + echarge * _microscopeParams.kv.val * 1000))) * 1e+010);
 
                 var mrads = (1000 * MaxFreq * wavelength) / 2; //divide by two to get mask limits
 
@@ -89,229 +87,88 @@ namespace GPUTEMSTEMSimulation
             }
         }
 
-        private void ImagingDf_TextChanged(object sender, TextChangedEventArgs e)
+        private void txtImageKv_LostFocus(object sender, RoutedEventArgs e)
         {
-            var temporarytext = ImagingDf.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.df);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.df);
-        }
-
-        private void ImagingCs_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingCs.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.spherical);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.spherical);
-        }
-
-        private void ImagingA1_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingA1.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigmag);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigmag);
-        }
-
-        private void ImagingA1theta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingA1theta.Text;
-            var ok = false;
-
-            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astigang);
-            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astigang);
-
-            if (ok)
-            {
-                ImagingParameters.astigang /= Convert.ToSingle((180 / Math.PI));
-                ProbeParameters.astigang /= Convert.ToSingle((180 / Math.PI));
-            }
-
-
-        }
-
-        private void ImagingkV_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingkV.Text;
-
-            if (temporarytext.Length == 0)
-                return;
-
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.kilovoltage);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.kilovoltage);
-
             UpdateMaxMrad();
-        }
-
-        private void Imagingbeta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = Imagingbeta.Text;
-            var ok = false;
-
-            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.beta);
-            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.beta);
-
-            if (ok)
-            {
-                ImagingParameters.beta /= 1000;
-                ProbeParameters.beta /= 1000;
-            }
-        }
-
-        private void Imagingdelta_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = Imagingdelta.Text;
-            var ok = false;
-
-            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.delta);
-            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.delta);
-
-            if (ok)
-            {
-                ImagingParameters.delta *= 10;
-                ProbeParameters.delta *= 10;
-            }
-        }
-
-        private void ImagingAperture_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingAperture.Text;
-
-            if (temporarytext.Length == 0)
-                return;
-
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.aperturemrad);
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.aperturemrad);
         }
 
         private void SimTypeRadio_Checked(object sender, RoutedEventArgs e)
         {
             if (TEMRadioButton.IsChecked == true)
             {
-                ImagingA2.IsEnabled = true;
-                ImagingA2Phi.IsEnabled = true;
-                ImagingB2.IsEnabled = true;
-                ImagingB2Phi.IsEnabled = true;
-                Imagingdelta.IsEnabled = true;
-                Imagingbeta.IsEnabled = true;
-                TEMbox.Visibility = System.Windows.Visibility.Visible;
-                STEMbox.Visibility = System.Windows.Visibility.Hidden;
-                CBEDbox.Visibility = System.Windows.Visibility.Hidden;
+                txtMicroscopeA2m.IsEnabled = true;
+                txtMicroscopeA2t.IsEnabled = true;
+                txtMicroscopeB2m.IsEnabled = true;
+                txtMicroscopeB2t.IsEnabled = true;
+                txtMicroscopeD.IsEnabled = true;
+                txtMicroscopeB.IsEnabled = true;
+                TEMbox.Visibility = Visibility.Visible;
+                STEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Hidden;
 
             }
             else if (STEMRadioButton.IsChecked == true)
             {
-                ImagingA2.IsEnabled = false;
-                ImagingA2Phi.IsEnabled = false;
-                ImagingB2.IsEnabled = false;
-                ImagingB2Phi.IsEnabled = false;
-                Imagingdelta.IsEnabled = false;
-                Imagingbeta.IsEnabled = false;
+                txtMicroscopeA2m.IsEnabled = false;
+                txtMicroscopeA2t.IsEnabled = false;
+                txtMicroscopeB2m.IsEnabled = false;
+                txtMicroscopeB2t.IsEnabled = false;
+                txtMicroscopeD.IsEnabled = false;
+                txtMicroscopeB.IsEnabled = false;
 
-                STEMbox.Visibility = System.Windows.Visibility.Visible;
-                TEMbox.Visibility = System.Windows.Visibility.Hidden;
-                CBEDbox.Visibility = System.Windows.Visibility.Hidden;
+                STEMbox.Visibility = Visibility.Visible;
+                TEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Hidden;
             }
             else if (CBEDRadioButton.IsChecked == true)
             {
-                ImagingA2.IsEnabled = false;
-                ImagingA2Phi.IsEnabled = false;
-                ImagingB2.IsEnabled = false;
-                ImagingB2Phi.IsEnabled = false;
-                Imagingdelta.IsEnabled = false;
-                Imagingbeta.IsEnabled = false;
+                txtMicroscopeA2m.IsEnabled = false;
+                txtMicroscopeA2t.IsEnabled = false;
+                txtMicroscopeB2m.IsEnabled = false;
+                txtMicroscopeB2t.IsEnabled = false;
+                txtMicroscopeD.IsEnabled = false;
+                txtMicroscopeB.IsEnabled = false;
 
-                STEMbox.Visibility = System.Windows.Visibility.Hidden;
-                TEMbox.Visibility = System.Windows.Visibility.Hidden;
-                CBEDbox.Visibility = System.Windows.Visibility.Visible;
+                STEMbox.Visibility = Visibility.Hidden;
+                TEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Visible;
             }
         }
 
-        private void ImagingB2_TextChanged(object sender, TextChangedEventArgs e)
+        private void STEM_TDStoggled(object sender, RoutedEventArgs e)
         {
-            var temporarytext = ImagingAperture.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2mag);
+            var chk = sender as CheckBox;
+            if (chk != null) doTDS_STEM = chk.IsChecked == true;
         }
 
-        private void ImagingB2Phi_TextChanged(object sender, TextChangedEventArgs e)
+        private void CBED_TDStoggled(object sender, RoutedEventArgs e)
         {
-            var temporarytext = ImagingAperture.Text;
-            var ok = false;
+            var chk = sender as CheckBox;
+            if (chk != null) doTDS_CBED = chk.IsChecked == true;
+        }
 
-            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.b2ang);
-            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.b2ang);
+        private void Full3Dtoggled(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk != null) doFull3D = chk.IsChecked == true;
 
-            if (ok)
+            if (ToggleFD != null && doFull3D)
             {
-                ImagingParameters.b2ang /= Convert.ToSingle((180 / Math.PI));
-                ProbeParameters.b2ang /= Convert.ToSingle((180 / Math.PI));
-            }
+                ToggleFD.IsChecked = false;
+                doFD = false;
+            }   
         }
 
-        private void ImagingA2Phi_TextChanged(object sender, TextChangedEventArgs e)
+        private void FDtoggled(object sender, RoutedEventArgs e)
         {
+            var chk = sender as CheckBox;
+            if (chk != null) doFD = chk.IsChecked == true;
 
-            var temporarytext = ImagingAperture.Text;
-            var ok = false;
-
-            ok = float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2ang);
-            ok |= float.TryParse(temporarytext, NumberStyles.Float, null, out ProbeParameters.astig2ang);
-
-            if (ok)
+            if (ToggleFull3D != null && doFD)
             {
-                ImagingParameters.astig2ang /= Convert.ToSingle((180 / Math.PI));
-                ProbeParameters.astig2ang /= Convert.ToSingle((180 / Math.PI));
-            }
-        }
-
-        private void ImagingA2_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var temporarytext = ImagingAperture.Text;
-            float.TryParse(temporarytext, NumberStyles.Float, null, out ImagingParameters.astig2mag);
-        }
-
-        private void STEM_TDSchecked(object sender, RoutedEventArgs e)
-        {
-            doTDS_STEM = true;
-        }
-
-        private void STEM_TDSunchecked(object sender, RoutedEventArgs e)
-        {
-            doTDS_STEM = false;
-        }
-
-        private void CBED_TDSchecked(object sender, RoutedEventArgs e)
-        {
-            doTDS_CBED = true;
-        }
-
-        private void CBED_TDSunchecked(object sender, RoutedEventArgs e)
-        {
-            doTDS_CBED = false;
-        }
-
-        private void Full3D_Checked(object sender, RoutedEventArgs e)
-        {
-            isFull3D = true;
-            if(ToggleFD != null)
-            { ToggleFD.IsChecked = false; }   
-            isFD = false;
-        }
-
-        private void Full3D_Unchecked(object sender, RoutedEventArgs e)
-        {
-            isFull3D = false;
-        }
-
-        private void FD_Checked(object sender, RoutedEventArgs e)
-        {
-            // Cant use full3d at same time
-            isFull3D = false;
-            if(ToggleFull3D!=null)
                 ToggleFull3D.IsChecked = false;
-            isFD = true;
-        }
-
-        private void FD_Unchecked(object sender, RoutedEventArgs e)
-        {
-            isFD = false;
+                doFull3D = false;
+            } 
         }
 
         private void Show_detectors(object sender, RoutedEventArgs e)
@@ -332,42 +189,42 @@ namespace GPUTEMSTEMSimulation
             DetectorVis = false;
         }
 
-        private void STEMDet_Click(object sender, RoutedEventArgs e)
+        private void OpenSTEMDetDlg(object sender, RoutedEventArgs e)
         {
             // open the window here
             var window = new STEMDetectorDialog(Detectors) {Owner = this};
-            window.AddDetectorEvent += new EventHandler<DetectorArgs>(STEM_AddDetector);
-            window.RemDetectorEvent += new EventHandler<DetectorArgs>(STEM_RemoveDetector);
+            window.AddDetectorEvent += STEM_AddDetector;
+            window.RemDetectorEvent += STEM_RemoveDetector;
             window.ShowDialog();
         }
 
-        private void STEMArea_Click(object sender, RoutedEventArgs e)
+        private void OpenSTEMAreaDlg(object sender, RoutedEventArgs e)
         {
             var window = new STEMAreaDialog(STEMRegion, SimRegion) {Owner = this};
-            window.AddSTEMAreaEvent += new EventHandler<StemAreaArgs>(STEM_AddArea);
+            window.AddSTEMAreaEvent += STEM_AddArea;
             window.ShowDialog();
         }
 
         void STEM_AddDetector(object sender, DetectorArgs evargs)
         {
-            var added = evargs.Detector as DetectorItem;
+            var added = evargs.Detector;
             LeftTab.Items.Add(added.Tab);
-            added.AddToCanvas(DiffDisplay.tCanvas);
+            added.AddToCanvas(_diffDisplay.tCanvas);
             if(HaveMaxMrad)
-                added.SetEllipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
+                added.SetEllipse(_lockedResolution, _lockedPixelScale, _lockedWavelength, DetectorVis);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
         {
             foreach (var i in evargs.DetectorList)
             {
-                i.RemoveFromCanvas(DiffDisplay.tCanvas);
+                i.RemoveFromCanvas(_diffDisplay.tCanvas);
                 LeftTab.Items.Remove(i.Tab);
             }
 
             foreach (var i in Detectors)
             {
-                i.SetColour();//Ellipse(CurrentResolution, CurrentPixelScale, CurrentWavelength, DetectorVis);
+                i.SetColour();
             }
         }
 
@@ -377,36 +234,30 @@ namespace GPUTEMSTEMSimulation
             STEMRegion = evargs.AreaParams;
         }
 
-        private void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //var CB = sender as ComboBox;
-            //mCL.SetDevice(CB.SelectedIndex);
-        }
-
         private void DeviceSelector_DropDownOpened(object sender, EventArgs e)
         {
-            DeviceSelector.ItemsSource = devicesLong;
+            DeviceSelector.ItemsSource = _devicesLong;
         }
 
         private void DeviceSelector_DropDownClosed(object sender, EventArgs e)
         {
-            var CB = sender as ComboBox;
+            var cb = sender as ComboBox;
 
-            var index = CB.SelectedIndex;
-            CB.ItemsSource = devicesShort;
-            CB.SelectedIndex = index;
-            if (index != -1) // Later, might want to check for index the same as before
+            if (cb == null) return;
+            var index = cb.SelectedIndex;
+            cb.ItemsSource = _devicesShort;
+            cb.SelectedIndex = index;
+            if (index != -1)
             {
-                mCL.setCLdev(CB.SelectedIndex);
-                //CB.IsEnabled = false;
-				SimulateImageButton.IsEnabled = false;
+                _mCl.setCLdev(cb.SelectedIndex);
+                SimulateImageButton.IsEnabled = false;
             }
         }
 
-        private void SetAreaButton_Click(object sender, RoutedEventArgs e)
+        private void OpenAreaDlg(object sender, RoutedEventArgs e)
         {
             var window = new AreaDialog(SimRegion) {Owner = this};
-            window.SetAreaEvent += new EventHandler<AreaArgs>(SetArea);
+            window.SetAreaEvent += SetArea;
             window.ShowDialog();
         }
 
@@ -450,21 +301,19 @@ namespace GPUTEMSTEMSimulation
             if (changedy)
                 STEMRegion.yPixels = (int)Math.Ceiling((STEMRegion.yStart - STEMRegion.yFinish) / yscale);
 
-            //var result = MessageBox.Show("STEM limits now out of bounds and have been rescaled", "", MessageBoxButton.OK, MessageBoxImage.Error);
-			UpdatePx();
-            //UpdateMaxMrad();
+			UpdatePixelScale();
         }
 
-        private void GridZoomReset(object sender, MouseButtonEventArgs e)
-        {
-            var tempGrid = sender as Grid;
-
-            var child = VisualTreeHelper.GetChild(tempGrid, 0) as ZoomBorder;
-            if (child != null)
-                child.Reset();
-        }
-
-		// Test if conditions necessary to perform simulation have been met.s
+        // TODO: implement more of this into regex, or do similar highlighting
+        // TODO: implement an error system so the user knows what went wrong.
+		/// <summary>
+		/// Test if the required parameters have been set.
+        /// 1. Structure has been set.
+        /// 2. Resolution has been set.
+        /// 3. OpenCL device has been set.
+        /// 4. Microscope parameters make sense.
+		/// </summary>
+		/// <returns>bool if all the parameters have been set.</returns>
 		private bool TestSimulationPrerequisites()
 		{
 			// Check We Have Structure
@@ -486,12 +335,12 @@ namespace GPUTEMSTEMSimulation
 				return false;
 			}
 			// Check we have sensible parameters.
-			if (ImagingParameters.kilovoltage == 0)
+			if (_microscopeParams.kv.val == 0)
 			{
 				var result = MessageBox.Show("Voltage cannot be zero", "", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}
-			if (ImagingParameters.aperturemrad == 0)
+            if (_microscopeParams.ap.val == 0)
 			{
 				var result = MessageBox.Show("Aperture should not be zero, do you want to continue?", "Continue?", MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
 				return result.Equals(MessageBoxResult.Yes);
@@ -511,12 +360,12 @@ namespace GPUTEMSTEMSimulation
 
 		private bool TestImagePrerequisites()
 		{
-			if (ImagingParameters.aperturemrad == 0)
+            if (_microscopeParams.ap.val == 0)
 			{
 				var result = MessageBox.Show("Aperture should not be zero, do you want to continue?", "Continue?", MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
 				return result.Equals(MessageBoxResult.Yes);
 			}
-			else return true;
+		    return true;
 		}
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -524,9 +373,11 @@ namespace GPUTEMSTEMSimulation
             cancellationTokenSource.Cancel();
         }
 
-        private void FiniteValidCheck(object sender, TextChangedEventArgs e)
+        // TODO: chec what values FD can have. (e.g. they must have to be greater than 0?)
+        private void CheckFDValid(object sender, TextChangedEventArgs e)
         {
             var tbox = sender as TextBox;
+            if (tbox == null) return;
             var text = tbox.Text;
 
             if (text.Length < 1 || text == ".")
@@ -537,56 +388,22 @@ namespace GPUTEMSTEMSimulation
             else
             {
                 tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
-                goodfinite = goodfinite && true;
             }
         }
 
-        //private void CBEDValidCheck(object sender, TextCompositionEventArgs e)
-        private void CBEDValidCheck(object sender, TextChangedEventArgs e)
+        private void ComboBoxSelectionChanged1(object sender, SelectionChangedEventArgs e)
         {
-            var tbox = sender as TextBox;
+            Resolution = Convert.ToInt32(ResolutionCombo.SelectedValue.ToString());
 
-            float lower;
-            float upper;
-            var isx = false;
+            IsResolutionSet = true;
 
-            if (tbox == CBEDxpos)
+            if (!userSTEMarea)
             {
-                lower = SimRegion.xStart;
-                upper = SimRegion.xFinish;
-                isx = true;
-            }
-            else if (tbox == CBEDypos)
-            {
-                lower = SimRegion.yStart;
-                upper = SimRegion.yFinish;
-            }
-            else
-                return;
-
-            var text = tbox.Text;
-
-            if (text.Length < 1 || text == ".")
-                CBED_posValid = false;
-            else
-                CBED_posValid = true;
-
-            if (CBED_posValid)
-            {
-                var pos = Convert.ToSingle(text);
-
-                if (isx)
-                    CBED_xpos = pos;
-                else
-                    CBED_xpos = pos;
-
-                CBED_posValid = pos >= lower && pos <= upper;
+                STEMRegion.xPixels = Resolution;
+                STEMRegion.yPixels = Resolution;
             }
 
-            if (!CBED_posValid)
-                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
-            else
-                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            UpdatePixelScale();
         }
     }
 }
