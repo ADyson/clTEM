@@ -439,7 +439,7 @@
                     <Label Content="multiSTEM:"  ToolTip="concurrent STEM pixels"
                            Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
                     <TextBox x:Name="mSTEM" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="number"
-                             Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^\d*[1-9]+\d*?$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+                             Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
                 </Grid>
 
                 <Grid Grid.Row="1" HorizontalAlignment="Center">
@@ -467,7 +467,7 @@
                     <Label Content="Full3D Integrals:"  ToolTip="y position"
                            Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
                     <TextBox x:Name="txtFDIntegrals" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms"
-                                     Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[1-9][0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+                                     Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
             </Grid>
            </Grid>
         </GroupBox>

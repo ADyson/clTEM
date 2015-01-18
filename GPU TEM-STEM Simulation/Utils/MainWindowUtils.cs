@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using PanAndZoom;
@@ -380,7 +381,15 @@ namespace GPUTEMSTEMSimulation
             if (tbox == null) return;
             var text = tbox.Text;
 
-            if (text.Length < 1 || text == ".")
+            float val;
+            if (!float.TryParse(text, out val))
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                goodfinite = false;
+                return;
+            }
+
+            if (val <= 0)
             {
                 tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
                 goodfinite = false;
@@ -388,6 +397,7 @@ namespace GPUTEMSTEMSimulation
             else
             {
                 tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                goodfinite = true;
             }
         }
 

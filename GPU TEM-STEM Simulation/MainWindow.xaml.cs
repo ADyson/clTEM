@@ -168,7 +168,7 @@ namespace GPUTEMSTEMSimulation
             InitializeComponent();
 
             // This was to supress some warnings, might not be needed
-            System.Diagnostics.PresentationTraceSources.DataBindingSource.Switch.Level = System.Diagnostics.SourceLevels.Critical;
+            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 
             //add event handlers here so they aren't called when creating controls
             txtCBEDx.TextChanged += CheckCBEDValid;
@@ -220,11 +220,11 @@ namespace GPUTEMSTEMSimulation
 
             _runsSTEM = new iParam();
             STEM_TDSCounts.DataContext = _runsSTEM;
-            _runsSTEM.val = 0;
+            _runsSTEM.val = 10;
 
             _multiSTEM = new iParam();
             mSTEM.DataContext = _multiSTEM;
-            _multiSTEM.val = 0;
+            _multiSTEM.val = 10;
 
             _pxCBED = new fParam();
             txtCBEDx.DataContext = _pxCBED;
@@ -236,7 +236,7 @@ namespace GPUTEMSTEMSimulation
 
             _runsCBED = new iParam();
             CBED_TDSCounts.DataContext = _runsCBED;
-            _runsCBED.val = 0;
+            _runsCBED.val = 10;
 
             // Set Default Binning and CCD selected indices
 			BinningCombo.SelectedIndex = 0;
