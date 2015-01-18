@@ -170,6 +170,7 @@
     <Compile Include="Utils\Areas.cs" />
     <Compile Include="Utils\DetectorItem.cs" />
     <Compile Include="Utils\DisplayTab.cs" />
+    <Compile Include="Utils\ErrorMessage.cs" />
     <Compile Include="Utils\MainWindowUtils.cs" />
     <Compile Include="Utils\CustomControls.cs" />
     <Compile Include="Utils\ColourGenerator.cs" />

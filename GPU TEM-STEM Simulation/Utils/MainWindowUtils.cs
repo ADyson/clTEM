@@ -374,7 +374,32 @@ namespace GPUTEMSTEMSimulation
             cancellationTokenSource.Cancel();
         }
 
-        // TODO: chec what values FD can have. (e.g. they must have to be greater than 0?)
+        private void CheckPositiveInt(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            if (tbox == null) return;
+            var text = tbox.Text;
+
+            int val;
+            if (!int.TryParse(text, out val))
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                //goodfinite = false;
+                return;
+            }
+
+            if (val <= 0)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+                //goodfinite = false;
+            }
+            else
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+                //goodfinite = true;
+            }
+        }
+
         private void CheckFDValid(object sender, TextChangedEventArgs e)
         {
             var tbox = sender as TextBox;

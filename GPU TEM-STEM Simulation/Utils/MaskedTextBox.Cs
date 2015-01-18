@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Media;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -135,6 +136,7 @@ namespace Masking
             if (!maskExpression.IsMatch(proposedText))
             {
                 e.Handled = true;
+                SystemSounds.Hand.Play();
             }
         }
 
