@@ -223,7 +223,7 @@ namespace SimulationGUI
             {
                 ToggleFD.IsChecked = false;
                 doFD = false;
-            }   
+            }
         }
 
         private void FDtoggled(object sender, RoutedEventArgs e)
@@ -235,7 +235,7 @@ namespace SimulationGUI
             {
                 ToggleFull3D.IsChecked = false;
                 doFull3D = false;
-            } 
+            }
         }
 
         private void Show_detectors(object sender, RoutedEventArgs e)

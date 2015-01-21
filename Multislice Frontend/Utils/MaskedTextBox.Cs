@@ -100,7 +100,7 @@ namespace SimulationGUI.Utils
             var textBox = dependencyObject as TextBox;
             var mask = e.NewValue as string;
 
-       
+
             textBox.PreviewTextInput -= textBox_PreviewTextInput;
             textBox.PreviewKeyDown -= textBox_PreviewKeyDown;
             DataObject.RemovePastingHandler(textBox, Pasting);
