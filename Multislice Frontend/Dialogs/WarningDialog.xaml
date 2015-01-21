@@ -1,0 +1,64 @@
+﻿<extra:OverlayWindow x:Class="GPUTEMSTEMSimulation.Dialogs.WarningDialog"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:params="http://schemas.codeplex.com/elysium/params"
+                     xmlns:extra="http://schemas.extra.com/ui"
+                     mc:Ignorable="d" 
+                     d:DesignHeight="768" d:DesignWidth="1024"
+                      
+                     params:Design.Theme="{DynamicResource ThemeCol}"
+                     params:Design.AccentBrush="{DynamicResource Accent}"
+                     params:Design.ContrastBrush="{DynamicResource Contrast}"
+              
+                     params:Manager.Theme="{DynamicResource  ThemeCol}"
+                     params:Manager.AccentBrush="{DynamicResource Accent}"
+                     params:Manager.ContrastBrush="{DynamicResource Contrast}"
+              
+                     Background="{DynamicResource BackgroundBrush}"
+                     Foreground="{DynamicResource TextColourLight}"
+                     
+                     DataContext="{Binding RelativeSource={RelativeSource Self}}"
+                     
+                     Title="Error!" Margin="20">
+    <Grid Margin="40">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Column="1" Grid.Row="0" FontSize="32" Grid.ColumnSpan="3" Margin="0,0,0,5"
+                Text=":(" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Column="2" Grid.Row="1" x:Name="MessageBlock"
+                Text="{Binding Path = MessageText, Mode = TwoWay}" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" />
+
+
+            <Grid  Grid.Column="4" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnOK" Content="OK" Grid.Column="1"
+                    HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5,2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
+
+                <Button x:Name="btnCancel" Content="Cancel" Grid.Column="2"
+                    HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5,2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickCancel"/>
+
+            </Grid>
+
+        </Grid>
+    </Grid>
+</extra:OverlayWindow>

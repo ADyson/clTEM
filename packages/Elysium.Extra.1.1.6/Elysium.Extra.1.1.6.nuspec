@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Elysium.Extra</id>
+    <version>1.1.6</version>
+    <title>Elysium Extra</title>
+    <authors>Muhammad Rehan Saeed (RehanSaeed.co.uk)</authors>
+    <owners>Muhammad Rehan Saeed (RehanSaeed.co.uk)</owners>
+    <licenseUrl>http://elysiumextra.codeplex.com/license</licenseUrl>
+    <projectUrl>https://elysiumextra.codeplex.com/</projectUrl>
+    <iconUrl>https://download-codeplex.sec.s-msft.com/Download?ProjectName=elysiumextra&amp;DownloadId=830611&amp;Build=20885</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Elysium Extra is a library that implements Metro style for Windows Presentation Foundation (WPF) applications. This Project is a very large add-on project built on top of the Elysium SDK.</description>
+    <summary>Elysium Extra is a library that implements Metro style for Windows Presentation Foundation (WPF) applications. This Project is a very large add-on project built on top of the Elysium SDK.</summary>
+    <releaseNotes>Fixed ApplicationBar not showing and Wizard dynamically adding or removing Wizarditem's</releaseNotes>
+    <copyright>© Muhammad Rehan Saeed. All rights Reserved</copyright>
+    <tags>Elysium WPF UI Theme Theming Metro Modern Windows Phone 8 8.1 8.2 9 Presentation Foundation Muhammad Rehan Saeed</tags>
+    <dependencies>
+      <dependency id="Elysium.Theme" version="2.0.4" />
+      <dependency id="System.Windows.Interactivity.WPF" version="2.0.20525" />
+      <dependency id="Rx-Main" version="2.2.5" />
+      <dependency id="Rx-WPF" version="2.2.5" />
+      <dependency id="Rx-Xaml" version="2.2.5" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="PresentationCore" targetFramework=".NETFramework4.0-Client, .NETFramework4.5" />
+      <frameworkAssembly assemblyName="PresentationFramework" targetFramework=".NETFramework4.0-Client, .NETFramework4.5" />
+      <frameworkAssembly assemblyName="WindowsBase" targetFramework=".NETFramework4.0-Client, .NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Xaml" targetFramework=".NETFramework4.0-Client, .NETFramework4.5" />
+    </frameworkAssemblies>
+    <references>
+      <reference file="Framework.dll" />
+      <reference file="Framework.UI.dll" />
+    </references>
+  </metadata>
+</package>

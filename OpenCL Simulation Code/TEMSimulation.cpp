@@ -27,8 +27,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 
 	resolution = res;
 	AtomicStructure = Structure;
-	if (FDMode)
-		AtomicStructure->dz = dz;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx - startx;
@@ -315,8 +314,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 
 	resolution = res;
 	AtomicStructure = Structure;
-	if (FDMode)
-		AtomicStructure->dz = dz;
+	AtomicStructure->dz = dz;
 
 	// Get size of input structure
 	float RealSizeX = endx - startx;
