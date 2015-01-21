@@ -427,7 +427,7 @@ namespace SimulationGUI
 		    }
 		}
 
-		private static bool TestImagePrerequisites()
+		private bool TestImagePrerequisites()
 		{
 		    var ErrorMsg = ErrorMessage.GetImageCodes();
             var WarnMsg = WarningMessage.GetImageCodes();
@@ -441,13 +441,16 @@ namespace SimulationGUI
 
             if (ErrorMsg.Count == 0)
             {
-                var result = MessageBox.Show(message, "Continue?",
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Error);
-                return result.Equals(MessageBoxResult.Yes);
+                var dlg = new WarningDialog(message, MessageBoxButton.OKCancel, WarningColour.Warning) { Owner = GetWindow(this) };
+                var ok = dlg.ShowDialog();
+                return ok ?? true;
             }
-
-            MessageBox.Show(message, "", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            else
+            {
+                var dlg = new WarningDialog(message, MessageBoxButton.OK, WarningColour.Error) { Owner = GetWindow(this) };
+                dlg.ShowDialog();
+                return false;
+            }
 		}
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

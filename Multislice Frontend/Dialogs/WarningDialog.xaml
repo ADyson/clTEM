@@ -51,10 +51,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="btnOK" Content="OK" Grid.Column="1"
+                <Button x:Name="btnOK" Content="OK" Grid.Column="0"
                     HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5,2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
 
-                <Button x:Name="btnCancel" Content="Cancel" Grid.Column="2"
+                <Button x:Name="btnCancel" Content="Cancel" Grid.Column="1"
                     HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5,2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickCancel"/>
 
             </Grid>
