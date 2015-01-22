@@ -18,7 +18,7 @@
               DataContext="{Binding RelativeSource={RelativeSource Self}}"
               
               Icon="clTEM.ico"
-              Title="Multislice Simulation" MinHeight="880" Height="880" MinWidth="1223" Width="1223" HasDropShadow="True">
+              Title="Multislice Simulation" MinHeight="880" Height="880" MinWidth="1221" Width="1221" HasDropShadow="True">
 
     <Grid HorizontalAlignment="Stretch">
         
@@ -252,7 +252,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Name="TEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="135" Grid.RowSpan="2" Visibility="Hidden">
+        <GroupBox Name="TEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -303,7 +303,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Name="STEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="135" Grid.RowSpan="2" Visibility="Hidden">
+        <GroupBox Name="STEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -336,7 +336,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Name="CBEDbox" Grid.Column="5" Template="{StaticResource gbox}" Header="CBED" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="135" Grid.RowSpan="2" Visibility="Visible">
+        <GroupBox Name="CBEDbox" Grid.Column="5" Template="{StaticResource gbox}" Header="CBED" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Visible">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

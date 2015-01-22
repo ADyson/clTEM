@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using SimulationGUI.Utils;
 
 namespace SimulationGUI
 {
@@ -61,5 +63,25 @@ namespace SimulationGUI
         }
 
         public STEMArea AreaParams { get; private set; }
+    }
+
+    /// <summary>
+    /// Used to pass back detectors from dialogs
+    /// </summary>
+    public class DetectorArgs : EventArgs
+    {
+        public DetectorArgs(DetectorItem s)
+        {
+            Detector = s;
+        }
+
+        public DetectorItem Detector { get; private set; }
+
+        public DetectorArgs(List<DetectorItem> sList)
+        {
+            DetectorList = sList;
+        }
+
+        public List<DetectorItem> DetectorList { get; private set; }
     }
 }

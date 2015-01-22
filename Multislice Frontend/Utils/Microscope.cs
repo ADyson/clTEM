@@ -107,8 +107,8 @@ namespace SimulationGUI.Utils
             a1m.val = 0;
             a1t.val = 0;
             kv.val = 200;
-            b.val = 0.1f;
-            d.val = 5;
+            b.val = 0.5f;
+            d.val = 3;
             ap.val = 30;
             a2m.val = 0;
             a2t.val = 0;

@@ -64,6 +64,11 @@ namespace SimulationGUI
             ycTxtbx.TextChanged += new TextChangedEventHandler(CentValidCheck);
         }
 
+        public void ClickOk(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             if (!goodradii || !isname || !uniquename)
