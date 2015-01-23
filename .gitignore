@@ -27,4 +27,7 @@ readme.html
 [Bb]in
 [Dd]ebug*/
 Cuda version/
+packages*/
 *.xyz
+*.exe
+!NuGet.exe
