@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GPUTEMSTEMSimulation.Utils
+namespace SimulationGUI.Utils
 {
 	public static class Shuffler
 	{

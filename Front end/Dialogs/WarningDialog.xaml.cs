@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using Elysium.Parameters;
 
-namespace GPUTEMSTEMSimulation.Dialogs
+namespace SimulationGUI.Dialogs
 {
 
     public enum WarningColour

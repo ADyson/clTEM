@@ -5,7 +5,7 @@ using System.Windows.Media;
 using SimulationGUI;
 using SimulationGUI.Utils;
 
-namespace GPUTEMSTEMSimulation.Dialogs
+namespace SimulationGUI.Dialogs
 {
     /// <summary>
     /// Interaction logic for STEMAreaDialog.xaml
@@ -63,8 +63,8 @@ namespace GPUTEMSTEMSimulation.Dialogs
             _simStartY = simArea.StartY;
             _simEndY = simArea.EndY;
 
-            txtPixelX.TextChanged += PixelValidCheck;
-            txtPixelY.TextChanged += PixelValidCheck;
+            txtPixelX.TextChanged += CheckPixelsValid;
+            txtPixelY.TextChanged += CheckPixelsValid;
             txtStartX.TextChanged += CheckXRangeValid;
             txtStartY.TextChanged += CheckXRangeValid;
             txtEndX.TextChanged += CheckXRangeValid;
@@ -91,7 +91,7 @@ namespace GPUTEMSTEMSimulation.Dialogs
             Close();
         }
 
-        private static void PixelValidCheck(object sender, TextChangedEventArgs e)
+        private static void CheckPixelsValid(object sender, TextChangedEventArgs e)
         {
             var tbox = sender as TextBox;
             if (tbox == null) return;

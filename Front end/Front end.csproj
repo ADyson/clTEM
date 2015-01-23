@@ -7,8 +7,8 @@
     <ProjectGuid>{09034F72-8AC9-43C6-9D03-B3B62051811D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GPUTEMSTEMSimulation</RootNamespace>
-    <AssemblyName>GPUTEMSTEMSimulation</AssemblyName>
+    <RootNamespace>SimulationGUI</RootNamespace>
+    <AssemblyName>SimulationGUI</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -199,10 +199,14 @@
     <Compile Include="Dialogs\STEMAreaDialog.xaml.cs">
       <DependentUpon>STEMAreaDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\STEMDetectorDialog.xaml.cs">
+      <DependentUpon>STEMDetectorDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\WarningDialog.xaml.cs">
       <DependentUpon>WarningDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Areas.cs" />
+    <Compile Include="Utils\SettingsStrings.cs" />
     <Compile Include="Utils\CustomControls.cs" />
     <Compile Include="Utils\DetectorItem.cs" />
     <Compile Include="Utils\DisplayTab.cs" />
@@ -213,9 +217,6 @@
     <Compile Include="Utils\Microscope.cs" />
     <Compile Include="Utils\Parameter.cs" />
     <Compile Include="Utils\ProgressReporter.cs" />
-    <Compile Include="STEMDetectorDialog.xaml.cs">
-      <DependentUpon>STEMDetectorDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Utils\Shuffler.cs" />
     <Compile Include="Utils\ZoomBorder.cs" />
     <Page Include="Dialogs\SimAreaDialog.xaml">
@@ -223,6 +224,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialogs\STEMAreaDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\STEMDetectorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -246,10 +251,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="STEMDetectorDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

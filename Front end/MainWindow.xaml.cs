@@ -11,7 +11,6 @@ using System.Threading;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
 using Framework.UI.Controls;
-using GPUTEMSTEMSimulation.Utils;
 using SimulationGUI.Utils;
 
 // TODO: convert aberration angles from radians to degrees or other way around? ( /= Convert.ToSingle((180 / Math.PI)) )
@@ -94,6 +93,8 @@ namespace SimulationGUI
 
         private readonly iParam _runsCBED;
 
+        private float _imageVoltage;
+
         // Locking copies of editable parameters
 
         /// <summary>
@@ -108,6 +109,8 @@ namespace SimulationGUI
         /// </summary>
         STEMArea _lockedSTEMRegion;
 
+        private SimArea _lockedSimRegion;
+
         int _lockedResolution;
 
         float _lockedPixelScale;
@@ -115,9 +118,6 @@ namespace SimulationGUI
         float _lockedWavelength;
 
         float _lockedVoltage;
-
-        private float _imageVoltage;
-
 
         bool IsResolutionSet = false;
         bool HaveStructure = false;
@@ -260,11 +260,6 @@ namespace SimulationGUI
             DeviceSelector.ItemsSource = _devicesShort;
         }
 
-        private void testing_click(object sender, RoutedEventArgs e)
-        {
-            _microscopeParams.df.sVal = "1337";
-        }
-
         /// <summary>
         /// Import structure button clicked.
         /// Opens .xyz file in unmanaged code.
@@ -289,8 +284,8 @@ namespace SimulationGUI
             {
                 // Get name and show it
                 var fName = openDialog.FileName;
-                fileNameLabel.Text = System.IO.Path.GetFileName(fName);
-                fileNameLabel.ToolTip = fName;
+                lblFileName.Text = System.IO.Path.GetFileName(fName);
+                lblFileName.ToolTip = fName;
 
                 // Pass filename through to unmanaged where atoms can be imported inside structure class
                 _mCl.importStructure(openDialog.FileName);
@@ -383,6 +378,7 @@ namespace SimulationGUI
             _lockedPixelScale = pixelScale;
             _lockedWavelength = wavelength;
             _lockedVoltage = _microscopeParams.kv.val;
+            _lockedSimRegion = SimRegion;
             _lockedDetectors = Detectors; // will do even if not simulating STEM
             _lockedSTEMRegion = STEMRegion;
 
@@ -829,7 +825,22 @@ namespace SimulationGUI
         /// <param name="scale">Function used to apply scaling (i.e. logarithmic).</param>
         private static void UpdateTabImage(DisplayTab imageTab, Func<float, float> scale)
         {
-            // update xdim needs to be done on appropriate simulation part?
+            //// update xdim needs to be done on appropriate simulation part?
+
+            //var path = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+            //var directory = Path.GetDirectoryName(path);
+            //directory = directory.Replace("file:\\", "");
+            //directory += "\\.tmpImages";
+
+            //if (!Directory.Exists(directory))
+            //{
+            //    var di = Directory.CreateDirectory(directory);
+            //    di.Attributes = FileAttributes.Directory | FileAttributes.Hidden; 
+            //}
+
+            //directory += "\\" + imageTab.Tab.Header + ".tiff";
+
+            //SaveImage(imageTab, directory);
 
             var min = scale(imageTab.Min);
             var max = scale(imageTab.Max);
@@ -916,8 +927,8 @@ namespace SimulationGUI
 		{
 			foreach (var dt in tabs)
 			{
+                if (dt.Tab.IsSelected != true) continue;
 			    if (dt.xDim == 0 && dt.yDim == 0) continue;
-			    if (dt.Tab.IsSelected != true) continue;
 
 			    // File saving dialog
 			    var saveDialog = new Microsoft.Win32.SaveFileDialog
@@ -933,60 +944,65 @@ namespace SimulationGUI
 
                 var filename = saveDialog.FileName;
 
-			    if (filename.EndsWith(".tiff"))
-			    {
-			        using (var output = Tiff.Open(filename, "w"))
-			        {
-
-			            output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
-			            output.SetField(TiffTag.IMAGELENGTH, dt.yDim);
-			            output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
-			            output.SetField(TiffTag.SAMPLEFORMAT, 3);
-			            output.SetField(TiffTag.BITSPERSAMPLE, 32);
-			            output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
-			            output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
-			            output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
-			            output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
-			            output.SetField(TiffTag.COMPRESSION, Compression.NONE);
-			            output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
-
-			            for (var i = 0; i < dt.yDim; ++i)
-			            {
-			                var buf = new float[dt.xDim];
-			                var buf2 = new byte[4 * dt.xDim];
-
-			                for (var j = 0; j < dt.yDim; ++j)
-			                {
-			                    buf[j] = dt.ImageData[j + dt.xDim * i];
-			                }
-
-			                Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
-			                output.WriteScanline(buf2, i);
-			            }
-			        }
-			    }
-			    else if (filename.EndsWith(".png"))
-			    {
-			        using (var stream = new FileStream(filename, FileMode.Create))
-			        {
-			            var encoder = new PngBitmapEncoder();
-			            encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
-			            encoder.Save(stream);
-			            stream.Close();
-			        }
-			    }
-			    else if (filename.EndsWith(".jpeg"))
-			    {
-			        using (var stream = new FileStream(filename, FileMode.Create))
-			        {
-			            var encoder = new JpegBitmapEncoder();
-			            encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
-			            encoder.Save(stream);
-			            stream.Close();
-			        }
-			    }
+			    SaveImage(dt, filename);
 			}
 		}
+
+        private static void SaveImage(DisplayTab dt, string filename)
+        {
+            if (filename.EndsWith(".tiff"))
+            {
+                using (var output = Tiff.Open(filename, "w"))
+                {
+
+                    output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
+                    output.SetField(TiffTag.IMAGELENGTH, dt.yDim);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                    output.SetField(TiffTag.SAMPLEFORMAT, 3);
+                    output.SetField(TiffTag.BITSPERSAMPLE, 32);
+                    output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+                    output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                    output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                    output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                    for (var i = 0; i < dt.yDim; ++i)
+                    {
+                        var buf = new float[dt.xDim];
+                        var buf2 = new byte[4 * dt.xDim];
+
+                        for (var j = 0; j < dt.yDim; ++j)
+                        {
+                            buf[j] = dt.ImageData[j + dt.xDim * i];
+                        }
+
+                        Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
+                        output.WriteScanline(buf2, i);
+                    }
+                }
+            }
+            else if (filename.EndsWith(".png"))
+            {
+                using (var stream = new FileStream(filename, FileMode.Create))
+                {
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
+                    encoder.Save(stream);
+                    stream.Close();
+                }
+            }
+            else if (filename.EndsWith(".jpeg"))
+            {
+                using (var stream = new FileStream(filename, FileMode.Create))
+                {
+                    var encoder = new JpegBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
+                    encoder.Save(stream);
+                    stream.Close();
+                }
+            }
+        }
 
         private void SimulateImage(object sender, RoutedEventArgs e)
         {
@@ -1026,6 +1042,36 @@ namespace SimulationGUI
             UpdateDiffractionImage();
 
 			SimulateEWButton.IsEnabled = true;
+        }
+
+        private void SaveSimulationSettings(object sender, RoutedEventArgs e)
+        {
+            var general = SettingsStrings.UniversalSettings;
+            general = general.Replace("{{filename}}", lblFileName.Text);
+            general = general.Replace("{{simareaxstart}}", _lockedSimRegion.StartX.ToString());
+            general = general.Replace("{{simareaxend}}", _lockedSimRegion.EndX.ToString());
+            general = general.Replace("{{simareaystart}}", _lockedSimRegion.StartY.ToString());
+            general = general.Replace("{{simareayend}}", _lockedSimRegion.EndY.ToString());
+            general = general.Replace("{{resolution}}", _lockedResolution.ToString());
+            //general = general.Replace("{{mode}}", );
+            //full3d
+            //
+            
+
+            var saveDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Save Simulation Settings",
+                DefaultExt = ".txt",
+                Filter = "txt (*.txt)|*.txt"
+            };
+
+            var result = saveDialog.ShowDialog();
+
+            if (result == false) return;
+
+            var filename = saveDialog.FileName;
+
+            File.WriteAllText(filename, general);
         }
     }
 }

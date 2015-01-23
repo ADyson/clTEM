@@ -5,7 +5,7 @@ using System.Windows.Media;
 using SimulationGUI;
 using SimulationGUI.Utils;
 
-namespace GPUTEMSTEMSimulation.Dialogs
+namespace SimulationGUI.Dialogs
 {
     /// <summary>
     /// Interaction logic for SimAreaDialog.xaml

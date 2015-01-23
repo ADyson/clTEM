@@ -70,9 +70,6 @@ namespace SimulationGUI.Utils
 
     }
 
-
-
-
     /// <summary>
     /// Class used to hold a variable and also keep the value in sync with a textbox
     /// </summary>
@@ -120,6 +117,66 @@ namespace SimulationGUI.Utils
                 int.TryParse(value, out temp);
                 val = temp;
             }
+        }
+
+        /// <summary>
+        /// Event when setters are called
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// This calls the event when setters are called
+        /// </summary>
+        private void NotifyPropertyChanged(string id)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(id));
+            }
+        }
+
+    }
+
+    public class sParam : INotifyPropertyChanged
+    {
+        public sParam()
+        {
+            val = "";
+        }
+
+        public sParam(string v)
+        {
+            val = v;
+        }
+
+        /// <summary>
+        /// Actual parameter value
+        /// </summary>
+        private string _val;
+
+        /// <summary>
+        /// Public value that Notifies of property changed
+        /// </summary>
+        public string val
+        {
+            get { return _val; }
+            set
+            {
+                if (_val == value)
+                    return;
+                _val = value;
+                NotifyPropertyChanged("sVal");
+            }
+        }
+
+        /// <summary>
+        /// String value used to convert strings from textboxes.
+        /// Here for compatibility with other Paams.
+        /// </summary>
+        public string sVal
+        {
+            get { return _val; }
+            set { val = value; }
         }
 
         /// <summary>

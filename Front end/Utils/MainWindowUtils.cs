@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Framework.UI.Controls;
 using Framework.UI.Input;
-using GPUTEMSTEMSimulation.Dialogs;
+using SimulationGUI.Dialogs;
 using SimulationGUI.Utils;
 
 namespace SimulationGUI
@@ -259,7 +259,7 @@ namespace SimulationGUI
         private void OpenSTEMDetDlg(object sender, RoutedEventArgs e)
         {
             // open the window here
-            var window = new STEMDetectorDialog(Detectors) {Owner = this};
+            var window = new Dialogs.STEMDetectorDialog(Detectors) {Owner = this};
             window.AddDetectorEvent += STEM_AddDetector;
             window.RemDetectorEvent += STEM_RemoveDetector;
             window.ShowDialog();
@@ -267,7 +267,7 @@ namespace SimulationGUI
 
         private void OpenSTEMAreaDlg(object sender, RoutedEventArgs e)
         {
-            var window = new GPUTEMSTEMSimulation.Dialogs.STEMAreaDialog(STEMRegion, SimRegion) {Owner = this};
+            var window = new SimulationGUI.Dialogs.STEMAreaDialog(STEMRegion, SimRegion) {Owner = this};
             window.AddSTEMAreaEvent += STEM_AddArea;
             window.ShowDialog();
         }

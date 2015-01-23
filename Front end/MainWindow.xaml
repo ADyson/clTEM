@@ -113,7 +113,7 @@
                     </Grid.ColumnDefinitions>
                     <Button x:Name="SetAreaButton" Content="Set Area" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}"
                         Grid.Row="0" Grid.Column="0" Margin="2,1,3,1" Click="OpenAreaDlg" Padding="{StaticResource ControlPadding}"/>
-                    <Button x:Name="Show3DButton" Content="Show 3D" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click ="testing_click"
+                    <Button x:Name="Show3DButton" Content="Show 3D" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click ="SaveSimulationSettings"
                         Grid.Row="0" Grid.Column="1" Margin="2,1,3,1" Padding="{StaticResource ControlPadding}"/>
                 </Grid>
                 
@@ -554,7 +554,7 @@
                 </StatusBarItem>
 
                 <StatusBarItem Grid.Column="2">
-                    <TextBlock x:Name="fileNameLabel" Text="no structure loaded" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
+                    <TextBlock x:Name="lblFileName" Text="no structure loaded" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
                 </StatusBarItem>
 
                 <StatusBarItem Grid.Column="3"/>
