@@ -49,48 +49,48 @@
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtStartX" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="3" Grid.Row="1"
-                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"
-                      TextWrapping="NoWrap" Width="80" Height="36"  m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap" Width="80"   m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Label Content="X end" Margin="20, 0, 7.5, 0"
                Grid.Column="4" Grid.Row="1"
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtEndX" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="5" Grid.Row="1"
-                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"
-                      TextWrapping="NoWrap"  Width="80" Height="36" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap"  Width="80"  m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Label Content="X pixels"  Margin="20, 0, 7.5, 0"
                Grid.Column="6" Grid.Row="1"
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtPixelX" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="7" Grid.Row="1"
-                      m:MaskedTextBox.Mask="^[0-9]*$" 
-                      TextWrapping="NoWrap" Width="80" Height="36" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*$"  Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap" Width="80"  m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Label Content="Y start"  Margin="20, 0, 7.5, 0"
                Grid.Column="2" Grid.Row="2"
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtStartY" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="3" Grid.Row="2"
-                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"
-                      TextWrapping="NoWrap"  Width="80" Height="36" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap"  Width="80"  m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Label Content="Y end" Margin="20, 0, 7.5, 0"
                Grid.Column="4" Grid.Row="2"
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtEndY" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="5" Grid.Row="2"
-                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"
-                      TextWrapping="NoWrap"  Height="36" Width="80" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap"   Width="80" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Label Content="Y pixels" Margin="20, 0, 7.5, 0"
                Grid.Column="6" Grid.Row="2"
                HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource TextColourLight}"/>
         <TextBox x:Name="txtPixelY" Text="{Binding Path = sVal, Mode = TwoWay}"
                       Grid.Column="7" Grid.Row="2"
-                      m:MaskedTextBox.Mask="^[0-9]*$"
-                      TextWrapping="NoWrap" Height="36" Width="80" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
+                      m:MaskedTextBox.Mask="^[0-9]*$" Height="{StaticResource ControlHeight}"
+                      TextWrapping="NoWrap"  Width="80" m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"/>
 
         <Grid Grid.Row="3" Grid.Column="9">
             <Grid.ColumnDefinitions>
@@ -100,10 +100,10 @@
             </Grid.ColumnDefinitions>
 
             <Button x:Name="btnOK" Content="OK" Grid.Column="0"
-                HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
+                HorizontalAlignment="Center" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
 
             <Button x:Name="btnCancel" Content="Cancel" Grid.Column="1"
-                HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickCancel"/>
+                HorizontalAlignment="Center" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickCancel"/>
 
         </Grid>
     </Grid>

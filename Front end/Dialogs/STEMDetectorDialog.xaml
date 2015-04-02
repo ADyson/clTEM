@@ -80,45 +80,45 @@
             <TextBlock Text="Name"
                        Grid.Row="0" Margin="0,7,0,2"/>
             <TextBox x:Name="txtName" Text="{Binding Path = sVal, Mode = TwoWay}"
-                          Grid.Row="1"
-                          TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Height="36" Width="120" Margin="0,2"/>
+                          Grid.Row="1" Height="{StaticResource ControlHeight}"
+                          TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="Inner Radius"
                        Grid.Row="2" Margin="0,7,0,2"/>
             <TextBox x:Name="txtInner" Text="{Binding Path = sVal, Mode = TwoWay}"
-                          Grid.Row="3"
-                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Height="36" Width="120" Margin="0,2"/>
+                          Grid.Row="3" Height="{StaticResource ControlHeight}"
+                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="Outer Radius"
                        Grid.Row="4" Margin="0,7,0,2"/>
             <TextBox x:Name="txtOuter" Text="{Binding Path = sVal, Mode = TwoWay}"
-                          Grid.Row="5"
-                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Height="36" Width="120" Margin="0,2"/>
+                          Grid.Row="5" Height="{StaticResource ControlHeight}"
+                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="x Centre"
                        Grid.Row="6" Margin="0,7,0,2"/>
             <TextBox x:Name="txtCenterX" Text="{Binding Path = sVal, Mode = TwoWay}"
-                          Grid.Row="7"
-                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Height="36" Width="120" Margin="0,2"/>
+                          Grid.Row="7" Height="{StaticResource ControlHeight}"
+                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="y Centre"
                        Grid.Row="8" Margin="0,7,0,2"/>
             <TextBox x:Name="txtCenterY" Text="{Binding Path = sVal, Mode = TwoWay}"
-                          Grid.Row="9"
-                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Height="36" Width="120" Margin="0,2"/>
+                          Grid.Row="9" Height="{StaticResource ControlHeight}"
+                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
         
             <Button x:Name="AddButton"
-                    Grid.Row="10"
+                    Grid.Row="10" BorderThickness="{StaticResource BorderThickness}"
                     Content="Add" Click="ClickAdd" Margin="0,7,0,2" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Width="{StaticResource ControlWidth}"/>
 
             <Button x:Name="DeleteButton" 
-                    Grid.Row="11"
+                    Grid.Row="11" BorderThickness="{StaticResource BorderThickness}"
                     Content="Delete" Click="ClickDelete" Margin="0,7,0,2" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Width="{StaticResource ControlWidth}"/>
             
         </Grid>
 
         <Button x:Name="btnOK" Content="OK" Grid.Column="5" Grid.Row="2" Grid.ColumnSpan="2"
-                HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
+                HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="2.5" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ClickOk"/>
         
     </Grid>
 

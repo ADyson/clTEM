@@ -19,6 +19,7 @@ using SimulationGUI.Utils;
 
 namespace SimulationGUI
 {
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -46,12 +47,12 @@ namespace SimulationGUI
         /// <summary>
         /// Display tab for the exit wave amplitude image
         /// </summary>
-        readonly DisplayTab _ewAmplitudeDisplay = new DisplayTab("EW Amp");
+        readonly DisplayTab _ewAmplitudeDisplay = new DisplayTab("EW A");
 
         /// <summary>
         /// Display tab for the exit wave phase image
         /// </summary>
-        readonly DisplayTab _ewPhaseDisplay = new DisplayTab("EW2 phase");
+        readonly DisplayTab _ewPhaseDisplay = new DisplayTab("EW θ");
 
         /// <summary>
         /// Display tab for the diffraction image
@@ -165,6 +166,10 @@ namespace SimulationGUI
 
             // This was to supress some warnings, might not be needed
             PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
+
+            
+
+            
 
             //add event handlers here so they aren't called when creating controls
             txtCBEDx.TextChanged += CheckTboxValid;
@@ -1072,6 +1077,16 @@ namespace SimulationGUI
             var filename = saveDialog.FileName;
 
             File.WriteAllText(filename, general);
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var newSize = e.NewSize;
+            var win = sender as System.Windows.Window;
+
+            win.Width = newSize.Width;
+            win.Height = newSize.Height;
+
         }
     }
 }

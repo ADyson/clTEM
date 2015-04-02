@@ -18,334 +18,332 @@
               DataContext="{Binding RelativeSource={RelativeSource Self}}"
               
               Icon="clTEM.ico"
-              Title="Multislice Simulation" MinHeight="880" Height="880" MinWidth="1221" Width="1221" HasDropShadow="True">
+              Title="Multislice Simulation" Width="1222" Height="750" MinWidth="1222" MinHeight="750" HasDropShadow="True" SizeToContent="WidthAndHeight">
 
-    <Grid HorizontalAlignment="Stretch">
-        
+    <Grid MinWidth="1222">
         <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="155"/>
-            <RowDefinition Height="140*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <GroupBox Template="{StaticResource gbox}" Grid.Row="0" Grid.Column="0" Header="Import Structure" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2">
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="0" Header="Import Structure">
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <Button Content="Import Structure"
-                        Grid.Row="0" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportXYZ" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+                    <Button Content="Import Structure"
+                            Grid.Row="0" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportXYZ" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
 
-                <Button Content="Import Unit Cell"
-                        Grid.Row="1" IsEnabled="False" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportUnitCell" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-            </Grid>
-        </GroupBox>
+                    <Button Content="Import Unit Cell"
+                            Grid.Row="1" IsEnabled="False" BorderThickness="{StaticResource BorderThickness}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportUnitCell" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+                </Grid>
+            </GroupBox>
 
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="1" Header="Structure Information" Height="Auto" VerticalAlignment="Stretch" Grid.RowSpan="2">
-            <Grid Width="250"  Margin="2.5" HorizontalAlignment="Left">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                
-                <Label Content="Width" 
-                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-                <Label Content="Height" 
-                       Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-                <Label Content="Depth" 
-                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-
-                <Label x:Name="WidthLabel" Content="--" 
-                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-                <Label x:Name="HeightLabel" Content="--" 
-                       Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-                <Label x:Name="DepthLabel" Content="--" 
-                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-
-                <Label Content="No. atoms" 
-                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-                <Label Content="Pixel size" 
-                       Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-                <Label Content="Max reciprocal" 
-                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
-
-                <Label x:Name="AtomNoLabel" Content="--" 
-                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-                <Label x:Name="PixelScaleLabel" Content="--" 
-                       Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-                <Label x:Name="MaxMradsLabel" Content="--" 
-                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
-                
-                <Grid Grid.Row="4" Grid.ColumnSpan="3">
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="1" Header="Structure Information">
+                <Grid Width="250"  Margin="2.5" HorizontalAlignment="Left">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="SetAreaButton" Content="Set Area" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}"
-                        Grid.Row="0" Grid.Column="0" Margin="2,1,3,1" Click="OpenAreaDlg" Padding="{StaticResource ControlPadding}"/>
-                    <Button x:Name="Show3DButton" Content="Show 3D" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click ="SaveSimulationSettings"
-                        Grid.Row="0" Grid.Column="1" Margin="2,1,3,1" Padding="{StaticResource ControlPadding}"/>
+
+                    <Label Content="Width" 
+                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+                    <Label Content="Height" 
+                           Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+                    <Label Content="Depth" 
+                           Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+
+                    <Label x:Name="WidthLabel" Content="--" 
+                           Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+                    <Label x:Name="HeightLabel" Content="--" 
+                           Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+                    <Label x:Name="DepthLabel" Content="--" 
+                           Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+
+                    <Label Content="No. atoms" 
+                           Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+                    <Label Content="Pixel size" 
+                           Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+                    <Label Content="Max reciprocal" 
+                           Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Padding="1" Foreground="{StaticResource TextColourLight}"/>
+
+                    <Label x:Name="AtomNoLabel" Content="--" 
+                           Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+                    <Label x:Name="PixelScaleLabel" Content="--" 
+                           Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+                    <Label x:Name="MaxMradsLabel" Content="--" 
+                           Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto" Padding="0" Foreground="{StaticResource TextColourLight}"/>
+
+                    <Grid Grid.Row="4" Grid.ColumnSpan="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="SetAreaButton" Content="Set Area" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}"
+                            Grid.Row="0" Grid.Column="0" Margin="2,1,3,1" Click="OpenAreaDlg" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                        <Button x:Name="Show3DButton" Content="Show 3D" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click ="SaveSimulationSettings"
+                            Grid.Row="0" Grid.Column="1" Margin="2,1,3,1" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                    </Grid>
+
                 </Grid>
-                
-            </Grid>
-        </GroupBox>
+            </GroupBox>
 
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="2" Header="Simulation Type" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
-            <Grid  Margin="2.5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <RadioButton x:Name="TEMRadioButton" Content="TEM"
-                             Grid.Row="0" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" />
-                <RadioButton x:Name="CBEDRadioButton" Content="CBED" 
-                             Grid.Row="1" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
-                <RadioButton x:Name="STEMRadioButton" Content="STEM" 
-                             Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left"/>
-
-                <CheckBox x:Name="ToggleFull3D"  Content="Full 3D Potential" 
-                          Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
-                          Checked="Full3Dtoggled" Unchecked="Full3Dtoggled" IsChecked="True" />
-
-                <CheckBox x:Name="ToggleFD"  Content="Finite Difference" 
-                          Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
-                          Checked="FDtoggled" Unchecked="FDtoggled" IsChecked="False" />
-
-                <Grid Grid.Row="5" Grid.Column="0" HorizontalAlignment="Center">
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="2" Header="Simulation Type">
+                <Grid  Margin="2.5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Resolution"
-                           Grid.Column="0" HorizontalAlignment="Right" Width="Auto" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                    <ComboBox x:Name="ResolutionCombo"
-                              Grid.Column="1" HorizontalAlignment="Left" Padding ="{StaticResource ControlPadding}" Margin="2.5,0" VerticalAlignment="Center" Width="75" SelectionChanged="cboResolutionChanged" SelectedValuePath="Content" Height="{StaticResource ControlHeight}">
-                        <ComboBoxItem Content="256"/>
-                        <ComboBoxItem Content="512"/>
-                        <ComboBoxItem Content="1024"/>
-                        <ComboBoxItem Content="2048"/>
-                        <ComboBoxItem Content="4096"/>
-                    </ComboBox>
+
+                    <RadioButton x:Name="TEMRadioButton" Content="TEM"
+                                 Grid.Row="0" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>
+                    <RadioButton x:Name="CBEDRadioButton" Content="CBED" 
+                                 Grid.Row="1" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>
+                    <RadioButton x:Name="STEMRadioButton" Content="STEM" 
+                                 Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>
+
+                    <CheckBox x:Name="ToggleFull3D"  Content="Full 3D Potential" 
+                              Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
+                              Checked="Full3Dtoggled" Unchecked="Full3Dtoggled" IsChecked="True" />
+
+                    <CheckBox x:Name="ToggleFD"  Content="Finite Difference" 
+                              Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center" Margin="5,0,0,0" VerticalAlignment="Center"
+                              Checked="FDtoggled" Unchecked="FDtoggled" IsChecked="False" />
+
+                    <Grid Grid.Row="5" Grid.Column="0" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Resolution"
+                               Grid.Column="0" HorizontalAlignment="Right" Width="Auto" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                        <ComboBox x:Name="ResolutionCombo"
+                                  Grid.Column="1" HorizontalAlignment="Left" Padding ="{StaticResource ControlPadding}" Margin="2.5,0" VerticalAlignment="Center" Width="75" SelectionChanged="cboResolutionChanged" SelectedValuePath="Content" Height="{StaticResource ControlHeight}">
+                            <ComboBoxItem Content="256"/>
+                            <ComboBoxItem Content="512"/>
+                            <ComboBoxItem Content="1024"/>
+                            <ComboBoxItem Content="2048"/>
+                            <ComboBoxItem Content="4096"/>
+                        </ComboBox>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </GroupBox>
+            </GroupBox>
 
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="4" Header="Wave Function" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2">
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" Margin="2.5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
-                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeDf" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="0" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="Cs:" ToolTip="Spherical Aberration"
-                       Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeCs" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="1" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
-                       Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeA1m" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="2" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
-                       Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeA1t" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="3" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="kV:"  ToolTip="Accelerating Voltage"
-                       Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeKv" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="kilo Volts" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="0" Grid.Column="3" m:MaskedTextBox.Mask="^([\+]?[0-9]*\.?[0-9]*)*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55" LostFocus="txtImageKv_LostFocus"/>
-
-                <Label Content="β:" ToolTip="Convergence Angle"
-                       Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeB" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="milliRadians" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="1" Grid.Column="3" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="Δ:" ToolTip="Defocus Spread"
-                       Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeD" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="nm" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="2" Grid.Column="3" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="Aper:"  ToolTip="Objective Aperture"
-                       Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox Name="txtMicroscopeAp" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="milliRadians" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="3" Grid.Column="3" m:MaskedTextBox.Mask="^([\+]?[0-9]*\.?[0-9]*)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
-                       Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="txtMicroscopeA2m" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="0" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="{StaticResource ControlHeight}"/>
-
-                <Label Content="A2 θ:"  ToolTip="3-fold Astimatism Angle"
-                       Grid.Row="1" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="txtMicroscopeA2t" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="1" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                    <Label Content="B2:"  ToolTip="Coma Magnitude"
-                       Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left"  Width="36" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="txtMicroscopeB2m" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="2" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-                <Label Content="B2 θ:"  ToolTip="Coma Angle"
-                       Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left"  Width="40" HorizontalContentAlignment="Right" Foreground="{StaticResource TextColourLight}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="txtMicroscopeB2t" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
-                         Grid.Row="3" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
-
-            </Grid>
-        </GroupBox>
-
-        <GroupBox Name="TEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="TEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Hidden">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button x:Name ="SimulateImageButton" Content="Simulate Image"
-                        Grid.Row="0" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Padding="{StaticResource ControlPadding}" IsEnabled="False" Click="SimulateImage" Margin="0, 2.5" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
-
-                <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="2.5,0" Width="130">
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="3" Header="Wave Function">
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="Auto" Margin="2.5">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Content="Dose:  " ToolTip="e/A^-2"
-                             Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txtDose" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="e/A^-2" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" m:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="60" Padding ="{StaticResource ControlPadding}"/>
+                    <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
+                           Grid.Row="0" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeDf" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="0" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
 
-                    <Label Content="CCD:  " ToolTip="Select a CCD to include detector characteristics for TEM image simulation"
-                              Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <ComboBox x:Name="CCDCombo"
-                              Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="60" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}">
-                        <ComboBoxItem Content="Perfect"/>
-                        <ComboBoxItem Content="Orius"/>
-                        <ComboBoxItem Content="k2"/>
-                    </ComboBox>
+                    <Label Content="Cs:" ToolTip="Spherical Aberration"
+                           Grid.Row="1" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeCs" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="1" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
 
-                    <Label Content="Binning:  " ToolTip="Select binning to simulate for CCD detector characteristics"
-                              Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <ComboBox x:Name="BinningCombo"
-                              Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="60" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}">
-                        <ComboBoxItem Content="1"/>
-                        <ComboBoxItem Content="2"/>
-                        <ComboBoxItem Content="4"/>
-                        <ComboBoxItem Content="8"/>
-                    </ComboBox>
+                    <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
+                           Grid.Row="2" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeA1m" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="2" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
+                           Grid.Row="3" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeA1t" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="3" Grid.Column="1" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="kV:"  ToolTip="Accelerating Voltage"
+                           Grid.Row="0" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeKv" Text="{Binding Path = sVal, Mode = TwoWay}"  ToolTip="kilo Volts" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="0" Grid.Column="3" m:MaskedTextBox.Mask="^([\+]?[0-9]*\.?[0-9]*)*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55" LostFocus="txtImageKv_LostFocus"/>
+
+                    <Label Content="β:" ToolTip="Convergence Angle"
+                           Grid.Row="1" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeB" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="milliRadians" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="1" Grid.Column="3" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="Δ:" ToolTip="Defocus Spread"
+                           Grid.Row="2" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeD" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="nm" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="2" Grid.Column="3" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="Aper:"  ToolTip="Objective Aperture"
+                           Grid.Row="3" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox Name="txtMicroscopeAp" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="milliRadians" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="3" Grid.Column="3" m:MaskedTextBox.Mask="^([\+]?[0-9]*\.?[0-9]*)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="A2:"  ToolTip="3-fold Astigmatism Magnitude"
+                           Grid.Row="0" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox x:Name="txtMicroscopeA2m" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="0" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" TextWrapping="Wrap" Width="55" Height="{StaticResource ControlHeight}"/>
+
+                    <Label Content="A2 θ:"  ToolTip="3-fold Astimatism Angle"
+                           Grid.Row="1" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox x:Name="txtMicroscopeA2t" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="1" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="B2:"  ToolTip="Coma Magnitude"
+                           Grid.Row="2" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox x:Name="txtMicroscopeB2m" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="2" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
+                    <Label Content="B2 θ:"  ToolTip="Coma Angle"
+                           Grid.Row="3" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <TextBox x:Name="txtMicroscopeB2t" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Degrees" m:TextBoxBehavior.SelectAllOnFocus="True"
+                             Grid.Row="3" Grid.Column="5" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="55"/>
+
                 </Grid>
-            </Grid>
-        </GroupBox>
+            </GroupBox>
 
-        <GroupBox Name="STEMbox" Grid.Column="5" Template="{StaticResource gbox}" Header="STEM" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Hidden">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button x:Name ="STEMDetButton" Content="Edit Detectors"
-                        Grid.Row="0" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMDetDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-
-                <Button x:Name ="STEMAreaButton" Content="Select Region"
-                        Grid.Row="1" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMAreaDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-
-                <Grid Grid.Row="2" HorizontalAlignment="Center">
+            <GroupBox Name="TEMbox" Grid.Column="4" Template="{StaticResource gbox}" Header="TEM" Width="140" Visibility="Hidden">
+                <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox x:Name="STEM_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
-                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="STEM_TDStoggled" Unchecked="STEM_TDStoggled" />
-                    <TextBox Name="txtSTEMruns" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Number of frozen phonon iterations" m:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="45" Padding="{StaticResource ControlPadding}"/>
-                </Grid>
-            </Grid>
-        </GroupBox>
 
-        <GroupBox Name="CBEDbox" Grid.Column="5" Template="{StaticResource gbox}" Header="CBED" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="140" Grid.RowSpan="2" Visibility="Visible">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Button x:Name ="SimulateImageButton" Content="Simulate Image"
+                            Grid.Row="0" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Padding="{StaticResource ControlPadding}" IsEnabled="False" Click="SimulateImage" Margin="0, 2.5" HorizontalAlignment="Center" HorizontalContentAlignment="Center" BorderThickness="{StaticResource BorderThickness}"/>
+
+                    <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="2.5,0" Width="130">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="Dose:  " ToolTip="e/A^-2"
+                                 Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txtDose" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="e/A^-2" m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                 Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="60" Padding ="{StaticResource ControlPadding}"/>
+
+                        <Label Content="CCD:  " ToolTip="Select a CCD to include detector characteristics for TEM image simulation"
+                                  Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <ComboBox x:Name="CCDCombo"
+                                  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="60" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}">
+                            <ComboBoxItem Content="Perfect"/>
+                            <ComboBoxItem Content="Orius"/>
+                            <ComboBoxItem Content="k2"/>
+                        </ComboBox>
+
+                        <Label Content="Binning:  " ToolTip="Select binning to simulate for CCD detector characteristics"
+                                  Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <ComboBox x:Name="BinningCombo"
+                                  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="60" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="8"/>
+                        </ComboBox>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Name="STEMbox" Grid.Column="4" Template="{StaticResource gbox}" Header="STEM" Width="140" Visibility="Hidden">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name ="STEMDetButton" Content="Edit Detectors"
+                            Grid.Row="0" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMDetDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+
+                    <Button x:Name ="STEMAreaButton" Content="Select Region"
+                            Grid.Row="1" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMAreaDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+
+                    <Grid Grid.Row="2" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox x:Name="STEM_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
+                                  Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="STEM_TDStoggled" Unchecked="STEM_TDStoggled" />
+                        <TextBox Name="txtSTEMruns" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Number of frozen phonon iterations" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                 Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="45" Padding="{StaticResource ControlPadding}"/>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Name="CBEDbox" Grid.Column="4" Template="{StaticResource gbox}" Header="CBED" Width="140"  Visibility="Visible">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
 
                     <Grid Grid.Row="0" HorizontalAlignment="Center">
@@ -356,13 +354,13 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                    
-                            <Label Content="X:  "  ToolTip="x position"
-                                   Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txtCBEDx" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                                     Grid.Row="0" Grid.Column="1" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+
+                        <Label Content="X:  "  ToolTip="x position"
+                                       Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txtCBEDx" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                         Grid.Row="0" Grid.Column="1" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
                     </Grid>
-                
+
                     <Grid Grid.Row="1" HorizontalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -371,144 +369,146 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                    
+
                         <Label Content="Y:  "  ToolTip="y position"
-                               Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txtCBEDy" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                                 Grid.Row="1" Grid.Column="1" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-                    
+                                   Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txtCBEDy" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                     Grid.Row="1" Grid.Column="1" m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+
                     </Grid>
 
-                <Grid Grid.Row="2" HorizontalAlignment="Center">
+                    <Grid Grid.Row="2" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox x:Name="CBED_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
+                                  Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CBED_TDStoggled" Unchecked="CBED_TDStoggled"/>
+                        <TextBox Name="txtCBEDruns" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Number of frozen phonon calculatfions" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                 Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="45" Padding="{StaticResource ControlPadding}"/>
+                    </Grid>
+
+                </Grid>
+
+            </GroupBox>
+
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="5" Header="Simulation">
+                <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <CheckBox x:Name="CBED_ToggleTDS" Content="TDS:  " ToolTip="Number of frozen phonon calculations"
-                              Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="CBED_TDStoggled" Unchecked="CBED_TDStoggled"/>
-                    <TextBox Name="txtCBEDruns" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Number of frozen phonon calculatfions" m:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="45" Padding="{StaticResource ControlPadding}"/>
+
+                    <Button x:Name="SimulateEWButton" Content="Simulate EW"
+                            Grid.Row="0" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SimulateExitWave" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                    <Button x:Name="CancelButton" Content="Cancel" IsEnabled="False"
+                            Grid.Row="1" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="Cancel_Click"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
                 </Grid>
-                
-            </Grid>
-            
-        </GroupBox>
+            </GroupBox>
 
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="7" Header="Simulation" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <Button x:Name="SimulateEWButton" Content="Simulate EW"
-                        Grid.Row="0" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SimulateExitWave" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-                <Button x:Name="CancelButton" Content="Cancel" IsEnabled="False"
-                        Grid.Row="1" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="Cancel_Click"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
-            </Grid>
-        </GroupBox>
-
-        <GroupBox Template="{StaticResource gbox}" Grid.Column="8" Header="Options" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" >
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Row="0" HorizontalAlignment="Center">
+            <GroupBox Template="{StaticResource gbox}" Grid.Column="6" Header="Options" >
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="multiSTEM:"  ToolTip="concurrent STEM pixels"
-                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txtSTEMmulti" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="number" m:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+
+                    <Grid Grid.Row="0" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="multiSTEM:"  ToolTip="concurrent STEM pixels"
+                               Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txtSTEMmulti" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="number" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                 Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Slice Thickness:"  ToolTip="y position"
+                               Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txtSliceThickness" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                 Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="2" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Full3D Integrals:"  ToolTip="y position"
+                               Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
+                        <TextBox x:Name="txt3DIntegrals" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
+                                         Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
+                    </Grid>
                 </Grid>
+            </GroupBox>
 
-                <Grid Grid.Row="1" HorizontalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Slice Thickness:"  ToolTip="y position"
-                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txtSliceThickness" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
-                </Grid>
-                
-            <Grid Grid.Row="2" HorizontalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Full3D Integrals:"  ToolTip="y position"
-                           Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                    <TextBox x:Name="txt3DIntegrals" Text="{Binding Path = sVal, Mode = TwoWay}" ToolTip="Angstroms" m:TextBoxBehavior.SelectAllOnFocus="True"
-                                     Grid.Row="1" Grid.Column="0" m:MaskedTextBox.Mask="^([\+]?[0-9]*)*$"  HorizontalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="Wrap"  Width="50" Padding="{StaticResource ControlPadding}"/>
-            </Grid>
-           </Grid>
-        </GroupBox>
+            <GroupBox Grid.Column="7" Template="{StaticResource gbox}" Header=""/>
+        </Grid>
 
-        <GroupBox Grid.Column="9" Template="{StaticResource gbox}" Header="" Grid.RowSpan="2" />
-
-        <!--  Huge columnspan as there is no all option -->
-        <Grid Grid.Row="2" Grid.ColumnSpan="1000" HorizontalAlignment="Stretch">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width=".5*"/>
                 <ColumnDefinition Width=".5*"/>
             </Grid.ColumnDefinitions>
+            
             <!-- Left Image Tab Control-->
-            <Grid Grid.Row="0" Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-                
-                <TabControl x:Name="LeftTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20,20,20,0" Grid.Row="0"/>
-                <Grid Grid.Row="1" Margin="20,5,20,60">
-                    <Border Background="{StaticResource PanelLight}">
-                        <DockPanel HorizontalAlignment="Stretch">
-                            <Label Name="LeftXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
-                            <Label Name="LeftXCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
-                            <Label Name="LeftYCoordLabel" Content="; Y = " HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
-                            <Label Name="LeftYCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
-                            <Button x:Name="SaveImageButton" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveLeftImage" IsEnabled="False" Padding="{StaticResource ControlPadding}"/>
-                        </DockPanel>
-                    </Border>
-                </Grid>
-        </Grid>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-            <!-- Right Image Tab Control-->
-            <Grid Grid.Row="0" Grid.Column="1">
+                <TabControl x:Name="LeftTab" Margin="20,20,20,0" Grid.Row="0"/>
+
+                <Grid Grid.Row="1" Margin="20,5,20,20">
+                        <Border Background="{StaticResource PanelLight}">
+                            <DockPanel HorizontalAlignment="Stretch">
+                                <Label Name="LeftXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
+                                <Label Name="LeftXCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
+                                <Label Name="LeftYCoordLabel" Content="; Y = " HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
+                                <Label Name="LeftYCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
+                            <Button x:Name="SaveImageButton" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveLeftImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                </Grid>
+                <!-- Right Image Tab Control-->
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TabControl Name="RightTab" Margin="20,20,20,0" Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-                <Grid Grid.Row="1" Grid.Column="1" Margin="20,5,20,60">
+                <Grid Grid.Row="1" Grid.Column="1" Margin="20,5,20,20">
                     <Border Background="{StaticResource PanelLight}">
                         <DockPanel HorizontalAlignment="Stretch">
                             <Label Name="RightXCoordLabel" Content="X = " HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
@@ -519,65 +519,66 @@
                                       Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="True">
                                 <TextBlock Text="Show Detectors" VerticalAlignment="Center" />
                             </CheckBox>
-                            <Button x:Name="SaveImageButton2" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveRightImage" IsEnabled="False" Padding="{StaticResource ControlPadding}"/>
+                            <Button x:Name="SaveImageButton2" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveRightImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
                         </DockPanel>
                     </Border>
                 </Grid>
             </Grid>
 
-            <StatusBar Name="StatBar" HorizontalAlignment="Stretch" Height="Auto" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{DynamicResource Accent}" HorizontalContentAlignment="Right">
-                <StatusBar.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="75"/>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="20"/>
-                            </Grid.ColumnDefinitions>
-                        </Grid>
-                    </ItemsPanelTemplate>
-                </StatusBar.ItemsPanel>
+        </Grid>
 
-                <StatusBarItem Grid.Column="0">
-                    <ComboBox Name="DeviceSelector" HorizontalContentAlignment="Left" Width="250" Height="{StaticResource ControlHeight}" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed" Padding="{StaticResource ControlPadding}"/>
-                </StatusBarItem>
-
-                <StatusBarItem Grid.Column="1">
-                    <TextBlock x:Name="MemUsageLabel" Text="0 MB" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
-                </StatusBarItem>
-
-                <StatusBarItem Grid.Column="2">
-                    <TextBlock x:Name="lblFileName" Text="no structure loaded" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
-                </StatusBarItem>
-
-                <StatusBarItem Grid.Column="3"/>
-
-                <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Right">
-                    <TextBlock x:Name="TimerMessage" Text="0 ms" HorizontalAlignment="Right" Foreground="{StaticResource TextColourLight}"/>
-                </StatusBarItem>
-
-                <StatusBarItem Grid.Column="5">
+        <StatusBar Name="StatBar" HorizontalAlignment="Stretch" Height="Auto" Grid.Row="2" VerticalAlignment="Bottom" Background="{DynamicResource Accent}" HorizontalContentAlignment="Right">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <metro:ProgressBar x:Name="pbrSlices" VerticalAlignment="Center" Grid.Row="0" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0" Foreground="{StaticResource ProgressFull}" Background="{StaticResource ProgressEmpty}"/>
-                        <metro:ProgressBar x:Name="pbrTotal" VerticalAlignment="Center" Grid.Row="2" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0" Foreground="{StaticResource ProgressFull}" Background="{StaticResource ProgressEmpty}"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
                     </Grid>
-                </StatusBarItem>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
 
-            </StatusBar>
-        </Grid>
-        <StackPanel HorizontalAlignment="Left" Height="100" Margin="-14,569,0,0" Grid.Row="2" VerticalAlignment="Top" Width="100"/>
+            <StatusBarItem Grid.Column="0">
+                <ComboBox Name="DeviceSelector" HorizontalContentAlignment="Left" Width="250" Height="{StaticResource ControlHeight}" DropDownOpened="DeviceSelector_DropDownOpened" DropDownClosed="DeviceSelector_DropDownClosed" Padding="{StaticResource ControlPadding}"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="1">
+                <TextBlock x:Name="MemUsageLabel" Text="0 MB" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="2">
+                <TextBlock x:Name="lblFileName" Text="no structure loaded" Width="Auto" HorizontalAlignment="Right" Margin="0,0,10,0" Foreground="{StaticResource TextColourLight}"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="3"/>
+
+            <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Right">
+                <TextBlock x:Name="TimerMessage" Text="0 ms" HorizontalAlignment="Right" Foreground="{StaticResource TextColourLight}"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <metro:ProgressBar x:Name="pbrSlices" VerticalAlignment="Center" Grid.Row="0" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0" Foreground="{StaticResource ProgressFull}" Background="{StaticResource ProgressEmpty}"/>
+                    <metro:ProgressBar x:Name="pbrTotal" VerticalAlignment="Center" Grid.Row="2" Value="0" Width="250" Height="15" Minimum="0" Maximum="100" Margin="0" Foreground="{StaticResource ProgressFull}" Background="{StaticResource ProgressEmpty}"/>
+                </Grid>
+            </StatusBarItem>
+
+        </StatusBar>
+        
     </Grid>
 
     <metro:Window.Effect>

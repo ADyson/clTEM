@@ -7,13 +7,13 @@
     <Application.Resources>
          
     	<ResourceDictionary>
-    		<ResourceDictionary.MergedDictionaries>
-    			<ResourceDictionary Source="../Utils/CustomControls.xaml"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Utils/CustomControls.xaml"/>
                 <ResourceDictionary Source="/Elysium;component/Themes/Generic.xaml"/>
                 <ResourceDictionary Source="/Framework.UI;component/Themes/Generic.xaml"/>
-    		</ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary.MergedDictionaries>
 
-             <!--Dark-->
+            <!--Dark-->
             <metro:Theme x:Key="ThemeCol">Dark</metro:Theme>
 
             <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
@@ -81,6 +81,8 @@
             <System:Double x:Key="ControlHeight">25</System:Double>
             <Thickness x:Key="ControlPadding">3,0</Thickness>
             <Thickness x:Key="ControlMargins">2.5</Thickness>
+
+            <Thickness x:Key="BorderThickness">0</Thickness>
 
         </ResourceDictionary>
 
