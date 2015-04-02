@@ -16,11 +16,11 @@
             <!--Dark-->
             <metro:Theme x:Key="ThemeCol">Dark</metro:Theme>
 
-            <SolidColorBrush x:Key="Accent" Color="#FF339933"/>
+            <SolidColorBrush x:Key="Accent" Color="#FF4d8712"/>
             <SolidColorBrush x:Key="WorkingCol" Color="#FF374737"/>
             <SolidColorBrush x:Key="ErrorCol" Color="#FFcc3300"/>
 
-            <SolidColorBrush x:Key="AccentOrig" Color="#FF339933"/>
+            <SolidColorBrush x:Key="AccentOrig" Color="#FF4d8712"/>
             <SolidColorBrush x:Key="WorkingColOrig" Color="#FF374737"/>
             <SolidColorBrush x:Key="ErrorColOrig" Color="#FFcc3300"/>
 
