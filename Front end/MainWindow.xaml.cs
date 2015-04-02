@@ -59,81 +59,15 @@ namespace SimulationGUI
         /// </summary>
         readonly DisplayTab _diffDisplay = new DisplayTab("Diffraction");
 
-        // parameters
 
-        /// <summary>
-        /// List of detectors.
-        /// User changeable version.
-        /// </summary>
-        public List<DetectorItem> Detectors = new List<DetectorItem>();
+        private SimulationSettings Settings;
 
-        /// <summary>
-        /// Describes the region that STEM simulations will cover.
-        /// User changeable version.
-        /// </summary>
-        public STEMArea STEMRegion = new STEMArea { StartX = 0, EndX = 1, StartY = 0, EndY = 1, xPixels = 1, yPixels = 1 };
-
-        /// <summary>
-        /// Stores microscope parameters
-        /// </summary>
-        private readonly Microscope _microscopeParams;
-
-        private readonly fParam _dose;
-
-        private readonly fParam _fdThickness;
-
-        private readonly iParam _fdIntegrals;
-
-        private readonly iParam _runsSTEM;
-
-        private readonly iParam _multiSTEM;
-
-        private readonly fParam _pxCBED;
-
-        private readonly fParam _pyCBED;
-
-        private readonly iParam _runsCBED;
-
-        private float _imageVoltage;
-
-        // Locking copies of editable parameters
-
-        /// <summary>
-        /// List of detectors.
-        /// Locked from changes mid simulation.
-        /// </summary>
-        List<DetectorItem> _lockedDetectors = new List<DetectorItem>();
-
-        /// <summary>
-        /// Describes the region that STEM simulations will cover.
-        /// Locked from changes mid simulation.
-        /// </summary>
-        STEMArea _lockedSTEMRegion;
-
-        private SimArea _lockedSimRegion;
-
-        int _lockedResolution;
-
-        float _lockedPixelScale;
-
-        float _lockedWavelength;
-
-        float _lockedVoltage;
+        private SimulationSettings _lockedSettings;
 
         bool IsResolutionSet = false;
         bool HaveStructure = false;
-        bool doTDS_STEM = false;
-        bool doTDS_CBED = false;
-        bool doFull3D = true;
-        bool doFD = false;
         bool DetectorVis = false;
         bool HaveMaxMrad = false;
-
-        bool select_TEM = false;
-        bool select_STEM = false;
-        bool select_CBED = false;
-
-        int _resolution;
 
         /// <summary>
         /// Cancel event to halt calculation.
@@ -148,28 +82,19 @@ namespace SimulationGUI
         // TaskFactory stuff
         private CancellationTokenSource cancellationTokenSource;
 
-        public SimArea SimRegion = new SimArea { StartX = 0, EndX = 10, StartY = 0, EndY = 10};
-
-        bool userSIMarea;
-        bool userSTEMarea;
-
-        float pixelScale;
-        float wavelength;
-
         /// <summary>
         /// Class constructor.
         /// </summary>
         public MainWindow()
         {
+            // has to be created before gui is created to avoid errors
+            Settings = new SimulationSettings();
+
             // Initialise GPU
             InitializeComponent();
 
             // This was to supress some warnings, might not be needed
             PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
-
-            
-
-            
 
             //add event handlers here so they aren't called when creating controls
             txtCBEDx.TextChanged += CheckTboxValid;
@@ -207,42 +132,8 @@ namespace SimulationGUI
             DeviceSelector.SelectedIndex = -1;
             DeviceSelector.SelectedIndex = -1;
 
-            // Set default microscope values
-            _microscopeParams = new Microscope(this);
-            _microscopeParams.SetDefaults();
-
-            // set up other parameters to update with textboxes
-            _dose = new fParam();
-            txtDose.DataContext = _dose;
-            _dose.val = 10000;
-
-            _fdThickness = new fParam();
-            txtSliceThickness.DataContext = _fdThickness;
-            _fdThickness.val = 1;
-
-            _fdIntegrals = new iParam();
-            txt3DIntegrals.DataContext = _fdIntegrals;
-            _fdIntegrals.val = 20;
-
-            _runsSTEM = new iParam();
-            txtSTEMruns.DataContext = _runsSTEM;
-            _runsSTEM.val = 10;
-
-            _multiSTEM = new iParam();
-            txtSTEMmulti.DataContext = _multiSTEM;
-            _multiSTEM.val = 10;
-
-            _pxCBED = new fParam();
-            txtCBEDx.DataContext = _pxCBED;
-            _pxCBED.val = 0;
-
-            _pyCBED = new fParam();
-            txtCBEDy.DataContext = _pyCBED;
-            _pyCBED.val = 0;
-
-            _runsCBED = new iParam();
-            txtCBEDruns.DataContext = _runsCBED;
-            _runsCBED.val = 10;
+            // Link settings class to dialogs
+            Settings.UpdateWindow(this);
 
             // Set Default Binning and CCD selected indices
 			BinningCombo.SelectedIndex = 0;
@@ -292,6 +183,8 @@ namespace SimulationGUI
                 lblFileName.Text = System.IO.Path.GetFileName(fName);
                 lblFileName.ToolTip = fName;
 
+                Settings.FileName = fName;
+
                 // Pass filename through to unmanaged where atoms can be imported inside structure class
                 _mCl.importStructure(openDialog.FileName);
                 _mCl.uploadParameterisation();
@@ -317,16 +210,16 @@ namespace SimulationGUI
                 AtomNoLabel.Content = Len.ToString();
 
                 // Change area parameters only if they aren't user set
-                if (!userSTEMarea)
+                if (!Settings.STEM.UserSetArea)
                 {
-                    STEMRegion.EndX = Convert.ToSingle((MaxX - MinX).ToString("f2"));
-					STEMRegion.EndY = Convert.ToSingle((MaxY - MinY).ToString("f2"));
+                    Settings.STEM.ScanArea.EndX = Convert.ToSingle((MaxX - MinX).ToString("f2"));
+                    Settings.STEM.ScanArea.EndY = Convert.ToSingle((MaxY - MinY).ToString("f2"));
                 }
 
-                if (!userSIMarea)
+                if (!Settings.UserSetArea)
                 {
-                    SimRegion.EndX = Convert.ToSingle((MaxX - MinX).ToString("f2"));
-                    SimRegion.EndY = Convert.ToSingle((MaxY - MinY).ToString("f2"));
+                    Settings.SimArea.EndX = Convert.ToSingle((MaxX - MinX).ToString("f2"));
+                    Settings.SimArea.EndY = Convert.ToSingle((MaxY - MinY).ToString("f2"));
                 }
 
                 // Try and update the pixelscale
@@ -365,11 +258,6 @@ namespace SimulationGUI
         /// <param name="e"></param>
         private void SimulateExitWave(object sender, RoutedEventArgs e)
         {
-            // Find which radio button is checked
-            select_TEM = TEMRadioButton.IsChecked == true;
-            select_STEM = STEMRadioButton.IsChecked == true;
-            select_CBED = CBEDRadioButton.IsChecked == true;
-
 			if (!TestSimulationPrerequisites())
 				return;
 
@@ -379,30 +267,16 @@ namespace SimulationGUI
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
-            _lockedResolution = _resolution;
-            _lockedPixelScale = pixelScale;
-            _lockedWavelength = wavelength;
-            _lockedVoltage = _microscopeParams.kv.val;
-            _lockedSimRegion = SimRegion;
-            _lockedDetectors = Detectors; // will do even if not simulating STEM
-            _lockedSTEMRegion = STEMRegion;
+            _lockedSettings = Settings;
 
             // Update the display tab sizes so we don't need to worry about this later
-            _ewAmplitudeDisplay.SetSize(_lockedResolution);
-            _ewPhaseDisplay.SetSize(_lockedResolution);
-            _ctemDisplay.SetSize(_lockedResolution);
-            _diffDisplay.SetSize(_lockedResolution);
+            _ewAmplitudeDisplay.SetSize(_lockedSettings.Resolution);
+            _ewPhaseDisplay.SetSize(_lockedSettings.Resolution);
+            _ctemDisplay.SetSize(_lockedSettings.Resolution);
+            _diffDisplay.SetSize(_lockedSettings.Resolution);
 
-            foreach(var det in _lockedDetectors)
-                det.SetSize(_lockedSTEMRegion.xPixels, _lockedSTEMRegion.yPixels);
-
-            // Get number of TDS runs set
-            var TDSruns = 1;
-
-            if (select_STEM)
-                TDSruns = _runsSTEM.val;
-            else if (select_CBED)
-                TDSruns = _runsCBED.val;
+            foreach(var det in _lockedSettings.STEM.Detectors)
+                det.SetSize(_lockedSettings.STEM.ScanArea.xPixels, _lockedSettings.STEM.ScanArea.yPixels);
 
             // Create new instances to use to cancel the simulation and to run tasks.
             cancellationTokenSource = new CancellationTokenSource();
@@ -418,7 +292,7 @@ namespace SimulationGUI
                 var timer = new Stopwatch();
 
                 // Do cimulation part
-				DoSimulationMethod(select_TEM, select_STEM, select_CBED, TDSruns, ref progressReporter, ref timer, ref cancellationToken);
+                DoSimulationMethod(ref progressReporter, ref timer, ref cancellationToken);
 
             }, cancellationToken);
 
@@ -430,37 +304,44 @@ namespace SimulationGUI
                 pbrSlices.Value = 100;
                 pbrTotal.Value = 100;
 
-                if (select_STEM)
+                if (_lockedSettings.SimMode == 2)
                 {
-                    if (_lockedDetectors.Count == 0)
+                    _lockedSettings.SimMode = 2;
+                    if (_lockedSettings.STEM.Detectors.Count == 0)
                     {
                         SimulateEWButton.IsEnabled = true;
                         return;
                     }
 
-                    foreach (var i in _lockedDetectors)
+                    foreach (var i in _lockedSettings.STEM.Detectors)
                     {
                         UpdateSTEMImage(i);
                     }
 
                     // Just select the first tab for convenience
-                    _lockedDetectors[0].Tab.IsSelected = true;
+                    _lockedSettings.STEM.Detectors[0].Tab.IsSelected = true;
                     SaveImageButton.IsEnabled = true;
                 }
-                else if (select_CBED)
+                else if (_lockedSettings.SimMode == 1)
                 {
+                    Settings.SimMode = 1;
                     UpdateDiffractionImage();
                     SaveImageButton2.IsEnabled = true;
 
                 }
-                else
+                else if (_lockedSettings.SimMode == 0)
                 {
+                    Settings.SimMode = 0;
 					UpdateEWImages();
 					_ewAmplitudeDisplay.Tab.IsSelected = true;
 					UpdateDiffractionImage();
                     SaveImageButton.IsEnabled = true;
                     SaveImageButton2.IsEnabled = true;
                     SimulateImageButton.IsEnabled = true;
+                }
+                else
+                {
+                    return;
                 }
 
                 UpdateWorkingColour(false);
@@ -472,53 +353,49 @@ namespace SimulationGUI
         /// <summary>
         /// Chooses the correct simulation to run (TEM, STEM, CBED) depending on the radio dial checked.
         /// </summary>
-        /// <param name="selectTEM"> true if TEM is selected.</param>
-        /// <param name="selectSTEM"> true if STEM is selected.</param>
-        /// <param name="selectCBED"> true if CBED is selected.</param>
-        /// <param name="TDSruns"> Number of TDS runs to perform.</param>
         /// <param name="progressReporter"></param>
         /// <param name="timer"></param>
         /// <param name="ct"></param>
-		private void DoSimulationMethod(bool selectTEM, bool selectSTEM, bool selectCBED, int TDSruns, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+		private void DoSimulationMethod(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
             // Conversion to units
-            var cA1t = _microscopeParams.a1t.val / Convert.ToSingle((180/Math.PI));
-            var cA2t = _microscopeParams.a2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB2t = _microscopeParams.b2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB = _microscopeParams.b.val / 1000;
-            var cD = _microscopeParams.d.val / 10;
+            var cA1t = Settings.Microscope.a1t.val / Convert.ToSingle((180/Math.PI));
+            var cA2t = Settings.Microscope.a2t.val / Convert.ToSingle((180 / Math.PI));
+            var cB2t = Settings.Microscope.b2t.val / Convert.ToSingle((180 / Math.PI));
+            var cB = Settings.Microscope.b.val / 1000;
+            var cD = Settings.Microscope.d.val / 10;
             // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(_microscopeParams.df.val, _microscopeParams.a1m.val, cA1t, _microscopeParams.kv.val, _microscopeParams.cs.val, cB,
-                cD, _microscopeParams.ap.val, _microscopeParams.a2m.val, cA2t, _microscopeParams.b2m.val, cB2t);
+            _mCl.setCTEMParams(Settings.Microscope.df.val, Settings.Microscope.a1m.val, cA1t, Settings.Microscope.kv.val, Settings.Microscope.cs.val, cB,
+                cD, Settings.Microscope.ap.val, Settings.Microscope.a2m.val, cA2t, Settings.Microscope.b2m.val, cB2t);
 
-            _mCl.setSTEMParams(_microscopeParams.df.val, _microscopeParams.a1m.val, cA1t, _microscopeParams.kv.val, _microscopeParams.cs.val, cB,
-                cD, _microscopeParams.ap.val);
+            _mCl.setSTEMParams(Settings.Microscope.df.val, Settings.Microscope.a1m.val, cA1t, Settings.Microscope.kv.val, Settings.Microscope.cs.val, cB,
+                cD, Settings.Microscope.ap.val);
 
             // Add Pixelscale to image tabs and diffraction then run simulation
-			if (selectTEM)
+            if (_lockedSettings.SimMode == 0)
 			{
-                _ewAmplitudeDisplay.PixelScaleX = pixelScale;
-                _diffDisplay.PixelScaleX = pixelScale;
+                _ewAmplitudeDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
 
-                _ewAmplitudeDisplay.PixelScaleY = pixelScale;
-                _diffDisplay.PixelScaleY = pixelScale;
+                _ewAmplitudeDisplay.PixelScaleY = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
 
-				_ewAmplitudeDisplay.xStartPosition = SimRegion.StartX;
-				_ewAmplitudeDisplay.yStartPosition = SimRegion.StartY;
+				_ewAmplitudeDisplay.xStartPosition = Settings.SimArea.StartX;
+                _ewAmplitudeDisplay.yStartPosition = Settings.SimArea.StartY;
 
 				SimulateTEM(ref progressReporter,ref timer, ref ct);
 			}
-			else if (selectSTEM)
+            else if (_lockedSettings.SimMode == 2)
 			{
-                _diffDisplay.PixelScaleX = pixelScale;
-                _diffDisplay.PixelScaleY = pixelScale;
-				SimulateSTEM(TDSruns, ref progressReporter, ref timer, ref ct);
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
+				SimulateSTEM(ref progressReporter, ref timer, ref ct);
 			}
-			else if (selectCBED)
+            else if (_lockedSettings.SimMode == 3)
 			{
-                _diffDisplay.PixelScaleX = pixelScale;
-                _diffDisplay.PixelScaleY = pixelScale;
-				SimulateCBED(TDSruns, ref progressReporter,ref timer, ref ct);
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
+				SimulateCBED(ref progressReporter,ref timer, ref ct);
 			}
 		}
 
@@ -531,17 +408,18 @@ namespace SimulationGUI
 		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
         {
             // So we have the right voltage should we try to simulate an image later.
-            _imageVoltage = _lockedVoltage;
+            _lockedSettings.ImageVoltage = _lockedSettings.Microscope.kv.val;
 
             // Initialise
-		    _mCl.initialiseCTEMSimulation(_lockedResolution, SimRegion.StartX, SimRegion.StartY, SimRegion.EndX, SimRegion.EndY, doFull3D, doFD, _fdThickness.val, _fdIntegrals.val);
+            _mCl.initialiseCTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val);
 
 			// Reset atoms incase TDS has been used previously
 			_mCl.sortStructure(false);
 
 			// Use Background worker to progress through each step
 			var numberOfSlices = 0;
-			_mCl.getNumberSlices(ref numberOfSlices, doFD);
+			_mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
 
 			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
 			for (var slice = 1; slice <= numberOfSlices; slice++)
@@ -570,35 +448,35 @@ namespace SimulationGUI
         /// <summary>
         /// Simulates CBED patterns
         /// </summary>
-        /// <param name="numTDS">Number of TDS runs to perform</param>
         /// <param name="progressReporter"></param>
         /// <param name="timer"></param>
         /// <param name="ct"></param>
-		private void SimulateCBED(int numTDS, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+		private void SimulateCBED(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
             // Initialise probe simulation
-            _mCl.initialiseSTEMSimulation(_lockedResolution, SimRegion.StartX, SimRegion.StartY, SimRegion.EndX, SimRegion.EndY, doFull3D, doFD, _fdThickness.val, _fdIntegrals.val, 1);
+            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val, 1);
 
             // Correct probe position for when the simulation region has been changed
-            var posx = (_pxCBED.val - SimRegion.StartX) / pixelScale;
-            var posy = (_pyCBED.val - SimRegion.StartY) / pixelScale;
+            var posx = (_lockedSettings.CBED.x.val - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale;
+            var posy = (_lockedSettings.CBED.y.val - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale;
 
 			// Get number of steps in the multislice
 			var numberOfSlices = 0;
-            _mCl.getNumberSlices(ref numberOfSlices, doFD);
+            _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
 
             // Initialise TDS runs
 			var runs = 1;
-			if (doTDS_CBED)
+            if (_lockedSettings.CBED.DoTDS)
 			{
-				runs = numTDS;
+				runs = _lockedSettings.CBED.TDSRuns.val;
 			}
 
             // Loops TDS runs
 			for (var j = 0; j < runs; j++)
 			{
                 // Shuffle the structure for frozen phonon
-				_mCl.sortStructure(doTDS_CBED);
+                _mCl.sortStructure(Settings.CBED.DoTDS);
                 // Initialise probe
                 _mCl.initialiseSTEMWaveFunction(posx, posy, 1);
 
@@ -637,29 +515,31 @@ namespace SimulationGUI
         /// <summary>
         /// Performs the STEM simulations
         /// </summary>
-        /// <param name="numTDS"> Number of TDS runs to perform.</param>
         /// <param name="progressReporter"></param>
         /// <param name="timer"></param>
         /// <param name="ct"></param>
-		private void SimulateSTEM(int numTDS, ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+		private void SimulateSTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
 		{
-            // Lock the detectors so user can't change them mid simulation
-            // might need some of these later so they are class members
-            var conPix = _multiSTEM.val;
+            // convenience variable
+            var conPix = _lockedSettings.STEM.ConcurrentPixels.val;
+
+            // Get steps we need to move the probe in
+            var xInterval = _lockedSettings.STEM.ScanArea.getxInterval;
+            var yInterval = _lockedSettings.STEM.ScanArea.getyInterval;
 
             // Updates pixel scales for display?
-			foreach (var det in _lockedDetectors)
+			foreach (var det in _lockedSettings.STEM.Detectors)
 			{
-				det.PixelScaleX = _lockedSTEMRegion.getxInterval;
-				det.PixelScaleY = _lockedSTEMRegion.getyInterval;
+                det.PixelScaleX = xInterval;
+                det.PixelScaleY = yInterval;
 				det.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
 			}
 
             // calculate the number of STEM pixels
-			int numPix = _lockedSTEMRegion.xPixels * _lockedSTEMRegion.yPixels;
+            int numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
 
             // Initialise detector images
-		    foreach (DetectorItem det in _lockedDetectors)
+		    foreach (DetectorItem det in _lockedSettings.STEM.Detectors)
 			{
 				det.ImageData = new float[numPix];
 				det.Min = float.MaxValue;
@@ -668,22 +548,19 @@ namespace SimulationGUI
 
             // Get number of TDS runs needed
 			var numRuns = 1;
-            if (doTDS_STEM)
-				numRuns = numTDS;
+            if (_lockedSettings.STEM.DoTDS)
+                numRuns = _lockedSettings.STEM.TDSRuns.val;
 
             // Initialise probe
-            _mCl.initialiseSTEMSimulation(_lockedResolution, SimRegion.StartX, SimRegion.StartY, SimRegion.EndX, SimRegion.EndY, doFull3D, doFD, _fdThickness.val, _fdIntegrals.val, conPix);
-
-            // Get steps we need to move the probe in
-			var xInterval = _lockedSTEMRegion.getxInterval;
-			var yInterval = _lockedSTEMRegion.getyInterval;
+            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val, conPix);
 
             // Create array of all the pixels coords
 			var pixels = new List<Tuple<Int32, Int32>>();
 
-			for (var yPx = 0; yPx < _lockedSTEMRegion.yPixels; yPx++)
+            for (var yPx = 0; yPx < _lockedSettings.STEM.ScanArea.yPixels; yPx++)
 			{
-				for (var xPx = 0; xPx < _lockedSTEMRegion.xPixels; xPx++)
+                for (var xPx = 0; xPx < _lockedSettings.STEM.ScanArea.xPixels; xPx++)
 				{
 					pixels.Add(new Tuple<Int32,Int32>(xPx, yPx));
 				}
@@ -702,7 +579,7 @@ namespace SimulationGUI
                 while (nPx < numPix)
                 {
                     // sort the structure if needed
-                    _mCl.sortStructure(doTDS_STEM); // is there optimisation possible here?
+                    _mCl.sortStructure(Settings.STEM.DoTDS); // is there optimisation possible here?
 
                     // make a copy of current pixel as we are about to modify it
                     var currentPx = nPx;
@@ -720,13 +597,13 @@ namespace SimulationGUI
                     // Make probles for all concurrent probe positions
                     for (var i = 1; i <= conPix; i++)
                     {
-                        _mCl.initialiseSTEMWaveFunction(((_lockedSTEMRegion.StartX + pixels[(currentPx + i - 1)].Item1 * xInterval - SimRegion.StartX) / pixelScale),
-                            ((_lockedSTEMRegion.StartY + pixels[(currentPx + i - 1)].Item2 * yInterval - SimRegion.StartY) / pixelScale), i);
+                        _mCl.initialiseSTEMWaveFunction(((_lockedSettings.STEM.ScanArea.StartX + pixels[(currentPx + i - 1)].Item1 * xInterval - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale),
+                            ((_lockedSettings.STEM.ScanArea.StartY + pixels[(currentPx + i - 1)].Item2 * yInterval - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale), i);
                     }
 
                     // Get number of slices in our multislice
                     int numberOfSlices = 0;
-                    _mCl.getNumberSlices(ref numberOfSlices, doFD);
+                    _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
 
                     // Loop through slices and simulate as we go
                     for (var i = 1; i <= numberOfSlices; i++)
@@ -746,7 +623,7 @@ namespace SimulationGUI
                         progressReporter.ReportProgress(val =>
                         {
                             CancelButton.IsEnabled = true;
-                            UpdateStatus(numberOfSlices, numTDS, numPix, i, j, nPx, simTime, memUsage);
+                            UpdateStatus(numberOfSlices, _lockedSettings.STEM.TDSRuns.val, numPix, i, j, nPx, simTime, memUsage);
                         }, i);
                     }
 
@@ -760,12 +637,12 @@ namespace SimulationGUI
                         _mCl.getSTEMDiff(p);
 
                         // Loop through each detectors and get each STEM pixel by summing up diffraction over the detector area
-                        foreach (DetectorItem det in _lockedDetectors)
+                        foreach (DetectorItem det in _lockedSettings.STEM.Detectors)
                         {
                             var pixelVal = _mCl.getSTEMPixel(det.Inner, det.Outer, det.xCentre, det.yCentre, p);
                             // create new variable to avoid writing this out a lot
-                            var newVal = det.ImageData[_lockedSTEMRegion.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] + pixelVal;
-                            det.ImageData[_lockedSTEMRegion.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] = newVal;
+                            var newVal = det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] + pixelVal;
+                            det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] = newVal;
 
                             // update maximum and minimum as we go
                             if (newVal < det.Min)
@@ -786,13 +663,13 @@ namespace SimulationGUI
         private void UpdateEWImages()
         {
             // Update amplitude
-            _mCl.getEWImage(_ewAmplitudeDisplay.ImageData, _lockedResolution);
+            _mCl.getEWImage(_ewAmplitudeDisplay.ImageData, _lockedSettings.Resolution);
             _ewAmplitudeDisplay.Max = _mCl.getEWMax();
             _ewAmplitudeDisplay.Min = _mCl.getEWMin();
             UpdateTabImage(_ewAmplitudeDisplay, x => x);
 
             // Update phase
-            _mCl.getEWImage2(_ewPhaseDisplay.ImageData, _lockedResolution);
+            _mCl.getEWImage2(_ewPhaseDisplay.ImageData, _lockedSettings.Resolution);
             _ewPhaseDisplay.Max = _mCl.getEWMax2();
             _ewPhaseDisplay.Min = _mCl.getEWMin2();
             UpdateTabImage(_ewPhaseDisplay, x => x);
@@ -801,9 +678,9 @@ namespace SimulationGUI
         private void UpdateCTEMImage(float dpp, int binning, int CCD)
         {
             if (CCD != 0)
-                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedResolution, dpp, binning, CCD);
+                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution, dpp, binning, CCD);
             else
-                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedResolution);
+                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution);
             _ctemDisplay.Max = _mCl.getCTEMMax();
             _ctemDisplay.Min = _mCl.getCTEMMin();
             UpdateTabImage(_ctemDisplay, x => x);
@@ -811,7 +688,7 @@ namespace SimulationGUI
 
         private void UpdateDiffractionImage()
         {
-            _mCl.getDiffImage(_diffDisplay.ImageData, _lockedResolution);
+            _mCl.getDiffImage(_diffDisplay.ImageData, _lockedSettings.Resolution);
             _diffDisplay.Max = _mCl.getDiffMax();
             _diffDisplay.Min = _mCl.getDiffMin();
             UpdateTabImage(_diffDisplay, x => Convert.ToSingle(Math.Log(Convert.ToDouble(x + 1.0f))));
@@ -916,7 +793,7 @@ namespace SimulationGUI
 		private void SaveLeftImage(object sender, RoutedEventArgs e)
 		{
 			var tabs = new List<DisplayTab> {_ctemDisplay,_ewAmplitudeDisplay,_ewPhaseDisplay};
-		    tabs.AddRange(_lockedDetectors);
+            tabs.AddRange(_lockedSettings.STEM.Detectors);
 
             SaveImageFromTab(tabs);
 		}
@@ -1019,17 +896,17 @@ namespace SimulationGUI
             //
 
             // Conversion to units
-            var cA1t = _microscopeParams.a1t.val / Convert.ToSingle((180 / Math.PI));
-            var cA2t = _microscopeParams.a2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB2t = _microscopeParams.b2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB = _microscopeParams.b.val / 1000;
-            var cD = _microscopeParams.d.val / 10;
+            var cA1t = _lockedSettings.Microscope.a1t.val / Convert.ToSingle((180 / Math.PI));
+            var cA2t = _lockedSettings.Microscope.a2t.val / Convert.ToSingle((180 / Math.PI));
+            var cB2t = _lockedSettings.Microscope.b2t.val / Convert.ToSingle((180 / Math.PI));
+            var cB = _lockedSettings.Microscope.b.val / 1000;
+            var cD = _lockedSettings.Microscope.d.val / 10;
             // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(_microscopeParams.df.val, _microscopeParams.a1m.val, cA1t, _microscopeParams.kv.val, _microscopeParams.cs.val, cB,
-                cD, _microscopeParams.ap.val, _microscopeParams.a2m.val, cA2t, _microscopeParams.b2m.val, cB2t);
+            _mCl.setCTEMParams(_lockedSettings.Microscope.df.val, _lockedSettings.Microscope.a1m.val, cA1t, _lockedSettings.Microscope.kv.val, _lockedSettings.Microscope.cs.val, cB,
+                cD, _lockedSettings.Microscope.ap.val, _lockedSettings.Microscope.a2m.val, cA2t, _lockedSettings.Microscope.b2m.val, cB2t);
 
 			// Calculate Dose Per Pixel
-			var dpp = _dose.val * (_lockedPixelScale * _lockedPixelScale);
+            var dpp = _lockedSettings.TEM.Dose.val * (_lockedSettings.PixelScale * _lockedSettings.PixelScale);
 			// Get CCD and Binning
 
 			var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
@@ -1051,16 +928,22 @@ namespace SimulationGUI
 
         private void SaveSimulationSettings(object sender, RoutedEventArgs e)
         {
+            if (_lockedSettings.SimArea == null)
+                return; // might want other checks? this one is definitely used after a simulation?
+
             var general = SettingsStrings.UniversalSettings;
-            general = general.Replace("{{filename}}", lblFileName.Text);
-            general = general.Replace("{{simareaxstart}}", _lockedSimRegion.StartX.ToString());
-            general = general.Replace("{{simareaxend}}", _lockedSimRegion.EndX.ToString());
-            general = general.Replace("{{simareaystart}}", _lockedSimRegion.StartY.ToString());
-            general = general.Replace("{{simareayend}}", _lockedSimRegion.EndY.ToString());
-            general = general.Replace("{{resolution}}", _lockedResolution.ToString());
-            //general = general.Replace("{{mode}}", );
-            //full3d
-            //
+            general = general.Replace("{{filename}}", _lockedSettings.FileName); // save this beforehand somewhere and lock it?
+            general = general.Replace("{{simareaxstart}}", _lockedSettings.SimArea.StartX.ToString());
+            general = general.Replace("{{simareaxend}}", _lockedSettings.SimArea.EndX.ToString());
+            general = general.Replace("{{simareaystart}}", _lockedSettings.SimArea.StartY.ToString());
+            general = general.Replace("{{simareayend}}", _lockedSettings.SimArea.EndY.ToString());
+            general = general.Replace("{{resolution}}", _lockedSettings.Resolution.ToString());
+
+            var modeNames = new List<string> { "TEM", "CBED", "STEM" };
+            general = general.Replace("{{mode}}", modeNames[_lockedSettings.SimMode]);
+
+            general = general.Replace("{{full3d}}", _lockedSettings.IsFull3D.ToString());
+            general = general.Replace("{{fd}}", _lockedSettings.IsFiniteDiff.ToString());
             
 
             var saveDialog = new Microsoft.Win32.SaveFileDialog

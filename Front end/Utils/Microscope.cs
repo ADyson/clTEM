@@ -6,7 +6,7 @@ namespace SimulationGUI.Utils
     /// Holds the settings of the microscope
     /// Currently no error checking takes place here as it is assumed regexs will handle that
     /// </summary>
-    public class Microscope
+    public class MicroscopeParams
     {
         ///// <summary>
         ///// Defocus (Å)
@@ -72,7 +72,7 @@ namespace SimulationGUI.Utils
         /// Default constructor, sets the datacontext for textboxes on the microscope to this
         /// (so they auto update each other)
         /// </summary>
-        public Microscope(MainWindow app)
+        public MicroscopeParams(MainWindow app)
         {
             df = new fParam();
             cs = new fParam();

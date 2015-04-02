@@ -18,7 +18,7 @@
               DataContext="{Binding RelativeSource={RelativeSource Self}}"
               
               Icon="clTEM.ico"
-              Title="Multislice Simulation" Width="1222" Height="750" MinWidth="1222" MinHeight="750" HasDropShadow="True" SizeToContent="WidthAndHeight">
+              Title="Multislice Simulation" Width="1222" Height="750" MinWidth="1222" MinHeight="750" HasDropShadow="True">
 
     <Grid MinWidth="1222">
         <Grid.RowDefinitions>
@@ -135,7 +135,7 @@
 
                     <RadioButton x:Name="TEMRadioButton" Content="TEM"
                                  Grid.Row="0" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>
-                    <RadioButton x:Name="CBEDRadioButton" Content="CBED" 
+                    <RadioButton x:Name="CBEDRadioButton" Content="CBED"
                                  Grid.Row="1" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>
                     <RadioButton x:Name="STEMRadioButton" Content="STEM" 
                                  Grid.Row="2" VerticalAlignment="Center" Height="20" Width="Auto" Checked="SimTypeRadio_Checked" Margin="50,1,0,1" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}"/>

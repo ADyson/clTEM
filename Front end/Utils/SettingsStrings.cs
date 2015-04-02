@@ -9,7 +9,8 @@
 {{filename}}
 
 *** Simulation Area ***
-{{simarea}}
+x: {{simareaxstart}}, {{simareaxend}}
+y: {{simareaystart}}, {{simareayend}}
 
 *** Resolution ***
 {{resolution}}
@@ -19,8 +20,6 @@
 
 *** Full 3D ***
 {{full3d}}
-
-{{full3dopt}}
 
 *** Finite Difference ***
 {{fd}}

@@ -23,7 +23,7 @@ namespace SimulationGUI.Dialogs
 
         public event EventHandler<SimAreaArgs> SetAreaEvent;
 
-        public SimAreaDialog(SimArea area)
+        public SimAreaDialog(SimulationArea area)
         {
             InitializeComponent();
 
@@ -54,7 +54,7 @@ namespace SimulationGUI.Dialogs
             if (!(_goodXrange && _goodYrange))
                 return;
 
-            var temp = new SimArea { StartX = _startX.val, EndX = _endX.val, StartY = _startY.val, EndY = _endY.val };
+            var temp = new SimulationArea { StartX = _startX.val, EndX = _endX.val, StartY = _startY.val, EndY = _endY.val };
 
             if (SetAreaEvent != null) SetAreaEvent(this, new SimAreaArgs(temp));
 

@@ -33,13 +33,13 @@ namespace SimulationGUI
             if (Equals(tbox, txtCBEDx))
             {
                 float.TryParse(text, out fVal);
-                good = fVal >= SimRegion.StartX && fVal <= SimRegion.EndX;
+                good = fVal >= Settings.SimArea.StartX && fVal <= Settings.SimArea.EndX;
                 ErrorMessage.ToggleCode(30, good);
             }
             else if (Equals(tbox, txtCBEDy))
             {
                 float.TryParse(text, out fVal);
-                good = fVal >= SimRegion.StartY && fVal <= SimRegion.EndY;
+                good = fVal >= Settings.SimArea.StartY && fVal <= Settings.SimArea.EndY;
                 ErrorMessage.ToggleCode(30, good);
             }
             else if (Equals(tbox, txtCBEDruns))
@@ -114,9 +114,9 @@ namespace SimulationGUI
         {
             if (HaveStructure && IsResolutionSet)
             {
-                var BiggestSize = Math.Max(SimRegion.EndX - SimRegion.StartX, SimRegion.EndY - SimRegion.StartY);
-                pixelScale = BiggestSize / _resolution;
-                PixelScaleLabel.Content = pixelScale.ToString("f2") + " Å";
+                var BiggestSize = Math.Max(Settings.SimArea.EndX - Settings.SimArea.StartX, Settings.SimArea.EndY - Settings.SimArea.StartY);
+                Settings.PixelScale = BiggestSize / Settings.Resolution;
+                PixelScaleLabel.Content = Settings.PixelScale.ToString("f2") + " Å";
 
                 UpdateMaxMrad();
             }
@@ -130,23 +130,23 @@ namespace SimulationGUI
             if (!HaveStructure)
                 return;
 
-            var MinX = SimRegion.StartX;
-            var MinY = SimRegion.StartY;
+            var MinX = Settings.SimArea.StartX;
+            var MinY = Settings.SimArea.StartY;
 
-            var MaxX = SimRegion.EndX;
-            var MaxY = SimRegion.EndY;
+            var MaxX = Settings.SimArea.EndX;
+            var MaxY = Settings.SimArea.EndY;
 
             var BiggestSize = Math.Max(MaxX - MinX, MaxY - MinY);
             // Determine max mrads for reciprocal space, (need wavelength)...
-            var MaxFreq = 1 / (2 * BiggestSize / _resolution);
+            var MaxFreq = 1 / (2 * BiggestSize / Settings.Resolution);
 
-            if (_microscopeParams.kv.val != 0 && IsResolutionSet)
+            if (Settings.Microscope.kv.val != 0 && IsResolutionSet)
             {
                 const float echarge = 1.6e-19f;
-                wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * _microscopeParams.kv.val * 1000 *
-                    (2 * 9.11e-031 * 9e+016 + echarge * _microscopeParams.kv.val * 1000))) * 1e+010);
+                Settings.Wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * Settings.Microscope.kv.val * 1000 *
+                    (2 * 9.11e-031 * 9e+016 + echarge * Settings.Microscope.kv.val * 1000))) * 1e+010);
 
-                var mrads = (1000 * MaxFreq * wavelength) / 2; //divide by two to get mask limits
+                var mrads = (1000 * MaxFreq * Settings.Wavelength) / 2; //divide by two to get mask limits
 
                 MaxMradsLabel.Content = mrads.ToString("f2")+" mrad";
 
@@ -169,9 +169,12 @@ namespace SimulationGUI
                 txtMicroscopeB2t.IsEnabled = true;
                 txtMicroscopeD.IsEnabled = true;
                 txtMicroscopeB.IsEnabled = true;
+
                 TEMbox.Visibility = Visibility.Visible;
                 STEMbox.Visibility = Visibility.Hidden;
                 CBEDbox.Visibility = Visibility.Hidden;
+
+                Settings.SimMode = 0;
 
             }
             else if (STEMRadioButton.IsChecked == true)
@@ -186,6 +189,8 @@ namespace SimulationGUI
                 STEMbox.Visibility = Visibility.Visible;
                 TEMbox.Visibility = Visibility.Hidden;
                 CBEDbox.Visibility = Visibility.Hidden;
+
+                Settings.SimMode = 2;
             }
             else if (CBEDRadioButton.IsChecked == true)
             {
@@ -199,48 +204,50 @@ namespace SimulationGUI
                 STEMbox.Visibility = Visibility.Hidden;
                 TEMbox.Visibility = Visibility.Hidden;
                 CBEDbox.Visibility = Visibility.Visible;
+
+                Settings.SimMode = 1;
             }
         }
 
         private void STEM_TDStoggled(object sender, RoutedEventArgs e)
         {
             var chk = sender as CheckBox;
-            if (chk != null) doTDS_STEM = chk.IsChecked == true;
+            if (chk != null) Settings.STEM.DoTDS = chk.IsChecked == true;
         }
 
         private void CBED_TDStoggled(object sender, RoutedEventArgs e)
         {
             var chk = sender as CheckBox;
-            if (chk != null) doTDS_CBED = chk.IsChecked == true;
+            if (chk != null) Settings.CBED.DoTDS = chk.IsChecked == true;
         }
 
         private void Full3Dtoggled(object sender, RoutedEventArgs e)
         {
             var chk = sender as CheckBox;
-            if (chk != null) doFull3D = chk.IsChecked == true;
+            if (chk != null) Settings.IsFull3D = chk.IsChecked == true;
 
-            if (ToggleFD != null && doFull3D)
+            if (ToggleFD != null && Settings.IsFull3D)
             {
                 ToggleFD.IsChecked = false;
-                doFD = false;
+                Settings.IsFiniteDiff = false;
             }
         }
 
         private void FDtoggled(object sender, RoutedEventArgs e)
         {
             var chk = sender as CheckBox;
-            if (chk != null) doFD = chk.IsChecked == true;
+            if (chk != null) Settings.IsFiniteDiff = chk.IsChecked == true;
 
-            if (ToggleFull3D != null && doFD)
+            if (ToggleFull3D != null && Settings.IsFiniteDiff)
             {
                 ToggleFull3D.IsChecked = false;
-                doFull3D = false;
+                Settings.IsFull3D = false;
             }
         }
 
         private void Show_detectors(object sender, RoutedEventArgs e)
         {
-            foreach (var i in Detectors)
+            foreach (var i in Settings.STEM.Detectors)
             {
                 i.SetVisibility(true);
             }
@@ -249,7 +256,7 @@ namespace SimulationGUI
 
         private void Hide_Detectors(object sender, RoutedEventArgs e)
         {
-            foreach (var i in Detectors)
+            foreach (var i in Settings.STEM.Detectors)
             {
                 i.SetVisibility(false);
             }
@@ -259,7 +266,7 @@ namespace SimulationGUI
         private void OpenSTEMDetDlg(object sender, RoutedEventArgs e)
         {
             // open the window here
-            var window = new Dialogs.STEMDetectorDialog(Detectors) {Owner = this};
+            var window = new Dialogs.STEMDetectorDialog(Settings.STEM.Detectors) { Owner = this };
             window.AddDetectorEvent += STEM_AddDetector;
             window.RemDetectorEvent += STEM_RemoveDetector;
             window.ShowDialog();
@@ -267,7 +274,7 @@ namespace SimulationGUI
 
         private void OpenSTEMAreaDlg(object sender, RoutedEventArgs e)
         {
-            var window = new SimulationGUI.Dialogs.STEMAreaDialog(STEMRegion, SimRegion) {Owner = this};
+            var window = new SimulationGUI.Dialogs.STEMAreaDialog(Settings.STEM.ScanArea, Settings.SimArea) { Owner = this };
             window.AddSTEMAreaEvent += STEM_AddArea;
             window.ShowDialog();
         }
@@ -278,7 +285,7 @@ namespace SimulationGUI
             LeftTab.Items.Add(added.Tab);
             added.AddToCanvas(_diffDisplay.tCanvas);
             if(HaveMaxMrad)
-                added.SetEllipse(_lockedResolution, _lockedPixelScale, _lockedWavelength, DetectorVis);
+                added.SetEllipse(_lockedSettings.Resolution, _lockedSettings.PixelScale, _lockedSettings.Wavelength, DetectorVis);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
@@ -289,7 +296,7 @@ namespace SimulationGUI
                 LeftTab.Items.Remove(i.Tab);
             }
 
-            foreach (var i in Detectors)
+            foreach (var i in Settings.STEM.Detectors)
             {
                 i.SetColour();
             }
@@ -297,8 +304,8 @@ namespace SimulationGUI
 
         void STEM_AddArea(object sender, StemAreaArgs evargs)
         {
-            userSTEMarea = true;
-            STEMRegion = evargs.AreaParams;
+            Settings.STEM.UserSetArea = true;
+            Settings.STEM.ScanArea = evargs.AreaParams;
         }
 
         private void DeviceSelector_DropDownOpened(object sender, EventArgs e)
@@ -324,7 +331,7 @@ namespace SimulationGUI
 
         private void OpenAreaDlg(object sender, RoutedEventArgs e)
         {
-            var window = new SimAreaDialog(SimRegion) {Owner = this};
+            var window = new SimAreaDialog(Settings.SimArea) {Owner = this};
             window.SetAreaEvent += SetArea;
             window.Show();
         }
@@ -333,41 +340,41 @@ namespace SimulationGUI
         {
             var changedx = false;
             var changedy = false;
-            userSIMarea = true;
-            SimRegion = evargs.AreaParams;
+            Settings.UserSetArea = true;
+            Settings.SimArea = evargs.AreaParams;
 
-            var xscale = (STEMRegion.StartX - STEMRegion.EndX) / STEMRegion.xPixels;
-            var yscale = (STEMRegion.StartY - STEMRegion.EndY) / STEMRegion.yPixels;
+            var xscale = (Settings.STEM.ScanArea.StartX - Settings.STEM.ScanArea.EndX) / Settings.STEM.ScanArea.xPixels;
+            var yscale = (Settings.STEM.ScanArea.StartY - Settings.STEM.ScanArea.EndY) / Settings.STEM.ScanArea.yPixels;
 
-            if (STEMRegion.StartX < SimRegion.StartX || STEMRegion.StartX > SimRegion.EndX)
+            if (Settings.STEM.ScanArea.StartX < Settings.SimArea.StartX || Settings.STEM.ScanArea.StartX > Settings.SimArea.EndX)
             {
-                STEMRegion.StartX = SimRegion.StartX;
+                Settings.STEM.ScanArea.StartX = Settings.SimArea.StartX;
                 changedx = true;
             }
 
-            if (STEMRegion.EndX > SimRegion.EndX || STEMRegion.EndX < SimRegion.StartX)
+            if (Settings.STEM.ScanArea.EndX > Settings.SimArea.EndX || Settings.STEM.ScanArea.EndX < Settings.SimArea.StartX)
             {
-                STEMRegion.EndX = SimRegion.EndX;
+                Settings.STEM.ScanArea.EndX = Settings.SimArea.EndX;
                 changedx = true;
             }
 
-            if (STEMRegion.StartY < SimRegion.StartY || STEMRegion.StartY > SimRegion.EndY)
+            if (Settings.STEM.ScanArea.StartY < Settings.SimArea.StartY || Settings.STEM.ScanArea.StartY > Settings.SimArea.EndY)
             {
-                STEMRegion.StartY = SimRegion.StartY;
+                Settings.STEM.ScanArea.StartY = Settings.SimArea.StartY;
                 changedy = true;
             }
 
-            if (STEMRegion.EndY > SimRegion.EndY || STEMRegion.EndY < SimRegion.StartY)
+            if (Settings.STEM.ScanArea.EndY > Settings.SimArea.EndY || Settings.STEM.ScanArea.EndY < Settings.SimArea.StartY)
             {
-                STEMRegion.EndY = SimRegion.EndY;
+                Settings.STEM.ScanArea.EndY = Settings.SimArea.EndY;
                 changedy = true;
             }
 
             if (changedx)
-                STEMRegion.xPixels = (int)Math.Ceiling((STEMRegion.StartX - STEMRegion.EndX) / xscale);
+                Settings.STEM.ScanArea.xPixels = (int)Math.Ceiling((Settings.STEM.ScanArea.StartX - Settings.STEM.ScanArea.EndX) / xscale);
 
             if (changedy)
-                STEMRegion.yPixels = (int)Math.Ceiling((STEMRegion.StartY - STEMRegion.EndY) / yscale);
+                Settings.STEM.ScanArea.yPixels = (int)Math.Ceiling((Settings.STEM.ScanArea.StartY - Settings.STEM.ScanArea.EndY) / yscale);
 
 			UpdatePixelScale();
         }
@@ -386,22 +393,22 @@ namespace SimulationGUI
 		    var WarnMsg = new List<string>();
 
             // At the moment easiest to check this here
-            if (_lockedDetectors.Count == 0)
+            if (Settings.STEM.Detectors.Count == 0)
                 ErrorMessage.AddCode(42);
             else
                 ErrorMessage.RemoveCode(42);
 
-			if (select_TEM)
+			if (Settings.SimMode == 0)
 			{
 			    ErrorMsg = ErrorMessage.GetCTEMCodes();
                 WarnMsg = WarningMessage.GetCTEMCodes();
 			}
-            else if (select_CBED)
+            else if (Settings.SimMode == 1)
             {
                 ErrorMsg = ErrorMessage.GetCBEDCodes();
                 WarnMsg = WarningMessage.GetCBEDCodes();
             }
-            else if (select_STEM)
+            else if (Settings.SimMode == 2)
             {
                 ErrorMsg = ErrorMessage.GetSTEMCodes();
                 WarnMsg = WarningMessage.GetSTEMCodes();
@@ -460,16 +467,16 @@ namespace SimulationGUI
 
         private void cboResolutionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int.TryParse(ResolutionCombo.SelectedValue.ToString(), out _resolution);
+            int.TryParse(ResolutionCombo.SelectedValue.ToString(), out Settings.Resolution);
 
             ErrorMessage.ToggleCode(2, true);
 
             IsResolutionSet = true;
 
-            if (!userSTEMarea)
+            if (!Settings.STEM.UserSetArea)
             {
-                STEMRegion.xPixels = _resolution;
-                STEMRegion.yPixels = _resolution;
+                Settings.STEM.ScanArea.xPixels = Settings.Resolution;
+                Settings.STEM.ScanArea.yPixels = Settings.Resolution;
             }
 
             UpdatePixelScale();

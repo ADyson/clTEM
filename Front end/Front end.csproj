@@ -206,6 +206,7 @@
       <DependentUpon>WarningDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Areas.cs" />
+    <Compile Include="Utils\SimulationSettings.cs" />
     <Compile Include="Utils\SettingsStrings.cs" />
     <Compile Include="Utils\CustomControls.cs" />
     <Compile Include="Utils\DetectorItem.cs" />
@@ -271,7 +272,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="Utils\packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

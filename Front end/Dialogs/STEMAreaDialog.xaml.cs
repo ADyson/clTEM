@@ -30,7 +30,7 @@ namespace SimulationGUI.Dialogs
         private bool _goodXrange = true;
         private bool _goodYrange = true;
 
-        public STEMAreaDialog(STEMArea Area, SimArea simArea)
+        public STEMAreaDialog(STEMArea Area, SimulationArea simArea)
         {
             InitializeComponent();
 

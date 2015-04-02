@@ -4,7 +4,7 @@ using SimulationGUI.Utils;
 
 namespace SimulationGUI
 {
-    public class STEMArea : SimArea
+    public class STEMArea : SimulationArea
     {
         // public float StartX { get; set; }
 
@@ -29,7 +29,7 @@ namespace SimulationGUI
         }
     }
 
-    public class SimArea
+    public class SimulationArea
     {
         public float StartX { get; set; }
 
@@ -45,11 +45,11 @@ namespace SimulationGUI
     /// </summary>
     public class SimAreaArgs : EventArgs
     {
-        public SimAreaArgs(SimArea s)
+        public SimAreaArgs(SimulationArea s)
         {
             AreaParams = s;
         }
-        public SimArea AreaParams { get; private set; }
+        public SimulationArea AreaParams { get; private set; }
     }
 
     /// <summary>
