@@ -5,9 +5,10 @@ using System.Windows.Shapes;
 
 namespace SimulationGUI.Utils
 {
+
     public class DetectorItem : DisplayTab
     {
-        public DetectorItem(string tabName) : base(tabName)
+        public DetectorItem(string tabName, float _inner, float _outter, float _x, float _y, int _colInd) : base(tabName)
         {
             InnerEllipse = new Ellipse();
             OuterEllipse = new Ellipse();
@@ -16,6 +17,14 @@ namespace SimulationGUI.Utils
             CurrentResolution = 0;
             CurrentPixelScale = 0;
             CurrentWaveLength = 0;
+
+            SimParams.STEM.Name = tabName;
+            SimParams.STEM.Inner = _inner;
+            SimParams.STEM.Outer = _outter;
+            SimParams.STEM.x = _x;
+            SimParams.STEM.y = _y;
+
+            ColourIndex = _colInd;
         }
 
         private int CurrentResolution;
@@ -40,15 +49,15 @@ namespace SimulationGUI.Utils
             }
         }
 
-        public string Name { get; set; }
+        //public string Name { get; set; }
 
-        public float Inner { get; set; }
+        //public float Inner { get; set; }
 
-        public float Outer { get; set; }
+        //public float Outer { get; set; }
 
-        public float xCentre { get; set; }
+        //public float xCentre { get; set; }
 
-        public float yCentre { get; set; }
+        //public float yCentre { get; set; }
 
         public Ellipse InnerEllipse { get; set; }
 
@@ -94,10 +103,10 @@ namespace SimulationGUI.Utils
 
             var dashes = new DoubleCollection {4, 4}; // {on, off, on, etc}
             
-            var innerRad = (res * pxScale) * Inner / (1000 * wavelength);
-            var outerRad = (res * pxScale) * Outer / (1000 * wavelength);
-            var xcRad = (res * pxScale) * xCentre / (1000 * wavelength);
-            var ycRad = (res * pxScale) * yCentre / (1000 * wavelength);
+            var innerRad = (res * pxScale) * SimParams.STEM.Inner / (1000 * wavelength);
+            var outerRad = (res * pxScale) * SimParams.STEM.Outer / (1000 * wavelength);
+            var xcRad = (res * pxScale) * SimParams.STEM.x / (1000 * wavelength);
+            var ycRad = (res * pxScale) * SimParams.STEM.y / (1000 * wavelength);
 
             var innerShift = (res) / 2 - innerRad;
             var outerShift = (res) / 2 - outerRad;

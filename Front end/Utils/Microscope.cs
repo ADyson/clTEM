@@ -8,6 +8,23 @@ namespace SimulationGUI.Utils
     /// </summary>
     public class MicroscopeParams
     {
+        public MicroscopeParams(MicroscopeParams old)
+        {
+            df = new fParam(old.df.val);
+            cs = new fParam(old.cs.val);
+            a1m = new fParam(old.a1m.val);
+            a1t = new fParam(old.a1t.val);
+            kv = new fParam(old.kv.val);
+            b = new fParam(old.b.val);
+            d = new fParam(old.d.val);
+            ap = new fParam(old.ap.val);
+            a2m = new fParam(old.a2m.val);
+            a2t = new fParam(old.a2t.val);
+            b2m = new fParam(old.b2m.val);
+            b2t = new fParam(old.b2t.val);
+
+        }
+
         ///// <summary>
         ///// Defocus (Å)
         ///// </summary>

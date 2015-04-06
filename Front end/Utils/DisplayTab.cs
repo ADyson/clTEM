@@ -9,6 +9,8 @@ namespace SimulationGUI.Utils
 {
 	public class DisplayTab
 	{
+        public SimulationSettings SimParams = new SimulationSettings();
+
 		public int xDim { get; set; }
 
 		public int yDim { get; set; }
@@ -20,12 +22,12 @@ namespace SimulationGUI.Utils
         /// <summary>
         /// Maximum value of image data
         /// </summary>
-        public float Max { get; set; }
+        public float Max = 0;
 
         /// <summary>
         /// Minimum value of image data
         /// </summary>
-        public float Min { get; set; }
+        public float Min = float.MaxValue;
 
         /// <summary>
         /// Sets images sizes with the square dimensions

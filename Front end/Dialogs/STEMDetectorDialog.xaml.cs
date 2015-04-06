@@ -77,8 +77,7 @@ namespace SimulationGUI.Dialogs
             }
 
             // add everything to detector class
-            var temp = new DetectorItem(_name.val) { Name = _name.val, Inner = _inner.val, Outer = _outer.val, 
-                xCentre = _centerX.val, yCentre = _centerY.val, Min = float.MaxValue, Max = 0, ColourIndex = _mainDetectors.Count };
+            var temp = new DetectorItem(_name.val, _inner.val, _outer.val, _centerX.val, _centerY.val, _mainDetectors.Count );
 
             // add to the listview
             _mainDetectors.Add(temp);
@@ -124,7 +123,7 @@ namespace SimulationGUI.Dialogs
             var dname = tbox.Text;
             _goodName = dname.Length > 0;
 
-            if (_mainDetectors.Any(i => i.Name.Equals(dname)))
+            if (_mainDetectors.Any(i => i.SimParams.STEM.Name.Equals(dname)))
                 _goodName = false;
 
             if (!_goodName)

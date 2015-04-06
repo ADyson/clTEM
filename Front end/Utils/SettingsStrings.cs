@@ -9,8 +9,8 @@
 {{filename}}
 
 *** Simulation Area ***
-x: {{simareaxstart}}, {{simareaxend}}
-y: {{simareaystart}}, {{simareayend}}
+x: {{simareaxstart}} -> {{simareaxend}}
+y: {{simareaystart}} -> {{simareayend}}
 
 *** Resolution ***
 {{resolution}}
@@ -23,14 +23,19 @@ y: {{simareaystart}}, {{simareayend}}
 
 *** Finite Difference ***
 {{fd}}
-
+{{Full3Dopt}}
 *** Slice Thickness ***
 {{slicethickness}}
 
 *** Microscope Settings ***
 *** Voltage (kV)***
 {{volts}}
+{{microscopesettings}}
+{{modesettings}}"
+;
 
+public static readonly string MicroscopeSettings =
+@"
 *** Objective Aperture ***
 {{aperture}}
 
@@ -54,47 +59,55 @@ y: {{simareaystart}}, {{simareayend}}
 
 *** B2 (magnitude, angle)***
 {{B2m}}, {{B2t}}
-
-{{modesettings}}"
+"
 ;
 
-        public static readonly string Full3dSettings =
-@"*** 3D Integrals ***
-{{3dint}}"
+public static readonly string Full3dSettings =
+@"
+*** 3D Integrals ***
+{{3dint}}
+"
 ;
 
-        public static readonly string DoseSettings =
-@"*** Dose ***
-{{Dose}}
+public static readonly string DoseSettings =
+@"
+*** Dose ***
+{{dose}}
 
 *** CCD ***
 {{ccd}}
 
 *** Binning ***
-{{binning}}"
+{{binning}}
+"
 ;
 
         public static readonly string CBEDSettings =
-@"*** CBED Position (x, y)***
+@"
+*** CBED Position (x, y)***
 {{cbedx}}, {{cbedy}}
 
 *** CBED TDS Runs ***
-{{cbedtds}}"
+{{cbedtds}}
+"
 ;
 
         public static readonly string STEMSettings =
-@"*** Concurrent Pixels ***
+@"
+*** Concurrent Pixels ***
 {{multistem}}
 
 *** STEM TDS Runs ***
 {{stemtds}}
 
 *** Detectors ***
-{{stemdetectors}}"
+{{stemdetectors}}
+"
 ;
 
         public static readonly string STEMDetectors =
-@"*** Name ***
+@"
+*** Name ***
 {{detectorname}}
 
 *** Inner Radius ***
@@ -104,7 +117,8 @@ y: {{simareaystart}}, {{simareayend}}
 {{outer}}
 
 *** Center (x, y)***
-{{centx}}, {{centy}}"
+{{centx}}, {{centy}}
+"
 ;
     }
 }

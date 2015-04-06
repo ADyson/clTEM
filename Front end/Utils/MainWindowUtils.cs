@@ -247,7 +247,7 @@ namespace SimulationGUI
 
         private void Show_detectors(object sender, RoutedEventArgs e)
         {
-            foreach (var i in Settings.STEM.Detectors)
+            foreach (var i in DetectorDisplay)
             {
                 i.SetVisibility(true);
             }
@@ -256,7 +256,7 @@ namespace SimulationGUI
 
         private void Hide_Detectors(object sender, RoutedEventArgs e)
         {
-            foreach (var i in Settings.STEM.Detectors)
+            foreach (var i in DetectorDisplay)
             {
                 i.SetVisibility(false);
             }
@@ -266,7 +266,7 @@ namespace SimulationGUI
         private void OpenSTEMDetDlg(object sender, RoutedEventArgs e)
         {
             // open the window here
-            var window = new Dialogs.STEMDetectorDialog(Settings.STEM.Detectors) { Owner = this };
+            var window = new Dialogs.STEMDetectorDialog(DetectorDisplay) { Owner = this };
             window.AddDetectorEvent += STEM_AddDetector;
             window.RemDetectorEvent += STEM_RemoveDetector;
             window.ShowDialog();
@@ -284,8 +284,8 @@ namespace SimulationGUI
             var added = evargs.Detector;
             LeftTab.Items.Add(added.Tab);
             added.AddToCanvas(_diffDisplay.tCanvas);
-            if(HaveMaxMrad)
-                added.SetEllipse(_lockedSettings.Resolution, _lockedSettings.PixelScale, _lockedSettings.Wavelength, DetectorVis);
+            //if(HaveMaxMrad)
+            //   added.SetEllipse(Settings.Resolution, _lockedSettings.PixelScale, _lockedSettings.Wavelength, DetectorVis);
         }
 
         void STEM_RemoveDetector(object sender, DetectorArgs evargs)
@@ -296,7 +296,7 @@ namespace SimulationGUI
                 LeftTab.Items.Remove(i.Tab);
             }
 
-            foreach (var i in Settings.STEM.Detectors)
+            foreach (var i in DetectorDisplay)
             {
                 i.SetColour();
             }
@@ -393,7 +393,7 @@ namespace SimulationGUI
 		    var WarnMsg = new List<string>();
 
             // At the moment easiest to check this here
-            if (Settings.STEM.Detectors.Count == 0)
+            if (DetectorDisplay.Count == 0)
                 ErrorMessage.AddCode(42);
             else
                 ErrorMessage.RemoveCode(42);
