@@ -14,13 +14,13 @@ namespace SimulationGUI.Dialogs
     {
         public event EventHandler<StemAreaArgs> AddSTEMAreaEvent;
 
-        private fParam _startX;
-        private fParam _endX;
-        private iParam _pixelX;
+        private FParam _startX;
+        private FParam _endX;
+        private IParam _pixelX;
 
-        private fParam _startY;
-        private fParam _endY;
-        private iParam _pixelY;
+        private FParam _startY;
+        private FParam _endY;
+        private IParam _pixelY;
 
         private readonly float _simStartX;
         private readonly float _simStartY;
@@ -34,13 +34,13 @@ namespace SimulationGUI.Dialogs
         {
             InitializeComponent();
 
-            _startX = new fParam();
-            _endX = new fParam();
-            _pixelX = new iParam();
+            _startX = new FParam();
+            _endX = new FParam();
+            _pixelX = new IParam();
 
-            _startY = new fParam();
-            _endY = new fParam();
-            _pixelY = new iParam();
+            _startY = new FParam();
+            _endY = new FParam();
+            _pixelY = new IParam();
 
             txtStartX.DataContext = _startX;
             txtEndX.DataContext = _endX;
@@ -50,13 +50,13 @@ namespace SimulationGUI.Dialogs
             txtEndY.DataContext = _endY;
             txtPixelY.DataContext = _pixelY;
 
-            _startX.val = Area.StartX;
-            _endX.val = Area.EndX;
-            _pixelX.val = Area.xPixels;
+            _startX.Val = Area.StartX;
+            _endX.Val = Area.EndX;
+            _pixelX.Val = Area.xPixels;
 
-            _startY.val = Area.StartY;
-            _endY.val = Area.EndY;
-            _pixelY.val = Area.yPixels;
+            _startY.Val = Area.StartY;
+            _endY.Val = Area.EndY;
+            _pixelY.Val = Area.yPixels;
 
             _simStartX = simArea.StartX;
             _simEndX = simArea.EndX;
@@ -79,7 +79,7 @@ namespace SimulationGUI.Dialogs
                 return;
             }
 
-            var temp = new STEMArea { StartX = _startX.val, EndX = _endX.val, StartY = _startY.val, EndY = _endY.val, xPixels = _pixelX.val, yPixels = _pixelY.val };
+            var temp = new STEMArea { StartX = _startX.Val, EndX = _endX.Val, StartY = _startY.Val, EndY = _endY.Val, xPixels = _pixelX.Val, yPixels = _pixelY.Val };
 
             if (AddSTEMAreaEvent != null) AddSTEMAreaEvent(this, new StemAreaArgs(temp));
 

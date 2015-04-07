@@ -1,0 +1,447 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Threading;
+using SimulationGUI.Controls;
+using SimulationGUI.Utils;
+using SimulationGUI.Utils.Settings;
+
+namespace SimulationGUI
+{
+    public partial class MainWindow
+    {
+
+        /// <summary>
+        /// Simulate exit wave.
+        /// Checks/gets parameters and performs the simulation.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SimulateExitWave(object sender, RoutedEventArgs e)
+        {
+            if (!TestSimulationPrerequisites())
+                return;
+
+            // Update GUI to 'working' colour
+            UpdateWorkingColour(true);
+
+            SimulateEWButton.IsEnabled = false;
+            SimulateImageButton.IsEnabled = false;
+
+            _lockedSettings = new SimulationSettings(Settings, CopyType.All);
+            _lockedDetectorDisplay = DetectorDisplay;
+
+            // Update the display tab sizes so we don't need to worry about this later
+            _ewAmplitudeDisplay.SetSize(_lockedSettings.Resolution);
+            _ewPhaseDisplay.SetSize(_lockedSettings.Resolution);
+            _ctemDisplay.SetSize(_lockedSettings.Resolution);
+            _diffDisplay.SetSize(_lockedSettings.Resolution);
+
+            foreach (var det in _lockedDetectorDisplay)
+                det.SetSize(_lockedSettings.STEM.ScanArea.xPixels, _lockedSettings.STEM.ScanArea.yPixels);
+
+            // Create new instances to use to cancel the simulation and to run tasks.
+            cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
+            var progressReporter = new ProgressReporter();
+
+            // Set the simulation parameters
+            CancelButton.IsEnabled = false;
+            var task = Task.Factory.StartNew(() =>
+            {
+                Thread.CurrentThread.Priority = ThreadPriority.Normal;
+
+                var timer = new Stopwatch();
+
+                // Do cimulation part
+                DoSimulationMethod(ref progressReporter, ref timer, ref cancellationToken);
+
+            }, cancellationToken);
+
+            // Update all the images and return application to original state
+            // This runs on UI thread so can access UI, probably better way of doing image updates though
+            progressReporter.RegisterContinuation(task, () =>
+            {
+                CancelButton.IsEnabled = false;
+                pbrSlices.Value = 100;
+                pbrTotal.Value = 100;
+
+                if (_lockedSettings.SimMode == 2)
+                {
+                    //_lockedSettings.SimMode = 2;
+                    if (_lockedDetectorDisplay.Count == 0)
+                    {
+                        SimulateEWButton.IsEnabled = true;
+                        return;
+                    }
+
+                    foreach (var det in _lockedDetectorDisplay)
+                    {
+                        UpdateSTEMImage(det);
+                        // copy simulation settings to tab
+                        // don't copy stem settings as they are set elsewhere?
+                        det.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+                    }
+
+                    // Just select the first tab for convenience
+                    //_lockedDetectorDisplay.Tab.IsSelected = true;
+                    SaveImageButton.IsEnabled = true;
+                }
+                else if (_lockedSettings.SimMode == 1)
+                {
+                    //Settings.SimMode = 1;
+                    UpdateDiffractionImage();
+
+                    // copy simulation settings to tabs
+                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.CBED);
+
+                    SaveImageButton2.IsEnabled = true;
+
+                }
+                else if (_lockedSettings.SimMode == 0)
+                {
+                    //Settings.SimMode = 0;
+                    UpdateEWImages();
+                    UpdateDiffractionImage();
+
+                    // copy simulation settings to tabs
+                    _ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+                    _ewPhaseDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+
+                    _ewAmplitudeDisplay.SimParams.TEMMode = 1;
+                    _ewPhaseDisplay.SimParams.TEMMode = 2;
+                    _diffDisplay.SimParams.TEMMode = 3;
+
+                    _ewAmplitudeDisplay.Tab.IsSelected = true;
+                    SaveImageButton.IsEnabled = true;
+                    SaveImageButton2.IsEnabled = true;
+                    SimulateImageButton.IsEnabled = true;
+                }
+                else
+                {
+                    return;
+                }
+
+                UpdateWorkingColour(false);
+                SimulateEWButton.IsEnabled = true;
+            });
+
+        }
+
+        /// <summary>
+        /// Chooses the correct simulation to run (TEM, STEM, CBED) depending on the radio dial checked.
+        /// </summary>
+        /// <param name="progressReporter"></param>
+        /// <param name="timer"></param>
+        /// <param name="ct"></param>
+        private void DoSimulationMethod(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+        {
+            // Conversion to units
+            var cA1T = Settings.Microscope.a1t.Val / Convert.ToSingle((180 / Math.PI));
+            var cA2T = Settings.Microscope.a2t.Val / Convert.ToSingle((180 / Math.PI));
+            var cB2T = Settings.Microscope.b2t.Val / Convert.ToSingle((180 / Math.PI));
+            var cB = Settings.Microscope.b.Val / 1000;
+            var cD = Settings.Microscope.d.Val / 10;
+            // Upload Simulation Parameters to c++
+            _mCl.setCTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
+                cD, Settings.Microscope.ap.Val, Settings.Microscope.a2m.Val, cA2T, Settings.Microscope.b2m.Val, cB2T);
+
+            _mCl.setSTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
+                cD, Settings.Microscope.ap.Val);
+
+            // Add Pixelscale to image tabs and diffraction then run simulation
+            if (_lockedSettings.SimMode == 0)
+            {
+                _ewAmplitudeDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
+
+                _ewAmplitudeDisplay.PixelScaleY = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
+
+                _ewAmplitudeDisplay.xStartPosition = Settings.SimArea.StartX;
+                _ewAmplitudeDisplay.yStartPosition = Settings.SimArea.StartY;
+
+                SimulateTEM(ref progressReporter, ref timer, ref ct);
+            }
+            else if (_lockedSettings.SimMode == 2)
+            {
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
+                SimulateSTEM(ref progressReporter, ref timer, ref ct);
+            }
+            else if (_lockedSettings.SimMode == 1)
+            {
+                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
+                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
+                SimulateCBED(ref progressReporter, ref timer, ref ct);
+            }
+        }
+
+        /// <summary>
+        /// Simulates the exit wave of TEM
+        /// </summary>
+        /// <param name="progressReporter"></param>
+        /// <param name="timer"></param>
+        /// <param name="ct"></param>
+        private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+        {
+            // So we have the right voltage should we try to simulate an image later.
+            //_lockedSettings.ImageVoltage = _lockedSettings.Microscope.kv.val;
+
+            //_ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+
+            // Initialise
+            _mCl.initialiseCTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.Val, _lockedSettings.Integrals.Val);
+
+            // Reset atoms incase TDS has been used previously
+            _mCl.sortStructure(false);
+
+            // Use Background worker to progress through each step
+            var numberOfSlices = 0;
+            _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
+
+            // Seperate into setup, loop over slices and final steps to allow for progress reporting.
+            for (var slice = 1; slice <= numberOfSlices; slice++)
+            {
+                if (ct.IsCancellationRequested)
+                    break;
+
+                timer.Start();
+                // Do the actual simulation
+                _mCl.doMultisliceStep(slice, numberOfSlices);
+                timer.Stop();
+                var memUsage = _mCl.getCLMemoryUsed();
+
+                // Update GUI stuff
+                float ms = timer.ElapsedMilliseconds;
+                progressReporter.ReportProgress((val) =>
+                {
+                    CancelButton.IsEnabled = true;
+                    UpdateStatus(numberOfSlices, 1, slice, 1, ms, memUsage);
+                }, slice);
+
+            }
+
+        }
+
+        /// <summary>
+        /// Simulates CBED patterns
+        /// </summary>
+        /// <param name="progressReporter"></param>
+        /// <param name="timer"></param>
+        /// <param name="ct"></param>
+        private void SimulateCBED(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+        {
+            // Initialise probe simulation
+            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.Val, _lockedSettings.Integrals.Val, 1);
+
+            // Correct probe position for when the simulation region has been changed
+            var posx = (_lockedSettings.CBED.x.Val - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale;
+            var posy = (_lockedSettings.CBED.y.Val - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale;
+
+            // Get number of steps in the multislice
+            var numberOfSlices = 0;
+            _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
+
+            // Initialise TDS runs
+            var runs = 1;
+            if (_lockedSettings.CBED.DoTDS)
+            {
+                runs = _lockedSettings.CBED.TDSRuns.Val;
+            }
+
+            // Loops TDS runs
+            for (var j = 0; j < runs; j++)
+            {
+                // Shuffle the structure for frozen phonon
+                _mCl.sortStructure(Settings.CBED.DoTDS);
+                // Initialise probe
+                _mCl.initialiseSTEMWaveFunction(posx, posy, 1);
+
+                // Do the multislice for this TDS run
+                for (var i = 1; i <= numberOfSlices; i++)
+                {
+                    if (ct.IsCancellationRequested)
+                        break;
+
+                    timer.Start();
+                    // Actual simulation part
+                    _mCl.doMultisliceStep(i, numberOfSlices);
+                    timer.Stop();
+                    var memUsage = _mCl.getCLMemoryUsed();
+                    float simTime = timer.ElapsedMilliseconds;
+
+                    // Update GUI multislice progress
+                    progressReporter.ReportProgress(val =>
+                    {
+                        CancelButton.IsEnabled = true;
+                        UpdateStatus(numberOfSlices, runs, i, j, simTime, memUsage);
+                    }, i);
+                }
+
+                if (ct.IsCancellationRequested)
+                    break;
+                // Update TDS image
+                progressReporter.ReportProgress((val) =>
+                {
+                    CancelButton.IsEnabled = false;
+                    UpdateDiffractionImage();
+                }, j);
+            }
+        }
+
+        /// <summary>
+        /// Performs the STEM simulations
+        /// </summary>
+        /// <param name="progressReporter"></param>
+        /// <param name="timer"></param>
+        /// <param name="ct"></param>
+        private void SimulateSTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
+        {
+            // convenience variable
+            var conPix = _lockedSettings.STEM.ConcurrentPixels.Val;
+
+            // Get steps we need to move the probe in
+            var xInterval = _lockedSettings.STEM.ScanArea.getxInterval;
+            var yInterval = _lockedSettings.STEM.ScanArea.getyInterval;
+
+            // Updates pixel scales for display?
+            foreach (var det in _lockedDetectorDisplay)
+            {
+                det.PixelScaleX = xInterval;
+                det.PixelScaleY = yInterval;
+                det.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
+            }
+
+            // calculate the number of STEM pixels
+            int numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
+
+            // Initialise detector images
+            foreach (DetectorItem det in _lockedDetectorDisplay)
+            {
+                det.ImageData = new float[numPix];
+                det.Min = float.MaxValue;
+                det.Max = float.MinValue;
+            }
+
+            // Get number of TDS runs needed
+            var numRuns = 1;
+            if (_lockedSettings.STEM.DoTDS)
+                numRuns = _lockedSettings.STEM.TDSRuns.Val;
+
+            // Initialise probe
+            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.Val, _lockedSettings.Integrals.Val, conPix);
+
+            // Create array of all the pixels coords
+            var pixels = new List<Tuple<Int32, Int32>>();
+
+            for (var yPx = 0; yPx < _lockedSettings.STEM.ScanArea.yPixels; yPx++)
+            {
+                for (var xPx = 0; xPx < _lockedSettings.STEM.ScanArea.xPixels; xPx++)
+                {
+                    pixels.Add(new Tuple<Int32, Int32>(xPx, yPx));
+                }
+            }
+
+            // Loop over number of TDS runs
+            for (var j = 0; j < numRuns; j++)
+            {
+                // shuffle the pixels so when we do TDS, we avoid doing them all next to each other
+                pixels.Shuffle();
+
+                // Current pixel number
+                var nPx = 0;
+
+                // loop through pixels
+                while (nPx < numPix)
+                {
+                    // sort the structure if needed
+                    _mCl.sortStructure(Settings.STEM.DoTDS); // is there optimisation possible here?
+
+                    // make a copy of current pixel as we are about to modify it
+                    var currentPx = nPx;
+
+                    // Check if nPx is inside limits
+                    // If it isn't, adjust the number of concurrent pixels so it is
+                    if (nPx + conPix > numPix && nPx + conPix - numPix + 1 < conPix)
+                    {
+                        conPix = numPix - nPx;
+                        nPx = numPix;
+                    }
+                    else
+                        nPx += conPix;
+
+                    // Make probles for all concurrent probe positions
+                    for (var i = 1; i <= conPix; i++)
+                    {
+                        _mCl.initialiseSTEMWaveFunction(((_lockedSettings.STEM.ScanArea.StartX + pixels[(currentPx + i - 1)].Item1 * xInterval - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale),
+                            ((_lockedSettings.STEM.ScanArea.StartY + pixels[(currentPx + i - 1)].Item2 * yInterval - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale), i);
+                    }
+
+                    // Get number of slices in our multislice
+                    int numberOfSlices = 0;
+                    _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
+
+                    // Loop through slices and simulate as we go
+                    for (var i = 1; i <= numberOfSlices; i++)
+                    {
+                        if (ct.IsCancellationRequested)
+                            break;
+
+                        timer.Start();
+                        // The actual simulation part
+                        _mCl.doMultisliceStep(i, numberOfSlices, conPix);
+                        timer.Stop();
+
+                        var memUsage = _mCl.getCLMemoryUsed();
+                        float simTime = timer.ElapsedMilliseconds;
+
+                        // Update the progress bars
+                        progressReporter.ReportProgress(val =>
+                        {
+                            CancelButton.IsEnabled = true;
+                            UpdateStatus(numberOfSlices, _lockedSettings.STEM.TDSRuns.Val, numPix, i, j, nPx, simTime, memUsage);
+                        }, i);
+                    }
+
+                    if (ct.IsCancellationRequested)
+                        break;
+
+                    // loop over the pixels we jsut simulated
+                    for (var p = 1; p <= conPix; p++)
+                    {
+                        // get the diffraction pattern (in OpenCL buffers)
+                        _mCl.getSTEMDiff(p);
+
+                        // Loop through each detectors and get each STEM pixel by summing up diffraction over the detector area
+                        foreach (DetectorItem det in _lockedDetectorDisplay)
+                        {
+                            var pixelVal = _mCl.getSTEMPixel(det.SimParams.STEM.Inner, det.SimParams.STEM.Outer, det.SimParams.STEM.x, det.SimParams.STEM.y, p);
+                            // create new variable to avoid writing this out a lot
+                            var newVal = det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] + pixelVal;
+                            det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] = newVal;
+
+                            // update maximum and minimum as we go
+                            if (newVal < det.Min)
+                                det.Min = newVal;
+                            if (newVal > det.Max)
+                                det.Max = newVal;
+
+                        }
+                    }
+
+                }
+
+                if (ct.IsCancellationRequested)
+                    break;
+            }
+        }
+
+    }
+}

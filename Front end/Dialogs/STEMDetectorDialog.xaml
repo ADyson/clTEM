@@ -4,7 +4,8 @@
         xmlns:m="clr-namespace:SimulationGUI.Utils"
         xmlns:extra="http://schemas.extra.com/ui"  
         xmlns:params="http://schemas.codeplex.com/elysium/params"
-                     
+        xmlns:controls="clr-namespace:SimulationGUI.Controls"
+
         params:Design.Theme="{DynamicResource ThemeCol}"
         params:Design.AccentBrush="{DynamicResource Accent}"
         params:Design.ContrastBrush="{DynamicResource Contrast}"
@@ -79,33 +80,33 @@
 
             <TextBlock Text="Name"
                        Grid.Row="0" Margin="0,7,0,2"/>
-            <TextBox x:Name="txtName" Text="{Binding Path = sVal, Mode = TwoWay}"
+            <TextBox x:Name="txtName" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="1" Height="{StaticResource ControlHeight}"
-                          TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="Inner Radius"
                        Grid.Row="2" Margin="0,7,0,2"/>
-            <TextBox x:Name="txtInner" Text="{Binding Path = sVal, Mode = TwoWay}"
+            <TextBox x:Name="txtInner" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="3" Height="{StaticResource ControlHeight}"
-                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="Outer Radius"
                        Grid.Row="4" Margin="0,7,0,2"/>
-            <TextBox x:Name="txtOuter" Text="{Binding Path = sVal, Mode = TwoWay}"
+            <TextBox x:Name="txtOuter" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="5" Height="{StaticResource ControlHeight}"
-                          m:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="x Centre"
                        Grid.Row="6" Margin="0,7,0,2"/>
-            <TextBox x:Name="txtCenterX" Text="{Binding Path = sVal, Mode = TwoWay}"
+            <TextBox x:Name="txtCenterX" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="7" Height="{StaticResource ControlHeight}"
-                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="y Centre"
                        Grid.Row="8" Margin="0,7,0,2"/>
-            <TextBox x:Name="txtCenterY" Text="{Binding Path = sVal, Mode = TwoWay}"
+            <TextBox x:Name="txtCenterY" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="9" Height="{StaticResource ControlHeight}"
-                          m:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" m:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
         
             <Button x:Name="AddButton"
                     Grid.Row="10" BorderThickness="{StaticResource BorderThickness}"

@@ -1,108 +1,106 @@
-﻿using System.ComponentModel;
-
-namespace SimulationGUI.Utils
+﻿namespace SimulationGUI.Utils.Settings
 {
     /// <summary>
     /// Holds the settings of the microscope
     /// Currently no error checking takes place here as it is assumed regexs will handle that
     /// </summary>
-    public class MicroscopeParams
+    public class MicroscopeSettings
     {
-        public MicroscopeParams(MicroscopeParams old)
+        public MicroscopeSettings(MicroscopeSettings old)
         {
-            df = new fParam(old.df.val);
-            cs = new fParam(old.cs.val);
-            a1m = new fParam(old.a1m.val);
-            a1t = new fParam(old.a1t.val);
-            kv = new fParam(old.kv.val);
-            b = new fParam(old.b.val);
-            d = new fParam(old.d.val);
-            ap = new fParam(old.ap.val);
-            a2m = new fParam(old.a2m.val);
-            a2t = new fParam(old.a2t.val);
-            b2m = new fParam(old.b2m.val);
-            b2t = new fParam(old.b2t.val);
+            df = new FParam(old.df.Val);
+            cs = new FParam(old.cs.Val);
+            a1m = new FParam(old.a1m.Val);
+            a1t = new FParam(old.a1t.Val);
+            kv = new FParam(old.kv.Val);
+            b = new FParam(old.b.Val);
+            d = new FParam(old.d.Val);
+            ap = new FParam(old.ap.Val);
+            a2m = new FParam(old.a2m.Val);
+            a2t = new FParam(old.a2t.Val);
+            b2m = new FParam(old.b2m.Val);
+            b2t = new FParam(old.b2t.Val);
 
         }
 
         ///// <summary>
         ///// Defocus (Å)
         ///// </summary>
-        public fParam df;
+        public FParam df;
 
         /// <summary>
         /// Spherical aberration (Å)
         /// </summary>
-        public fParam cs;
+        public FParam cs;
 
         /// <summary>
         /// Two-fold astigmatism magnitude (Å)
         /// </summary>
-        public fParam a1m;
+        public FParam a1m;
 
         /// <summary>
         /// Two-fold astigmatism phase (°)
         /// </summary>
-        public fParam a1t;
+        public FParam a1t;
 
         /// <summary>
         /// Voltage (kV)
         /// </summary>
-        public fParam kv;
+        public FParam kv;
 
         /// <summary>
         /// Convergence angle (mRad)
         /// </summary>
-        public fParam b;
+        public FParam b;
 
         /// <summary>
         /// Defocus spread (nm)
         /// </summary>
-        public fParam d;
+        public FParam d;
 
         /// <summary>
         /// Aperture (mRad)
         /// </summary>
-        public fParam ap;
+        public FParam ap;
 
         /// <summary>
         /// Three-fold astigmatism magnitude (Å)
         /// </summary>
-        public fParam a2m;
+        public FParam a2m;
 
         /// <summary>
         /// Three-fold astigmatism phase (°)
         /// </summary>
-        public fParam a2t;
+        public FParam a2t;
 
         /// <summary>
         /// Coma magnitude (Å)
         /// </summary>
-        public fParam b2m;
+        public FParam b2m;
 
         /// <summary>
         /// Coma phase (°)
         /// </summary>
-        public fParam b2t;
+        public FParam b2t;
 
         /// <summary>
         /// Default constructor, sets the datacontext for textboxes on the microscope to this
         /// (so they auto update each other)
         /// </summary>
-        public MicroscopeParams(MainWindow app)
+        public MicroscopeSettings(MainWindow app)
         {
-            df = new fParam();
-            cs = new fParam();
-            a1m = new fParam();
-            a1t = new fParam();
-            kv = new fParam();
-            b = new fParam();
-            d = new fParam();
-            ap = new fParam();
-            a2m = new fParam();
-            a2t = new fParam();
-            b2m = new fParam();
-            b2t = new fParam();
+            df = new FParam();
+            cs = new FParam();
+            a1m = new FParam();
+            a1t = new FParam();
+            kv = new FParam();
+            b = new FParam();
+            d = new FParam();
+            ap = new FParam();
+            a2m = new FParam();
+            a2t = new FParam();
+            b2m = new FParam();
+            b2t = new FParam();
             app.txtMicroscopeDf.DataContext = df;
             app.txtMicroscopeCs.DataContext = cs;
             app.txtMicroscopeA1m.DataContext = a1m;
@@ -119,18 +117,18 @@ namespace SimulationGUI.Utils
 
         public void SetDefaults()
         {
-            df.val = 0;
-            cs.val = 10000;
-            a1m.val = 0;
-            a1t.val = 0;
-            kv.val = 200;
-            b.val = 0.5f;
-            d.val = 3;
-            ap.val = 30;
-            a2m.val = 0;
-            a2t.val = 0;
-            b2m.val = 0;
-            b2t.val = 0;
+            df.Val = 0;
+            cs.Val = 10000;
+            a1m.Val = 0;
+            a1t.Val = 0;
+            kv.Val = 200;
+            b.Val = 0.5f;
+            d.Val = 3;
+            ap.Val = 30;
+            a2m.Val = 0;
+            a2t.Val = 0;
+            b2m.Val = 0;
+            b2t.Val = 0;
         }
 
     }

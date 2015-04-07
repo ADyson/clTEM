@@ -193,6 +193,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\CustomControls.cs" />
+    <Compile Include="Controls\DetectorItem.cs" />
+    <Compile Include="Controls\DisplayTab.cs" />
+    <Compile Include="Controls\MaskedTextBox.Cs" />
+    <Compile Include="Controls\ZoomBorder.cs" />
     <Compile Include="Dialogs\SimAreaDialog.xaml.cs">
       <DependentUpon>SimAreaDialog.xaml</DependentUpon>
     </Compile>
@@ -205,21 +210,20 @@
     <Compile Include="Dialogs\WarningDialog.xaml.cs">
       <DependentUpon>WarningDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Simulation.cs" />
     <Compile Include="Utils\Areas.cs" />
-    <Compile Include="Utils\SimulationSettings.cs" />
-    <Compile Include="Utils\SettingsStrings.cs" />
-    <Compile Include="Utils\CustomControls.cs" />
-    <Compile Include="Utils\DetectorItem.cs" />
-    <Compile Include="Utils\DisplayTab.cs" />
     <Compile Include="Utils\ErrorMessage.cs" />
-    <Compile Include="Utils\MainWindowUtils.cs" />
     <Compile Include="Utils\ColourGenerator.cs" />
-    <Compile Include="Utils\MaskedTextBox.Cs" />
-    <Compile Include="Utils\Microscope.cs" />
     <Compile Include="Utils\Parameter.cs" />
     <Compile Include="Utils\ProgressReporter.cs" />
+    <Compile Include="Utils\Settings\SettingsFileStrings.cs" />
+    <Compile Include="Utils\Settings\SettingsMicroscope.cs" />
+    <Compile Include="Utils\Settings\SettingsSimulation.cs" />
     <Compile Include="Utils\Shuffler.cs" />
-    <Compile Include="Utils\ZoomBorder.cs" />
+    <Page Include="Controls\CustomControls.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Dialogs\SimAreaDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -233,10 +237,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialogs\WarningDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Utils\CustomControls.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -271,8 +271,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="app.config" />
-    <None Include="Utils\packages.config" />
+    <None Include="App\packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -308,9 +307,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

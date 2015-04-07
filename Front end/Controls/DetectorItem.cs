@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace SimulationGUI.Utils
+namespace SimulationGUI.Controls
 {
 
     public class DetectorItem : DisplayTab

@@ -6,16 +6,16 @@ namespace SimulationGUI.Utils
     /// <summary>
     /// Class used to hold a variable and also keep the value in sync with a textbox
     /// </summary>
-    public class fParam : INotifyPropertyChanged
+    public class FParam : INotifyPropertyChanged
     {
-        public fParam()
+        public FParam()
         {
-            val = 1;
+            Val = 1.0f;
         }
 
-        public fParam(float v)
+        public FParam(float v)
         {
-            val = v;
+            Val = v;
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace SimulationGUI.Utils
         /// <summary>
         /// Public value that Notifies of property changed
         /// </summary>
-        public float val
+        public float Val
         {
             get { return _val; }
             set
@@ -34,21 +34,21 @@ namespace SimulationGUI.Utils
                 if (_val == value)
                     return;
                 _val = value;
-                NotifyPropertyChanged("sVal");
+                NotifyPropertyChanged("SVal");
             }
         }
 
         /// <summary>
         /// String value used to convert strings from textboxes.
         /// </summary>
-        public string sVal
+        public string SVal
         {
             get { return _val.ToString(CultureInfo.CurrentCulture); }
             set
             {
                 float temp;
                 float.TryParse(value, out temp);
-                val = temp;
+                Val = temp;
             }
         }
 
@@ -73,16 +73,16 @@ namespace SimulationGUI.Utils
     /// <summary>
     /// Class used to hold a variable and also keep the value in sync with a textbox
     /// </summary>
-    public class iParam : INotifyPropertyChanged
+    public class IParam : INotifyPropertyChanged
     {
-        public iParam()
+        public IParam()
         {
-            val = 1;
+            Val = 1;
         }
 
-        public iParam(int v)
+        public IParam(int v)
         {
-            val = v;
+            Val = v;
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace SimulationGUI.Utils
         /// <summary>
         /// Public value that Notifies of property changed
         /// </summary>
-        public int val
+        public int Val
         {
             get { return _val; }
             set
@@ -101,21 +101,21 @@ namespace SimulationGUI.Utils
                 if (_val == value)
                     return;
                 _val = value;
-                NotifyPropertyChanged("sVal");
+                NotifyPropertyChanged("SVal");
             }
         }
 
         /// <summary>
         /// String value used to convert strings from textboxes.
         /// </summary>
-        public string sVal
+        public string SVal
         {
             get { return _val.ToString(CultureInfo.CurrentCulture); }
             set
             {
                 int temp;
                 int.TryParse(value, out temp);
-                val = temp;
+                Val = temp;
             }
         }
 
@@ -137,16 +137,16 @@ namespace SimulationGUI.Utils
 
     }
 
-    public class sParam : INotifyPropertyChanged
+    public class SParam : INotifyPropertyChanged
     {
-        public sParam()
+        public SParam()
         {
-            val = "";
+            Val = "";
         }
 
-        public sParam(string v)
+        public SParam(string v)
         {
-            val = v;
+            Val = v;
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace SimulationGUI.Utils
         /// <summary>
         /// Public value that Notifies of property changed
         /// </summary>
-        public string val
+        public string Val
         {
             get { return _val; }
             set
@@ -165,7 +165,7 @@ namespace SimulationGUI.Utils
                 if (_val == value)
                     return;
                 _val = value;
-                NotifyPropertyChanged("sVal");
+                NotifyPropertyChanged("SVal");
             }
         }
 
@@ -173,10 +173,10 @@ namespace SimulationGUI.Utils
         /// String value used to convert strings from textboxes.
         /// Here for compatibility with other Paams.
         /// </summary>
-        public string sVal
+        public string SVal
         {
             get { return _val; }
-            set { val = value; }
+            set { Val = value; }
         }
 
         /// <summary>

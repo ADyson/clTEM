@@ -1,6 +1,6 @@
-﻿namespace SimulationGUI.Utils
+﻿namespace SimulationGUI.Utils.Settings
 {
-    public static class SettingsStrings
+    public static class SettingsFileStrings
     {
         //Verbatim string literals cannot be intented (the tabs get included in the string)
 

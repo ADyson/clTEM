@@ -2,9 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-
 // Basically taken from http://dutton.me.uk/2013/07/25/how-to-select-all-wpf-textbox-text-on-focus-using-an-attached-behavior/
-namespace SimulationGUI.Utils
+namespace SimulationGUI.Controls
 {
     public class TextBoxBehavior
     {

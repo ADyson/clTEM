@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SimulationGUI.Utils
+namespace SimulationGUI.Utils.Settings
 {
     public enum CopyType { All, Base, TEM, STEM, CBED }
 
@@ -32,10 +28,10 @@ namespace SimulationGUI.Utils
             UserSetArea = old.UserSetArea;
             SimMode = old.SimMode;
 
-            Microscope = new MicroscopeParams(old.Microscope);
+            Microscope = new MicroscopeSettings(old.Microscope);
 
-            SliceThickness = new fParam(old.SliceThickness.val);
-            Integrals = new iParam(old.Integrals.val);
+            SliceThickness = new FParam(old.SliceThickness.Val);
+            Integrals = new IParam(old.Integrals.Val);
             IsFull3D = old.IsFull3D;
             IsFiniteDiff = old.IsFiniteDiff;
             Resolution = old.Resolution;
@@ -62,13 +58,13 @@ namespace SimulationGUI.Utils
 
         public void UpdateWindow(MainWindow app)
         {
-            Microscope = new MicroscopeParams(app);
+            Microscope = new MicroscopeSettings(app);
             Microscope.SetDefaults();
 
-            SliceThickness = new fParam();
+            SliceThickness = new FParam();
             app.txtSliceThickness.DataContext = SliceThickness;
 
-            Integrals = new iParam();
+            Integrals = new IParam();
             app.txt3DIntegrals.DataContext = Integrals;
 
             CBED = new CBEDParams(app);
@@ -77,16 +73,16 @@ namespace SimulationGUI.Utils
 
             STEM = new STEMParams(app);
 
-            SliceThickness.val = 1;
-            Integrals.val = 20;
+            SliceThickness.Val = 1;
+            Integrals.Val = 20;
         }
 
         public void UpdateImageParameters(SimulationSettings old)
         {
             TEM = new TEMParams(old.TEM);
-            var temp = old.Microscope.kv.val;
-            Microscope = new MicroscopeParams(old.Microscope);
-            Microscope.kv.val = temp;
+            var temp = old.Microscope.kv.Val;
+            Microscope = new MicroscopeSettings(old.Microscope);
+            Microscope.kv.Val = temp;
         }
 
         public string GetModeString()
@@ -119,11 +115,11 @@ namespace SimulationGUI.Utils
 
         public STEMParams STEM;
 
-        public MicroscopeParams Microscope;
+        public MicroscopeSettings Microscope;
 
-        public fParam SliceThickness;
+        public FParam SliceThickness;
 
-        public iParam Integrals;
+        public IParam Integrals;
 
         public bool IsFull3D;
 
@@ -141,12 +137,12 @@ namespace SimulationGUI.Utils
     {
         public TEMParams()
         {
-            Dose = new fParam();
+            Dose = new FParam();
         }
 
         public TEMParams(TEMParams old)
         {
-            Dose = new fParam(old.Dose.val);
+            Dose = new FParam(old.Dose.Val);
             Binning = old.Binning;
             CCD = old.CCD;
             CCDName = old.CCDName;
@@ -154,14 +150,14 @@ namespace SimulationGUI.Utils
 
         public TEMParams(MainWindow app)
         {
-            Dose = new fParam();
+            Dose = new FParam();
             app.txtDose.DataContext = Dose;
-            Dose.val = 10000;
+            Dose.Val = 10000;
         }
 
         public bool IsDoseUsed() { return CCD != 0; }
 
-        public fParam Dose;
+        public FParam Dose;
 
         public Int32 Binning;
 
@@ -174,49 +170,49 @@ namespace SimulationGUI.Utils
     {
         public CBEDParams()
         {
-            x = new fParam();
-            y = new fParam();
-            TDSRuns = new iParam();
+            x = new FParam();
+            y = new FParam();
+            TDSRuns = new IParam();
         }
 
         public CBEDParams(CBEDParams old)
         {
-            x = new fParam(old.x.val);
-            y = new fParam(old.y.val);
+            x = new FParam(old.x.Val);
+            y = new FParam(old.y.Val);
             DoTDS = old.DoTDS;
-            TDSRuns = new iParam(old.TDSRuns.val);
+            TDSRuns = new IParam(old.TDSRuns.Val);
         }
 
         public CBEDParams(MainWindow app)
         {
-            x = new fParam();
+            x = new FParam();
             app.txtCBEDx.DataContext = x;
-            x.val = 0;
+            x.Val = 0;
 
-            y = new fParam();
+            y = new FParam();
             app.txtCBEDy.DataContext = y;
-            y.val = 0;
+            y.Val = 0;
 
-            TDSRuns = new iParam();
+            TDSRuns = new IParam();
             app.txtCBEDruns.DataContext = TDSRuns;
-            TDSRuns.val = 10;
+            TDSRuns.Val = 10;
         }
 
-        public fParam x;
+        public FParam x;
 
-        public fParam y;
+        public FParam y;
 
         public bool DoTDS;
 
-        public iParam TDSRuns;
+        public IParam TDSRuns;
     }
 
     public class STEMParams
     {
         public STEMParams()
         {
-            TDSRuns = new iParam();
-            ConcurrentPixels = new iParam();
+            TDSRuns = new IParam();
+            ConcurrentPixels = new IParam();
         }
 
         public STEMParams(STEMParams old)
@@ -229,19 +225,19 @@ namespace SimulationGUI.Utils
             x = old.x;
             y = old.y;
             DoTDS = old.DoTDS;
-            TDSRuns = new iParam(old.TDSRuns.val);
-            ConcurrentPixels = new iParam(old.ConcurrentPixels.val);
+            TDSRuns = new IParam(old.TDSRuns.Val);
+            ConcurrentPixels = new IParam(old.ConcurrentPixels.Val);
         }
 
         public STEMParams(MainWindow app)
         {
-            TDSRuns = new iParam();
+            TDSRuns = new IParam();
             app.txtSTEMruns.DataContext = TDSRuns;
-            TDSRuns.val = 10;
+            TDSRuns.Val = 10;
 
-            ConcurrentPixels = new iParam();
+            ConcurrentPixels = new IParam();
             app.txtSTEMmulti.DataContext = ConcurrentPixels;
-            ConcurrentPixels.val = 10;
+            ConcurrentPixels.Val = 10;
         }
 
         public STEMArea ScanArea = new STEMArea { StartX = 0, EndX = 1, StartY = 0, EndY = 1, xPixels = 1, yPixels = 1 };
@@ -260,8 +256,8 @@ namespace SimulationGUI.Utils
 
         public bool DoTDS;
 
-        public iParam TDSRuns;
+        public IParam TDSRuns;
 
-        public iParam ConcurrentPixels;
+        public IParam ConcurrentPixels;
     }
 }

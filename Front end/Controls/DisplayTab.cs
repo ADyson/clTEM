@@ -3,9 +3,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using PanAndZoom;
+using SimulationGUI.Utils;
+using SimulationGUI.Utils.Settings;
 
-namespace SimulationGUI.Utils
+namespace SimulationGUI.Controls
 {
 	public class DisplayTab
 	{

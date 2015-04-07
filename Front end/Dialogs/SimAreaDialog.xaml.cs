@@ -12,10 +12,10 @@ namespace SimulationGUI.Dialogs
     /// </summary>
     public partial class SimAreaDialog
     {
-        private readonly fParam _startX;
-        private readonly fParam _endX;
-        private readonly fParam _startY;
-        private readonly fParam _endY;
+        private readonly FParam _startX;
+        private readonly FParam _endX;
+        private readonly FParam _startY;
+        private readonly FParam _endY;
 
 
         private bool _goodXrange = true;
@@ -27,20 +27,20 @@ namespace SimulationGUI.Dialogs
         {
             InitializeComponent();
 
-            _startX = new fParam();
-            _startY = new fParam();
-            _endX = new fParam();
-            _endY = new fParam();
+            _startX = new FParam();
+            _startY = new FParam();
+            _endX = new FParam();
+            _endY = new FParam();
 
             txtStartX.DataContext = _startX;
             txtEndX.DataContext = _endX;
             txtStartY.DataContext = _startY;
             txtEndY.DataContext = _endY;
 
-            _startX.val = area.StartX;
-            _startY.val = area.StartY;
-            _endX.val = area.EndX;
-            _endY.val = area.EndY;
+            _startX.Val = area.StartX;
+            _startY.Val = area.StartY;
+            _endX.Val = area.EndX;
+            _endY.Val = area.EndY;
 
             txtStartX.TextChanged += CheckXRangeValid;
             txtStartY.TextChanged += CheckYRangeValid;
@@ -54,7 +54,7 @@ namespace SimulationGUI.Dialogs
             if (!(_goodXrange && _goodYrange))
                 return;
 
-            var temp = new SimulationArea { StartX = _startX.val, EndX = _endX.val, StartY = _startY.val, EndY = _endY.val };
+            var temp = new SimulationArea { StartX = _startX.Val, EndX = _endX.Val, StartY = _startY.Val, EndY = _endY.Val };
 
             if (SetAreaEvent != null) SetAreaEvent(this, new SimAreaArgs(temp));
 
@@ -76,9 +76,9 @@ namespace SimulationGUI.Dialogs
             float.TryParse(text, out newVal);
 
             if (Equals(tbox, txtStartX))
-                _goodXrange = newVal < _endX.val;
+                _goodXrange = newVal < _endX.Val;
             else if (Equals(tbox, txtEndX))
-                _goodXrange = _startX.val < newVal;
+                _goodXrange = _startX.Val < newVal;
 
             if (!_goodXrange) 
             {
@@ -102,9 +102,9 @@ namespace SimulationGUI.Dialogs
             float.TryParse(text, out newVal);
 
             if (Equals(tbox, txtStartY))
-                _goodYrange = newVal < _endY.val;
+                _goodYrange = newVal < _endY.Val;
             else if (Equals(tbox, txtEndY))
-                _goodYrange = _startY.val < newVal;
+                _goodYrange = _startY.Val < newVal;
 
             if (!_goodYrange)
             {

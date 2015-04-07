@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SimulationGUI.Controls;
 using SimulationGUI.Utils;
 
 namespace SimulationGUI

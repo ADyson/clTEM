@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace SimulationGUI.Utils
+namespace SimulationGUI.Controls
 {
     /// <summary>
     /// Provides masking behavior for any <see cref="TextBox"/>.

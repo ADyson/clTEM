@@ -4,7 +4,8 @@
         xmlns:m="clr-namespace:SimulationGUI.Utils"
         xmlns:extra="http://schemas.extra.com/ui"      
         xmlns:params="http://schemas.codeplex.com/elysium/params"
-                     
+        xmlns:controls="clr-namespace:SimulationGUI.Controls"
+
         params:Design.Theme="{DynamicResource ThemeCol}"
         params:Design.AccentBrush="{DynamicResource Accent}"
         params:Design.ContrastBrush="{DynamicResource Contrast}"
@@ -43,34 +44,34 @@
         <Label Content="X start" Margin="20, 0, 7.5, 0"
                 Grid.Column="2" Grid.Row="1"
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
-        <TextBox x:Name="txtStartX" Text="{Binding Path = sVal, Mode = TwoWay}"
+        <TextBox x:Name="txtStartX" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="1"
-                        m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
-                        m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
+                        controls:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                        controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
         <Label Content="X end" Margin="20, 0, 7.5, 0"
                 Grid.Column="4" Grid.Row="1"
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
-        <TextBox x:Name="txtEndX" Text="{Binding Path = sVal, Mode = TwoWay}"
+        <TextBox x:Name="txtEndX" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="5" Grid.Row="1"
-                        m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
-                        m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
+                        controls:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                        controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
         <Label Content="Y start" Margin="20, 0, 7.5, 0"
                 Grid.Column="2" Grid.Row="2"
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
-        <TextBox x:Name="txtStartY" Text="{Binding Path = sVal, Mode = TwoWay}"
+        <TextBox x:Name="txtStartY" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="2"
-                        m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
-                        m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5" Width="80" />
+                        controls:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                        controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5" Width="80" />
 
         <Label Content="Y end" Margin="20, 0, 7.5, 0"
                 Grid.Column="4" Grid.Row="2"
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
-        <TextBox x:Name="txtEndY" Text="{Binding Path = sVal, Mode = TwoWay}"
+        <TextBox x:Name="txtEndY" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="5" Grid.Row="2"
-                        m:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
-                        m:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
+                        controls:MaskedTextBox.Mask="^[0-9]*\.?([0-9]{1,2})?$" Height="{StaticResource ControlHeight}"
+                        controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
 
         <Grid Grid.Row="3" Grid.Column="7">

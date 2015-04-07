@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SimulationGUI.Controls;
 using SimulationGUI.Utils;
 
 namespace SimulationGUI.Dialogs
@@ -21,11 +22,11 @@ namespace SimulationGUI.Dialogs
         private int _numDet;
 
         // these are used for text input validation
-        private readonly sParam _name;
-        private readonly fParam _inner;
-        private readonly fParam _outer;
-        private readonly fParam _centerX;
-        private readonly fParam _centerY;
+        private readonly SParam _name;
+        private readonly FParam _inner;
+        private readonly FParam _outer;
+        private readonly FParam _centerX;
+        private readonly FParam _centerY;
 
         private bool _goodName = true;
         private bool _goodRadii = true;
@@ -34,11 +35,11 @@ namespace SimulationGUI.Dialogs
         {
             InitializeComponent();
 
-            _name = new sParam();
-            _inner = new fParam();
-            _outer = new fParam();
-            _centerX = new fParam();
-            _centerY = new fParam();
+            _name = new SParam();
+            _inner = new FParam();
+            _outer = new FParam();
+            _centerX = new FParam();
+            _centerY = new FParam();
 
             txtName.DataContext = _name;
             txtInner.DataContext = _inner;
@@ -51,11 +52,11 @@ namespace SimulationGUI.Dialogs
             DetectorListView.ItemsSource = _mainDetectors;
             _numDet = _mainDetectors.Count;
 
-            _name.val = "Detector" + (_numDet + 1);
-            _inner.val = 0;
-            _outer.val = 30;
-            _centerX.val = 0;
-            _centerY.val = 0;
+            _name.Val = "Detector" + (_numDet + 1);
+            _inner.Val = 0;
+            _outer.Val = 30;
+            _centerX.Val = 0;
+            _centerY.Val = 0;
 
             // add event handlers
             txtName.TextChanged += CheckNameValid;
@@ -77,13 +78,13 @@ namespace SimulationGUI.Dialogs
             }
 
             // add everything to detector class
-            var temp = new DetectorItem(_name.val, _inner.val, _outer.val, _centerX.val, _centerY.val, _mainDetectors.Count );
+            var temp = new DetectorItem(_name.Val, _inner.Val, _outer.Val, _centerX.Val, _centerY.Val, _mainDetectors.Count );
 
             // add to the listview
             _mainDetectors.Add(temp);
             DetectorListView.Items.Refresh();
             _numDet = _mainDetectors.Count;
-            _name.val = "Detector" + (_numDet+1);
+            _name.Val = "Detector" + (_numDet+1);
 
             // modify the mainWindow List by creating event
             if (AddDetectorEvent != null) AddDetectorEvent(this, new DetectorArgs(temp));
@@ -143,9 +144,9 @@ namespace SimulationGUI.Dialogs
 
 
             if (Equals(tbox, txtInner))
-                _goodRadii = newVal < _outer.val;
+                _goodRadii = newVal < _outer.Val;
             else if (Equals(tbox, txtOuter))
-                _goodRadii = _inner.val < newVal;
+                _goodRadii = _inner.Val < newVal;
 
 
             if (!_goodRadii)

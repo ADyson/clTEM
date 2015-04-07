@@ -10,9 +10,13 @@ using System.Windows.Media.Imaging;
 using System.Threading;
 using ManagedOpenCLWrapper;
 using BitMiracle.LibTiff.Classic;
-using Framework.UI.Controls;
 using SimulationGUI.Utils;
+using System.Linq;
+using SimulationGUI.Controls;
+using SimulationGUI.Dialogs;
+using SimulationGUI.Utils.Settings;
 
+// this stuff might have moved to the simulations file now.
 // TODO: convert aberration angles from radians to degrees or other way around? ( /= Convert.ToSingle((180 / Math.PI)) )
 // TODO: divide beta by 1000?
 // TODO: times delta by 10?
@@ -25,8 +29,6 @@ namespace SimulationGUI
     /// </summary>
     public partial class MainWindow
     {
-        // OpenCL device name storage
-
         /// <summary>
         /// Holds names of OpenCL devices, full versions
         /// </summary>
@@ -59,21 +61,31 @@ namespace SimulationGUI
         /// </summary>
         readonly DisplayTab _diffDisplay = new DisplayTab("Diffraction");
 
+        /// <summary>
+        /// List storing all detectors (that act as tabs). This is the live version that is modifed by the detector dialog.
+        /// </summary>
         List<DetectorItem> DetectorDisplay = new List<DetectorItem>();
 
+        /// <summary>
+        /// List storing all detectors (that act as tabs). This is the locked version used to stop users changing settings mid simulation.
+        /// </summary>
         List<DetectorItem> _lockedDetectorDisplay = new List<DetectorItem>();
 
-
+        /// <summary>
+        /// Settings stores all the current settings and is updated as dialogs/textboxes are changed.
+        /// </summary>
         private SimulationSettings Settings;
 
+        /// <summary>
+        /// Settings of the last simulated images, used to keep constant settings mid simulation.
+        /// </summary>
         private SimulationSettings _lockedSettings;
 
-        //private SimulationSettings _imageSettings;
-
-        bool IsResolutionSet = false;
-        bool HaveStructure = false;
-        bool DetectorVis = false;
-        bool HaveMaxMrad = false;
+        //TODO: see which of these we can do away with
+        bool _isResolutionSet = false;
+        bool _haveStructure = false;
+        bool _detectorVis = false;
+        bool _haveMaxMrad = false;
 
         /// <summary>
         /// Cancel event to halt calculation.
@@ -85,11 +97,13 @@ namespace SimulationGUI
         /// </summary>
         readonly ManagedOpenCL _mCl;
 
-        // TaskFactory stuff
+        /// <summary>
+        /// TaskFactory stuff
+        /// </summary>
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
-        /// Class constructor.
+        /// Class constructor. Makes GUI and sets up the settings.
         /// </summary>
         public MainWindow()
         {
@@ -170,7 +184,7 @@ namespace SimulationGUI
         /// <param name="e"></param>
         private void ImportXYZ(object sender, RoutedEventArgs e)
         {
-            // Create Dialog
+            // Create open dialog
             var openDialog = new Microsoft.Win32.OpenFileDialog
             {
                 FileName = "file name",
@@ -207,7 +221,7 @@ namespace SimulationGUI
                 // Get structure details from unmanaged
                 _mCl.getStructureDetails(ref Len, ref MinX, ref MinY, ref MinZ, ref MaxX, ref MaxY, ref MaxZ);
 
-                HaveStructure = true;
+                _haveStructure = true;
 
                 // Update the displays
                 WidthLabel.Content = (MaxX - MinX).ToString("f2") + " Å";
@@ -254,437 +268,8 @@ namespace SimulationGUI
         private void ImportUnitCell(object sender, RoutedEventArgs e)
         {
             // TODO: implement cif file inputs.
+            // would need to calculate the unit cell coordinates and then tile them to some user set range?
         }
-
-        /// <summary>
-        /// Simulate exit wave.
-        /// Checks/gets parameters and performs the simulation.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SimulateExitWave(object sender, RoutedEventArgs e)
-        {
-			if (!TestSimulationPrerequisites())
-				return;
-
-            // Update GUI to 'working' colour
-            UpdateWorkingColour(true);
-
-            SimulateEWButton.IsEnabled = false;
-            SimulateImageButton.IsEnabled = false;
-
-            _lockedSettings = new SimulationSettings(Settings, CopyType.All);
-            _lockedDetectorDisplay = DetectorDisplay;
-
-            // Update the display tab sizes so we don't need to worry about this later
-            _ewAmplitudeDisplay.SetSize(_lockedSettings.Resolution);
-            _ewPhaseDisplay.SetSize(_lockedSettings.Resolution);
-            _ctemDisplay.SetSize(_lockedSettings.Resolution);
-            _diffDisplay.SetSize(_lockedSettings.Resolution);
-
-            foreach(var det in _lockedDetectorDisplay)
-                det.SetSize(_lockedSettings.STEM.ScanArea.xPixels, _lockedSettings.STEM.ScanArea.yPixels);
-
-            // Create new instances to use to cancel the simulation and to run tasks.
-            cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = this.cancellationTokenSource.Token;
-            var progressReporter = new ProgressReporter();
-
-            // Set the simulation parameters
-			CancelButton.IsEnabled = false;
-            var task = Task.Factory.StartNew(() =>
-            {
-                Thread.CurrentThread.Priority = ThreadPriority.Normal;
-
-                var timer = new Stopwatch();
-
-                // Do cimulation part
-                DoSimulationMethod(ref progressReporter, ref timer, ref cancellationToken);
-
-            }, cancellationToken);
-
-            // Update all the images and return application to original state
-            // This runs on UI thread so can access UI, probably better way of doing image updates though
-            progressReporter.RegisterContinuation(task, () =>
-            {
-				CancelButton.IsEnabled = false;
-                pbrSlices.Value = 100;
-                pbrTotal.Value = 100;
-
-                if (_lockedSettings.SimMode == 2)
-                {
-                    //_lockedSettings.SimMode = 2;
-                    if (_lockedDetectorDisplay.Count == 0)
-                    {
-                        SimulateEWButton.IsEnabled = true;
-                        return;
-                    }
-
-                    foreach (var det in _lockedDetectorDisplay)
-                    {
-                        UpdateSTEMImage(det);
-                        // copy simulation settings to tab
-                        // don't copy stem settings as they are set elsewhere?
-                        det.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-                    }
-
-                    // Just select the first tab for convenience
-                    //_lockedDetectorDisplay.Tab.IsSelected = true;
-                    SaveImageButton.IsEnabled = true;
-                }
-                else if (_lockedSettings.SimMode == 1)
-                {
-                    //Settings.SimMode = 1;
-                    UpdateDiffractionImage();
-
-                    // copy simulation settings to tabs
-                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.CBED);
-
-                    SaveImageButton2.IsEnabled = true;
-
-                }
-                else if (_lockedSettings.SimMode == 0)
-                {
-                    //Settings.SimMode = 0;
-					UpdateEWImages();
-					UpdateDiffractionImage();
-
-                    // copy simulation settings to tabs
-                    _ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-                    _ewPhaseDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-
-                    _ewAmplitudeDisplay.SimParams.TEMMode = 1;
-                    _ewPhaseDisplay.SimParams.TEMMode = 2;
-                    _diffDisplay.SimParams.TEMMode = 3;
-
-                    _ewAmplitudeDisplay.Tab.IsSelected = true;
-                    SaveImageButton.IsEnabled = true;
-                    SaveImageButton2.IsEnabled = true;
-                    SimulateImageButton.IsEnabled = true;
-                }
-                else
-                {
-                    return;
-                }
-
-                UpdateWorkingColour(false);
-                SimulateEWButton.IsEnabled = true;
-            });
-
-        }
-
-        /// <summary>
-        /// Chooses the correct simulation to run (TEM, STEM, CBED) depending on the radio dial checked.
-        /// </summary>
-        /// <param name="progressReporter"></param>
-        /// <param name="timer"></param>
-        /// <param name="ct"></param>
-		private void DoSimulationMethod(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
-		{
-            // Conversion to units
-            var cA1t = Settings.Microscope.a1t.val / Convert.ToSingle((180/Math.PI));
-            var cA2t = Settings.Microscope.a2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB2t = Settings.Microscope.b2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB = Settings.Microscope.b.val / 1000;
-            var cD = Settings.Microscope.d.val / 10;
-            // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(Settings.Microscope.df.val, Settings.Microscope.a1m.val, cA1t, Settings.Microscope.kv.val, Settings.Microscope.cs.val, cB,
-                cD, Settings.Microscope.ap.val, Settings.Microscope.a2m.val, cA2t, Settings.Microscope.b2m.val, cB2t);
-
-            _mCl.setSTEMParams(Settings.Microscope.df.val, Settings.Microscope.a1m.val, cA1t, Settings.Microscope.kv.val, Settings.Microscope.cs.val, cB,
-                cD, Settings.Microscope.ap.val);
-
-            // Add Pixelscale to image tabs and diffraction then run simulation
-            if (_lockedSettings.SimMode == 0)
-			{
-                _ewAmplitudeDisplay.PixelScaleX = _lockedSettings.PixelScale;
-                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
-
-                _ewAmplitudeDisplay.PixelScaleY = _lockedSettings.PixelScale;
-                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
-
-				_ewAmplitudeDisplay.xStartPosition = Settings.SimArea.StartX;
-                _ewAmplitudeDisplay.yStartPosition = Settings.SimArea.StartY;
-
-				SimulateTEM(ref progressReporter,ref timer, ref ct);
-			}
-            else if (_lockedSettings.SimMode == 2)
-			{
-                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
-                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
-				SimulateSTEM(ref progressReporter, ref timer, ref ct);
-			}
-            else if (_lockedSettings.SimMode == 1)
-			{
-                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
-                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
-				SimulateCBED(ref progressReporter,ref timer, ref ct);
-			}
-		}
-
-        /// <summary>
-        /// Simulates the exit wave of TEM
-        /// </summary>
-        /// <param name="progressReporter"></param>
-        /// <param name="timer"></param>
-        /// <param name="ct"></param>
-		private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
-        {
-            // So we have the right voltage should we try to simulate an image later.
-            //_lockedSettings.ImageVoltage = _lockedSettings.Microscope.kv.val;
-
-            //_ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-
-            // Initialise
-            _mCl.initialiseCTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
-                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val);
-
-			// Reset atoms incase TDS has been used previously
-			_mCl.sortStructure(false);
-
-			// Use Background worker to progress through each step
-			var numberOfSlices = 0;
-			_mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
-
-			// Seperate into setup, loop over slices and final steps to allow for progress reporting.
-			for (var slice = 1; slice <= numberOfSlices; slice++)
-			{
-				if (ct.IsCancellationRequested)
-					break;
-
-				timer.Start();
-                // Do the actual simulation
-				_mCl.doMultisliceStep(slice, numberOfSlices);
-				timer.Stop();
-				var memUsage = _mCl.getCLMemoryUsed();
-
-                // Update GUI stuff
-				float ms = timer.ElapsedMilliseconds;
-				progressReporter.ReportProgress((val) =>
-				{
-					CancelButton.IsEnabled = true;
-					UpdateStatus(numberOfSlices, 1, slice, 1, ms, memUsage);
-				}, slice);
-
-			}
-
-		}
-
-        /// <summary>
-        /// Simulates CBED patterns
-        /// </summary>
-        /// <param name="progressReporter"></param>
-        /// <param name="timer"></param>
-        /// <param name="ct"></param>
-		private void SimulateCBED(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
-		{
-            // Initialise probe simulation
-            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
-                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val, 1);
-
-            // Correct probe position for when the simulation region has been changed
-            var posx = (_lockedSettings.CBED.x.val - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale;
-            var posy = (_lockedSettings.CBED.y.val - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale;
-
-			// Get number of steps in the multislice
-			var numberOfSlices = 0;
-            _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
-
-            // Initialise TDS runs
-			var runs = 1;
-            if (_lockedSettings.CBED.DoTDS)
-			{
-				runs = _lockedSettings.CBED.TDSRuns.val;
-			}
-
-            // Loops TDS runs
-			for (var j = 0; j < runs; j++)
-			{
-                // Shuffle the structure for frozen phonon
-                _mCl.sortStructure(Settings.CBED.DoTDS);
-                // Initialise probe
-                _mCl.initialiseSTEMWaveFunction(posx, posy, 1);
-
-                // Do the multislice for this TDS run
-				for (var i = 1; i <= numberOfSlices; i++)
-				{
-					if (ct.IsCancellationRequested == true)
-						break;
-
-					timer.Start();
-                    // Actual simulation part
-					_mCl.doMultisliceStep(i, numberOfSlices);
-					timer.Stop();
-					var memUsage = _mCl.getCLMemoryUsed();
-					float simTime = timer.ElapsedMilliseconds;
-
-					// Update GUI multislice progress
-					progressReporter.ReportProgress((val) =>
-					{
-						CancelButton.IsEnabled = true;
-						UpdateStatus(numberOfSlices, runs, i, j, simTime, memUsage);
-					}, i);
-				}
-
-				if (ct.IsCancellationRequested == true)
-					break;
-                // Update TDS image
-				progressReporter.ReportProgress((val) =>
-				{
-					CancelButton.IsEnabled = false;
-					UpdateDiffractionImage();
-				}, j);
-			}
-		}
-
-        /// <summary>
-        /// Performs the STEM simulations
-        /// </summary>
-        /// <param name="progressReporter"></param>
-        /// <param name="timer"></param>
-        /// <param name="ct"></param>
-		private void SimulateSTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
-		{
-            // convenience variable
-            var conPix = _lockedSettings.STEM.ConcurrentPixels.val;
-
-            // Get steps we need to move the probe in
-            var xInterval = _lockedSettings.STEM.ScanArea.getxInterval;
-            var yInterval = _lockedSettings.STEM.ScanArea.getyInterval;
-
-            // Updates pixel scales for display?
-			foreach (var det in _lockedDetectorDisplay)
-			{
-                det.PixelScaleX = xInterval;
-                det.PixelScaleY = yInterval;
-				det.SetPositionReadoutElements(ref LeftXCoord, ref LeftYCoord);
-			}
-
-            // calculate the number of STEM pixels
-            int numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
-
-            // Initialise detector images
-		    foreach (DetectorItem det in _lockedDetectorDisplay)
-			{
-				det.ImageData = new float[numPix];
-				det.Min = float.MaxValue;
-				det.Max = float.MinValue;
-			}
-
-            // Get number of TDS runs needed
-			var numRuns = 1;
-            if (_lockedSettings.STEM.DoTDS)
-                numRuns = _lockedSettings.STEM.TDSRuns.val;
-
-            // Initialise probe
-            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
-                                          _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.val, _lockedSettings.Integrals.val, conPix);
-
-            // Create array of all the pixels coords
-			var pixels = new List<Tuple<Int32, Int32>>();
-
-            for (var yPx = 0; yPx < _lockedSettings.STEM.ScanArea.yPixels; yPx++)
-			{
-                for (var xPx = 0; xPx < _lockedSettings.STEM.ScanArea.xPixels; xPx++)
-				{
-					pixels.Add(new Tuple<Int32,Int32>(xPx, yPx));
-				}
-			}
-
-            // Loop over number of TDS runs
-			for (var j = 0; j < numRuns; j++)
-			{
-                // shuffle the pixels so when we do TDS, we avoid doing them all next to each other
-                pixels.Shuffle();
-
-                // Current pixel number
-                var nPx = 0;
-
-                // loop through pixels
-                while (nPx < numPix)
-                {
-                    // sort the structure if needed
-                    _mCl.sortStructure(Settings.STEM.DoTDS); // is there optimisation possible here?
-
-                    // make a copy of current pixel as we are about to modify it
-                    var currentPx = nPx;
-
-                    // Check if nPx is inside limits
-                    // If it isn't, adjust the number of concurrent pixels so it is
-                    if (nPx + conPix > numPix && nPx + conPix - numPix + 1 < conPix)
-                    {
-                        conPix = numPix - nPx;
-                        nPx = numPix;
-                    }
-                    else
-                        nPx += conPix;
-
-                    // Make probles for all concurrent probe positions
-                    for (var i = 1; i <= conPix; i++)
-                    {
-                        _mCl.initialiseSTEMWaveFunction(((_lockedSettings.STEM.ScanArea.StartX + pixels[(currentPx + i - 1)].Item1 * xInterval - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale),
-                            ((_lockedSettings.STEM.ScanArea.StartY + pixels[(currentPx + i - 1)].Item2 * yInterval - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale), i);
-                    }
-
-                    // Get number of slices in our multislice
-                    int numberOfSlices = 0;
-                    _mCl.getNumberSlices(ref numberOfSlices, _lockedSettings.IsFiniteDiff);
-
-                    // Loop through slices and simulate as we go
-                    for (var i = 1; i <= numberOfSlices; i++)
-                    {
-                        if (ct.IsCancellationRequested)
-                            break;
-
-                        timer.Start();
-                        // The actual simulation part
-                        _mCl.doMultisliceStep(i, numberOfSlices, conPix);
-                        timer.Stop();
-
-                        var memUsage = _mCl.getCLMemoryUsed();
-                        float simTime = timer.ElapsedMilliseconds;
-
-                        // Update the progress bars
-                        progressReporter.ReportProgress(val =>
-                        {
-                            CancelButton.IsEnabled = true;
-                            UpdateStatus(numberOfSlices, _lockedSettings.STEM.TDSRuns.val, numPix, i, j, nPx, simTime, memUsage);
-                        }, i);
-                    }
-
-                    if (ct.IsCancellationRequested)
-                        break;
-
-                    // loop over the pixels we jsut simulated
-                    for (var p = 1; p <= conPix; p++)
-                    {
-                        // get the diffraction pattern (in OpenCL buffers)
-                        _mCl.getSTEMDiff(p);
-
-                        // Loop through each detectors and get each STEM pixel by summing up diffraction over the detector area
-                        foreach (DetectorItem det in _lockedDetectorDisplay)
-                        {
-                            var pixelVal = _mCl.getSTEMPixel(det.SimParams.STEM.Inner, det.SimParams.STEM.Outer, det.SimParams.STEM.x, det.SimParams.STEM.y, p);
-                            // create new variable to avoid writing this out a lot
-                            var newVal = det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] + pixelVal;
-                            det.ImageData[_lockedSettings.STEM.ScanArea.xPixels * pixels[currentPx + p - 1].Item2 + pixels[currentPx + p - 1].Item1] = newVal;
-
-                            // update maximum and minimum as we go
-                            if (newVal < det.Min)
-                                det.Min = newVal;
-                            if (newVal > det.Max)
-                                det.Max = newVal;
-
-                        }
-                    }
-
-                }
-
-				if (ct.IsCancellationRequested == true)
-					break;
-			}
-		}
 
         private void UpdateEWImages()
         {
@@ -701,6 +286,12 @@ namespace SimulationGUI
             UpdateTabImage(_ewPhaseDisplay, x => x);
         }
 
+        /// <summary>
+        /// Updates the CTEM image tab
+        /// </summary>
+        /// <param name="dpp">Dose per pixel value (units ???)</param>
+        /// <param name="binning">Binning number</param>
+        /// <param name="CCD">Integer value denoting CCD selection in dropdown box (0 == perfect)</param>
         private void UpdateCTEMImage(float dpp, int binning, int CCD)
         {
             if (CCD != 0)
@@ -843,11 +434,14 @@ namespace SimulationGUI
         private static void SaveImage(DisplayTab dt, string filename)
         {
             // for setings stuff (test)
-            string extension = System.IO.Path.GetExtension(filename);
-            string result = filename.Substring(0, filename.Length - extension.Length);
+            var extension = Path.GetExtension(filename);
+            if (extension == null)
+                return;
+            var result = filename.Substring(0, filename.Length - extension.Length);
             result = result + ".txt";
 
             SaveSimulationSettings(dt, result);
+            
 
             if (filename.EndsWith(".tiff"))
             {
@@ -916,12 +510,13 @@ namespace SimulationGUI
 			SimulateEWButton.IsEnabled = false;
 
             var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
-            var binning = Convert.ToInt32(bincombo.Content);
-            var CCD = CCDCombo.SelectedIndex;
-            string CCDName = ((ComboBoxItem)CCDCombo.SelectedItem).Content.ToString();
+            var binning = bincombo != null ? Convert.ToInt32(bincombo.Content) : 1;
+                
+            var ccd = CCDCombo.SelectedIndex;
+            var ccdName = ((ComboBoxItem)CCDCombo.SelectedItem).Content.ToString();
 
-            Settings.TEM.CCD = CCD;
-            Settings.TEM.CCDName = CCDName;
+            Settings.TEM.CCD = ccd;
+            Settings.TEM.CCDName = ccdName;
             Settings.TEM.Binning = binning;
 
             // copy settings used for the exit wave (settings from Amplitude and Phase should always be the same) 
@@ -930,161 +525,599 @@ namespace SimulationGUI
             // then need to copy TEM params from current settings
             _ctemDisplay.SimParams.UpdateImageParameters(Settings);
             
-
             // Conversion to units of correctness
-            var cA1t = Settings.Microscope.a1t.val / Convert.ToSingle((180 / Math.PI));
-            var cA2t = Settings.Microscope.a2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB2t = Settings.Microscope.b2t.val / Convert.ToSingle((180 / Math.PI));
-            var cB = Settings.Microscope.b.val / 1000;
-            var cD = Settings.Microscope.d.val / 10;
+            var cA1T = Settings.Microscope.a1t.Val / Convert.ToSingle((180 / Math.PI));
+            var cA2T = Settings.Microscope.a2t.Val / Convert.ToSingle((180 / Math.PI));
+            var cB2T = Settings.Microscope.b2t.Val / Convert.ToSingle((180 / Math.PI));
+            var cB = Settings.Microscope.b.Val / 1000;
+            var cD = Settings.Microscope.d.Val / 10;
 
             // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(Settings.Microscope.df.val, Settings.Microscope.a1m.val, cA1t, Settings.Microscope.kv.val, Settings.Microscope.cs.val, cB,
-                cD, Settings.Microscope.ap.val, Settings.Microscope.a2m.val, cA2t, Settings.Microscope.b2m.val, cB2t);
+            _mCl.setCTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
+                cD, Settings.Microscope.ap.Val, Settings.Microscope.a2m.Val, cA2T, Settings.Microscope.b2m.Val, cB2T);
 
 			// Calculate Dose Per Pixel
-            var dpp = Settings.TEM.Dose.val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
+            var dpp = Settings.TEM.Dose.Val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
 			
             // Get CCD and Binning
 
-            if (CCD != 0)
-                _mCl.simulateCTEM(CCD, binning);
+            if (ccd != 0)
+                _mCl.simulateCTEM(ccd, binning);
             else
                 _mCl.simulateCTEM();
 
             //Update the displays
-            UpdateCTEMImage(dpp, binning, CCD);
+            UpdateCTEMImage(dpp, binning, ccd);
             UpdateDiffractionImage();
 
 			SimulateEWButton.IsEnabled = true;
         }
 
-        static private void SaveSimulationSettings(DisplayTab Tab, string filename)
+        static private void SaveSimulationSettings(DisplayTab tab, string filename)
         {
-            if (Tab.SimParams.SimArea == null)
+            if (tab.SimParams.SimArea == null)
                 return; // might want other checks? this one is definitely used after a simulation?
 
-            var general = SettingsStrings.UniversalSettings;
-            general = general.Replace("{{filename}}", Tab.SimParams.FileName); // save this beforehand somewhere and lock it?
-            general = general.Replace("{{simareaxstart}}", Tab.SimParams.SimArea.StartX.ToString());
-            general = general.Replace("{{simareaxend}}", Tab.SimParams.SimArea.EndX.ToString());
-            general = general.Replace("{{simareaystart}}", Tab.SimParams.SimArea.StartY.ToString());
-            general = general.Replace("{{simareayend}}", Tab.SimParams.SimArea.EndY.ToString());
-            general = general.Replace("{{resolution}}", Tab.SimParams.Resolution.ToString());
+            var general = SettingsFileStrings.UniversalSettings;
+            general = general.Replace("{{filename}}", tab.SimParams.FileName); // save this beforehand somewhere and lock it?
+            general = general.Replace("{{simareaxstart}}", tab.SimParams.SimArea.StartX.ToString());
+            general = general.Replace("{{simareaxend}}", tab.SimParams.SimArea.EndX.ToString());
+            general = general.Replace("{{simareaystart}}", tab.SimParams.SimArea.StartY.ToString());
+            general = general.Replace("{{simareayend}}", tab.SimParams.SimArea.EndY.ToString());
+            general = general.Replace("{{resolution}}", tab.SimParams.Resolution.ToString());
 
-            general = general.Replace("{{mode}}", Tab.SimParams.GetModeString());
+            general = general.Replace("{{mode}}", tab.SimParams.GetModeString());
 
-            general = general.Replace("{{full3d}}", Tab.SimParams.IsFull3D.ToString());
+            general = general.Replace("{{full3d}}", tab.SimParams.IsFull3D.ToString());
 
-            if (Tab.SimParams.IsFull3D)
+            if (tab.SimParams.IsFull3D)
             {
-                var Full3Dopt_string = SettingsStrings.Full3dSettings;
-                Full3Dopt_string = Full3Dopt_string.Replace("{{3dint}}", Tab.SimParams.Integrals.val.ToString());
+                var full3DoptString = SettingsFileStrings.Full3dSettings;
+                full3DoptString = full3DoptString.Replace("{{3dint}}", tab.SimParams.Integrals.Val.ToString());
 
-                general = general.Replace("{{Full3Dopt}}", Full3Dopt_string);
+                general = general.Replace("{{Full3Dopt}}", full3DoptString);
             }
             else
             {
                 general = general.Replace("{{Full3Dopt}}", "");
             }
 
-            general = general.Replace("{{fd}}", Tab.SimParams.IsFiniteDiff.ToString());
-            general = general.Replace("{{slicethickness}}", Tab.SimParams.SliceThickness.val.ToString());
+            general = general.Replace("{{fd}}", tab.SimParams.IsFiniteDiff.ToString());
+            general = general.Replace("{{slicethickness}}", tab.SimParams.SliceThickness.Val.ToString());
 
             // Microscope
 
-            general = general.Replace("{{volts}}", Tab.SimParams.Microscope.kv.val.ToString());
+            general = general.Replace("{{volts}}", tab.SimParams.Microscope.kv.Val.ToString());
 
-            string Microscope_string = "";
+            var microscopeString = "";
 
-            if (Tab.SimParams.SimMode != 0 || (Tab.SimParams.SimMode == 0 && Tab.SimParams.TEMMode == 0))
+            if (tab.SimParams.SimMode != 0 || (tab.SimParams.SimMode == 0 && tab.SimParams.TEMMode == 0))
             {
-                Microscope_string = SettingsStrings.MicroscopeSettings;
+                microscopeString = SettingsFileStrings.MicroscopeSettings;
 
-                Microscope_string = Microscope_string.Replace("{{aperture}}", Tab.SimParams.Microscope.ap.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{beta}}", Tab.SimParams.Microscope.b.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{delta}}", Tab.SimParams.Microscope.d.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{defocus}}", Tab.SimParams.Microscope.df.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{cs}}", Tab.SimParams.Microscope.cs.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{A1m}}", Tab.SimParams.Microscope.a1m.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{A1t}}", Tab.SimParams.Microscope.a1t.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{A2m}}", Tab.SimParams.Microscope.a2m.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{A2t}}", Tab.SimParams.Microscope.a2t.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{B2m}}", Tab.SimParams.Microscope.b2m.val.ToString());
-                Microscope_string = Microscope_string.Replace("{{B2t}}", Tab.SimParams.Microscope.b2t.val.ToString());
+                microscopeString = microscopeString.Replace("{{aperture}}", tab.SimParams.Microscope.ap.Val.ToString());
+                microscopeString = microscopeString.Replace("{{beta}}", tab.SimParams.Microscope.b.Val.ToString());
+                microscopeString = microscopeString.Replace("{{delta}}", tab.SimParams.Microscope.d.Val.ToString());
+                microscopeString = microscopeString.Replace("{{defocus}}", tab.SimParams.Microscope.df.Val.ToString());
+                microscopeString = microscopeString.Replace("{{cs}}", tab.SimParams.Microscope.cs.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A1m}}", tab.SimParams.Microscope.a1m.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A1t}}", tab.SimParams.Microscope.a1t.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A2m}}", tab.SimParams.Microscope.a2m.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A2t}}", tab.SimParams.Microscope.a2t.Val.ToString());
+                microscopeString = microscopeString.Replace("{{B2m}}", tab.SimParams.Microscope.b2m.Val.ToString());
+                microscopeString = microscopeString.Replace("{{B2t}}", tab.SimParams.Microscope.b2t.Val.ToString());
             }
 
-            general = general.Replace("{{microscopesettings}}", Microscope_string);
+            general = general.Replace("{{microscopesettings}}", microscopeString);
 
             // mode settings
-            string Mode_string = "";
+            var modeString = "";
 
-            if (Tab.SimParams.SimMode == 0 && Tab.SimParams.TEM != null && Tab.SimParams.TEM.CCD != 0)
+            if (tab.SimParams.SimMode == 0 && tab.SimParams.TEM != null && tab.SimParams.TEM.CCD != 0)
             {
-                Mode_string = SettingsStrings.DoseSettings;
+                modeString = SettingsFileStrings.DoseSettings;
 
-                Mode_string = Mode_string.Replace("{{dose}}", Tab.SimParams.TEM.Dose.val.ToString());
-                Mode_string = Mode_string.Replace("{{ccd}}", Tab.SimParams.TEM.CCDName);
-                Mode_string = Mode_string.Replace("{{binning}}", Tab.SimParams.TEM.Binning.ToString());
+                modeString = modeString.Replace("{{dose}}", tab.SimParams.TEM.Dose.Val.ToString());
+                modeString = modeString.Replace("{{ccd}}", tab.SimParams.TEM.CCDName);
+                modeString = modeString.Replace("{{binning}}", tab.SimParams.TEM.Binning.ToString());
             }
-            else if (Tab.SimParams.SimMode == 1)
+            else switch (tab.SimParams.SimMode)
             {
-                Mode_string = SettingsStrings.CBEDSettings;
+                case 1:
+                    modeString = SettingsFileStrings.CBEDSettings;
 
-                Mode_string = Mode_string.Replace("{{cbedx}}", Tab.SimParams.CBED.x.val.ToString());
-                Mode_string = Mode_string.Replace("{{cbedy}}", Tab.SimParams.CBED.y.val.ToString());
-                if (Tab.SimParams.CBED.DoTDS)
-                    Mode_string = Mode_string.Replace("{{cbedtds}}", Tab.SimParams.CBED.TDSRuns.val.ToString());
-                else
-                    Mode_string = Mode_string.Replace("{{cbedtds}}", "1");
-            }
-            else if (Tab.SimParams.SimMode == 2)
-            {
-                Mode_string = SettingsStrings.STEMSettings;
+                    modeString = modeString.Replace("{{cbedx}}", tab.SimParams.CBED.x.Val.ToString());
+                    modeString = modeString.Replace("{{cbedy}}", tab.SimParams.CBED.y.Val.ToString());
+                    modeString = modeString.Replace("{{cbedtds}}", tab.SimParams.CBED.DoTDS ? tab.SimParams.CBED.TDSRuns.Val.ToString() : "1");
+                    break;
+                case 2:
+                    modeString = SettingsFileStrings.STEMSettings;
 
-                Mode_string = Mode_string.Replace("{{multistem}}", Tab.SimParams.STEM.ConcurrentPixels.val.ToString());
-                if (Tab.SimParams.STEM.DoTDS)
-                    Mode_string = Mode_string.Replace("{{stemtds}}", Tab.SimParams.STEM.TDSRuns.val.ToString());
-                else
-                    Mode_string = Mode_string.Replace("{{stemtds}}", "1");
+                    modeString = modeString.Replace("{{multistem}}", tab.SimParams.STEM.ConcurrentPixels.Val.ToString());
+                    modeString = modeString.Replace("{{stemtds}}", tab.SimParams.STEM.DoTDS ? tab.SimParams.STEM.TDSRuns.Val.ToString() : "1");
 
-                var detInfo_string = SettingsStrings.STEMDetectors;
+                    var detInfoString = SettingsFileStrings.STEMDetectors;
 
-                detInfo_string = detInfo_string.Replace("{{detectorname}}", Tab.SimParams.STEM.Name);
-                detInfo_string = detInfo_string.Replace("{{inner}}", Tab.SimParams.STEM.Inner.ToString());
-                detInfo_string = detInfo_string.Replace("{{outer}}", Tab.SimParams.STEM.Outer.ToString());
-                detInfo_string = detInfo_string.Replace("{{centx}}", Tab.SimParams.STEM.x.ToString());
-                detInfo_string = detInfo_string.Replace("{{centy}}", Tab.SimParams.STEM.y.ToString());
+                    detInfoString = detInfoString.Replace("{{detectorname}}", tab.SimParams.STEM.Name);
+                    detInfoString = detInfoString.Replace("{{inner}}", tab.SimParams.STEM.Inner.ToString());
+                    detInfoString = detInfoString.Replace("{{outer}}", tab.SimParams.STEM.Outer.ToString());
+                    detInfoString = detInfoString.Replace("{{centx}}", tab.SimParams.STEM.x.ToString());
+                    detInfoString = detInfoString.Replace("{{centy}}", tab.SimParams.STEM.y.ToString());
 
-                Mode_string = Mode_string.Replace("{{stemdetectors}}", detInfo_string);
+                    modeString = modeString.Replace("{{stemdetectors}}", detInfoString);
+                    break;
             }
 
-            general = general.Replace("{{modesettings}}", Mode_string);
-
-            //var saveDialog = new Microsoft.Win32.SaveFileDialog
-            //{
-            //    Title = "Save Simulation Settings",
-            //    DefaultExt = ".txt",
-            //    Filter = "txt (*.txt)|*.txt"
-            //};
-
-            //var result = saveDialog.ShowDialog();
-
-            //if (result == false) return;
-
-            //var filename = saveDialog.FileName;
+            general = general.Replace("{{modesettings}}", modeString);
 
             File.WriteAllText(filename, general);
         }
 
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        /// <summary>
+        /// Check CBED positions are in simulation range.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CheckTboxValid(object sender, TextChangedEventArgs e)
         {
-            var newSize = e.NewSize;
-            var win = sender as System.Windows.Window;
+            var tbox = sender as TextBox;
+            if (tbox == null) return;
 
-            win.Width = newSize.Width;
-            win.Height = newSize.Height;
+            var text = tbox.Text;
+            // have replaced validCBED and goofinite
 
+            float fVal;
+            int iVal;
+            bool good;
+
+            if (Equals(tbox, txtCBEDx))
+            {
+                float.TryParse(text, out fVal);
+                good = fVal >= Settings.SimArea.StartX && fVal <= Settings.SimArea.EndX;
+                ErrorMessage.ToggleCode(30, good);
+            }
+            else if (Equals(tbox, txtCBEDy))
+            {
+                float.TryParse(text, out fVal);
+                good = fVal >= Settings.SimArea.StartY && fVal <= Settings.SimArea.EndY;
+                ErrorMessage.ToggleCode(30, good);
+            }
+            else if (Equals(tbox, txtCBEDruns))
+            {
+                int.TryParse(text, out iVal);
+                good = iVal > 0;
+                ErrorMessage.ToggleCode(31, good);
+            }
+            else if (Equals(tbox, txt3DIntegrals))
+            {
+                int.TryParse(text, out iVal);
+                good = iVal > 0;
+                ErrorMessage.ToggleCode(6, good);
+            }
+            else if (Equals(tbox, txtSliceThickness))
+            {
+                float.TryParse(text, out fVal);
+                good = fVal > 0;
+                ErrorMessage.ToggleCode(5, good);
+            }
+            else if (Equals(tbox, txtMicroscopeAp))
+            {
+                float.TryParse(text, out fVal);
+                good = fVal > 0;
+                WarningMessage.ToggleCode(10, good);
+            }
+            else if (Equals(tbox, txtMicroscopeKv))
+            {
+                float.TryParse(text, out fVal);
+                good = fVal > 0;
+                ErrorMessage.ToggleCode(3, good);
+            }
+            else if (Equals(tbox, txtSTEMruns))
+            {
+                int.TryParse(tbox.Text, out iVal);
+                good = iVal > 0;
+                ErrorMessage.ToggleCode(41, good);
+            }
+            else if (Equals(tbox, txtSTEMmulti))
+            {
+                int.TryParse(tbox.Text, out iVal);
+                good = iVal > 0;
+                ErrorMessage.ToggleCode(41, good);
+            }
+            else if (Equals(tbox, txtDose))
+            {
+                int.TryParse(tbox.Text, out iVal);
+                good = iVal > 0;
+                WarningMessage.ToggleCode(50, good);
+            }
+            else
+                return;
+
+            if (!good)
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            else
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+        }
+
+        private static void UpdateWorkingColour(bool working)
+        {
+            if (working)
+                Application.Current.Resources["Accent"] = Application.Current.Resources["WorkingColOrig"];
+            else
+                Application.Current.Resources["Accent"] = Application.Current.Resources["AccentOrig"];
+        }
+
+        /// <summary>
+        /// Updates the pixel scale and also the maximum milliradians
+        /// </summary>
+        private void UpdatePixelScale()
+        {
+            if (!_haveStructure || !_isResolutionSet) return;
+            var biggestSize = Math.Max(Settings.SimArea.EndX - Settings.SimArea.StartX, Settings.SimArea.EndY - Settings.SimArea.StartY);
+            Settings.PixelScale = biggestSize / Settings.Resolution;
+            PixelScaleLabel.Content = Settings.PixelScale.ToString("f2") + " Å";
+
+            UpdateMaxMrad();
+        }
+
+        /// <summary>
+        /// Updates maximum milliradians visible in reciprocal space
+        /// </summary>
+        private void UpdateMaxMrad()
+        {
+            if (!_haveStructure)
+                return;
+
+            var minX = Settings.SimArea.StartX;
+            var minY = Settings.SimArea.StartY;
+
+            var maxX = Settings.SimArea.EndX;
+            var maxY = Settings.SimArea.EndY;
+
+            var biggestSize = Math.Max(maxX - minX, maxY - minY);
+            // Determine max mrads for reciprocal space, (need wavelength)...
+            var maxFreq = 1 / (2 * biggestSize / Settings.Resolution);
+
+            if (Settings.Microscope.kv.Val <= 0 && _isResolutionSet)
+            {
+                const float echarge = 1.6e-19f;
+                Settings.Wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * Settings.Microscope.kv.Val * 1000 *
+                    (2 * 9.11e-031 * 9e+016 + echarge * Settings.Microscope.kv.Val * 1000))) * 1e+010);
+
+                var mrads = (1000 * maxFreq * Settings.Wavelength) / 2; //divide by two to get mask limits
+
+                MaxMradsLabel.Content = mrads.ToString("f2") + " mrad";
+
+                _haveMaxMrad = true;
+            }
+        }
+
+        private void txtImageKv_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateMaxMrad();
+        }
+
+        private void SimTypeRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (TEMRadioButton.IsChecked == true)
+            {
+                txtMicroscopeA2m.IsEnabled = true;
+                txtMicroscopeA2t.IsEnabled = true;
+                txtMicroscopeB2m.IsEnabled = true;
+                txtMicroscopeB2t.IsEnabled = true;
+                txtMicroscopeD.IsEnabled = true;
+                txtMicroscopeB.IsEnabled = true;
+
+                TEMbox.Visibility = Visibility.Visible;
+                STEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Hidden;
+
+                Settings.SimMode = 0;
+
+            }
+            else if (STEMRadioButton.IsChecked == true)
+            {
+                txtMicroscopeA2m.IsEnabled = false;
+                txtMicroscopeA2t.IsEnabled = false;
+                txtMicroscopeB2m.IsEnabled = false;
+                txtMicroscopeB2t.IsEnabled = false;
+                txtMicroscopeD.IsEnabled = false;
+                txtMicroscopeB.IsEnabled = false;
+
+                STEMbox.Visibility = Visibility.Visible;
+                TEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Hidden;
+
+                Settings.SimMode = 2;
+            }
+            else if (CBEDRadioButton.IsChecked == true)
+            {
+                txtMicroscopeA2m.IsEnabled = false;
+                txtMicroscopeA2t.IsEnabled = false;
+                txtMicroscopeB2m.IsEnabled = false;
+                txtMicroscopeB2t.IsEnabled = false;
+                txtMicroscopeD.IsEnabled = false;
+                txtMicroscopeB.IsEnabled = false;
+
+                STEMbox.Visibility = Visibility.Hidden;
+                TEMbox.Visibility = Visibility.Hidden;
+                CBEDbox.Visibility = Visibility.Visible;
+
+                Settings.SimMode = 1;
+            }
+        }
+
+        private void STEM_TDStoggled(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk != null) Settings.STEM.DoTDS = chk.IsChecked == true;
+        }
+
+        private void CBED_TDStoggled(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk != null) Settings.CBED.DoTDS = chk.IsChecked == true;
+        }
+
+        private void Full3Dtoggled(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk != null) Settings.IsFull3D = chk.IsChecked == true;
+
+            if (ToggleFD != null && Settings.IsFull3D)
+            {
+                ToggleFD.IsChecked = false;
+                Settings.IsFiniteDiff = false;
+            }
+        }
+
+        private void FDtoggled(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk != null) Settings.IsFiniteDiff = chk.IsChecked == true;
+
+            if (ToggleFull3D != null && Settings.IsFiniteDiff)
+            {
+                ToggleFull3D.IsChecked = false;
+                Settings.IsFull3D = false;
+            }
+        }
+
+        private void Show_detectors(object sender, RoutedEventArgs e)
+        {
+            foreach (var i in DetectorDisplay)
+            {
+                i.SetVisibility(true);
+            }
+            _detectorVis = true;
+        }
+
+        private void Hide_Detectors(object sender, RoutedEventArgs e)
+        {
+            foreach (var i in DetectorDisplay)
+            {
+                i.SetVisibility(false);
+            }
+            _detectorVis = false;
+        }
+
+        private void OpenSTEMDetDlg(object sender, RoutedEventArgs e)
+        {
+            // open the window here
+            var window = new STEMDetectorDialog(DetectorDisplay) { Owner = this };
+            window.AddDetectorEvent += STEM_AddDetector;
+            window.RemDetectorEvent += STEM_RemoveDetector;
+            window.ShowDialog();
+        }
+
+        private void OpenSTEMAreaDlg(object sender, RoutedEventArgs e)
+        {
+            var window = new STEMAreaDialog(Settings.STEM.ScanArea, Settings.SimArea) { Owner = this };
+            window.AddSTEMAreaEvent += STEM_AddArea;
+            window.ShowDialog();
+        }
+
+        void STEM_AddDetector(object sender, DetectorArgs evargs)
+        {
+            var added = evargs.Detector;
+            LeftTab.Items.Add(added.Tab);
+            added.AddToCanvas(_diffDisplay.tCanvas);
+            //if(HaveMaxMrad)
+            //   added.SetEllipse(Settings.Resolution, _lockedSettings.PixelScale, _lockedSettings.Wavelength, DetectorVis);
+        }
+
+        void STEM_RemoveDetector(object sender, DetectorArgs evargs)
+        {
+            foreach (var i in evargs.DetectorList)
+            {
+                i.RemoveFromCanvas(_diffDisplay.tCanvas);
+                LeftTab.Items.Remove(i.Tab);
+            }
+
+            foreach (var i in DetectorDisplay)
+            {
+                i.SetColour();
+            }
+        }
+
+        void STEM_AddArea(object sender, StemAreaArgs evargs)
+        {
+            Settings.STEM.UserSetArea = true;
+            Settings.STEM.ScanArea = evargs.AreaParams;
+        }
+
+        private void DeviceSelector_DropDownOpened(object sender, EventArgs e)
+        {
+            DeviceSelector.ItemsSource = _devicesLong;
+        }
+
+        private void DeviceSelector_DropDownClosed(object sender, EventArgs e)
+        {
+            var cb = sender as ComboBox;
+
+            if (cb == null) return;
+            var index = cb.SelectedIndex;
+            cb.ItemsSource = _devicesShort;
+            cb.SelectedIndex = index;
+            if (index != -1)
+            {
+                _mCl.setCLdev(cb.SelectedIndex);
+                SimulateImageButton.IsEnabled = false;
+            }
+            ErrorMessage.ToggleCode(1, index != -1);
+        }
+
+        private void OpenAreaDlg(object sender, RoutedEventArgs e)
+        {
+            var window = new SimAreaDialog(Settings.SimArea) { Owner = this };
+            window.SetAreaEvent += SetArea;
+            window.Show();
+        }
+
+        void SetArea(object sender, SimAreaArgs evargs)
+        {
+            var changedx = false;
+            var changedy = false;
+            Settings.UserSetArea = true;
+            Settings.SimArea = evargs.AreaParams;
+
+            var xscale = (Settings.STEM.ScanArea.StartX - Settings.STEM.ScanArea.EndX) / Settings.STEM.ScanArea.xPixels;
+            var yscale = (Settings.STEM.ScanArea.StartY - Settings.STEM.ScanArea.EndY) / Settings.STEM.ScanArea.yPixels;
+
+            if (Settings.STEM.ScanArea.StartX < Settings.SimArea.StartX || Settings.STEM.ScanArea.StartX > Settings.SimArea.EndX)
+            {
+                Settings.STEM.ScanArea.StartX = Settings.SimArea.StartX;
+                changedx = true;
+            }
+
+            if (Settings.STEM.ScanArea.EndX > Settings.SimArea.EndX || Settings.STEM.ScanArea.EndX < Settings.SimArea.StartX)
+            {
+                Settings.STEM.ScanArea.EndX = Settings.SimArea.EndX;
+                changedx = true;
+            }
+
+            if (Settings.STEM.ScanArea.StartY < Settings.SimArea.StartY || Settings.STEM.ScanArea.StartY > Settings.SimArea.EndY)
+            {
+                Settings.STEM.ScanArea.StartY = Settings.SimArea.StartY;
+                changedy = true;
+            }
+
+            if (Settings.STEM.ScanArea.EndY > Settings.SimArea.EndY || Settings.STEM.ScanArea.EndY < Settings.SimArea.StartY)
+            {
+                Settings.STEM.ScanArea.EndY = Settings.SimArea.EndY;
+                changedy = true;
+            }
+
+            if (changedx)
+                Settings.STEM.ScanArea.xPixels = (int)Math.Ceiling((Settings.STEM.ScanArea.StartX - Settings.STEM.ScanArea.EndX) / xscale);
+
+            if (changedy)
+                Settings.STEM.ScanArea.yPixels = (int)Math.Ceiling((Settings.STEM.ScanArea.StartY - Settings.STEM.ScanArea.EndY) / yscale);
+
+            UpdatePixelScale();
+        }
+
+        /// <summary>
+        /// Test if the required parameters have been set.
+        /// 1. Structure has been set.
+        /// 2. Resolution has been set.
+        /// 3. OpenCL device has been set.
+        /// 4. Microscope parameters make sense.
+        /// </summary>
+        /// <returns>bool if all the parameters have been set.</returns>
+        private bool TestSimulationPrerequisites()
+        {
+            var errorMsg = new List<string>();
+            var warnMsg = new List<string>();
+
+            // At the moment easiest to check this here
+            if (DetectorDisplay.Count == 0)
+                ErrorMessage.AddCode(42);
+            else
+                ErrorMessage.RemoveCode(42);
+
+            if (Settings.SimMode == 0)
+            {
+                errorMsg = ErrorMessage.GetCTEMCodes();
+                warnMsg = WarningMessage.GetCTEMCodes();
+            }
+            else if (Settings.SimMode == 1)
+            {
+                errorMsg = ErrorMessage.GetCBEDCodes();
+                warnMsg = WarningMessage.GetCBEDCodes();
+            }
+            else if (Settings.SimMode == 2)
+            {
+                errorMsg = ErrorMessage.GetSTEMCodes();
+                warnMsg = WarningMessage.GetSTEMCodes();
+            }
+
+            if (errorMsg.Count == 0 && warnMsg.Count == 0)
+                return true;
+
+            var message = errorMsg.Aggregate("", (current, msg) => current + ("Error: " + msg + "\n"));
+            message = warnMsg.Aggregate(message, (current, msg) => current + ("Warning: " + msg + "\n"));
+
+            if (errorMsg.Count == 0)
+            {
+                var dlg = new WarningDialog(message, MessageBoxButton.OKCancel, WarningColour.Warning) { Owner = GetWindow(this) };
+                var ok = dlg.ShowDialog();
+                return ok ?? true;
+            }
+            else
+            {
+                var dlg = new WarningDialog(message, MessageBoxButton.OK, WarningColour.Error) { Owner = GetWindow(this) };
+                dlg.ShowDialog();
+                return false;
+            }
+        }
+
+        private bool TestImagePrerequisites()
+        {
+            var errorMsg = ErrorMessage.GetImageCodes();
+            var warnMsg = WarningMessage.GetImageCodes();
+
+            if (errorMsg.Count == 0 && warnMsg.Count == 0)
+                return true;
+
+            var message = errorMsg.Aggregate("", (current, msg) => current + ("Error: " + msg + "\n"));
+
+            message = warnMsg.Aggregate(message, (current, msg) => current + ("Warning: " + msg + "\n"));
+
+            if (errorMsg.Count == 0)
+            {
+                var dlg = new WarningDialog(message, MessageBoxButton.OKCancel, WarningColour.Warning) { Owner = GetWindow(this) };
+                var ok = dlg.ShowDialog();
+                return ok ?? true;
+            }
+            else
+            {
+                var dlg = new WarningDialog(message, MessageBoxButton.OK, WarningColour.Error) { Owner = GetWindow(this) };
+                dlg.ShowDialog();
+                return false;
+            }
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            cancellationTokenSource.Cancel();
+        }
+
+        private void CboResolutionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int.TryParse(ResolutionCombo.SelectedValue.ToString(), out Settings.Resolution);
+
+            ErrorMessage.ToggleCode(2, true);
+
+            _isResolutionSet = true;
+
+            if (!Settings.STEM.UserSetArea)
+            {
+                Settings.STEM.ScanArea.xPixels = Settings.Resolution;
+                Settings.STEM.ScanArea.yPixels = Settings.Resolution;
+            }
+
+            UpdatePixelScale();
         }
     }
 }
