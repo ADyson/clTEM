@@ -394,107 +394,25 @@ namespace SimulationGUI
         //TODO: can combine these by getting the sender too?
 		private void SaveLeftImage(object sender, RoutedEventArgs e)
 		{
-			var tabs = new List<DisplayTab> {_ctemDisplay,_ewAmplitudeDisplay,_ewPhaseDisplay};
+            // get display tab that is selected
+            var tabs = new List<DisplayTab> { _ctemDisplay, _ewAmplitudeDisplay, _ewPhaseDisplay };
+            // for left tab only
             tabs.AddRange(_lockedDetectorDisplay);
 
-            SaveImageFromTab(tabs);
+            foreach (var window in from dt in tabs where dt.Tab.IsSelected where dt.xDim != 0 || dt.yDim != 0 select new InfoSaveDialog(dt) { Owner = this })
+            {
+                window.ShowDialog();
+            }
 		}
 
         private void SaveRightImage(object sender, RoutedEventArgs e)
         {
 			// Ideally want to check tab and use information to save either EW or CTEM....
 			var tabs = new List<DisplayTab> {_diffDisplay};
-            SaveImageFromTab(tabs);
-        }
 
-		private static void SaveImageFromTab(IEnumerable<DisplayTab> tabs)
-		{
-			foreach (var dt in tabs)
-			{
-                if (dt.Tab.IsSelected != true) continue;
-			    if (dt.xDim == 0 && dt.yDim == 0) continue;
-
-			    // File saving dialog
-			    var saveDialog = new Microsoft.Win32.SaveFileDialog
-			    {
-			        Title = "Save Output Image",
-			        DefaultExt = ".tiff",
-			        Filter = "TIFF (*.tiff)|*.tiff|PNG (*.png)|*.png|JPEG (*.jpeg)|*.jpeg"
-			    };
-
-			    var result = saveDialog.ShowDialog();
-
-			    if (result == false) return;
-
-                var filename = saveDialog.FileName;
-
-			    SaveImage(dt, filename);
-			}
-		}
-
-        private static void SaveImage(DisplayTab dt, string filename)
-        {
-            // for setings stuff (test)
-            var extension = Path.GetExtension(filename);
-            if (extension == null)
-                return;
-            var result = filename.Substring(0, filename.Length - extension.Length);
-            result = result + ".txt";
-
-            SaveSimulationSettings(dt, result);
-            
-
-            if (filename.EndsWith(".tiff"))
+            foreach (var window in from dt in tabs where dt.Tab.IsSelected where dt.xDim != 0 || dt.yDim != 0 select new InfoSaveDialog(dt) { Owner = this })
             {
-                using (var output = Tiff.Open(filename, "w"))
-                {
-
-                    output.SetField(TiffTag.IMAGEWIDTH, dt.xDim);
-                    output.SetField(TiffTag.IMAGELENGTH, dt.yDim);
-                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
-                    output.SetField(TiffTag.SAMPLEFORMAT, 3);
-                    output.SetField(TiffTag.BITSPERSAMPLE, 32);
-                    output.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
-                    output.SetField(TiffTag.ROWSPERSTRIP, dt.yDim);
-                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
-                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
-                    output.SetField(TiffTag.COMPRESSION, Compression.NONE);
-                    output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
-
-                    for (var i = 0; i < dt.yDim; ++i)
-                    {
-                        var buf = new float[dt.xDim];
-                        var buf2 = new byte[4 * dt.xDim];
-
-                        for (var j = 0; j < dt.yDim; ++j)
-                        {
-                            buf[j] = dt.ImageData[j + dt.xDim * i];
-                        }
-
-                        Buffer.BlockCopy(buf, 0, buf2, 0, buf2.Length);
-                        output.WriteScanline(buf2, i);
-                    }
-                }
-            }
-            else if (filename.EndsWith(".png"))
-            {
-                using (var stream = new FileStream(filename, FileMode.Create))
-                {
-                    var encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
-                    encoder.Save(stream);
-                    stream.Close();
-                }
-            }
-            else if (filename.EndsWith(".jpeg"))
-            {
-                using (var stream = new FileStream(filename, FileMode.Create))
-                {
-                    var encoder = new JpegBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(dt.ImgBmp.Clone()));
-                    encoder.Save(stream);
-                    stream.Close();
-                }
+                window.ShowDialog();
             }
         }
 
@@ -552,13 +470,6 @@ namespace SimulationGUI
             UpdateDiffractionImage();
 
 			SimulateEWButton.IsEnabled = true;
-        }
-
-        static private void SaveSimulationSettings(DisplayTab tab, string filename)
-        {
-            var general = SettingsFileStrings.GenerateSettingsString(tab);
-
-            File.WriteAllText(filename, general);
         }
 
         /// <summary>
@@ -1030,15 +941,7 @@ namespace SimulationGUI
 
         private void Show3DTestFunction(object sender, RoutedEventArgs e)
         {
-            // get display tab that is selected
-            var tabs = new List<DisplayTab> { _ctemDisplay, _ewAmplitudeDisplay, _ewPhaseDisplay };
-            // for left tab only
-            tabs.AddRange(_lockedDetectorDisplay);
-
-            foreach (var window in from dt in tabs where dt.Tab.IsSelected where dt.xDim != 0 || dt.yDim != 0 select new SettingsDialog(dt) { Owner = this })
-            {
-                window.ShowDialog();
-            }
+            // this is mostly used for testing at the moment
         }
     }
 }

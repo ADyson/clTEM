@@ -495,7 +495,7 @@
                                 <Label Name="LeftXCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
                                 <Label Name="LeftYCoordLabel" Content="; Y = " HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{StaticResource TextColourLight}"/>
                                 <Label Name="LeftYCoord" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="70" HorizontalAlignment="Left" DockPanel.Dock="Left" Visibility="Hidden" Foreground="{StaticResource TextColourLight}"/>
-                            <Button x:Name="SaveImageButton" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveLeftImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                            <Button x:Name="SaveImageButton" Content="Save/Info" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveLeftImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
                             </DockPanel>
                         </Border>
                     </Grid>
@@ -519,7 +519,7 @@
                                       Checked="Show_detectors" Unchecked="Hide_Detectors" IsEnabled="True">
                                 <TextBlock Text="Show Detectors" VerticalAlignment="Center" />
                             </CheckBox>
-                            <Button x:Name="SaveImageButton2" Content="Save Image" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveRightImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                            <Button x:Name="SaveImageButton2" Content="Save/Info" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,5" DockPanel.Dock="Right" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="SaveRightImage" IsEnabled="False" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
                         </DockPanel>
                     </Border>
                 </Grid>

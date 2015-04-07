@@ -2,11 +2,11 @@
 
 namespace SimulationGUI.Utils.Settings
 {
-    public static class SettingsFileStrings
+    public static class InfoTemplateStrings
     {
         //Verbatim string literals cannot be intented (the tabs get included in the string)
 
-        static public string GenerateSettingsString(DisplayTab tab)
+        static public string GenerateInfoString(DisplayTab tab)
         {
             if (tab.SimParams.SimArea == null)
                 return ""; // might want other checks? this one is definitely used after a simulation?
@@ -105,119 +105,119 @@ namespace SimulationGUI.Utils.Settings
         }
 
         public static readonly string UniversalSettings =
-@"*** Filename ***
-{{filename}}
+@"Filename
+  {{filename}}
 
-*** Simulation Area ***
-x: {{simareaxstart}} -> {{simareaxend}}
-y: {{simareaystart}} -> {{simareayend}}
+Simulation Mode
+  {{mode}}
 
-*** Resolution ***
-{{resolution}}
+Simulation Range (UNITS)
+  x: {{simareaxstart}} - {{simareaxend}}
+  y: {{simareaystart}} - {{simareayend}}
 
-*** Simulation Mode ***
-{{mode}}
+Resolution
+  {{resolution}}
 
-*** Full 3D ***
-{{full3d}}
-
-*** Finite Difference ***
-{{fd}}
+Full 3D
+  {{full3d}}
 {{Full3Dopt}}
-*** Slice Thickness ***
-{{slicethickness}}
+Finite Difference 
+  {{fd}}
 
-*** Microscope Settings ***
-*** Voltage (kV)***
-{{volts}}
-{{microscopesettings}}
-{{modesettings}}"
+Slice Thickness (UNITS)
+  {{slicethickness}}
+{{modesettings}}
+Microscope Settings
+
+  Voltage (kV)
+    {{volts}}
+{{microscopesettings}}"
 ;
 
 public static readonly string MicroscopeSettings =
 @"
-*** Objective Aperture ***
-{{aperture}}
+  Objective Aperture (UNITS)
+    {{aperture}}
 
-*** Convergence Angle ***
-{{beta}}
+  Convergence Angle (UNITS)
+    {{beta}}
 
-*** Defocus Spread ***
-{{delta}}
+  Defocus Spread (UNITS)
+    {{delta}}
 
-*** Defocus ***
-{{defocus}}
+  Defocus ***
+    {{defocus}}
 
-*** Cs ***
-{{cs}}
+  Cs ***
+    {{cs}}
 
-*** A1 (magnitude, angle)***
-{{A1m}}, {{A1t}}
+  A1 (magnitude, angle) (UNITS)
+    {{A1m}}, {{A1t}}
 
-*** A2 (magnitude, angle)***
-{{A2m}}, {{A2t}}
+  A2 (magnitude, angle) (UNITS)
+    {{A2m}}, {{A2t}}
 
-*** B2 (magnitude, angle)***
-{{B2m}}, {{B2t}}
+  B2 (magnitude, angle) (UNITS)
+    {{B2m}}, {{B2t}}
 "
 ;
 
 public static readonly string Full3dSettings =
 @"
-*** 3D Integrals ***
-{{3dint}}
+3D Integrals
+  {{3dint}}
 "
 ;
 
 public static readonly string DoseSettings =
 @"
-*** Dose ***
-{{dose}}
+Dose (UNITS)
+  {{dose}}
 
-*** CCD ***
-{{ccd}}
+CCD
+  {{ccd}}
 
-*** Binning ***
-{{binning}}
+Binning
+  {{binning}}
 "
 ;
 
         public static readonly string CBEDSettings =
 @"
-*** CBED Position (x, y)***
-{{cbedx}}, {{cbedy}}
+Probe Position (x, y) (UNITS)
+  {{cbedx}}, {{cbedy}}
 
-*** CBED TDS Runs ***
-{{cbedtds}}
+TDS Runs
+  {{cbedtds}}
 "
 ;
 
         public static readonly string STEMSettings =
 @"
-*** Concurrent Pixels ***
-{{multistem}}
+Concurrent Pixels
+  {{multistem}}
 
-*** STEM TDS Runs ***
-{{stemtds}}
+TDS Runs
+  {{stemtds}}
 
-*** Detectors ***
-{{stemdetectors}}
+Detector
+  {{stemdetectors}}
 "
 ;
 
         public static readonly string STEMDetectors =
 @"
-*** Name ***
-{{detectorname}}
+  Name
+    {{detectorname}}
 
-*** Inner Radius ***
-{{inner}}
+  Inner Radius (UNITS)
+    {{inner}}
 
-*** Outer Radius ***
-{{outer}}
+  Outer Radius (UNITS)
+    {{outer}}
 
-*** Center (x, y)***
-{{centx}}, {{centy}}
+  Center (x, y) (UNITS)
+    {{centx}}, {{centy}}
 "
 ;
     }

@@ -1,4 +1,4 @@
-﻿<extra:OverlayWindow x:Class="SimulationGUI.Dialogs.SettingsDialog"
+﻿<extra:OverlayWindow x:Class="SimulationGUI.Dialogs.InfoSaveDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:extra="http://schemas.extra.com/ui"  
@@ -57,15 +57,15 @@
 
             <Image x:Name="img" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Width="{StaticResource ControlDoubleWidth}" Height ="{StaticResource ControlDoubleWidth}" HorizontalAlignment="Center"/>
 
-            <Button x:Name="btnSaveBoth"
+            <Button x:Name="btnSaveBoth" Click="SaveBothButton"
                     Grid.Row="3" Grid.Column="0" BorderThickness="{StaticResource BorderThickness}"
                     Content="Save Both" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="{StaticResource ControlMargins}" Width="{StaticResource ControlWidth}"/>
 
-            <Button x:Name="btnSaveSettings"
+            <Button x:Name="btnSaveSettings" Click="SaveSettingsBtton"
                     Grid.Row="2" Grid.Column="1" BorderThickness="{StaticResource BorderThickness}"
                     Content="Save Settings" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="{StaticResource ControlMargins}"  Width="{StaticResource ControlWidth}"/>
 
-            <Button x:Name="btnSaveImage"
+            <Button x:Name="btnSaveImage" Click="SaveImageButton"
                     Grid.Row="3" Grid.Column="1" BorderThickness="{StaticResource BorderThickness}"
                     Content="Save Image" Height="{StaticResource ControlHeight}" Padding ="{StaticResource ControlPadding}" Margin="{StaticResource ControlMargins}" Width="{StaticResource ControlWidth}"/>
 

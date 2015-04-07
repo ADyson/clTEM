@@ -198,8 +198,8 @@
     <Compile Include="Controls\DisplayTab.cs" />
     <Compile Include="Controls\MaskedTextBox.Cs" />
     <Compile Include="Controls\ZoomBorder.cs" />
-    <Compile Include="Dialogs\SettingsDialog.xaml.cs">
-      <DependentUpon>SettingsDialog.xaml</DependentUpon>
+    <Compile Include="Dialogs\InfoSaveDialog.xaml.cs">
+      <DependentUpon>InfoSaveDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\SimAreaDialog.xaml.cs">
       <DependentUpon>SimAreaDialog.xaml</DependentUpon>
@@ -219,7 +219,7 @@
     <Compile Include="Utils\ColourGenerator.cs" />
     <Compile Include="Utils\Parameter.cs" />
     <Compile Include="Utils\ProgressReporter.cs" />
-    <Compile Include="Utils\Settings\SettingsFileStrings.cs" />
+    <Compile Include="Utils\Settings\InfoTemplateStrings.cs" />
     <Compile Include="Utils\Settings\SettingsMicroscope.cs" />
     <Compile Include="Utils\Settings\SettingsSimulation.cs" />
     <Compile Include="Utils\Shuffler.cs" />
@@ -227,7 +227,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Dialogs\SettingsDialog.xaml">
+    <Page Include="Dialogs\InfoSaveDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
