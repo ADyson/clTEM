@@ -198,6 +198,9 @@
     <Compile Include="Controls\DisplayTab.cs" />
     <Compile Include="Controls\MaskedTextBox.Cs" />
     <Compile Include="Controls\ZoomBorder.cs" />
+    <Compile Include="Dialogs\SettingsDialog.xaml.cs">
+      <DependentUpon>SettingsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\SimAreaDialog.xaml.cs">
       <DependentUpon>SimAreaDialog.xaml</DependentUpon>
     </Compile>
@@ -223,6 +226,10 @@
     <Page Include="Controls\CustomControls.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\SettingsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\SimAreaDialog.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -391,6 +391,7 @@ namespace SimulationGUI
 			MemUsageLabel.Text = memUsage / (1024 * 1024) + " MB"; // TODO: check why 1024*1024?
 		}
 
+        //TODO: can combine these by getting the sender too?
 		private void SaveLeftImage(object sender, RoutedEventArgs e)
 		{
 			var tabs = new List<DisplayTab> {_ctemDisplay,_ewAmplitudeDisplay,_ewPhaseDisplay};
@@ -555,100 +556,7 @@ namespace SimulationGUI
 
         static private void SaveSimulationSettings(DisplayTab tab, string filename)
         {
-            if (tab.SimParams.SimArea == null)
-                return; // might want other checks? this one is definitely used after a simulation?
-
-            var general = SettingsFileStrings.UniversalSettings;
-            general = general.Replace("{{filename}}", tab.SimParams.FileName); // save this beforehand somewhere and lock it?
-            general = general.Replace("{{simareaxstart}}", tab.SimParams.SimArea.StartX.ToString());
-            general = general.Replace("{{simareaxend}}", tab.SimParams.SimArea.EndX.ToString());
-            general = general.Replace("{{simareaystart}}", tab.SimParams.SimArea.StartY.ToString());
-            general = general.Replace("{{simareayend}}", tab.SimParams.SimArea.EndY.ToString());
-            general = general.Replace("{{resolution}}", tab.SimParams.Resolution.ToString());
-
-            general = general.Replace("{{mode}}", tab.SimParams.GetModeString());
-
-            general = general.Replace("{{full3d}}", tab.SimParams.IsFull3D.ToString());
-
-            if (tab.SimParams.IsFull3D)
-            {
-                var full3DoptString = SettingsFileStrings.Full3dSettings;
-                full3DoptString = full3DoptString.Replace("{{3dint}}", tab.SimParams.Integrals.Val.ToString());
-
-                general = general.Replace("{{Full3Dopt}}", full3DoptString);
-            }
-            else
-            {
-                general = general.Replace("{{Full3Dopt}}", "");
-            }
-
-            general = general.Replace("{{fd}}", tab.SimParams.IsFiniteDiff.ToString());
-            general = general.Replace("{{slicethickness}}", tab.SimParams.SliceThickness.Val.ToString());
-
-            // Microscope
-
-            general = general.Replace("{{volts}}", tab.SimParams.Microscope.kv.Val.ToString());
-
-            var microscopeString = "";
-
-            if (tab.SimParams.SimMode != 0 || (tab.SimParams.SimMode == 0 && tab.SimParams.TEMMode == 0))
-            {
-                microscopeString = SettingsFileStrings.MicroscopeSettings;
-
-                microscopeString = microscopeString.Replace("{{aperture}}", tab.SimParams.Microscope.ap.Val.ToString());
-                microscopeString = microscopeString.Replace("{{beta}}", tab.SimParams.Microscope.b.Val.ToString());
-                microscopeString = microscopeString.Replace("{{delta}}", tab.SimParams.Microscope.d.Val.ToString());
-                microscopeString = microscopeString.Replace("{{defocus}}", tab.SimParams.Microscope.df.Val.ToString());
-                microscopeString = microscopeString.Replace("{{cs}}", tab.SimParams.Microscope.cs.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1m}}", tab.SimParams.Microscope.a1m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1t}}", tab.SimParams.Microscope.a1t.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2m}}", tab.SimParams.Microscope.a2m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2t}}", tab.SimParams.Microscope.a2t.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2m}}", tab.SimParams.Microscope.b2m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2t}}", tab.SimParams.Microscope.b2t.Val.ToString());
-            }
-
-            general = general.Replace("{{microscopesettings}}", microscopeString);
-
-            // mode settings
-            var modeString = "";
-
-            if (tab.SimParams.SimMode == 0 && tab.SimParams.TEM != null && tab.SimParams.TEM.CCD != 0)
-            {
-                modeString = SettingsFileStrings.DoseSettings;
-
-                modeString = modeString.Replace("{{dose}}", tab.SimParams.TEM.Dose.Val.ToString());
-                modeString = modeString.Replace("{{ccd}}", tab.SimParams.TEM.CCDName);
-                modeString = modeString.Replace("{{binning}}", tab.SimParams.TEM.Binning.ToString());
-            }
-            else switch (tab.SimParams.SimMode)
-            {
-                case 1:
-                    modeString = SettingsFileStrings.CBEDSettings;
-
-                    modeString = modeString.Replace("{{cbedx}}", tab.SimParams.CBED.x.Val.ToString());
-                    modeString = modeString.Replace("{{cbedy}}", tab.SimParams.CBED.y.Val.ToString());
-                    modeString = modeString.Replace("{{cbedtds}}", tab.SimParams.CBED.DoTDS ? tab.SimParams.CBED.TDSRuns.Val.ToString() : "1");
-                    break;
-                case 2:
-                    modeString = SettingsFileStrings.STEMSettings;
-
-                    modeString = modeString.Replace("{{multistem}}", tab.SimParams.STEM.ConcurrentPixels.Val.ToString());
-                    modeString = modeString.Replace("{{stemtds}}", tab.SimParams.STEM.DoTDS ? tab.SimParams.STEM.TDSRuns.Val.ToString() : "1");
-
-                    var detInfoString = SettingsFileStrings.STEMDetectors;
-
-                    detInfoString = detInfoString.Replace("{{detectorname}}", tab.SimParams.STEM.Name);
-                    detInfoString = detInfoString.Replace("{{inner}}", tab.SimParams.STEM.Inner.ToString());
-                    detInfoString = detInfoString.Replace("{{outer}}", tab.SimParams.STEM.Outer.ToString());
-                    detInfoString = detInfoString.Replace("{{centx}}", tab.SimParams.STEM.x.ToString());
-                    detInfoString = detInfoString.Replace("{{centy}}", tab.SimParams.STEM.y.ToString());
-
-                    modeString = modeString.Replace("{{stemdetectors}}", detInfoString);
-                    break;
-            }
-
-            general = general.Replace("{{modesettings}}", modeString);
+            var general = SettingsFileStrings.GenerateSettingsString(tab);
 
             File.WriteAllText(filename, general);
         }
@@ -1118,6 +1026,19 @@ namespace SimulationGUI
             }
 
             UpdatePixelScale();
+        }
+
+        private void Show3DTestFunction(object sender, RoutedEventArgs e)
+        {
+            // get display tab that is selected
+            var tabs = new List<DisplayTab> { _ctemDisplay, _ewAmplitudeDisplay, _ewPhaseDisplay };
+            // for left tab only
+            tabs.AddRange(_lockedDetectorDisplay);
+
+            foreach (var window in from dt in tabs where dt.Tab.IsSelected where dt.xDim != 0 || dt.yDim != 0 select new SettingsDialog(dt) { Owner = this })
+            {
+                window.ShowDialog();
+            }
         }
     }
 }

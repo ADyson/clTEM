@@ -22,8 +22,16 @@
     </ControlTemplate>
 
 
+    <Style x:Key="StandardScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
-
+    <!-- For data grid, used to show stem detectors-->
     <Style x:Key="StandardDataGrid" TargetType="DataGrid">
         <Setter Property="SelectionUnit" Value="Cell"/>
         <Setter Property="GridLinesVisibility" Value="None"/>

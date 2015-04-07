@@ -4,7 +4,6 @@
         xmlns:extra="http://schemas.extra.com/ui"  
         xmlns:params="http://schemas.codeplex.com/elysium/params"
         xmlns:controls="clr-namespace:SimulationGUI.Controls"
-        xmlns:settings="clr-namespace:SimulationGUI.Utils.Settings"
 
         params:Design.Theme="{DynamicResource ThemeCol}"
         params:Design.AccentBrush="{DynamicResource Accent}"

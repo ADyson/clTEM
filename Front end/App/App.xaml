@@ -78,6 +78,7 @@
 
             <!--Small controls-->
             <System:Double x:Key="ControlWidth">120</System:Double>
+            <System:Double x:Key="ControlDoubleWidth">240</System:Double>
             <System:Double x:Key="ControlHeight">25</System:Double>
             <Thickness x:Key="ControlPadding">3,0</Thickness>
             <Thickness x:Key="ControlMargins">2.5</Thickness>
