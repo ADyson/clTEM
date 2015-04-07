@@ -220,6 +220,7 @@
     <Compile Include="Utils\Parameter.cs" />
     <Compile Include="Utils\ProgressReporter.cs" />
     <Compile Include="Utils\Settings\InfoTemplateStrings.cs" />
+    <Compile Include="Utils\Settings\LoadSettings.cs" />
     <Compile Include="Utils\Settings\SettingsMicroscope.cs" />
     <Compile Include="Utils\Settings\SettingsSimulation.cs" />
     <Compile Include="Utils\Shuffler.cs" />
