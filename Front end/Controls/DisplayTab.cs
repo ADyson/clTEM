@@ -3,14 +3,19 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using SimulationGUI.Utils;
 using SimulationGUI.Utils.Settings;
 
 namespace SimulationGUI.Controls
 {
 	public class DisplayTab
 	{
-        public SimulationSettings SimParams = new SimulationSettings();
+        private SimulationSettings _SimParams = new SimulationSettings();
+        public SimulationSettings SimParams 
+        {
+            get{return _SimParams;}
+            set { _SimParams = value; }
+        }
+
 
 		public int xDim { get; set; }
 

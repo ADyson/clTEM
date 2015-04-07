@@ -1,10 +1,10 @@
 ﻿<extra:OverlayWindow x:Class="SimulationGUI.Dialogs.STEMDetectorDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:m="clr-namespace:SimulationGUI.Utils"
         xmlns:extra="http://schemas.extra.com/ui"  
         xmlns:params="http://schemas.codeplex.com/elysium/params"
         xmlns:controls="clr-namespace:SimulationGUI.Controls"
+        xmlns:settings="clr-namespace:SimulationGUI.Utils.Settings"
 
         params:Design.Theme="{DynamicResource ThemeCol}"
         params:Design.AccentBrush="{DynamicResource Accent}"
@@ -51,11 +51,11 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="100"/>
-                <DataGridTextColumn Header="Inner" Binding="{Binding Path=Inner}" Width="100"/>
-                <DataGridTextColumn Header="Outer" Binding="{Binding Path=Outer}" Width="100"/>
-                <DataGridTextColumn Header="X offset" Binding="{Binding Path=xCentre}" Width="100"/>
-                <DataGridTextColumn Header="Y offset" Binding="{Binding Path=yCentre}" Width="100"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Path=SimParams.STEM.Name}" Width="100"/>
+                <DataGridTextColumn Header="Inner" Binding="{Binding Path=SimParams.STEM.Inner}" Width="100"/>
+                <DataGridTextColumn Header="Outer" Binding="{Binding Path=SimParams.STEM.Outer}" Width="100"/>
+                <DataGridTextColumn Header="X offset" Binding="{Binding Path=SimParams.STEM.x}" Width="100"/>
+                <DataGridTextColumn Header="Y offset" Binding="{Binding Path=SimParams.STEM.y}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
 
