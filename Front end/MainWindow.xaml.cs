@@ -114,46 +114,6 @@ namespace SimulationGUI
             // Initialise GPU
             InitializeComponent();
 
-
-            LoadSettings test = new LoadSettings();
-
-            //test.SearchDefaultFolder();
-
-            Title = test.ToString();
-
-            //// to get location of .exe
-            //var microscopesPath = AppDomain.CurrentDomain.BaseDirectory;
-            //// add subfolder on
-            //microscopesPath += "_microscopes\\";
-
-            //if (Directory.Exists(microscopesPath))
-            //{
-            //    // serach for files with my extension and return a list of them
-            //    var files = Directory.GetFiles(microscopesPath, "*.microscope");
-
-            //    if (files.Count() != 0)
-            //    {
-            //        var lines = File.ReadAllLines(files[0]);
-
-            //        Regex regex = new Regex(@"_name[:]?\s*(.*)\s*");
-
-            //        foreach (var line in lines)
-            //        {
-            //            Match match = regex.Match(line);
-            //            if (match.Success)
-            //            {
-            //                string key = match.Groups[1].Value;
-            //                //string value = match.Groups[2].Value;
-            //                Title = key;
-            //            }
-            //        }
-            //    }
-            //}
-
-
-
-
-
             // This was to supress some warnings, might not be needed
             PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 
