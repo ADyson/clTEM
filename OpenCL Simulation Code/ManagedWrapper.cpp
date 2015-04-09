@@ -185,9 +185,43 @@ namespace ManagedOpenCLWrapper
 				);
 	};
 
-	void ManagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
+	void ManagedOpenCL::setSTEMParams(
+		float Voltage,
+		float Aperture,
+		float C10,
+		float C12Mag, float C12Ang,
+		float C21Mag, float C21Ang,
+		float C23Mag, float C23Ang,
+		float C30,
+		float C32Mag, float C32Ang,
+		float C34Mag, float C34Ang,
+		float C41Mag, float C41Ang,
+		float C43Mag, float C43Ang,
+		float C45Mag, float C45Ang,
+		float C50,
+		float C52Mag, float C52Ang,
+		float C54Mag, float C54Ang,
+		float C56Mag, float C56Ang
+		)
 	{
-		_UMOpenCL->setSTEMParams(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture);
+		_UMOpenCL->setSTEMParams(
+			Voltage,
+			Aperture,
+			C10,
+			C12Mag, C12Ang,
+			C21Mag, C21Ang,
+			C23Mag, C23Ang,
+			C30,
+			C32Mag, C32Ang,
+			C34Mag, C34Ang,
+			C41Mag, C41Ang,
+			C43Mag, C43Ang,
+			C45Mag, C45Ang,
+			C50,
+			C52Mag, C52Ang,
+			C54Mag, C54Ang,
+			C56Mag, C56Ang
+			);
 	};
 
 	void ManagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
@@ -207,17 +241,17 @@ namespace ManagedOpenCLWrapper
 
 	void ManagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 	{
-		try
-		{
+		//try
+		//{
 			_UMOpenCL->initialiseSTEMSimulation(resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
-		}
-		catch (std::exception ex)
-		{
-			// Get Message, pass onwards
-			std::string message = ex.what();
-			System::String^ sys_str = gcnew System::String(message.c_str());
-			throw gcnew System::Exception(sys_str);
-		}
+		//}
+		//catch (std::exception ex)
+		//{
+		//	// Get Message, pass onwards
+		//	std::string message = ex.what();
+		//	System::String^ sys_str = gcnew System::String(message.c_str());
+		//	throw gcnew System::Exception(sys_str);
+		//}
 	};
 
 	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy)

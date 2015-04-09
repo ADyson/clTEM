@@ -169,8 +169,24 @@ namespace SimulationGUI
                 M.C56Mag.Val, M.C56Ang.Val
                 );
 
-            _mCl.setSTEMParams(Settings.Microscope.C10.Val, Settings.Microscope.C12Mag.Val, cA1T, Settings.Microscope.Voltage.Val, Settings.Microscope.C30.Val, cB,
-                cD, Settings.Microscope.Aperture.Val);
+            _mCl.setSTEMParams(
+                M.Voltage.Val,
+                M.Aperture.Val,
+                M.C10.Val,
+                M.C12Mag.Val, M.C12Ang.Val,
+                M.C21Mag.Val, M.C21Ang.Val,
+                M.C23Mag.Val, M.C23Ang.Val,
+                M.C30.Val,
+                M.C32Mag.Val, M.C32Ang.Val,
+                M.C34Mag.Val, M.C34Ang.Val,
+                M.C41Mag.Val, M.C41Ang.Val,
+                M.C43Mag.Val, M.C43Ang.Val,
+                M.C45Mag.Val, M.C45Ang.Val,
+                M.C50.Val,
+                M.C52Mag.Val, M.C52Ang.Val,
+                M.C54Mag.Val, M.C54Ang.Val,
+                M.C56Mag.Val, M.C56Ang.Val
+                );
 
             // Add Pixelscale to image tabs and diffraction then run simulation
             if (_lockedSettings.SimMode == 0)

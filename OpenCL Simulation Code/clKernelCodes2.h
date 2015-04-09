@@ -1,21 +1,6 @@
 #pragma once
-
-const char* InitialiseWavefunctionSource =
-"__kernel void clInitialiseWavefunction(__global float2* InputWavefunction, int width, int height, float value) \n"
-"{		\n"
-"	int xid = get_global_id(0);	\n"
-"	int yid = get_global_id(1);	\n"
-"	if(xid < width && yid < height) \n"
-"	{	\n"
-"		int Index = xid + width*yid; \n"
-"		InputWavefunction[Index].x = value; \n"
-"		InputWavefunction[Index].y = 0; \n"
-"	}	\n"
-"}		\n"
-;
-
 // test using raw string literal for slightly cleaner code.
-const std::string InitialiseWavefunctionSourceTest =
+const std::string InitialiseWavefunctionSource =
 R"(__kernel void clInitialiseWavefunction(global float2* InputWavefunction, int width, int height, float value)
 {
 	int xid = get_global_id(0);
@@ -246,7 +231,7 @@ const char* fdsource=
 
 // see Rolf Erni's book, Kirklands book and maybe the SuperSTEM book for details
 // Need to test the behavious of float2 (i.e. addition etc.i)
-const std::string imagingKernelSourceTest =
+const std::string imagingKernelSource =
 R"(float cModSq(float2 a)
 {
 	return (a.x*a.x + a.y*a.y);
@@ -337,34 +322,98 @@ float objap, float beta, float delta)
 )"
 ;
 
-const char* imagingKernelSource =
-"__kernel void clImagingKernel(__global const float2* Input, __global float2* Output, int width, int height, float Cs, float df, float a2, float a2phi, float a3, float a3phi, float objap, float wavel, __global float* clXFrequencies, __global float* clYFrequencies, float beta, float delta) \n"
-"{        \n"
-"    //Get the work items ID \n"
-"    int xid = get_global_id(0); \n"
-"    int yid = get_global_id(1); \n"
-"    if(xid < width && yid < height) \n"
-"    {  \n"
-"       int Index = xid + yid*width; \n"
-"		float objap2 = (((objap * 0.001f) / wavel ) * (( objap * 0.001f ) / wavel )); \n"
-"		float Chi1 = 3.14159f * wavel; \n"
-"		float Chi2 = 0.5f * Cs * wavel * wavel; \n"
-"		float k2 = (clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]); \n"
-"		float k = sqrt(k2); \n"
-"		float factor = 1.0f*beta*beta/(4*wavel*wavel); \n"
-"		float ecohs = exp(-factor*pow(3.14159f*k*wavel*2*df + 2*3.14159f*wavel*wavel*wavel*Cs*k2*k,2)); \n"
-"		float ecohd = exp(-0.25f*delta*delta*3.14159f*3.14159f*k2*k2*wavel*wavel); \n"
-"		if ( k2 < objap2){ \n"
-"			float Phi = atan2(clYFrequencies[yid],clXFrequencies[xid]); \n"
-"			float Chi = Chi1 * k2 * ( Chi2 * k2 + df + a2 * sin ( ( 2.0f * ( Phi - a2phi ) ) ) + 2.0f * a3 * wavel * sqrt ( k2 ) * sin ( ( 3.0f * ( Phi - a3phi ) ) ) / 3.0f ); \n"
-"			Output[Index].x = ecohs*ecohd*(Input[Index].x *  cos ( Chi )  + Input[Index].y * sin ( Chi )) ; \n"
-"			Output[Index].y	= ecohs*ecohd*(Input[Index].x * -1 *  sin ( Chi ) + Input[Index].y * cos ( Chi )); \n"
-"		} else { \n"
-"		Output[Index].x = 0.0f; \n"
-"		Output[Index].y = 0.0f; \n"
-"		} \n"
-"	} \n"
-"} \n"
+
+
+const std::string InitialiseSTEMWavefunctionSourceTest =
+R"(float cModSq(float2 a)
+{
+	return (a.x*a.x + a.y*a.y);
+}
+
+float2 cMult(float2 a, float2 b)
+{
+	return (float2)(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+}
+
+float2 cConj(float2 a)
+{
+	return (float2)(a.x, -a.y);
+}
+
+float2 cPow(float2 a, int n)
+{
+	float2 temp = a;
+	for (int j=1; j < n; j++)
+	{
+		temp = cMult(temp, a);
+	}
+	return temp;
+}
+
+
+__kernel void clInitialiseSTEMWavefunction(__global float2* Output, int width, int height,
+__global const float* clXFrequencies, __global const float* clYFrequencies, 
+float posx, float posy, float pixelscale,
+float wavel,
+float C10, float2 C12,
+float2 C21, float2 C23,
+float C30, float2 C32, float2 C34,
+float2 C41, float2 C43, float2 C45,
+float C50, float2 C52, float2 C54, float2 C56,
+float condap)
+{
+	// Get the work items ID
+	int xid = get_global_id(0);
+	int yid = get_global_id(1);
+	if(xid < width && yid < height)
+	{
+		int Index = xid + yid*width;
+		float condap2 = (((condap * 0.001f) / wavel ) * (( condap * 0.001f ) / wavel ));
+		float k2 = (clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]);
+		float k = sqrt(k2);
+		if (k2 < condap2)
+		{			
+			// this term is easier to calcualte once before it is put into the exponential
+			float posTerm = 2.0f * M_PI_F * (clXFrequencies[xid]*posx*pixelscale + clYFrequencies[yid]*posy*pixelscale);
+
+			float phi = atan2(clYFrequencies[yid],clXFrequencies[xid]);
+			float2 w = (float2)(wavel*k*cos(phi), wavel*k*sin(phi));
+			float2 wc = cConj(w);
+
+			// all the aberration terms, calculated in w (omega)
+			float2 tC10 = 0.5f * C10 * cModSq(w);
+			float2 tC12 = 0.5f * cMult(C12, cPow(wc, 2));
+
+			float2 tC21 = cMult(C12, cMult(cPow(wc, 2), w)) / 3.0f;
+			float2 tC23 = cMult(C23, cPow(wc, 3)) / 3.0f;
+
+			float2 tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
+			float2 tC32 = 0.25f * cMult(C32, cMult(cPow(wc, 3), w));
+			float2 tC34 = 0.25f * cMult(C34, cPow(wc, 4));
+		
+			float2 tC41 = 0.2f * cMult(C41, cMult(cPow(wc, 3), cPow(w ,2)));
+			float2 tC43 = 0.2f * cMult(C43, cMult(cPow(wc, 4), w));
+			float2 tC45 = 0.2f * cMult(C45, cPow(wc, 5));
+
+			float2 tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
+			float2 tC52 = cMult(C52, cMult(cPow(wc, 4), cPow(w ,2))) / 6.0f;
+			float2 tC54 = cMult(C54, cMult(cPow(wc, 5), w)) / 6.0f;
+			float2 tC56 = cMult(C56, cPow(wc, 6)) / 6.0f;
+		
+			float2 cchi = tC10 + tC12 + tC21 + tC23 + tC30 + tC32 + tC34 + tC41 + tC43 + tC45 + tC50 + tC52 + tC54 + tC56;
+			float chi = 2.0f * M_PI_F * cchi.x / wavel;
+			
+			Output[Index].x = cos(chi) * cos(posTerm) + sin(chi) * sin(posTerm);
+			Output[Index].y = cos(chi) * sin(posTerm) - sin(chi) * cos(posTerm);
+		}
+		else
+		{
+			Output[Index].x = 0.0f;
+			Output[Index].y = 0.0f;
+		}
+	}
+}
+)"
 ;
 
 const char* InitialiseSTEMWavefunctionSource =

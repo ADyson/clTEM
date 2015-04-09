@@ -59,7 +59,24 @@ public:
 		float C54Mag, float C54Ang,
 		float C56Mag, float C56Ang
 		);
-	void setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture);
+	void setSTEMParams(
+		float Voltage,
+		float Aperture,
+		float C10,
+		float C12Mag, float C12Ang,
+		float C21Mag, float C21Ang,
+		float C23Mag, float C23Ang,
+		float C30,
+		float C32Mag, float C32Ang,
+		float C34Mag, float C34Ang,
+		float C41Mag, float C41Ang,
+		float C43Mag, float C43Ang,
+		float C45Mag, float C45Ang,
+		float C50,
+		float C52Mag, float C52Ang,
+		float C54Mag, float C54Ang,
+		float C56Mag, float C56Ang
+		);
 
 	void initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints);
 	void initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD,float dz, int full3dints, int waves);

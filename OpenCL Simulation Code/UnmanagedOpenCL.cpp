@@ -171,16 +171,43 @@ void UnmanagedOpenCL::setCTEMParams(
 	TEMParams->Aperture = Aperture;
 };
 
-void UnmanagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)
+void UnmanagedOpenCL::setSTEMParams(
+	float Voltage,
+	float Aperture,
+	float C10,
+	float C12Mag, float C12Ang,
+	float C21Mag, float C21Ang,
+	float C23Mag, float C23Ang,
+	float C30,
+	float C32Mag, float C32Ang,
+	float C34Mag, float C34Ang,
+	float C41Mag, float C41Ang,
+	float C43Mag, float C43Ang,
+	float C45Mag, float C45Ang,
+	float C50,
+	float C52Mag, float C52Ang,
+	float C54Mag, float C54Ang,
+	float C56Mag, float C56Ang
+	)
 {
-	STEMParams->defocus = df;
-	STEMParams->astigmag = astigmag;
-	STEMParams->astigang = astigang;
-	STEMParams->kilovoltage = kilovoltage;
-	STEMParams->spherical = spherical;
-	STEMParams->beta = beta;
-	STEMParams->delta = delta;
-	STEMParams->aperturesizemrad = aperture;
+	STEMParams->Voltage = Voltage;
+
+	STEMParams->C10 = C10;
+	STEMParams->C12 = std::complex<float>(C12Mag * std::cos(d2r * C12Ang), C12Mag * std::sin(d2r * C12Ang));
+	STEMParams->C21 = std::complex<float>(C21Mag * std::cos(d2r * C21Ang), C21Mag * std::sin(d2r * C21Ang));
+	STEMParams->C23 = std::complex<float>(C23Mag * std::cos(d2r * C23Ang), C23Mag * std::sin(d2r * C23Ang));
+	STEMParams->C30 = C30;
+	STEMParams->C32 = std::complex<float>(C32Mag * std::cos(d2r * C32Ang), C32Mag * std::sin(d2r * C32Ang));
+	STEMParams->C34 = std::complex<float>(C34Mag * std::cos(d2r * C34Ang), C34Mag * std::sin(d2r * C34Ang));
+	STEMParams->C41 = std::complex<float>(C41Mag * std::cos(d2r * C41Ang), C41Mag * std::sin(d2r * C41Ang));
+	STEMParams->C43 = std::complex<float>(C43Mag * std::cos(d2r * C43Ang), C43Mag * std::sin(d2r * C43Ang));
+	STEMParams->C45 = std::complex<float>(C45Mag * std::cos(d2r * C45Ang), C45Mag * std::sin(d2r * C45Ang));
+	STEMParams->C50 = C50;
+	STEMParams->C52 = std::complex<float>(C52Mag * std::cos(d2r * C52Ang), C52Mag * std::sin(d2r * C52Ang));
+	STEMParams->C54 = std::complex<float>(C54Mag * std::cos(d2r * C54Ang), C54Mag * std::sin(d2r * C54Ang));
+	STEMParams->C56 = std::complex<float>(C56Mag * std::cos(d2r * C56Ang), C56Mag * std::sin(d2r * C56Ang));
+
+	STEMParams->Aperture = Aperture;
 };
 
 void UnmanagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)

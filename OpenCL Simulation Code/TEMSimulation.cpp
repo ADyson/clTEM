@@ -177,7 +177,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSourceTest.c_str(),4, "clInitialiseWavefunction");
+	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSource.c_str(),4, "clInitialiseWavefunction");
 	
 	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
@@ -285,7 +285,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = clKernel(UnmanagedOpenCL::ctx, imagingKernelSourceTest.c_str(), 24, "clImagingKernel");
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx, imagingKernelSource.c_str(), 24, "clImagingKernel");
 
 	int waves = 1;
 	ewmin.resize(waves);
@@ -331,7 +331,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	float SimSizeY = SimSizeX;
 
 	float	Pi = 3.1415926f;
-	float	V = STEMParams->kilovoltage;
+	float	V = STEMParams->Voltage;
 	float	a0 = 52.9177e-012f;
 	float	a0a = a0*1e+010f;
 	float	echarge = 1.6e-019f;
@@ -473,7 +473,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	InitialiseSTEMWavefunction = clKernel(UnmanagedOpenCL::ctx,InitialiseSTEMWavefunctionSource,12, "clInitialiseSTEMWavefunction");
+	InitialiseSTEMWavefunction = clKernel(UnmanagedOpenCL::ctx,InitialiseSTEMWavefunctionSourceTest.c_str(), 24, "clInitialiseSTEMWavefunction");
 
 	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
@@ -574,7 +574,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource.c_str(),16, "clImagingKernel");
 
 	ewmin.resize(waves);
 	ewmax.resize(waves);
@@ -604,17 +604,31 @@ void TEMSimulation::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 	posx = resolution - 1 - posx;
 	posy = resolution - 1 - posy;
 
-	InitialiseSTEMWavefunction.SetArg(0,clWaveFunction2[wave - 1]);InitialiseSTEMWavefunction.SetArg(1, resolution);
-	InitialiseSTEMWavefunction.SetArg(2,resolution);
-	InitialiseSTEMWavefunction.SetArg(3,clXFrequencies);
-	InitialiseSTEMWavefunction.SetArg(4,clYFrequencies);
-	InitialiseSTEMWavefunction.SetArg(5,posx);
-	InitialiseSTEMWavefunction.SetArg(6,posy);
-	InitialiseSTEMWavefunction.SetArg(7,STEMParams->aperturesizemrad);
-	InitialiseSTEMWavefunction.SetArg(8,pixelscale);
-	InitialiseSTEMWavefunction.SetArg(9,STEMParams->defocus);
-	InitialiseSTEMWavefunction.SetArg(10,STEMParams->spherical);
-	InitialiseSTEMWavefunction.SetArg(11,wavelength);
+	InitialiseSTEMWavefunction.SetArg(0, clWaveFunction2[wave - 1]);
+	InitialiseSTEMWavefunction.SetArg(1, resolution);
+	InitialiseSTEMWavefunction.SetArg(2, resolution);
+	InitialiseSTEMWavefunction.SetArg(3, clXFrequencies);
+	InitialiseSTEMWavefunction.SetArg(4, clYFrequencies);
+	InitialiseSTEMWavefunction.SetArg(5, posx);
+	InitialiseSTEMWavefunction.SetArg(6, posy);
+	InitialiseSTEMWavefunction.SetArg(7, pixelscale);
+	InitialiseSTEMWavefunction.SetArg(8, wavelength);
+	InitialiseSTEMWavefunction.SetArg(9, STEMParams->C10);
+	InitialiseSTEMWavefunction.SetArg(10, STEMParams->C12);
+	InitialiseSTEMWavefunction.SetArg(11, STEMParams->C21);
+	InitialiseSTEMWavefunction.SetArg(12, STEMParams->C23);
+	InitialiseSTEMWavefunction.SetArg(13, STEMParams->C30);
+	InitialiseSTEMWavefunction.SetArg(14, STEMParams->C32);
+	InitialiseSTEMWavefunction.SetArg(15, STEMParams->C34);
+	InitialiseSTEMWavefunction.SetArg(16, STEMParams->C41);
+	InitialiseSTEMWavefunction.SetArg(17, STEMParams->C43);
+	InitialiseSTEMWavefunction.SetArg(18, STEMParams->C45);
+	InitialiseSTEMWavefunction.SetArg(19, STEMParams->C50);
+	InitialiseSTEMWavefunction.SetArg(20, STEMParams->C52);
+	InitialiseSTEMWavefunction.SetArg(21, STEMParams->C54);
+	InitialiseSTEMWavefunction.SetArg(22, STEMParams->C56);
+	InitialiseSTEMWavefunction.SetArg(23, STEMParams->Aperture);
+
 	InitialiseSTEMWavefunction(WorkSize);
 
 	// IFFT
