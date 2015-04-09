@@ -21,7 +21,7 @@ namespace SimulationGUI.Utils.Settings
                 switch (key)
                 {
                     case 0:
-                        MicroscopeName = match.Groups[0].Value;
+                        MicroscopeName = match.Groups[1].Value;
                         break;
                     case 1:
                         Voltage = float.Parse(match.Groups[1].Value);
@@ -35,6 +35,9 @@ namespace SimulationGUI.Utils.Settings
             public float Voltage;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private class SearchStrings
         {
             public SearchStrings(string a, string b)
@@ -113,13 +116,8 @@ namespace SimulationGUI.Utils.Settings
                         var match = entry.Value.Regexp.Match(line);
                         if (match.Success)
                         {
-                            // need to handle more than one return value? (only 2 max?)
-                            // can have dict of lists,or just a new class?
-
+                            // all actual data handling is done in this class method.
                             currentSetings.AddValue(entry.Key, match);
-
-                            //var value = match.Groups[1].Value;
-                            //string value = match.Groups[2].Value;
                         }
                         else
                         {

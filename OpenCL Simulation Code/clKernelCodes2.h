@@ -14,6 +14,22 @@ const char* InitialiseWavefunctionSource =
 "}		\n"
 ;
 
+// test using raw string literal for slightly cleaner code.
+const std::string InitialiseWavefunctionSourceTest =
+R"(__kernel void clInitialiseWavefunction(global float2* InputWavefunction, int width, int height, float value)
+{
+	int xid = get_global_id(0);
+	int yid = get_global_id(1);
+	if(xid < width && yid < height)
+	{
+		int Index = xid + width*yid;
+		InputWavefunction[Index].x = value;
+		InputWavefunction[Index].y = 0;
+	}
+}
+)"
+;
+
 // Slices have to start from 0
 // Tried to fix so model doesnt have to have min at (0,0,0)
 // Uses normal potential sliced many times not projected.
@@ -228,6 +244,98 @@ const char* fdsource=
 "	}\n"
 "}\n";
 
+// see Rolf Erni's book, Kirklands book and maybe the SuperSTEM book for details
+// Need to test the behavious of float2 (i.e. addition etc.i)
+const std::string imagingKernelSourceTest =
+R"(float cModSq(float2 a)
+{
+	return (a.x*a.x + a.y*a.y);
+}
+
+float2 cMult(float2 a, float2 b)
+{
+	return (float2)(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+}
+
+float2 cConj(float2 a)
+{
+	return (float2)(a.x, -a.y);
+}
+
+float2 cPow(float2 a, int n)
+{
+	float2 temp = a;
+	for (int j=1; j < n; j++)
+	{
+		temp = cMult(temp, a);
+	}
+	return temp;
+}
+
+
+__kernel void clImagingKernel(__global const float2* Input, __global float2* Output, int width, int height,
+__global float* clXFrequencies, __global float* clYFrequencies,
+float wavel,
+float C10, float2 C12,
+float2 C21, float2 C23,
+float C30, float2 C32, float2 C34,
+float2 C41, float2 C43, float2 C45,
+float C50, float2 C52, float2 C54, float2 C56,
+float objap, float beta, float delta)
+{
+	//Get the work items ID
+    int xid = get_global_id(0);
+    int yid = get_global_id(1);
+	if(xid < width && yid < height)
+	{
+		int Index = xid + yid*width;
+		float objap2 = (((objap * 0.001f) / wavel ) * (( objap * 0.001f ) / wavel ));
+		float k2 = (clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]);
+		float k = sqrt(k2);
+		if (k2 < objap2)
+		{
+			float phi = atan2(clYFrequencies[yid],clXFrequencies[xid]);
+			float2 w = (float2)(wavel*k*cos(phi), wavel*k*sin(phi));
+			float2 wc = cConj(w);
+			
+			float temporalCoh = exp( -0.5f * M_PI_F*M_PI_F  * delta*delta * cModSq(w)*cModSq(w) / (wavel*wavel) );
+
+			float spatialCoh = exp( -1.0f * M_PI_F*M_PI_F * beta*beta * cModSq(w) * pow((C10 + C30*cModSq(w) + C50*cModSq(w)*cModSq(w)), 2)  / (wavel*wavel) );
+
+			float2 tC10 = 0.5f * C10 * cModSq(w);
+			float2 tC12 = 0.5f * cMult(C12, cPow(wc, 2));
+
+			float2 tC21 = cMult(C12, cMult(cPow(wc, 2), w)) / 3.0f;
+			float2 tC23 = cMult(C23, cPow(wc, 3)) / 3.0f;
+
+			float2 tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
+			float2 tC32 = 0.25f * cMult(C32, cMult(cPow(wc, 3), w));
+			float2 tC34 = 0.25f * cMult(C34, cPow(wc, 4));
+		
+			float2 tC41 = 0.2f * cMult(C41, cMult(cPow(wc, 3), cPow(w ,2)));
+			float2 tC43 = 0.2f * cMult(C43, cMult(cPow(wc, 4), w));
+			float2 tC45 = 0.2f * cMult(C45, cPow(wc, 5));
+
+			float2 tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
+			float2 tC52 = cMult(C52, cMult(cPow(wc, 4), cPow(w ,2))) / 6.0f;
+			float2 tC54 = cMult(C54, cMult(cPow(wc, 5), w)) / 6.0f;
+			float2 tC56 = cMult(C56, cPow(wc, 6)) / 6.0f;
+		
+			float2 cchi = tC10 + tC12 + tC21 + tC23 + tC30 + tC32 + tC34 + tC41 + tC43 + tC45 + tC50 + tC52 + tC54 + tC56;
+			float chi = 2.0f * M_PI_F * cchi.x / wavel;
+
+			Output[Index].x = temporalCoh * spatialCoh * ( Input[Index].x * cos(chi) + Input[Index].y * sin(chi) );
+			Output[Index].y = temporalCoh * spatialCoh * ( Input[Index].y * cos(chi) - Input[Index].x * sin(chi) );
+		}
+		else
+		{
+			Output[Index].x = 0.0f;
+			Output[Index].y = 0.0f;
+		}
+	}
+}
+)"
+;
 
 const char* imagingKernelSource =
 "__kernel void clImagingKernel(__global const float2* Input, __global float2* Output, int width, int height, float Cs, float df, float a2, float a2phi, float a3, float a3phi, float objap, float wavel, __global float* clXFrequencies, __global float* clYFrequencies, float beta, float delta) \n"

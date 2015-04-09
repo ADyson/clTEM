@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Threading;
+using System.Windows.Controls;
 using SimulationGUI.Controls;
 using SimulationGUI.Utils;
 using SimulationGUI.Utils.Settings;
@@ -70,7 +71,6 @@ namespace SimulationGUI
 
                 if (_lockedSettings.SimMode == 2)
                 {
-                    //_lockedSettings.SimMode = 2;
                     if (_lockedDetectorDisplay.Count == 0)
                     {
                         SimulateEWButton.IsEnabled = true;
@@ -91,7 +91,6 @@ namespace SimulationGUI
                 }
                 else if (_lockedSettings.SimMode == 1)
                 {
-                    //Settings.SimMode = 1;
                     UpdateDiffractionImage();
 
                     // copy simulation settings to tabs
@@ -102,7 +101,6 @@ namespace SimulationGUI
                 }
                 else if (_lockedSettings.SimMode == 0)
                 {
-                    //Settings.SimMode = 0;
                     UpdateEWImages();
                     UpdateDiffractionImage();
 
@@ -140,17 +138,39 @@ namespace SimulationGUI
         private void DoSimulationMethod(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
         {
             // Conversion to units
-            var cA1T = Settings.Microscope.a1t.Val / Convert.ToSingle((180 / Math.PI));
-            var cA2T = Settings.Microscope.a2t.Val / Convert.ToSingle((180 / Math.PI));
-            var cB2T = Settings.Microscope.b2t.Val / Convert.ToSingle((180 / Math.PI));
-            var cB = Settings.Microscope.b.Val / 1000;
-            var cD = Settings.Microscope.d.Val / 10;
-            // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
-                cD, Settings.Microscope.ap.Val, Settings.Microscope.a2m.Val, cA2T, Settings.Microscope.b2m.Val, cB2T);
+            // used only for old method
+            var cA1T = Settings.Microscope.C12Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cA2T = Settings.Microscope.C23Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cB2T = Settings.Microscope.C21Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cB = Settings.Microscope.Alpha.Val / 1000;
+            var cD = Settings.Microscope.Delta.Val / 10;
 
-            _mCl.setSTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
-                cD, Settings.Microscope.ap.Val);
+            var M = _lockedSettings.Microscope;
+
+            // Upload Simulation Parameters to c++
+            _mCl.setCTEMParams(
+                M.Voltage.Val,
+                M.Alpha.Val,
+                M.Delta.Val,
+                M.Aperture.Val,
+                M.C10.Val,
+                M.C12Mag.Val, M.C12Ang.Val,
+                M.C21Mag.Val, M.C21Ang.Val,
+                M.C23Mag.Val, M.C23Ang.Val,
+                M.C30.Val,
+                M.C32Mag.Val, M.C32Ang.Val,
+                M.C34Mag.Val, M.C34Ang.Val,
+                M.C41Mag.Val, M.C41Ang.Val,
+                M.C43Mag.Val, M.C43Ang.Val,
+                M.C45Mag.Val, M.C45Ang.Val,
+                M.C50.Val,
+                M.C52Mag.Val, M.C52Ang.Val,
+                M.C54Mag.Val, M.C54Ang.Val,
+                M.C56Mag.Val, M.C56Ang.Val
+                );
+
+            _mCl.setSTEMParams(Settings.Microscope.C10.Val, Settings.Microscope.C12Mag.Val, cA1T, Settings.Microscope.Voltage.Val, Settings.Microscope.C30.Val, cB,
+                cD, Settings.Microscope.Aperture.Val);
 
             // Add Pixelscale to image tabs and diffraction then run simulation
             if (_lockedSettings.SimMode == 0)
@@ -188,11 +208,6 @@ namespace SimulationGUI
         /// <param name="ct"></param>
         private void SimulateTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
         {
-            // So we have the right voltage should we try to simulate an image later.
-            //_lockedSettings.ImageVoltage = _lockedSettings.Microscope.kv.val;
-
-            //_ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-
             // Initialise
             _mCl.initialiseCTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
                                           _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.Val, _lockedSettings.Integrals.Val);
@@ -319,7 +334,7 @@ namespace SimulationGUI
             }
 
             // calculate the number of STEM pixels
-            int numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
+            var numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
 
             // Initialise detector images
             foreach (DetectorItem det in _lockedDetectorDisplay)
@@ -420,7 +435,7 @@ namespace SimulationGUI
                         _mCl.getSTEMDiff(p);
 
                         // Loop through each detectors and get each STEM pixel by summing up diffraction over the detector area
-                        foreach (DetectorItem det in _lockedDetectorDisplay)
+                        foreach (var det in _lockedDetectorDisplay)
                         {
                             var pixelVal = _mCl.getSTEMPixel(det.SimParams.STEM.Inner, det.SimParams.STEM.Outer, det.SimParams.STEM.x, det.SimParams.STEM.y, p);
                             // create new variable to avoid writing this out a lot
@@ -441,6 +456,75 @@ namespace SimulationGUI
                 if (ct.IsCancellationRequested)
                     break;
             }
+        }
+
+        /// <summary>
+        /// TODO: this function needs a lookover to work out if the correct values are being used (i.e. locked versions etc.)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SimulateImage(object sender, RoutedEventArgs e)
+        {
+            if (!TestImagePrerequisites())
+                return;
+            //Disable simulate EW button for the duration
+            SimulateEWButton.IsEnabled = false;
+
+            var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
+            var binning = bincombo != null ? Convert.ToInt32(bincombo.Content) : 1;
+
+            var ccd = CCDCombo.SelectedIndex;
+            var ccdName = ((ComboBoxItem)CCDCombo.SelectedItem).Content.ToString();
+
+            Settings.TEM.CCD = ccd;
+            Settings.TEM.CCDName = ccdName;
+            Settings.TEM.Binning = binning;
+
+            // copy settings used for the exit wave (settings from Amplitude and Phase should always be the same) 
+            _ctemDisplay.SimParams = new SimulationSettings(_ewAmplitudeDisplay.SimParams, CopyType.Base);
+
+            // then need to copy TEM params from current settings
+            _ctemDisplay.SimParams.UpdateImageParameters(Settings);
+
+            var M = _ctemDisplay.SimParams.Microscope;
+
+            // Upload Simulation Parameters to c++
+            _mCl.setCTEMParams(
+                M.Voltage.Val,
+                M.Alpha.Val,
+                M.Delta.Val,
+                M.Aperture.Val,
+                M.C10.Val,
+                M.C12Mag.Val, M.C12Ang.Val,
+                M.C21Mag.Val, M.C21Ang.Val,
+                M.C23Mag.Val, M.C23Ang.Val,
+                M.C30.Val,
+                M.C32Mag.Val, M.C32Ang.Val,
+                M.C34Mag.Val, M.C34Ang.Val,
+                M.C41Mag.Val, M.C41Ang.Val,
+                M.C43Mag.Val, M.C43Ang.Val,
+                M.C45Mag.Val, M.C45Ang.Val,
+                M.C50.Val,
+                M.C52Mag.Val, M.C52Ang.Val,
+                M.C54Mag.Val, M.C54Ang.Val,
+                M.C56Mag.Val, M.C56Ang.Val
+                );
+
+            // Calculate Dose Per Pixel
+            var dpp = Settings.TEM.Dose.Val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
+
+            // Get CCD and Binning
+
+            if (ccd != 0)
+                _mCl.simulateCTEM(ccd, binning);
+            else
+                _mCl.simulateCTEM();
+
+            //Update the displays
+            UpdateCTEMImage(dpp, binning, ccd);
+            UpdateDiffractionImage();
+
+            SimulateEWButton.IsEnabled = true;
         }
 
     }

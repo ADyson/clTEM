@@ -142,9 +142,47 @@ namespace ManagedOpenCLWrapper
 		}
 	};
 
-	void ManagedOpenCL::setCTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
+	void ManagedOpenCL::setCTEMParams(
+		float Voltage,
+		float Beta,
+		float Delta,
+		float Aperture,
+		float C10,
+		float C12Mag, float C12Ang,
+		float C21Mag, float C21Ang,
+		float C23Mag, float C23Ang,
+		float C30,
+		float C32Mag, float C32Ang,
+		float C34Mag, float C34Ang,
+		float C41Mag, float C41Ang,
+		float C43Mag, float C43Ang,
+		float C45Mag, float C45Ang,
+		float C50,
+		float C52Mag, float C52Ang,
+		float C54Mag, float C54Ang,
+		float C56Mag, float C56Ang
+		)
 	{
-		_UMOpenCL->setCTEMParams(df, astigmag, astigang, kilovoltage, spherical, beta, delta, aperture, astig2mag, astig2ang, b2mag, b2ang);
+		_UMOpenCL->setCTEMParams(
+				Voltage,
+				Beta,
+				Delta,
+				Aperture,
+				C10,
+				C12Mag, C12Ang,
+				C21Mag, C21Ang,
+				C23Mag, C23Ang,
+				C30,
+				C32Mag, C32Ang,
+				C34Mag, C34Ang,
+				C41Mag, C41Ang,
+				C43Mag, C43Ang,
+				C45Mag, C45Ang,
+				C50,
+				C52Mag, C52Ang,
+				C54Mag, C54Ang,
+				C56Mag, C56Ang
+				);
 	};
 
 	void ManagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)

@@ -1,11 +1,12 @@
 #include "TEMSimulation.h"
 #include "clKernelCodes2.h"
 #include <minmax.h>
+#include <complex>
 #include "mtf.h"
 #include "UnmanagedOpenCL.h"
 
 //#include <boost/lexical_cast.hpp>
-//#include <Windows.h>
+#include <Windows.h>
 
 #include <time.h>
 #include <numeric>
@@ -43,7 +44,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	float SimSizeY = SimSizeX;
 
 	float	Pi = 3.1415926f;
-	float	V = TEMParams->kilovoltage;
+	float	V = TEMParams->Voltage;
 	float	a0 = 52.9177e-012f;
 	float	a0a = a0*1e+010f;
 	float	echarge = 1.6e-019f;
@@ -176,7 +177,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2,Manual>(resolution*resolution);
 
 	// Set initial wavefunction to 1+0i
-	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSource,4, "clInitialiseWavefunction");
+	clKernel InitialiseWavefunction(UnmanagedOpenCL::ctx,InitialiseWavefunctionSourceTest.c_str(),4, "clInitialiseWavefunction");
 	
 	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
 
@@ -284,7 +285,7 @@ void TEMSimulation::initialiseCTEMSimulation(int res, MultisliceStructure* Struc
 	ComplexMultiply.SetArg(4, resolution);
 
 	// And the imaging kernel
-	ImagingKernel = clKernel(UnmanagedOpenCL::ctx,imagingKernelSource,16, "clImagingKernel");
+	ImagingKernel = clKernel(UnmanagedOpenCL::ctx, imagingKernelSourceTest.c_str(), 24, "clImagingKernel");
 
 	int waves = 1;
 	ewmin.resize(waves);
@@ -940,23 +941,37 @@ void TEMSimulation::simulateCTEM()
 	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
 	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
+	wstring msgbuf;
+	std::wstringstream ss;
+	ss << "[clTEM] resolution: " << resolution << ", ap = " << TEMParams->Aperture;
+	msgbuf = ss.str();
+	OutputDebugString(msgbuf.c_str());
+
 	// Set arguments for imaging kernel
 	ImagingKernel.SetArg(0, clWaveFunction2[0],ArgumentType::Input);
 	ImagingKernel.SetArg(1, clImageWaveFunction,ArgumentType::Output);
 	ImagingKernel.SetArg(2, resolution);
 	ImagingKernel.SetArg(3, resolution);
-	ImagingKernel.SetArg(4, TEMParams->spherical);
-	ImagingKernel.SetArg(5, TEMParams->defocus);
-	ImagingKernel.SetArg(6, TEMParams->astigmag);
-	ImagingKernel.SetArg(7, TEMParams->astigang);
-	ImagingKernel.SetArg(8, TEMParams->astig2mag);
-	ImagingKernel.SetArg(9, TEMParams->astig2ang);
-	ImagingKernel.SetArg(10, TEMParams->aperturesizemrad);
-	ImagingKernel.SetArg(11, wavelength);
-	ImagingKernel.SetArg(12, clXFrequencies,ArgumentType::Input);
-	ImagingKernel.SetArg(13, clYFrequencies,ArgumentType::Input);
-	ImagingKernel.SetArg(14, TEMParams->beta);
-	ImagingKernel.SetArg(15, TEMParams->delta);
+	ImagingKernel.SetArg(4, clXFrequencies, ArgumentType::Input);
+	ImagingKernel.SetArg(5, clYFrequencies, ArgumentType::Input);
+	ImagingKernel.SetArg(6, wavelength);
+	ImagingKernel.SetArg(7, TEMParams->C10);
+	ImagingKernel.SetArg(8, TEMParams->C12);
+	ImagingKernel.SetArg(9, TEMParams->C21);
+	ImagingKernel.SetArg(10, TEMParams->C23);
+	ImagingKernel.SetArg(11, TEMParams->C30);
+	ImagingKernel.SetArg(12, TEMParams->C32);
+	ImagingKernel.SetArg(13, TEMParams->C34);
+	ImagingKernel.SetArg(14, TEMParams->C41);
+	ImagingKernel.SetArg(15, TEMParams->C43);
+	ImagingKernel.SetArg(16, TEMParams->C45);
+	ImagingKernel.SetArg(17, TEMParams->C50);
+	ImagingKernel.SetArg(18, TEMParams->C52);
+	ImagingKernel.SetArg(19, TEMParams->C54);
+	ImagingKernel.SetArg(20, TEMParams->C56);
+	ImagingKernel.SetArg(21, TEMParams->Aperture);
+	ImagingKernel.SetArg(22, TEMParams->Beta);
+	ImagingKernel.SetArg(23, TEMParams->Delta);
 
 	clWorkGroup Work(resolution,resolution,1);
 
@@ -1008,22 +1023,30 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// Set arguments for imaging kernel
-	ImagingKernel.SetArg(0, clWaveFunction2[0],ArgumentType::Input);
-	ImagingKernel.SetArg(1, clImageWaveFunction,ArgumentType::Output);
+	ImagingKernel.SetArg(0, clWaveFunction2[0], ArgumentType::Input);
+	ImagingKernel.SetArg(1, clImageWaveFunction, ArgumentType::Output);
 	ImagingKernel.SetArg(2, resolution);
 	ImagingKernel.SetArg(3, resolution);
-	ImagingKernel.SetArg(4, TEMParams->spherical);
-	ImagingKernel.SetArg(5, TEMParams->defocus);
-	ImagingKernel.SetArg(6, TEMParams->astigmag);
-	ImagingKernel.SetArg(7, TEMParams->astigang);
-	ImagingKernel.SetArg(8, TEMParams->astig2mag);
-	ImagingKernel.SetArg(9, TEMParams->astig2ang);
-	ImagingKernel.SetArg(10, TEMParams->aperturesizemrad);
-	ImagingKernel.SetArg(11, wavelength);
-	ImagingKernel.SetArg(12, clXFrequencies,ArgumentType::Input);
-	ImagingKernel.SetArg(13, clYFrequencies,ArgumentType::Input);
-	ImagingKernel.SetArg(14, TEMParams->beta);
-	ImagingKernel.SetArg(15, TEMParams->delta);
+	ImagingKernel.SetArg(4, clXFrequencies, ArgumentType::Input);
+	ImagingKernel.SetArg(5, clYFrequencies, ArgumentType::Input);
+	ImagingKernel.SetArg(6, wavelength);
+	ImagingKernel.SetArg(7, TEMParams->C10);
+	ImagingKernel.SetArg(8, TEMParams->C12);
+	ImagingKernel.SetArg(9, TEMParams->C21);
+	ImagingKernel.SetArg(10, TEMParams->C23);
+	ImagingKernel.SetArg(11, TEMParams->C30);
+	ImagingKernel.SetArg(12, TEMParams->C32);
+	ImagingKernel.SetArg(13, TEMParams->C34);
+	ImagingKernel.SetArg(14, TEMParams->C41);
+	ImagingKernel.SetArg(15, TEMParams->C43);
+	ImagingKernel.SetArg(16, TEMParams->C45);
+	ImagingKernel.SetArg(17, TEMParams->C50);
+	ImagingKernel.SetArg(18, TEMParams->C52);
+	ImagingKernel.SetArg(19, TEMParams->C54);
+	ImagingKernel.SetArg(20, TEMParams->C56);
+	ImagingKernel.SetArg(21, TEMParams->Aperture);
+	ImagingKernel.SetArg(22, TEMParams->Beta);
+	ImagingKernel.SetArg(23, TEMParams->Delta);
 
 	clWorkGroup Work(resolution,resolution,1);
 

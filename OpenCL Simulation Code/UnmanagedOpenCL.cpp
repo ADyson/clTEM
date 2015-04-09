@@ -1,6 +1,10 @@
 #include "UnmanagedOpenCL.h"
 
- clContext UnmanagedOpenCL::ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
+#include <complex>
+
+const float d2r = 3.141592653589793238462643383279502884 / 180;
+
+clContext UnmanagedOpenCL::ctx = OpenCL::MakeContext(OpenCL::GetDeviceList());
 
 UnmanagedOpenCL::UnmanagedOpenCL()
 {
@@ -124,20 +128,47 @@ void UnmanagedOpenCL::doMultisliceStep(int stepnumber, int steps, int waves)
 	TS->doMultisliceStep(stepnumber, steps, waves);
 };
 
-void UnmanagedOpenCL::setCTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture, float astig2mag, float astig2ang, float b2mag, float b2ang)
+void UnmanagedOpenCL::setCTEMParams(
+	float Voltage,
+	float Beta,
+	float Delta,
+	float Aperture,
+	float C10,
+	float C12Mag, float C12Ang,
+	float C21Mag, float C21Ang,
+	float C23Mag, float C23Ang,
+	float C30,
+	float C32Mag, float C32Ang,
+	float C34Mag, float C34Ang,
+	float C41Mag, float C41Ang,
+	float C43Mag, float C43Ang,
+	float C45Mag, float C45Ang,
+	float C50,
+	float C52Mag, float C52Ang,
+	float C54Mag, float C54Ang,
+	float C56Mag, float C56Ang
+	)
 {
-	TEMParams->defocus = df;
-	TEMParams->astigmag = astigmag;
-	TEMParams->astigang = astigang;
-	TEMParams->kilovoltage = kilovoltage;
-	TEMParams->spherical = spherical;
-	TEMParams->beta = beta;
-	TEMParams->delta = delta;
-	TEMParams->aperturesizemrad = aperture;
-	TEMParams->astig2mag = astig2mag;
-	TEMParams->astig2ang = astig2ang;
-	TEMParams->b2mag = b2mag;
-	TEMParams->b2ang = b2ang;
+	TEMParams->Voltage = Voltage;
+
+	TEMParams->C10 = C10;
+	TEMParams->C12 = std::complex<float>(C12Mag * std::cos(d2r * C12Ang), C12Mag * std::sin(d2r * C12Ang));
+	TEMParams->C21 = std::complex<float>(C21Mag * std::cos(d2r * C21Ang), C21Mag * std::sin(d2r * C21Ang));
+	TEMParams->C23 = std::complex<float>(C23Mag * std::cos(d2r * C23Ang), C23Mag * std::sin(d2r * C23Ang));
+	TEMParams->C30 = C30;
+	TEMParams->C32 = std::complex<float>(C32Mag * std::cos(d2r * C32Ang), C32Mag * std::sin(d2r * C32Ang));
+	TEMParams->C34 = std::complex<float>(C34Mag * std::cos(d2r * C34Ang), C34Mag * std::sin(d2r * C34Ang));
+	TEMParams->C41 = std::complex<float>(C41Mag * std::cos(d2r * C41Ang), C41Mag * std::sin(d2r * C41Ang));
+	TEMParams->C43 = std::complex<float>(C43Mag * std::cos(d2r * C43Ang), C43Mag * std::sin(d2r * C43Ang));
+	TEMParams->C45 = std::complex<float>(C45Mag * std::cos(d2r * C45Ang), C45Mag * std::sin(d2r * C45Ang));
+	TEMParams->C50 = C50;
+	TEMParams->C52 = std::complex<float>(C52Mag * std::cos(d2r * C52Ang), C52Mag * std::sin(d2r * C52Ang));
+	TEMParams->C54 = std::complex<float>(C54Mag * std::cos(d2r * C54Ang), C54Mag * std::sin(d2r * C54Ang));
+	TEMParams->C56 = std::complex<float>(C56Mag * std::cos(d2r * C56Ang), C56Mag * std::sin(d2r * C56Ang));
+
+	TEMParams->Beta = Beta / 1000;
+	TEMParams->Delta = Delta / 10;
+	TEMParams->Aperture = Aperture;
 };
 
 void UnmanagedOpenCL::setSTEMParams(float df, float astigmag, float astigang, float kilovoltage, float spherical, float beta, float delta, float aperture)

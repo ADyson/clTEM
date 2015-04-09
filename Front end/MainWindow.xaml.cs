@@ -418,62 +418,6 @@ namespace SimulationGUI
         }
 
         /// <summary>
-        /// TODO: this function needs a lookover to work out if the correct values are being used (i.e. locked versions etc.)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SimulateImage(object sender, RoutedEventArgs e)
-        {
-			if (!TestImagePrerequisites())
-				return;
-			//Disable simulate EW button for the duration
-			SimulateEWButton.IsEnabled = false;
-
-            var bincombo = BinningCombo.SelectedItem as ComboBoxItem;
-            var binning = bincombo != null ? Convert.ToInt32(bincombo.Content) : 1;
-                
-            var ccd = CCDCombo.SelectedIndex;
-            var ccdName = ((ComboBoxItem)CCDCombo.SelectedItem).Content.ToString();
-
-            Settings.TEM.CCD = ccd;
-            Settings.TEM.CCDName = ccdName;
-            Settings.TEM.Binning = binning;
-
-            // copy settings used for the exit wave (settings from Amplitude and Phase should always be the same) 
-            _ctemDisplay.SimParams = new SimulationSettings(_ewAmplitudeDisplay.SimParams, CopyType.Base);
-
-            // then need to copy TEM params from current settings
-            _ctemDisplay.SimParams.UpdateImageParameters(Settings);
-            
-            // Conversion to units of correctness
-            var cA1T = Settings.Microscope.a1t.Val / Convert.ToSingle((180 / Math.PI));
-            var cA2T = Settings.Microscope.a2t.Val / Convert.ToSingle((180 / Math.PI));
-            var cB2T = Settings.Microscope.b2t.Val / Convert.ToSingle((180 / Math.PI));
-            var cB = Settings.Microscope.b.Val / 1000;
-            var cD = Settings.Microscope.d.Val / 10;
-
-            // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(Settings.Microscope.df.Val, Settings.Microscope.a1m.Val, cA1T, Settings.Microscope.kv.Val, Settings.Microscope.cs.Val, cB,
-                cD, Settings.Microscope.ap.Val, Settings.Microscope.a2m.Val, cA2T, Settings.Microscope.b2m.Val, cB2T);
-
-			// Calculate Dose Per Pixel
-            var dpp = Settings.TEM.Dose.Val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
-			
-            // Get CCD and Binning
-
-            if (ccd != 0)
-                _mCl.simulateCTEM(ccd, binning);
-            else
-                _mCl.simulateCTEM();
-
-            //Update the displays
-            UpdateCTEMImage(dpp, binning, ccd);
-            UpdateDiffractionImage();
-
-			SimulateEWButton.IsEnabled = true;
-        }
-
-        /// <summary>
         /// Check CBED positions are in simulation range.
         /// </summary>
         /// <param name="sender"></param>
@@ -598,11 +542,11 @@ namespace SimulationGUI
             // Determine max mrads for reciprocal space, (need wavelength)...
             var maxFreq = 1 / (2 * biggestSize / Settings.Resolution);
 
-            if (Settings.Microscope.kv.Val <= 0 && _isResolutionSet)
+            if (Settings.Microscope.Voltage.Val <= 0 && _isResolutionSet)
             {
                 const float echarge = 1.6e-19f;
-                Settings.Wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * Settings.Microscope.kv.Val * 1000 *
-                    (2 * 9.11e-031 * 9e+016 + echarge * Settings.Microscope.kv.Val * 1000))) * 1e+010);
+                Settings.Wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * Settings.Microscope.Voltage.Val * 1000 *
+                    (2 * 9.11e-031 * 9e+016 + echarge * Settings.Microscope.Voltage.Val * 1000))) * 1e+010);
 
                 var mrads = (1000 * maxFreq * Settings.Wavelength) / 2; //divide by two to get mask limits
 
@@ -621,10 +565,6 @@ namespace SimulationGUI
         {
             if (TEMRadioButton.IsChecked == true)
             {
-                txtMicroscopeA2m.IsEnabled = true;
-                txtMicroscopeA2t.IsEnabled = true;
-                txtMicroscopeB2m.IsEnabled = true;
-                txtMicroscopeB2t.IsEnabled = true;
                 txtMicroscopeD.IsEnabled = true;
                 txtMicroscopeB.IsEnabled = true;
 
@@ -637,10 +577,6 @@ namespace SimulationGUI
             }
             else if (STEMRadioButton.IsChecked == true)
             {
-                txtMicroscopeA2m.IsEnabled = false;
-                txtMicroscopeA2t.IsEnabled = false;
-                txtMicroscopeB2m.IsEnabled = false;
-                txtMicroscopeB2t.IsEnabled = false;
                 txtMicroscopeD.IsEnabled = false;
                 txtMicroscopeB.IsEnabled = false;
 
@@ -652,10 +588,6 @@ namespace SimulationGUI
             }
             else if (CBEDRadioButton.IsChecked == true)
             {
-                txtMicroscopeA2m.IsEnabled = false;
-                txtMicroscopeA2t.IsEnabled = false;
-                txtMicroscopeB2m.IsEnabled = false;
-                txtMicroscopeB2t.IsEnabled = false;
                 txtMicroscopeD.IsEnabled = false;
                 txtMicroscopeB.IsEnabled = false;
 
@@ -940,9 +872,10 @@ namespace SimulationGUI
             UpdatePixelScale();
         }
 
-        private void Show3DTestFunction(object sender, RoutedEventArgs e)
+        private void ShowAberrationDialog(object sender, RoutedEventArgs e)
         {
-            // this is mostly used for testing at the moment
+            var window = new AberrationsDialog(Settings) { Owner = this };
+            window.ShowDialog();
         }
     }
 }

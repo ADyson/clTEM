@@ -1,7 +1,6 @@
 ﻿<extra:OverlayWindow x:Class="SimulationGUI.Dialogs.SimAreaDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:m="clr-namespace:SimulationGUI.Utils"
         xmlns:extra="http://schemas.extra.com/ui"      
         xmlns:params="http://schemas.codeplex.com/elysium/params"
         xmlns:controls="clr-namespace:SimulationGUI.Controls"

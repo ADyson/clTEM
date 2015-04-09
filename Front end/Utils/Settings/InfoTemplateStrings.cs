@@ -40,7 +40,7 @@ namespace SimulationGUI.Utils.Settings
 
             // Microscope
 
-            general = general.Replace("{{volts}}", tab.SimParams.Microscope.kv.Val.ToString());
+            general = general.Replace("{{volts}}", tab.SimParams.Microscope.Voltage.Val.ToString());
 
             var microscopeString = "";
 
@@ -48,17 +48,17 @@ namespace SimulationGUI.Utils.Settings
             {
                 microscopeString = MicroscopeSettings;
 
-                microscopeString = microscopeString.Replace("{{aperture}}", tab.SimParams.Microscope.ap.Val.ToString());
-                microscopeString = microscopeString.Replace("{{beta}}", tab.SimParams.Microscope.b.Val.ToString());
-                microscopeString = microscopeString.Replace("{{delta}}", tab.SimParams.Microscope.d.Val.ToString());
-                microscopeString = microscopeString.Replace("{{defocus}}", tab.SimParams.Microscope.df.Val.ToString());
-                microscopeString = microscopeString.Replace("{{cs}}", tab.SimParams.Microscope.cs.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1m}}", tab.SimParams.Microscope.a1m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1t}}", tab.SimParams.Microscope.a1t.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2m}}", tab.SimParams.Microscope.a2m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2t}}", tab.SimParams.Microscope.a2t.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2m}}", tab.SimParams.Microscope.b2m.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2t}}", tab.SimParams.Microscope.b2t.Val.ToString());
+                microscopeString = microscopeString.Replace("{{aperture}}", tab.SimParams.Microscope.Aperture.Val.ToString());
+                microscopeString = microscopeString.Replace("{{beta}}", tab.SimParams.Microscope.Alpha.Val.ToString());
+                microscopeString = microscopeString.Replace("{{delta}}", tab.SimParams.Microscope.Delta.Val.ToString());
+                microscopeString = microscopeString.Replace("{{defocus}}", tab.SimParams.Microscope.C10.Val.ToString());
+                microscopeString = microscopeString.Replace("{{cs}}", tab.SimParams.Microscope.C30.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A1m}}", tab.SimParams.Microscope.C12Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A1t}}", tab.SimParams.Microscope.C12Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A2m}}", tab.SimParams.Microscope.C23Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{A2t}}", tab.SimParams.Microscope.C23Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{B2m}}", tab.SimParams.Microscope.C21Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{B2t}}", tab.SimParams.Microscope.C21Ang.Val.ToString());
             }
 
             general = general.Replace("{{microscopesettings}}", microscopeString);

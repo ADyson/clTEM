@@ -80,9 +80,9 @@ namespace SimulationGUI.Utils.Settings
         public void UpdateImageParameters(SimulationSettings old)
         {
             TEM = new TEMParams(old.TEM);
-            var temp = old.Microscope.kv.Val;
+            var temp = old.Microscope.Voltage.Val;
             Microscope = new MicroscopeSettings(old.Microscope);
-            Microscope.kv.Val = temp;
+            Microscope.Voltage.Val = temp;
         }
 
         public string GetModeString()

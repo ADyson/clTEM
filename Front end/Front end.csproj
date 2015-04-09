@@ -198,6 +198,9 @@
     <Compile Include="Controls\DisplayTab.cs" />
     <Compile Include="Controls\MaskedTextBox.Cs" />
     <Compile Include="Controls\ZoomBorder.cs" />
+    <Compile Include="Dialogs\AberrationsDialog.xaml.cs">
+      <DependentUpon>AberrationsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\InfoSaveDialog.xaml.cs">
       <DependentUpon>InfoSaveDialog.xaml</DependentUpon>
     </Compile>
@@ -227,6 +230,10 @@
     <Page Include="Controls\CustomControls.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\AberrationsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\InfoSaveDialog.xaml">
       <SubType>Designer</SubType>
