@@ -86,7 +86,6 @@ namespace SimulationGUI
         bool _isResolutionSet = false;
         bool _haveStructure = false;
         bool _detectorVis = false;
-        bool _haveMaxMrad = false;
 
         /// <summary>
         /// Cancel event to halt calculation.
@@ -542,7 +541,7 @@ namespace SimulationGUI
             // Determine max mrads for reciprocal space, (need wavelength)...
             var maxFreq = 1 / (2 * biggestSize / Settings.Resolution);
 
-            if (Settings.Microscope.Voltage.Val <= 0 && _isResolutionSet)
+            if (Settings.Microscope.Voltage.Val > 0 && _isResolutionSet)
             {
                 const float echarge = 1.6e-19f;
                 Settings.Wavelength = Convert.ToSingle(6.63e-034 * 3e+008 / Math.Sqrt((echarge * Settings.Microscope.Voltage.Val * 1000 *
@@ -552,7 +551,6 @@ namespace SimulationGUI
 
                 MaxMradsLabel.Content = mrads.ToString("f2") + " mrad";
 
-                _haveMaxMrad = true;
             }
         }
 
@@ -876,6 +874,7 @@ namespace SimulationGUI
         {
             var window = new AberrationsDialog(Settings) { Owner = this };
             window.ShowDialog();
+            UpdateMaxMrad();
         }
     }
 }

@@ -43,11 +43,18 @@ namespace SimulationGUI.Utils
         /// </summary>
         public string SVal
         {
-            get { return _val.ToString(CultureInfo.CurrentCulture); }
+            get { return _val.ToString(); }
             set
             {
                 float temp;
-                float.TryParse(value, out temp);
+                string temps;
+
+                if (value.EndsWith("E"))
+                    temps = value + "0";
+                else
+                    temps = value;
+
+                float.TryParse(temps, out temp);
                 Val = temp;
             }
         }
@@ -110,11 +117,17 @@ namespace SimulationGUI.Utils
         /// </summary>
         public string SVal
         {
-            get { return _val.ToString(CultureInfo.CurrentCulture); }
+            get { return _val.ToString(); }
             set
             {
                 int temp;
-                int.TryParse(value, out temp);
+                string temps;
+
+                if (value.EndsWith("E"))
+                    temps = value + "0";
+                else
+                    temps = value;
+                int.TryParse(temps, out temp);
                 Val = temp;
             }
         }
