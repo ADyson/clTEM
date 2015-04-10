@@ -318,7 +318,7 @@ namespace SimulationGUI
         /// </summary>
         /// <param name="imageTab">Tab to be updates</param>
         /// <param name="scale">Function used to apply scaling (i.e. logarithmic).</param>
-        private static void UpdateTabImage(DisplayTab imageTab, Func<float, float> scale)
+        private static void UpdateTabImage(DisplayTab imageTab, Func<float, float> scale, bool nn = true)
         {
 
             var min = scale(imageTab.Min);
@@ -332,6 +332,9 @@ namespace SimulationGUI
 
             imageTab.ImgBmp = new WriteableBitmap(xDim, yDim, 96, 96, PixelFormats.Bgr32, null);
             imageTab.tImage.Source = imageTab.ImgBmp;
+
+            if (nn)
+                RenderOptions.SetBitmapScalingMode(imageTab.tImage, BitmapScalingMode.NearestNeighbor);
 
             var bytesPerPixel = (imageTab.ImgBmp.Format.BitsPerPixel + 7) / 8;
 
