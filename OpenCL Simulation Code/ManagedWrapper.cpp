@@ -241,17 +241,17 @@ namespace ManagedOpenCLWrapper
 
 	void ManagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 	{
-		//try
-		//{
+		try
+		{
 			_UMOpenCL->initialiseSTEMSimulation(resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
-		//}
-		//catch (std::exception ex)
-		//{
-		//	// Get Message, pass onwards
-		//	std::string message = ex.what();
-		//	System::String^ sys_str = gcnew System::String(message.c_str());
-		//	throw gcnew System::Exception(sys_str);
-		//}
+		}
+		catch (std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
 	};
 
 	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy)

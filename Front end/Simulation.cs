@@ -41,7 +41,11 @@ namespace SimulationGUI
             _diffDisplay.SetSize(_lockedSettings.Resolution);
 
             foreach (var det in _lockedDetectorDisplay)
+            {
                 det.SetSize(_lockedSettings.STEM.ScanArea.xPixels, _lockedSettings.STEM.ScanArea.yPixels);
+                // copy across so everything is in one nice place.
+                det.SimParams.STEM.ScanArea = _lockedSettings.STEM.ScanArea;
+            }
 
             // Create new instances to use to cancel the simulation and to run tasks.
             cancellationTokenSource = new CancellationTokenSource();
@@ -204,8 +208,6 @@ namespace SimulationGUI
             }
             else if (_lockedSettings.SimMode == 2)
             {
-                _diffDisplay.PixelScaleX = _lockedSettings.PixelScale;
-                _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
                 SimulateSTEM(ref progressReporter, ref timer, ref ct);
             }
             else if (_lockedSettings.SimMode == 1)
@@ -334,12 +336,13 @@ namespace SimulationGUI
         /// <param name="ct"></param>
         private void SimulateSTEM(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
         {
-            // convenience variable
+            // convenience variables
             var conPix = _lockedSettings.STEM.ConcurrentPixels.Val;
+            var ScanArea = _lockedSettings.STEM.ScanArea;
 
             // Get steps we need to move the probe in
-            var xInterval = _lockedSettings.STEM.ScanArea.getxInterval;
-            var yInterval = _lockedSettings.STEM.ScanArea.getyInterval;
+            var xInterval = ScanArea.getxInterval;
+            var yInterval = ScanArea.getyInterval;
 
             // Updates pixel scales for display?
             foreach (var det in _lockedDetectorDisplay)
@@ -350,10 +353,10 @@ namespace SimulationGUI
             }
 
             // calculate the number of STEM pixels
-            var numPix = _lockedSettings.STEM.ScanArea.xPixels * _lockedSettings.STEM.ScanArea.yPixels;
+            var numPix = ScanArea.xPixels * ScanArea.yPixels;
 
             // Initialise detector images
-            foreach (DetectorItem det in _lockedDetectorDisplay)
+            foreach (var det in _lockedDetectorDisplay)
             {
                 det.ImageData = new float[numPix];
                 det.Min = float.MaxValue;
@@ -372,9 +375,9 @@ namespace SimulationGUI
             // Create array of all the pixels coords
             var pixels = new List<Tuple<Int32, Int32>>();
 
-            for (var yPx = 0; yPx < _lockedSettings.STEM.ScanArea.yPixels; yPx++)
+            for (var yPx = 0; yPx < ScanArea.yPixels; yPx++)
             {
-                for (var xPx = 0; xPx < _lockedSettings.STEM.ScanArea.xPixels; xPx++)
+                for (var xPx = 0; xPx < ScanArea.xPixels; xPx++)
                 {
                     pixels.Add(new Tuple<Int32, Int32>(xPx, yPx));
                 }
@@ -393,7 +396,7 @@ namespace SimulationGUI
                 while (nPx < numPix)
                 {
                     // sort the structure if needed
-                    _mCl.sortStructure(Settings.STEM.DoTDS); // is there optimisation possible here?
+                    _mCl.sortStructure(_lockedSettings.STEM.DoTDS); // is there optimisation possible here?
 
                     // make a copy of current pixel as we are about to modify it
                     var currentPx = nPx;
