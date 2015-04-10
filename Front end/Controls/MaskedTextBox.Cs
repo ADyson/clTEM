@@ -98,8 +98,10 @@ namespace SimulationGUI.Controls
         private static void OnMaskChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             var textBox = dependencyObject as TextBox;
-            var mask = e.NewValue as string;
+            if (textBox == null)
+                return;
 
+            var mask = e.NewValue as string;
 
             textBox.PreviewTextInput -= textBox_PreviewTextInput;
             textBox.PreviewKeyDown -= textBox_PreviewKeyDown;

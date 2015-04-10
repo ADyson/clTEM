@@ -489,8 +489,8 @@ namespace SimulationGUI
             }
             else if (Equals(tbox, txtDose))
             {
-                int.TryParse(tbox.Text, out iVal);
-                good = iVal > 0;
+                float.TryParse(tbox.Text, out fVal);
+                good = fVal > 0;
                 WarningMessage.ToggleCode(50, good);
             }
             else
