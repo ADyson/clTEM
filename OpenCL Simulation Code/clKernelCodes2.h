@@ -274,26 +274,24 @@ float objap, float beta, float delta)
 	if(xid < width && yid < height)
 	{
 		int Index = xid + yid*width;
-		float objap2 = (((objap * 0.001f) / wavel ) * (( objap * 0.001f ) / wavel ));
-		float k2 = (clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]);
-		float k = sqrt(k2);
-		if (k2 < objap2)
+		float objap2 = (objap * 0.001f) / wavel;
+		float k = sqrt((clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]));
+		if (k < objap2)
 		{
-			float phi = atan2(clYFrequencies[yid],clXFrequencies[xid]);
-			float2 w = (float2)(wavel*k*cos(phi), wavel*k*sin(phi));
+			float2 w = (float2)(wavel*clXFrequencies[xid], wavel*clYFrequencies[yid]);
 			float2 wc = cConj(w);
 			
 			float temporalCoh = exp( -0.5f * M_PI_F*M_PI_F  * delta*delta * cModSq(w)*cModSq(w) / (wavel*wavel) );
 
 			float spatialCoh = exp( -1.0f * M_PI_F*M_PI_F * beta*beta * cModSq(w) * pow((C10 + C30*cModSq(w) + C50*cModSq(w)*cModSq(w)), 2)  / (wavel*wavel) );
 
-			float2 tC10 = 0.5f * C10 * cModSq(w);
+			float tC10 = 0.5f * C10 * cModSq(w);
 			float2 tC12 = 0.5f * cMult(C12, cPow(wc, 2));
 
 			float2 tC21 = cMult(C12, cMult(cPow(wc, 2), w)) / 3.0f;
 			float2 tC23 = cMult(C23, cPow(wc, 3)) / 3.0f;
 
-			float2 tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
+			float tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
 			float2 tC32 = 0.25f * cMult(C32, cMult(cPow(wc, 3), w));
 			float2 tC34 = 0.25f * cMult(C34, cPow(wc, 4));
 		
@@ -301,13 +299,13 @@ float objap, float beta, float delta)
 			float2 tC43 = 0.2f * cMult(C43, cMult(cPow(wc, 4), w));
 			float2 tC45 = 0.2f * cMult(C45, cPow(wc, 5));
 
-			float2 tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
+			float tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
 			float2 tC52 = cMult(C52, cMult(cPow(wc, 4), cPow(w ,2))) / 6.0f;
 			float2 tC54 = cMult(C54, cMult(cPow(wc, 5), w)) / 6.0f;
 			float2 tC56 = cMult(C56, cPow(wc, 6)) / 6.0f;
 		
-			float2 cchi = tC10 + tC12 + tC21 + tC23 + tC30 + tC32 + tC34 + tC41 + tC43 + tC45 + tC50 + tC52 + tC54 + tC56;
-			float chi = 2.0f * M_PI_F * cchi.x / wavel;
+			float cchi = tC10 + tC12.x + tC21.x + tC23.x + tC30 + tC32.x + tC34.x + tC41.x + tC43.x + tC45.x + tC50 + tC52.x + tC54.x + tC56.x;
+			float chi = 2.0f * M_PI_F * cchi / wavel;
 
 			Output[Index].x = temporalCoh * spatialCoh * ( Input[Index].x * cos(chi) + Input[Index].y * sin(chi) );
 			Output[Index].y = temporalCoh * spatialCoh * ( Input[Index].y * cos(chi) - Input[Index].x * sin(chi) );
@@ -367,26 +365,24 @@ float condap)
 	if(xid < width && yid < height)
 	{
 		int Index = xid + yid*width;
-		float condap2 = (((condap * 0.001f) / wavel ) * (( condap * 0.001f ) / wavel ));
-		float k2 = (clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]);
-		float k = sqrt(k2);
-		if (k2 < condap2)
+		float condap2 = (condap * 0.001f) / wavel;
+		float k = sqrt((clXFrequencies[xid]*clXFrequencies[xid]) + (clYFrequencies[yid]*clYFrequencies[yid]));
+		if (k < condap2)
 		{			
 			// this term is easier to calcualte once before it is put into the exponential
 			float posTerm = 2.0f * M_PI_F * (clXFrequencies[xid]*posx*pixelscale + clYFrequencies[yid]*posy*pixelscale);
 
-			float phi = atan2(clYFrequencies[yid],clXFrequencies[xid]);
-			float2 w = (float2)(wavel*k*cos(phi), wavel*k*sin(phi));
+			float2 w = (float2)(wavel*clXFrequencies[xid], wavel*clYFrequencies[yid]);
 			float2 wc = cConj(w);
 
 			// all the aberration terms, calculated in w (omega)
-			float2 tC10 = 0.5f * C10 * cModSq(w);
+			float tC10 = 0.5f * C10 * cModSq(w);
 			float2 tC12 = 0.5f * cMult(C12, cPow(wc, 2));
 
 			float2 tC21 = cMult(C12, cMult(cPow(wc, 2), w)) / 3.0f;
 			float2 tC23 = cMult(C23, cPow(wc, 3)) / 3.0f;
 
-			float2 tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
+			float tC30 = 0.25f * C30 * cModSq(w)*cModSq(w);
 			float2 tC32 = 0.25f * cMult(C32, cMult(cPow(wc, 3), w));
 			float2 tC34 = 0.25f * cMult(C34, cPow(wc, 4));
 		
@@ -394,13 +390,13 @@ float condap)
 			float2 tC43 = 0.2f * cMult(C43, cMult(cPow(wc, 4), w));
 			float2 tC45 = 0.2f * cMult(C45, cPow(wc, 5));
 
-			float2 tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
+			float tC50 = C50 * cModSq(w)*cModSq(w)*cModSq(w) / 6.0f; 
 			float2 tC52 = cMult(C52, cMult(cPow(wc, 4), cPow(w ,2))) / 6.0f;
 			float2 tC54 = cMult(C54, cMult(cPow(wc, 5), w)) / 6.0f;
 			float2 tC56 = cMult(C56, cPow(wc, 6)) / 6.0f;
 		
-			float2 cchi = tC10 + tC12 + tC21 + tC23 + tC30 + tC32 + tC34 + tC41 + tC43 + tC45 + tC50 + tC52 + tC54 + tC56;
-			float chi = 2.0f * M_PI_F * cchi.x / wavel;
+			float cchi = tC10 + tC12.x + tC21.x + tC23.x + tC30 + tC32.x + tC34.x + tC41.x + tC43.x + tC45.x + tC50 + tC52.x + tC54.x + tC56.x;
+			float chi = 2.0f * M_PI_F * cchi / wavel;
 			
 			Output[Index].x = cos(chi) * cos(posTerm) + sin(chi) * sin(posTerm);
 			Output[Index].y = cos(chi) * sin(posTerm) - sin(chi) * cos(posTerm);
