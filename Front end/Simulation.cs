@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Threading;
 using System.Windows.Controls;
-using SimulationGUI.Controls;
 using SimulationGUI.Utils;
 using SimulationGUI.Utils.Settings;
 
@@ -31,25 +30,20 @@ namespace SimulationGUI
             SimulateEWButton.IsEnabled = false;
             SimulateImageButton.IsEnabled = false;
 
-            _lockedSettings = new SimulationSettings(Settings, CopyType.All);
-            _lockedDetectorDisplay = DetectorDisplay;
+            _lockedSettings.CopySettings(_settings, CopyType.All);
+            _lockedDetectorDisplay = _detectorDisplay;
 
             // Update the display tab sizes so we don't need to worry about this later
             _ewAmplitudeDisplay.SetSize(_lockedSettings.Resolution);
             _ewPhaseDisplay.SetSize(_lockedSettings.Resolution);
             _ctemDisplay.SetSize(_lockedSettings.Resolution);
             _diffDisplay.SetSize(_lockedSettings.Resolution);
-
             foreach (var det in _lockedDetectorDisplay)
-            {
                 det.SetSize(_lockedSettings.STEM.ScanArea.xPixels, _lockedSettings.STEM.ScanArea.yPixels);
-                // copy across so everything is in one nice place.
-                det.SimParams.STEM.ScanArea = _lockedSettings.STEM.ScanArea;
-            }
 
             // Create new instances to use to cancel the simulation and to run tasks.
-            cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
+            _cancelToken = new CancellationTokenSource();
+            var cancellationToken = _cancelToken.Token;
             var progressReporter = new ProgressReporter();
 
             // Set the simulation parameters
@@ -83,10 +77,11 @@ namespace SimulationGUI
 
                     foreach (var det in _lockedDetectorDisplay)
                     {
-                        UpdateSTEMImage(det);
+                        UpdateStemImage(det);
                         // copy simulation settings to tab
-                        // don't copy stem settings as they are set elsewhere?
-                        det.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+                        det.SimParams.CopySettings(_lockedSettings, CopyType.Base);
+                        // copy across so everything is in one nice place.
+                        det.SimParams.STEM.ScanArea = _lockedSettings.STEM.ScanArea;
                     }
 
                     // Just select the first tab for convenience
@@ -98,20 +93,20 @@ namespace SimulationGUI
                     UpdateDiffractionImage();
 
                     // copy simulation settings to tabs
-                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.CBED);
+                    _diffDisplay.SimParams.CopySettings(_lockedSettings, CopyType.CBED);
 
                     SaveImageButton2.IsEnabled = true;
 
                 }
                 else if (_lockedSettings.SimMode == 0)
                 {
-                    UpdateEWImages();
+                    UpdateEwImages();
                     UpdateDiffractionImage();
 
                     // copy simulation settings to tabs
-                    _ewAmplitudeDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-                    _ewPhaseDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
-                    _diffDisplay.SimParams = new SimulationSettings(_lockedSettings, CopyType.Base);
+                    _ewAmplitudeDisplay.SimParams.CopySettings(_lockedSettings, CopyType.Base);
+                    _ewPhaseDisplay.SimParams.CopySettings(_lockedSettings, CopyType.Base);
+                    _diffDisplay.SimParams.CopySettings(_lockedSettings, CopyType.Base);
 
                     _ewAmplitudeDisplay.SimParams.TEMMode = 1;
                     _ewPhaseDisplay.SimParams.TEMMode = 2;
@@ -143,11 +138,11 @@ namespace SimulationGUI
         {
             // Conversion to units
             // used only for old method
-            var cA1T = Settings.Microscope.C12Ang.Val / Convert.ToSingle((180 / Math.PI));
-            var cA2T = Settings.Microscope.C23Ang.Val / Convert.ToSingle((180 / Math.PI));
-            var cB2T = Settings.Microscope.C21Ang.Val / Convert.ToSingle((180 / Math.PI));
-            var cB = Settings.Microscope.Alpha.Val / 1000;
-            var cD = Settings.Microscope.Delta.Val / 10;
+            var cA1T = _settings.Microscope.C12Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cA2T = _settings.Microscope.C23Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cB2T = _settings.Microscope.C21Ang.Val / Convert.ToSingle((180 / Math.PI));
+            var cB = _settings.Microscope.Alpha.Val / 1000;
+            var cD = _settings.Microscope.Delta.Val / 10;
 
             var M = _lockedSettings.Microscope;
 
@@ -201,8 +196,8 @@ namespace SimulationGUI
                 _ewAmplitudeDisplay.PixelScaleY = _lockedSettings.PixelScale;
                 _diffDisplay.PixelScaleY = _lockedSettings.PixelScale;
 
-                _ewAmplitudeDisplay.xStartPosition = Settings.SimArea.StartX;
-                _ewAmplitudeDisplay.yStartPosition = Settings.SimArea.StartY;
+                _ewAmplitudeDisplay.xStartPosition = _settings.SimArea.StartX;
+                _ewAmplitudeDisplay.yStartPosition = _settings.SimArea.StartY;
 
                 SimulateTEM(ref progressReporter, ref timer, ref ct);
             }
@@ -292,7 +287,7 @@ namespace SimulationGUI
             for (var j = 0; j < runs; j++)
             {
                 // Shuffle the structure for frozen phonon
-                _mCl.sortStructure(Settings.CBED.DoTDS);
+                _mCl.sortStructure(_settings.CBED.DoTDS);
                 // Initialise probe
                 _mCl.initialiseSTEMWaveFunction(posx, posy, 1);
 
@@ -495,15 +490,15 @@ namespace SimulationGUI
             var ccd = CCDCombo.SelectedIndex;
             var ccdName = ((ComboBoxItem)CCDCombo.SelectedItem).Content.ToString();
 
-            Settings.TEM.CCD = ccd;
-            Settings.TEM.CCDName = ccdName;
-            Settings.TEM.Binning = binning;
+            _settings.TEM.CCD = ccd;
+            _settings.TEM.CCDName = ccdName;
+            _settings.TEM.Binning = binning;
 
             // copy settings used for the exit wave (settings from Amplitude and Phase should always be the same) 
-            _ctemDisplay.SimParams = new SimulationSettings(_ewAmplitudeDisplay.SimParams, CopyType.Base);
+            _ctemDisplay.SimParams.CopySettings(_ewAmplitudeDisplay.SimParams, CopyType.Base);
 
             // then need to copy TEM params from current settings
-            _ctemDisplay.SimParams.UpdateImageParameters(Settings);
+            _ctemDisplay.SimParams.UpdateImageParameters(_settings);
 
             var M = _ctemDisplay.SimParams.Microscope;
 
@@ -530,7 +525,7 @@ namespace SimulationGUI
                 );
 
             // Calculate Dose Per Pixel
-            var dpp = Settings.TEM.Dose.Val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
+            var dpp = _settings.TEM.Dose.Val * (_ctemDisplay.SimParams.PixelScale * _ctemDisplay.SimParams.PixelScale);
 
             // Get CCD and Binning
 
@@ -540,7 +535,7 @@ namespace SimulationGUI
                 _mCl.simulateCTEM();
 
             //Update the displays
-            UpdateCTEMImage(dpp, binning, ccd);
+            UpdateCtemImage(dpp, binning, ccd);
             UpdateDiffractionImage();
 
             SimulateEWButton.IsEnabled = true;

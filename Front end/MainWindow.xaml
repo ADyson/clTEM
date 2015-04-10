@@ -50,7 +50,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Content="Import Structure"
-                            Grid.Row="0" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportXYZ" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+                            Grid.Row="0" HorizontalAlignment="Left" BorderThickness="{StaticResource BorderThickness}" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportXyz" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
 
                     <Button Content="Import Unit Cell"
                             Grid.Row="1" IsEnabled="False" BorderThickness="{StaticResource BorderThickness}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="ImportUnitCell" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
@@ -298,10 +298,10 @@
                     </Grid.ColumnDefinitions>
 
                     <Button x:Name ="STEMDetButton" Content="Edit Detectors"
-                            Grid.Row="0" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMDetDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                            Grid.Row="0" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenStemDetDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
 
                     <Button x:Name ="STEMAreaButton" Content="Select Region"
-                            Grid.Row="1" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenSTEMAreaDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
+                            Grid.Row="1" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Width="{StaticResource ControlWidth}" Click="OpenStemAreaDlg" Margin="2.5,2.5" Padding="{StaticResource ControlPadding}" BorderThickness="{StaticResource BorderThickness}"/>
 
                     <Grid Grid.Row="2" HorizontalAlignment="Center">
                         <Grid.RowDefinitions>

@@ -8,6 +8,11 @@
     {
         public MicroscopeSettings(MicroscopeSettings old)
         {
+            CopySettings(old);
+        }
+
+        public void CopySettings(MicroscopeSettings old)
+        {
             C10 = new FParam(old.C10.Val);
             C30 = new FParam(old.C30.Val);
             C12Mag = new FParam(old.C12Mag.Val);
@@ -183,6 +188,48 @@
             app.txtMicroscopeB.DataContext = Alpha;
             app.txtMicroscopeD.DataContext = Delta;
             app.txtMicroscopeAp.DataContext = Aperture;
+        }
+
+        public MicroscopeSettings()
+        {
+            C10 = new FParam();
+            C30 = new FParam();
+            C12Mag = new FParam();
+            C12Ang = new FParam();
+            Voltage = new FParam();
+            Alpha = new FParam();
+            Delta = new FParam();
+            Aperture = new FParam();
+            C23Mag = new FParam();
+            C23Ang = new FParam();
+            C21Mag = new FParam();
+            C21Ang = new FParam();
+
+            C32Mag = new FParam();
+            C32Ang = new FParam();
+
+            C34Mag = new FParam();
+            C34Ang = new FParam();
+
+            C41Mag = new FParam();
+            C41Ang = new FParam();
+
+            C43Mag = new FParam();
+            C43Ang = new FParam();
+
+            C45Mag = new FParam();
+            C45Ang = new FParam();
+
+            C50 = new FParam();
+
+            C52Mag = new FParam();
+            C52Ang = new FParam();
+
+            C54Mag = new FParam();
+            C54Ang = new FParam();
+
+            C56Mag = new FParam();
+            C56Ang = new FParam();
         }
 
         public void SetDefaults()

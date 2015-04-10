@@ -28,7 +28,7 @@ namespace SimulationGUI.Utils.Settings
             UserSetArea = old.UserSetArea;
             SimMode = old.SimMode;
 
-            Microscope = new MicroscopeSettings(old.Microscope);
+            Microscope.CopySettings(old.Microscope);
 
             SliceThickness = new FParam(old.SliceThickness.Val);
             Integrals = new IParam(old.Integrals.Val);
@@ -39,21 +39,26 @@ namespace SimulationGUI.Utils.Settings
             Wavelength = old.Wavelength;
         }
 
-        public SimulationSettings(SimulationSettings old, CopyType t)
+        public void CopySettings(SimulationSettings old, CopyType t)
         {
             CopyBase(old);
-            if (t == CopyType.All)
+            switch (t)
             {
-                TEM = new TEMParams(old.TEM);
-                CBED = new CBEDParams(old.CBED);
-                STEM = new STEMParams(old.STEM);
+                case CopyType.All:
+                    TEM.CopyParams(old.TEM);
+                    CBED.CopyParams(old.CBED);
+                    STEM.CopyParams(old.STEM);
+                    break;
+                case CopyType.CBED:
+                    CBED.CopyParams(old.CBED);
+                    break;
+                case CopyType.STEM:
+                    STEM.CopyParams(old.STEM);
+                    break;
+                case CopyType.TEM:
+                    TEM.CopyParams(old.TEM);
+                    break;
             }
-            else if (t == CopyType.CBED)
-                CBED = new CBEDParams(old.CBED);
-            else if (t == CopyType.STEM)
-                STEM = new STEMParams(old.STEM);
-            else if (t == CopyType.TEM)
-                TEM = new TEMParams(old.TEM);
         }
 
         public void UpdateWindow(MainWindow app)
@@ -79,9 +84,9 @@ namespace SimulationGUI.Utils.Settings
 
         public void UpdateImageParameters(SimulationSettings old)
         {
-            TEM = new TEMParams(old.TEM);
+            TEM.CopyParams(old.TEM);
             var temp = old.Microscope.Voltage.Val;
-            Microscope = new MicroscopeSettings(old.Microscope);
+            Microscope.CopySettings(old.Microscope);
             Microscope.Voltage.Val = temp;
         }
 
@@ -109,13 +114,13 @@ namespace SimulationGUI.Utils.Settings
 
         public int TEMMode;
 
-        public TEMParams TEM { get; set; }
+        public TEMParams TEM = new TEMParams();
 
-        public CBEDParams CBED { get; set; }
+        public CBEDParams CBED = new CBEDParams();
 
-        public STEMParams STEM { get; set; }
+        public STEMParams STEM = new STEMParams();
 
-        public MicroscopeSettings Microscope;
+        public MicroscopeSettings Microscope = new MicroscopeSettings();
 
         public FParam SliceThickness;
 
@@ -140,7 +145,7 @@ namespace SimulationGUI.Utils.Settings
             Dose = new FParam();
         }
 
-        public TEMParams(TEMParams old)
+        public void CopyParams(TEMParams old)
         {
             Dose = new FParam(old.Dose.Val);
             Binning = old.Binning;
@@ -175,7 +180,7 @@ namespace SimulationGUI.Utils.Settings
             TDSRuns = new IParam();
         }
 
-        public CBEDParams(CBEDParams old)
+        public void CopyParams(CBEDParams old)
         {
             x = new FParam(old.x.Val);
             y = new FParam(old.y.Val);
@@ -215,7 +220,7 @@ namespace SimulationGUI.Utils.Settings
             ConcurrentPixels = new IParam();
         }
 
-        public STEMParams(STEMParams old)
+        public void CopyParams(STEMParams old)
         {
             ScanArea = old.ScanArea;
             UserSetArea = old.UserSetArea;
