@@ -114,11 +114,11 @@ namespace SimulationGUI.Utils.Settings
 
         public int TEMMode;
 
-        public TEMParams TEM = new TEMParams();
+        public TEMParams TEM { get; set; }
 
-        public CBEDParams CBED = new CBEDParams();
+        public CBEDParams CBED { get; set; }
 
-        public STEMParams STEM = new STEMParams();
+        public STEMParams STEM { get; set; }
 
         public MicroscopeSettings Microscope = new MicroscopeSettings();
 

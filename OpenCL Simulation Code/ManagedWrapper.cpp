@@ -398,24 +398,4 @@ namespace ManagedOpenCLWrapper
 	{
 		return _UMOpenCL->TS->getSTEMPixel(inner, outer, xc, yc, wave);
 	};
-
-	//void ManagedOpenCL::addTDS()
-	//{
-	//	_UMOpenCL->TS->addTDS(1);
-	//};
-
-	//void ManagedOpenCL::addTDS(int wave)
-	//{
-	//	_UMOpenCL->TS->addTDS(wave);
-	//};
-
-	//void ManagedOpenCL::clearTDS()
-	//{
-	//	_UMOpenCL->TS->clearTDS(1);
-	//};
-
-	//void ManagedOpenCL::clearTDS(int wave)
-	//{
-	//	_UMOpenCL->TS->clearTDS(wave);
-	//};
 }

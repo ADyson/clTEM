@@ -73,12 +73,12 @@ namespace SimulationGUI.Dialogs
             var text = tbox.Text;
 
             float newVal;
-            float.TryParse(text, out newVal);
+            _goodXrange = float.TryParse(text, out newVal);
 
             if (Equals(tbox, txtStartX))
-                _goodXrange = newVal < _endX.Val;
+                _goodXrange = _goodXrange && newVal < _endX.Val;
             else if (Equals(tbox, txtEndX))
-                _goodXrange = _startX.Val < newVal;
+                _goodXrange = _goodXrange && _startX.Val < newVal;
 
             if (!_goodXrange) 
             {
@@ -99,12 +99,12 @@ namespace SimulationGUI.Dialogs
             var text = tbox.Text;
 
             float newVal;
-            float.TryParse(text, out newVal);
+            _goodYrange = float.TryParse(text, out newVal);
 
             if (Equals(tbox, txtStartY))
-                _goodYrange = newVal < _endY.Val;
+                _goodYrange = _goodYrange && newVal < _endY.Val;
             else if (Equals(tbox, txtEndY))
-                _goodYrange = _startY.Val < newVal;
+                _goodYrange = _goodYrange && _startY.Val < newVal;
 
             if (!_goodYrange)
             {

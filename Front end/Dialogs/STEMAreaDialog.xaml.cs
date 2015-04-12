@@ -98,9 +98,9 @@ namespace SimulationGUI.Dialogs
             var text = tbox.Text;
 
             int val;
-            int.TryParse(text, out val);
+            var good = int.TryParse(text, out val);
 
-            if (val == 0)
+            if (!good || val == 0)
                 tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
             else
                 tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
@@ -111,15 +111,15 @@ namespace SimulationGUI.Dialogs
         {
             float val;
             float otherVal;
-            float.TryParse(txtStartX.Text, out val);
-            float.TryParse(txtEndX.Text, out otherVal);
+            var goodstart = float.TryParse(txtStartX.Text, out val);
+            var goodend = float.TryParse(txtEndX.Text, out otherVal);
 
             var withinSimUpper = val <= _simEndX;
             var withinSimLower = val >= _simStartX;
 
             // add error about start being in range here
 
-            _goodXrange = withinSimLower && withinSimUpper;
+            _goodXrange = withinSimLower && withinSimUpper && goodstart && goodend;
 
             if (!(withinSimLower && withinSimUpper))
                 txtStartX.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
@@ -155,15 +155,15 @@ namespace SimulationGUI.Dialogs
         {
             float val;
             float otherVal;
-            float.TryParse(txtStartY.Text, out val);
-            float.TryParse(txtEndY.Text, out otherVal);
+            var goodstart = float.TryParse(txtStartY.Text, out val);
+            var goodend = float.TryParse(txtEndY.Text, out otherVal);
 
             var withinSimUpper = val <= _simEndY;
             var withinSimLower = val >= _simStartY;
 
             // add error about start being in range here
 
-            _goodYrange = withinSimLower && withinSimUpper;
+            _goodYrange = withinSimLower && withinSimUpper && goodstart && goodend;
 
             if (!(withinSimLower && withinSimUpper))
                 txtStartY.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];

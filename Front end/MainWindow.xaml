@@ -190,42 +190,42 @@
                     <Label Content="df:" ToolTip="Objective Defocus (-ve is underfocus)"
                            Grid.Row="0" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeDf" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="Angstroms" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="0" Grid.Column="1" controls:MaskedTextBox.Mask="^[+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="0" Grid.Column="1" controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="Cs:" ToolTip="Spherical Aberration"
                            Grid.Row="1" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeCs" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="Angstroms" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="1" Grid.Column="1" controls:MaskedTextBox.Mask="^[+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="1" Grid.Column="1" controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="A1:"  ToolTip="2-fold Astigmatism Magnitude"
                            Grid.Row="2" Grid.Column="0" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeA1m" Text="{Binding Path = SVal, Mode = TwoWay}"  ToolTip="Angstroms" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="2" Grid.Column="1" controls:MaskedTextBox.Mask="^[+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="2" Grid.Column="1" controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="A1 θ:"  ToolTip="2-fold Astigmatism Angle"
                            Grid.Row="2" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeA1t" Text="{Binding Path = SVal, Mode = TwoWay}"  ToolTip="Degrees" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="2" Grid.Column="3" controls:MaskedTextBox.Mask="^[+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="2" Grid.Column="3" controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="kV:"  ToolTip="Accelerating Voltage"
                            Grid.Row="0" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeKv" Text="{Binding Path = SVal, Mode = TwoWay}"  ToolTip="kilo Volts" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="0" Grid.Column="3" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55" LostFocus="txtImageKv_LostFocus"/>
+                             Grid.Row="0" Grid.Column="3" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55" LostFocus="txtImageKv_LostFocus"/>
 
                     <Label Content="α:" ToolTip="Convergence Angle"
                            Grid.Row="1" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeB" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="milliRadians" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="1" Grid.Column="5" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="1" Grid.Column="5" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="Δ:" ToolTip="Defocus Spread"
                            Grid.Row="1" Grid.Column="2" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeD" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="nm" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="1" Grid.Column="3" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="1" Grid.Column="3" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}"  HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
                     <Label Content="Aper:"  ToolTip="Aperture"
                            Grid.Row="0" Grid.Column="4" Foreground="{StaticResource TextColourLight}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0"/>
                     <TextBox Name="txtMicroscopeAp" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="milliRadians" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                             Grid.Row="0" Grid.Column="5" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
+                             Grid.Row="0" Grid.Column="5" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Padding ="{StaticResource ControlPadding}" HorizontalAlignment="Left" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="55"/>
 
 
                     <Button x:Name="txtAberrations" Content="More" Height="{StaticResource ControlHeight}" Width="{StaticResource ControlWidth}" Click="ShowAberrationDialog" Grid.ColumnSpan="3" HorizontalAlignment="Right"
@@ -261,7 +261,7 @@
 
                         <Label Content="Dose:  " ToolTip="e/A^-2"
                                  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
-                        <TextBox x:Name="txtDose" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="e/A^-2" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" controls:TextBoxBehavior.SelectAllOnFocus="True"
+                        <TextBox x:Name="txtDose" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="e/A^-2" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" controls:TextBoxBehavior.SelectAllOnFocus="True"
                                  Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap" Width="60" Padding ="{StaticResource ControlPadding}"/>
 
                         <Label Content="CCD:  " ToolTip="Select a CCD to include detector characteristics for TEM image simulation"
@@ -343,7 +343,7 @@
                         <Label Content="X:  "  ToolTip="x position"
                                        Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
                         <TextBox x:Name="txtCBEDx" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="Angstroms" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                                         Grid.Row="0" Grid.Column="1" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+                                         Grid.Row="0" Grid.Column="1" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
                     </Grid>
 
                     <Grid Grid.Row="1" HorizontalAlignment="Center">
@@ -358,7 +358,7 @@
                         <Label Content="Y:  "  ToolTip="y position"
                                    Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Height="Auto" VerticalContentAlignment="Center" Foreground="{StaticResource TextColourLight}"/>
                         <TextBox x:Name="txtCBEDy" Text="{Binding Path = SVal, Mode = TwoWay}" ToolTip="Angstroms" controls:TextBoxBehavior.SelectAllOnFocus="True"
-                                     Grid.Row="1" Grid.Column="1" controls:MaskedTextBox.Mask="^[+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
+                                     Grid.Row="1" Grid.Column="1" controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" HorizontalAlignment="Right" Height="{StaticResource ControlHeight}" TextWrapping="NoWrap"  Width="80"  Margin="2.5,2.5" Padding="{StaticResource ControlPadding}"/>
 
                     </Grid>
 

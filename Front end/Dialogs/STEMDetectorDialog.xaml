@@ -87,25 +87,25 @@
                        Grid.Row="2" Margin="0,7,0,2"/>
             <TextBox x:Name="txtInner" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="3" Height="{StaticResource ControlHeight}"
-                          controls:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="Outer Radius"
                        Grid.Row="4" Margin="0,7,0,2"/>
             <TextBox x:Name="txtOuter" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="5" Height="{StaticResource ControlHeight}"
-                          controls:MaskedTextBox.Mask="^[\+]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="x Centre"
                        Grid.Row="6" Margin="0,7,0,2"/>
             <TextBox x:Name="txtCenterX" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="7" Height="{StaticResource ControlHeight}"
-                          controls:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$"  TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
 
             <TextBlock Text="y Centre"
                        Grid.Row="8" Margin="0,7,0,2"/>
             <TextBox x:Name="txtCenterY" Text="{Binding Path = SVal, Mode = TwoWay}"
                           Grid.Row="9" Height="{StaticResource ControlHeight}"
-                          controls:MaskedTextBox.Mask="^[\+-]?[0-9]*\.?[0-9]*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
+                          controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" TextWrapping="NoWrap" controls:TextBoxBehavior.SelectAllOnFocus="True" Width="120" Margin="0,2"/>
         
             <Button x:Name="AddButton"
                     Grid.Row="10" BorderThickness="{StaticResource BorderThickness}"

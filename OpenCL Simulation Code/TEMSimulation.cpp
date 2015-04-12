@@ -848,7 +848,7 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 void TEMSimulation::getCTEMImage(float* data, int resolution)
 {
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
+	std::vector<cl_float2> compdata = clWaveFunction4[0]->CreateLocalCopy();
 
 	float max = CL_FLT_MIN;
 	float min = CL_MAXFLOAT;
@@ -889,7 +889,7 @@ void TEMSimulation::getCTEMImage(float* data, int resolution, float doseperpix, 
 	float Ntot = doseperpix*binning*binning; // Get this passed in, its dose per pixel i think.
 
 	// Original data is complex so copy complex version down first
-	std::vector<cl_float2> compdata = clWaveFunction1[0]->CreateLocalCopy();
+	std::vector<cl_float2> compdata = clWaveFunction4[0]->CreateLocalCopy();
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -951,15 +951,9 @@ void TEMSimulation::simulateCTEM()
 	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
 	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
-	wstring msgbuf;
-	std::wstringstream ss;
-	ss << "[clTEM] resolution: " << resolution << ", ap = " << TEMParams->Aperture;
-	msgbuf = ss.str();
-	OutputDebugString(msgbuf.c_str());
-
 	// Set arguments for imaging kernel
-	ImagingKernel.SetArg(0, clWaveFunction2[0],ArgumentType::Input);
-	ImagingKernel.SetArg(1, clImageWaveFunction,ArgumentType::Output);
+	ImagingKernel.SetArg(0, clWaveFunction2[0], ArgumentType::Input);
+	ImagingKernel.SetArg(1, clImageWaveFunction, ArgumentType::Output);
 	ImagingKernel.SetArg(2, resolution);
 	ImagingKernel.SetArg(3, resolution);
 	ImagingKernel.SetArg(4, clXFrequencies, ArgumentType::Input);
@@ -1065,7 +1059,7 @@ void TEMSimulation::simulateCTEM(int detector, int binning)
 	// Now get and display absolute value
 	FourierTrans(clImageWaveFunction, clWaveFunction1[0], Direction::Inverse);
 
-	ABS.SetArg(0,clWaveFunction1[0],ArgumentType::Input);
+	ABS.SetArg(0, clWaveFunction1[0], ArgumentType::InputOutput);
 	ABS.SetArg(1,Temp1,ArgumentType::Output);
 	ABS.SetArg(2,resolution);
 	ABS.SetArg(3,resolution);

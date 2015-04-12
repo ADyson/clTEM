@@ -121,13 +121,7 @@ namespace SimulationGUI.Utils
             set
             {
                 int temp;
-                string temps;
-
-                if (value.EndsWith("E"))
-                    temps = value + "0";
-                else
-                    temps = value;
-                int.TryParse(temps, out temp);
+                int.TryParse(value, out temp);
                 Val = temp;
             }
         }

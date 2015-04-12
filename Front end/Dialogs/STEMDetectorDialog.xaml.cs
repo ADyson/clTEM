@@ -62,6 +62,8 @@ namespace SimulationGUI.Dialogs
             txtName.TextChanged += CheckNameValid;
             txtInner.TextChanged += CheckRadiiValid;
             txtOuter.TextChanged += CheckRadiiValid;
+            txtCenterX.TextChanged += CheckCentreValid;
+            txtCenterY.TextChanged += CheckCentreValid;
         }
 
         public void ClickOk(object sender, RoutedEventArgs e)
@@ -140,13 +142,13 @@ namespace SimulationGUI.Dialogs
             var text = tbox.Text;
 
             float newVal;
-            float.TryParse(text, out newVal);
+            _goodRadii = float.TryParse(text, out newVal);
 
 
             if (Equals(tbox, txtInner))
-                _goodRadii = newVal < _outer.Val;
+                _goodRadii = _goodRadii && newVal < _outer.Val;
             else if (Equals(tbox, txtOuter))
-                _goodRadii = _inner.Val < newVal;
+                _goodRadii = _goodRadii && _inner.Val < newVal;
 
 
             if (!_goodRadii)
@@ -158,6 +160,25 @@ namespace SimulationGUI.Dialogs
             {
                 txtInner.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
                 txtOuter.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
+            }
+        }
+
+        private void CheckCentreValid(object sender, TextChangedEventArgs e)
+        {
+            var tbox = sender as TextBox;
+            if (tbox == null) return;
+            var text = tbox.Text;
+
+            float tempVal;
+            var _goodCent = float.TryParse(text, out tempVal);
+
+            if (!_goodCent)
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["ErrorCol"];
+            }
+            else
+            {
+                tbox.Background = (SolidColorBrush)Application.Current.Resources["TextBoxBackground"];
             }
         }
     }
