@@ -289,21 +289,15 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->simulateCTEM();
 	};
 
-	void ManagedOpenCL::simulateCTEM(int detector, int binning)
+	void ManagedOpenCL::simulateCTEM(int detector, int binning, float doseperpix, float conversionfactor)
 	{
-		_UMOpenCL->TS->simulateCTEM(detector, binning);
+		_UMOpenCL->TS->simulateCTEM(detector, binning, doseperpix, conversionfactor);
 	};
 
 	void ManagedOpenCL::getCTEMImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->getCTEMImage(pdata, resolution);
-	};
-
-	void ManagedOpenCL::getCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector)
-	{
-		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->getCTEMImage(pdata, resolution, dose, binning, detector);
 	};
 
 	// possibly phase

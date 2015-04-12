@@ -36,10 +36,10 @@ public:
 	float getSTEMPixel(float inner, float outer, float xc, float yc, int wave);
 
 	void getCTEMImage(float* data, int resolution);
-	void getCTEMImage(float* data, int resolution, float dose, int binning, int detector);
+	//void getCTEMImage(float* data, int resolution, float dose, int binning, int detector);
 
 	void simulateCTEM();
-	void simulateCTEM(int detector, int binning);
+	void simulateCTEM(int detector, int binning, float doseperpix, float conversionfactor);
 
 	void getDiffImage(float* data, int resolution, int wave);
 	void getEWImage(float* data, int resolution, int wave);

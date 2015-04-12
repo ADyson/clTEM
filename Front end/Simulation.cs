@@ -527,7 +527,7 @@ namespace SimulationGUI
             // Get CCD and Binning
 
             if (ccd != 0)
-                _mCl.simulateCTEM(ccd, binning);
+                _mCl.simulateCTEM(ccd, binning, dpp, 8);
             else
                 _mCl.simulateCTEM();
 

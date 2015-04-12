@@ -290,10 +290,10 @@ namespace SimulationGUI
         /// <param name="ccd">Integer value denoting CCD selection in dropdown box (0 == perfect)</param>
         private void UpdateCtemImage(float dpp, int binning, int ccd)
         {
-            if (ccd != 0)
-                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution, dpp, binning, ccd);
-            else
-                _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution);
+            //if (ccd != 0)
+            //    _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution, dpp, binning, ccd);
+            //else
+            _mCl.getCTEMImage(_ctemDisplay.ImageData, _lockedSettings.Resolution);
             _ctemDisplay.Max = _mCl.getCTEMMax();
             _ctemDisplay.Min = _mCl.getCTEMMin();
             UpdateTabImage(_ctemDisplay, x => x);

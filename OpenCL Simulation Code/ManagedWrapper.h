@@ -78,10 +78,9 @@ namespace ManagedOpenCLWrapper
 		void initialiseSTEMWaveFunction(float posx, float posy, int wave);
 
 		void simulateCTEM();
-		void simulateCTEM(int detector, int binning);
+		void simulateCTEM(int detector, int binning, float doseperpix, float conversionfactor);
 
 		void getCTEMImage(array<float>^ data, int resolution);
-		void getCTEMImage(array<float>^ data, int resolution, float dose, int binning, int detector);
 
 		void getEWImage(array<float>^ data, int resolution);
 		void getEWImage(array<float>^ data, int resolution, int wave);
