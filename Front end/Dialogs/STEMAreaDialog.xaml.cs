@@ -66,9 +66,9 @@ namespace SimulationGUI.Dialogs
             txtPixelX.TextChanged += CheckPixelsValid;
             txtPixelY.TextChanged += CheckPixelsValid;
             txtStartX.TextChanged += CheckXRangeValid;
-            txtStartY.TextChanged += CheckXRangeValid;
+            txtStartY.TextChanged += CheckYRangeValid;
             txtEndX.TextChanged += CheckXRangeValid;
-            txtEndY.TextChanged += CheckXRangeValid;
+            txtEndY.TextChanged += CheckYRangeValid;
         }
 
         private void ClickOk(object sender, RoutedEventArgs e)
