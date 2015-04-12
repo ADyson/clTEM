@@ -505,7 +505,7 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,26, "clBinnedAtomicPotentialOpt");
+		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx,opt2source,27, "clBinnedAtomicPotentialOpt");
 	}
 	else if (FD)
 	{
