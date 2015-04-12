@@ -1190,6 +1190,9 @@ float TEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWor
 
 	// Find out which numbers to read back
 	float sum = 0;
-	sum = std::accumulate(sums.begin(), sums.end(), 0); // is this any faster?
+	for (int i = 0; i < nGroups; i++)
+	{
+		sum += sums[i];
+	}
 	return sum;
 };

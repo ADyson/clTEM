@@ -573,7 +573,7 @@ const char* floatbandPassSource =
 "		int Index = xid + yid*width; \n"
 "       float centX = width/2 + xc; \n"
 "       float centY = height/2 + yc; \n"
-"       float radius = hypot(xid-centX,yid-centY); \n" // hypot?
+"       float radius = hypot(xid-centX,yid-centY); \n"
 "		Output[Index] = (radius < outer && radius > inner) * Input[Index];\n"
 "	}	\n"
 "}	\n"
@@ -591,8 +591,8 @@ const char* floatabsbandPassSource =
 "		int Index = xid + yid*width; \n"
 "       float centX = width/2 + xc; \n"
 "       float centY = height/2 + yc; \n"
-"       float radius = hypot(xid-centX,yid-centY); \n" // hypot?
-"		Output[Index] = (radius < outer && radius > inner) * hypot(Input[Index].x, Input[Index].y) * hypot(Input[Index].x, Input[Index].y);\n"
+"       float radius = hypot(xid-centX,yid-centY); \n"
+"		Output[Index] = (radius < outer && radius > inner) * hypot(Input[Index].x, Input[Index].y) * hypot(Input[Index].x, Input[Index].y);\n" // wants to be abs^2 ??
 "	}	\n"
 "}	\n"
 ;
