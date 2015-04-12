@@ -592,7 +592,7 @@ const char* floatabsbandPassSource =
 "       float centX = width/2 + xc; \n"
 "       float centY = height/2 + yc; \n"
 "       float radius = hypot(xid-centX,yid-centY); \n" // hypot?
-"		Output[Index] = (radius < outer && radius > inner) * ( hypot(Input[Index].x, Input[Index].y) );\n"
+"		Output[Index] = (radius < outer && radius > inner) * hypot(Input[Index].x, Input[Index].y) * hypot(Input[Index].x, Input[Index].y);\n"
 "	}	\n"
 "}	\n"
 ;

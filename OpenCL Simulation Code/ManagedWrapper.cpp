@@ -394,11 +394,6 @@ namespace ManagedOpenCLWrapper
 		return _UMOpenCL->TS->diffmin[wave - 1];
 	};
 
-	void ManagedOpenCL::getSTEMDiff(int wave)
-	{
-		_UMOpenCL->TS->getSTEMDiff(wave);
-	};
-
 	float ManagedOpenCL::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 	{
 		return _UMOpenCL->TS->getSTEMPixel(inner, outer, xc, yc, wave);

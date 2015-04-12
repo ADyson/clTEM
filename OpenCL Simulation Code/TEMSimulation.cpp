@@ -475,11 +475,11 @@ void TEMSimulation::initialiseSTEMSimulation(int res, MultisliceStructure* Struc
 	// Set initial wavefunction to 1+0i
 	InitialiseSTEMWavefunction = clKernel(UnmanagedOpenCL::ctx,InitialiseSTEMWavefunctionSourceTest.c_str(), 24, "clInitialiseSTEMWavefunction");
 
-	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2,4, "clFloatSumReduction");
+	SumReduction = clKernel(UnmanagedOpenCL::ctx,floatSumReductionsource2, 4, "clFloatSumReduction");
 
 	BandLimit = clKernel(UnmanagedOpenCL::ctx,BandLimitSource, 6, "clBandLimit");
 
-	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource,4, "clfftShift");
+	fftShift = clKernel(UnmanagedOpenCL::ctx,fftShiftSource, 4, "clfftShift");
 
 	fftShift.SetArg(0, clWaveFunction2[0]);
 	fftShift.SetArg(1, clWaveFunction3[0]);
@@ -806,6 +806,11 @@ void TEMSimulation::doMultisliceStepFD(int stepno, int waves)
 
 float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 {
+	clWorkGroup WorkSize(resolution, resolution, 1);
+
+	fftShift.SetArg(0, clWaveFunction2[wave - 1], ArgumentType::Input);
+	fftShift(WorkSize);
+
 	float pxFreq = (resolution * pixelscale);
 
 	float innerFreq = inner / (1000 * wavelength);
@@ -819,15 +824,6 @@ float TEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, 
 
 	float ycFreq = yc / (1000 * wavelength);
 	float ycPx = ycFreq*pxFreq;
-
-	// make the stem diff part
-	clWorkGroup WorkSize(resolution, resolution, 1);
-
-	// NOTE FOR TDS SHOULD USE THE clTDSk vector and mask this to get results.... (can use TDS everytime its just set to 1 run??).
-	// clWaveFunction3 should contain the diffraction pattern, shouldnt be needed elsewhere is STEM mode so should be safe to modify?
-	
-	//clTDSDiff[wave - 1]->Write(clTDSk[wave - 1]);
-	//clTDSDiff->Write(clTDSk);
 
 	TDSMaskingAbsKernel.SetArg(0, clTDSMaskDiff, ArgumentType::Output);
 	TDSMaskingAbsKernel.SetArg(1, clWaveFunction3[0], ArgumentType::Input);
@@ -1109,8 +1105,8 @@ void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 
 	std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
 
-	float max = -CL_MAXFLOAT;
-	float min = CL_MAXFLOAT;
+	float maxf = -CL_MAXFLOAT;
+	float minf = CL_MAXFLOAT;
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -1118,54 +1114,14 @@ void TEMSimulation::getDiffImage(float* data, int resolution, int wave)
 		data[i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
 
 		// Find max,min for contrast limits
-		if (data[i] > max)
-			max = data[i];
-		if (data[i] < min)
-			min = data[i];
+		if (data[i] > maxf)
+			maxf = data[i];
+		if (data[i] < minf)
+			minf = data[i];
 	}
 
-	diffmin[wave - 1] = min;
-	diffmax[wave - 1] = max;
-};
-
-void TEMSimulation::getSTEMDiff(int wave)
-{
-	//clock_t startTime = clock();
-
-	//float max = -CL_MAXFLOAT;
-	//float min = CL_MAXFLOAT;
-
-	// Original data is complex so copy complex version down first
-	
-
-	clWorkGroup Work(resolution,resolution,1);
-
-	fftShift.SetArg(0, clWaveFunction2[wave - 1], ArgumentType::Input);
-	fftShift(Work);
-
-	//std::vector<cl_float2> compdata = clWaveFunction3[0]->CreateLocalCopy();
-
-	//max = CL_FLT_MIN;
-	//min = CL_MAXFLOAT;
-
-	//for (int i = 0; i < resolution * resolution; i++)
-	//{
-	////	// Get absolute value for display...
-	//	clTDSk[i] = (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]); //SQRT?
-
-	////	// Find max,min for contrast limits
-	////	if (clTDSk[i] > max)
-	////		max = clTDSk[i];
-	////	if (clTDSk[i] < min)
-	////		min = clTDSk[i];
-	//}
-
-	//tdsmin[wave - 1] = *std::min_element(clTDSk.begin(), clTDSk.end());
-	//tdsmax[wave - 1] = *std::max_element(clTDSk.begin(), clTDSk.end());
-
-	//std::string msgbuf = "[clTEM] Got STEM diff in " + boost::lexical_cast<std::string>(double(clock() - startTime) / (double)CLOCKS_PER_SEC) + " seconds\n";
-	//std::wstring wmsgbuf(msgbuf.begin(), msgbuf.end());
-	//OutputDebugString(wmsgbuf.c_str());
+	diffmin[wave - 1] = minf;
+	diffmax[wave - 1] = maxf;
 };
 
 void TEMSimulation::getEWImage(float* data, int resolution, int wave)
@@ -1217,66 +1173,6 @@ void TEMSimulation::getEWImage2(float* data, int resolution, int wave)
 	ewmin2[wave - 1] = min;
 	ewmax2[wave - 1] = max;
 };
-
-//void TEMSimulation::addTDS(int wave)
-//{
-//	// Original data is complex so copy complex version down first
-//	std::vector<cl_float2> compdata = clWaveFunction1[wave - 1]->CreateLocalCopy();
-//
-//	float max = -CL_MAXFLOAT;
-//	float min = CL_MAXFLOAT;
-//
-//	for (int i = 0; i < resolution * resolution; i++)
-//	{
-//		// Get absolute value for display...
-//		clTDSx[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
-//
-//		// Find max,min for contrast limits
-//		if (clTDSx[wave - 1][i] > max)
-//			max = clTDSx[wave - 1][i];
-//		if (clTDSx[wave - 1][i] < min)
-//			min = clTDSx[wave - 1][i];
-//	}
-//
-//	ewmin[wave - 1] = min;
-//	ewmax[wave - 1] = max;
-//
-//	// Original data is complex so copy complex version down first
-//
-//	clWorkGroup Work(resolution,resolution,1);
-//
-//	fftShift.SetArg(0, clWaveFunction2[wave - 1],ArgumentType::Input);
-//	fftShift(Work);
-//
-//	compdata = clWaveFunction3[0]->CreateLocalCopy();
-//
-//	max = -CL_MAXFLOAT;
-//	min = CL_MAXFLOAT;
-//
-//	for (int i = 0; i < resolution * resolution; i++)
-//	{
-//		// Get absolute value for display...
-//		clTDSk[wave - 1][i] += (compdata[i].s[0] * compdata[i].s[0] + compdata[i].s[1] * compdata[i].s[1]);
-//
-//		// Find max,min for contrast limits
-//		if (clTDSk[wave - 1][i] > max)
-//			max = clTDSk[wave - 1][i];
-//		if (clTDSk[wave - 1][i] < min)
-//			min = clTDSk[wave - 1][i];
-//	}
-//
-//	tdsmin[wave - 1] = min;
-//	tdsmax[wave - 1] = max;
-//};
-
-//void TEMSimulation::clearTDS(int waves)
-//{
-//	for (int i = 1; i <= waves; i++)
-//	{
-//		fill(clTDSk[i - 1].begin(), clTDSk[i - 1].end(), 0);
-//		fill(clTDSx[i - 1].begin(), clTDSx[i - 1].end(), 0);
-//	}
-//};
 
 float TEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {

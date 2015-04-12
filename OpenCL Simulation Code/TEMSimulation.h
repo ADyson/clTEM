@@ -42,13 +42,8 @@ public:
 	void simulateCTEM(int detector, int binning);
 
 	void getDiffImage(float* data, int resolution, int wave);
-	void getSTEMDiff(int wave);
 	void getEWImage(float* data, int resolution, int wave);
 	void getEWImage2(float* data, int resolution, int wave);
-
-	//void AddTDSDiffImage(float* data, int resolution); same as GetDiffImage
-	//void addTDS(int wave);
-	//void clearTDS(int wave);
 
 	float FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize);
 
@@ -61,8 +56,6 @@ public:
 	float wavelength;
 	float bandwidthkmax;
 
-	//std::vector<std::vector<float>> clTDSx;
-	//std::vector<std::vector<float>> clTDSk;
 	std::vector<float> clTDSk;
 	float imagemin;
 	float imagemax;
@@ -116,12 +109,4 @@ public:
 	// FD Only
 	clKernel GradKernel;
 	clKernel FiniteDifference;
-
-//private:
-	// no idea if these are used
-	//float ComplSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-	//float ComplSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-	//float FloatSumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-	//float FloatSumReduction(Buffer &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize);
-//
 };

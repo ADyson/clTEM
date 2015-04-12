@@ -90,7 +90,7 @@ namespace SimulationGUI
                 }
                 else if (_lockedSettings.SimMode == 1)
                 {
-                    UpdateDiffractionImage();
+                    //UpdateDiffractionImage();
 
                     // copy simulation settings to tabs
                     _diffDisplay.SimParams.CopySettings(_lockedSettings, CopyType.CBED);
@@ -445,9 +445,6 @@ namespace SimulationGUI
                     // loop over the pixels we jsut simulated
                     for (var p = 1; p <= conPix; p++)
                     {
-                        // get the diffraction pattern (in OpenCL buffers)
-                        _mCl.getSTEMDiff(p);
-
                         // Loop through each detectors and get each STEM pixel by summing up diffraction over the detector area
                         foreach (var det in _lockedDetectorDisplay)
                         {
@@ -536,7 +533,8 @@ namespace SimulationGUI
 
             //Update the displays
             UpdateCtemImage(dpp, binning, ccd);
-            UpdateDiffractionImage();
+            // why does this get called here?
+            //UpdateDiffractionImage();
 
             SimulateEWButton.IsEnabled = true;
         }
