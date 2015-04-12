@@ -435,7 +435,7 @@ namespace SimulationGUI
                         progressReporter.ReportProgress(val =>
                         {
                             CancelButton.IsEnabled = true;
-                            UpdateStatus(numberOfSlices, _lockedSettings.STEM.TDSRuns.Val, numPix, i, j, nPx, simTime, memUsage);
+                            UpdateStatus(numberOfSlices, numRuns, numPix, i, j, nPx, simTime, memUsage);
                         }, i);
                     }
 
