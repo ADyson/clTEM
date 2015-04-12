@@ -17,6 +17,15 @@ namespace SimulationGUI.Utils.Settings
             general = general.Replace("{{simareaxend}}", tab.SimParams.SimArea.EndX.ToString());
             general = general.Replace("{{simareaystart}}", tab.SimParams.SimArea.StartY.ToString());
             general = general.Replace("{{simareayend}}", tab.SimParams.SimArea.EndY.ToString());
+
+            general = general.Replace("{{xpxscale}}", tab.PixelScaleX.ToString());
+            general = general.Replace("{{ypxscale}}", tab.PixelScaleY.ToString());
+
+            if(tab.Reciprocal)
+                general = general.Replace("{{scaleunits}}", "1/Å");
+            else
+                general = general.Replace("{{scaleunits}}", "Å");
+
             general = general.Replace("{{resolution}}", tab.SimParams.Resolution.ToString());
 
             general = general.Replace("{{mode}}", tab.SimParams.GetModeString());
@@ -51,14 +60,36 @@ namespace SimulationGUI.Utils.Settings
                 microscopeString = microscopeString.Replace("{{aperture}}", tab.SimParams.Microscope.Aperture.Val.ToString());
                 microscopeString = microscopeString.Replace("{{beta}}", tab.SimParams.Microscope.Alpha.Val.ToString());
                 microscopeString = microscopeString.Replace("{{delta}}", tab.SimParams.Microscope.Delta.Val.ToString());
-                microscopeString = microscopeString.Replace("{{defocus}}", tab.SimParams.Microscope.C10.Val.ToString());
-                microscopeString = microscopeString.Replace("{{cs}}", tab.SimParams.Microscope.C30.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1m}}", tab.SimParams.Microscope.C12Mag.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A1t}}", tab.SimParams.Microscope.C12Ang.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2m}}", tab.SimParams.Microscope.C23Mag.Val.ToString());
-                microscopeString = microscopeString.Replace("{{A2t}}", tab.SimParams.Microscope.C23Ang.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2m}}", tab.SimParams.Microscope.C21Mag.Val.ToString());
-                microscopeString = microscopeString.Replace("{{B2t}}", tab.SimParams.Microscope.C21Ang.Val.ToString());
+
+                microscopeString = microscopeString.Replace("{{C10}}", tab.SimParams.Microscope.C10.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C12m}}", tab.SimParams.Microscope.C12Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C12a}}", tab.SimParams.Microscope.C12Ang.Val.ToString());
+
+                microscopeString = microscopeString.Replace("{{C21m}}", tab.SimParams.Microscope.C21Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C21a}}", tab.SimParams.Microscope.C21Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C23m}}", tab.SimParams.Microscope.C23Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C23a}}", tab.SimParams.Microscope.C23Ang.Val.ToString());
+
+                microscopeString = microscopeString.Replace("{{C30}}", tab.SimParams.Microscope.C30.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C32m}}", tab.SimParams.Microscope.C32Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C32a}}", tab.SimParams.Microscope.C32Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C34m}}", tab.SimParams.Microscope.C34Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C34a}}", tab.SimParams.Microscope.C34Ang.Val.ToString());
+
+                microscopeString = microscopeString.Replace("{{C41m}}", tab.SimParams.Microscope.C41Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C41a}}", tab.SimParams.Microscope.C41Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C43m}}", tab.SimParams.Microscope.C43Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C43a}}", tab.SimParams.Microscope.C43Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C45m}}", tab.SimParams.Microscope.C45Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C45a}}", tab.SimParams.Microscope.C45Ang.Val.ToString());
+
+                microscopeString = microscopeString.Replace("{{C50}}", tab.SimParams.Microscope.C50.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C52m}}", tab.SimParams.Microscope.C52Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C52a}}", tab.SimParams.Microscope.C52Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C54m}}", tab.SimParams.Microscope.C54Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C54a}}", tab.SimParams.Microscope.C54Ang.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C56m}}", tab.SimParams.Microscope.C56Mag.Val.ToString());
+                microscopeString = microscopeString.Replace("{{C56a}}", tab.SimParams.Microscope.C56Ang.Val.ToString());
             }
 
             general = general.Replace("{{microscopesettings}}", microscopeString);
@@ -86,6 +117,13 @@ namespace SimulationGUI.Utils.Settings
                     case 2:
                         modeString = STEMSettings;
 
+                        modeString = modeString.Replace("{{areaxstart}}", tab.SimParams.STEM.ScanArea.StartX.ToString());
+                        modeString = modeString.Replace("{{areaxend}}", tab.SimParams.STEM.ScanArea.EndX.ToString());
+                        modeString = modeString.Replace("{{areaystart}}", tab.SimParams.STEM.ScanArea.StartY.ToString());
+                        modeString = modeString.Replace("{{areayend}}", tab.SimParams.STEM.ScanArea.EndY.ToString());
+                        modeString = modeString.Replace("{{xpixels}}", tab.SimParams.STEM.ScanArea.xPixels.ToString());
+                        modeString = modeString.Replace("{{ypixels}}", tab.SimParams.STEM.ScanArea.yPixels.ToString());
+                        
                         modeString = modeString.Replace("{{multistem}}", tab.SimParams.STEM.ConcurrentPixels.Val.ToString());
                         modeString = modeString.Replace("{{stemtds}}", tab.SimParams.STEM.DoTDS ? tab.SimParams.STEM.TDSRuns.Val.ToString() : "1");
 
@@ -111,11 +149,15 @@ namespace SimulationGUI.Utils.Settings
 Simulation Mode
   {{mode}}
 
-Simulation Range (UNITS)
-  x: {{simareaxstart}} - {{simareaxend}}
-  y: {{simareaystart}} - {{simareayend}}
+Simulation Range (Å)
+  x: {{simareaxstart}}, {{simareaxend}}
+  y: {{simareaystart}}, {{simareayend}}
 
-Resolution
+Pixel Scale ({{scaleunits}})
+  x: {{xpxscale}}
+  y: {{ypxscale}}
+
+Simulation Resolution
   {{resolution}}
 
 Full 3D
@@ -124,7 +166,7 @@ Full 3D
 Finite Difference 
   {{fd}}
 
-Slice Thickness (UNITS)
+Slice Thickness (Å)
   {{slicethickness}}
 {{modesettings}}
 Microscope Settings
@@ -136,29 +178,56 @@ Microscope Settings
 
 public static readonly string MicroscopeSettings =
 @"
-  Objective Aperture (UNITS)
+  Objective Aperture (mrad)
     {{aperture}}
 
-  Convergence Angle (UNITS)
+  Convergence Angle (mrad)
     {{beta}}
 
-  Defocus Spread (UNITS)
+  Defocus Spread (nm)
     {{delta}}
 
-  Defocus ***
-    {{defocus}}
+  C10 (Å)
+    {{C10}}
 
-  Cs ***
-    {{cs}}
+  C12 (Å, °)
+    {{C12m}}, {{C12a}}
 
-  A1 (magnitude, angle) (UNITS)
-    {{A1m}}, {{A1t}}
+  C21 (Å, °)
+    {{C21m}}, {{C21a}}
 
-  A2 (magnitude, angle) (UNITS)
-    {{A2m}}, {{A2t}}
+  C23 (Å, °)
+    {{C23m}}, {{C23a}}
 
-  B2 (magnitude, angle) (UNITS)
-    {{B2m}}, {{B2t}}
+  C30 (Å)
+    {{C30}}
+
+  C32 (Å, °)
+    {{C32m}}, {{C32a}}
+
+  C34 (Å, °)
+    {{C34m}}, {{C34a}}
+
+  C41 (Å, °)
+    {{C41m}}, {{C41a}}
+
+  C43 (Å, °)
+    {{C43m}}, {{C43a}}
+
+  C45 (Å, °)
+    {{C45m}}, {{C45a}}
+
+  C50 (Å)
+    {{C50}}
+
+  C52 (Å, °)
+    {{C52m}}, {{C52a}}
+
+  C54 (Å, °)
+    {{C54m}}, {{C54a}}
+
+  C56 (Å, °)
+    {{C56m}}, {{C56a}}
 "
 ;
 
@@ -171,7 +240,7 @@ public static readonly string Full3dSettings =
 
 public static readonly string DoseSettings =
 @"
-Dose (UNITS)
+Dose (e/Å²)
   {{dose}}
 
 CCD
@@ -184,7 +253,7 @@ Binning
 
         public static readonly string CBEDSettings =
 @"
-Probe Position (x, y) (UNITS)
+Probe Position (x, y) (Å)
   {{cbedx}}, {{cbedy}}
 
 TDS Runs
@@ -194,6 +263,14 @@ TDS Runs
 
         public static readonly string STEMSettings =
 @"
+Scan Range (Å)
+  x: {{areaxstart}}, {{areaxend}}
+  y: {{areaystart}}, {{areayend}}
+
+Scan Dimensions (px)
+  x: {{xpixels}}
+  y: {{ypixels}}
+
 Concurrent Pixels
   {{multistem}}
 
@@ -210,13 +287,13 @@ Detector
   Name
     {{detectorname}}
 
-  Inner Radius (UNITS)
+  Inner Radius (mrad)
     {{inner}}
 
-  Outer Radius (UNITS)
+  Outer Radius (mrad)
     {{outer}}
 
-  Center (x, y) (UNITS)
+  Center (x, y) (Å)
     {{centx}}, {{centy}}
 "
 ;
