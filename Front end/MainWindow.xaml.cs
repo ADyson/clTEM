@@ -416,11 +416,17 @@ namespace SimulationGUI
         }
 
         /// <summary>
-        /// Check CBED positions are in simulation range.
+        ///
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void CheckTboxValid(object sender, TextChangedEventArgs e)
+        {
+            isTboxValid(sender);
+        }
+
+
+        private void isTboxValid(object sender)
         {
             var tbox = sender as TextBox;
             if (tbox == null) return;
@@ -442,13 +448,13 @@ namespace SimulationGUI
             {
                 float.TryParse(text, out fVal);
                 good = fVal >= _settings.SimArea.StartY && fVal <= _settings.SimArea.EndY;
-                ErrorMessage.ToggleCode(30, good);
+                ErrorMessage.ToggleCode(31, good);
             }
             else if (Equals(tbox, txtCBEDruns))
             {
                 int.TryParse(text, out iVal);
                 good = iVal > 0;
-                ErrorMessage.ToggleCode(31, good);
+                ErrorMessage.ToggleCode(32, good);
             }
             else if (Equals(tbox, txt3DIntegrals))
             {
@@ -764,6 +770,8 @@ namespace SimulationGUI
                 _settings.STEM.ScanArea.yPixels = (int)Math.Ceiling((_settings.STEM.ScanArea.StartY - _settings.STEM.ScanArea.EndY) / yscale);
 
             UpdatePixelScale();
+            isTboxValid(txtCBEDx);
+            isTboxValid(txtCBEDy);
         }
 
         /// <summary>

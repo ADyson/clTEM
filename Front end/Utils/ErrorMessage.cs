@@ -20,8 +20,9 @@ namespace SimulationGUI.Utils
             // CTEM
             // N/A
             // CBED
-            {30, "CBED coordinates must be within simulation bounds."},
-            {31, "CBED TDS runs must be greater than 0."},
+            {30, "CBED x coordinates must be within simulation bounds."},
+            {31, "CBED y coordinates must be within simulation bounds."},
+            {32, "CBED TDS runs must be greater than 0."},
             // STEM
             {40, "Concurrent STEM pixels nust be greater than 0."},
             {41, "STEM TDS runs must be greater than 0."},
