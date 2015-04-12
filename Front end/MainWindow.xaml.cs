@@ -440,62 +440,62 @@ namespace SimulationGUI
 
             if (Equals(tbox, txtCBEDx))
             {
-                float.TryParse(text, out fVal);
-                good = fVal >= _settings.SimArea.StartX && fVal <= _settings.SimArea.EndX;
+                good = float.TryParse(text, out fVal);
+                good = good && fVal >= _settings.SimArea.StartX && fVal <= _settings.SimArea.EndX;
                 ErrorMessage.ToggleCode(30, good);
             }
             else if (Equals(tbox, txtCBEDy))
             {
-                float.TryParse(text, out fVal);
-                good = fVal >= _settings.SimArea.StartY && fVal <= _settings.SimArea.EndY;
+                good = float.TryParse(text, out fVal);
+                good = good && fVal >= _settings.SimArea.StartY && fVal <= _settings.SimArea.EndY;
                 ErrorMessage.ToggleCode(31, good);
             }
             else if (Equals(tbox, txtCBEDruns))
             {
-                int.TryParse(text, out iVal);
-                good = iVal > 0;
+                good = int.TryParse(text, out iVal);
+                good = good && iVal > 0;
                 ErrorMessage.ToggleCode(32, good);
             }
             else if (Equals(tbox, txt3DIntegrals))
             {
-                int.TryParse(text, out iVal);
-                good = iVal > 0;
+                good = int.TryParse(text, out iVal);
+                good = good && iVal > 0;
                 ErrorMessage.ToggleCode(6, good);
             }
             else if (Equals(tbox, txtSliceThickness))
             {
-                float.TryParse(text, out fVal);
-                good = fVal > 0;
+                good = float.TryParse(text, out fVal);
+                good = good && fVal > 0;
                 ErrorMessage.ToggleCode(5, good);
             }
             else if (Equals(tbox, txtMicroscopeAp))
             {
-                float.TryParse(text, out fVal);
-                good = fVal > 0;
+                good = float.TryParse(text, out fVal);
+                good = good && fVal > 0;
                 WarningMessage.ToggleCode(10, good);
             }
             else if (Equals(tbox, txtMicroscopeKv))
             {
-                float.TryParse(text, out fVal);
-                good = fVal > 0;
+                good = float.TryParse(text, out fVal);
+                good = good && fVal > 0;
                 ErrorMessage.ToggleCode(3, good);
             }
             else if (Equals(tbox, txtSTEMruns))
             {
-                int.TryParse(tbox.Text, out iVal);
-                good = iVal > 0;
+                good = int.TryParse(tbox.Text, out iVal);
+                good = good && iVal > 0;
                 ErrorMessage.ToggleCode(41, good);
             }
             else if (Equals(tbox, txtSTEMmulti))
             {
-                int.TryParse(tbox.Text, out iVal);
-                good = iVal > 0;
+                good = int.TryParse(tbox.Text, out iVal);
+                good = good && iVal > 0;
                 ErrorMessage.ToggleCode(41, good);
             }
             else if (Equals(tbox, txtDose))
             {
-                float.TryParse(tbox.Text, out fVal);
-                good = fVal > 0;
+                good = float.TryParse(tbox.Text, out fVal);
+                good = good && fVal > 0;
                 WarningMessage.ToggleCode(50, good);
             }
             else
