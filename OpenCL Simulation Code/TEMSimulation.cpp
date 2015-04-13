@@ -935,7 +935,8 @@ void TEMSimulation::simulateCTEM(int detector, int binning, float doseperpix, fl
 	// build additional kernels required
 	clKernel NTF = clKernel(UnmanagedOpenCL::ctx, NTFSource, 5, "clNTF");
 	clKernel DQE = clKernel(UnmanagedOpenCL::ctx,DQESource, 5, "clDQE");
-	clKernel ABS = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
+	clKernel ABS = clKernel(UnmanagedOpenCL::ctx, abssource2, 3, "clAbs");
+	clKernel ABS2 = clKernel(UnmanagedOpenCL::ctx,SqAbsSource, 4, "clSqAbs");
 
 	// simulate image
 	ImagingKernel.SetArg(0, clWaveFunction2[0], ArgumentType::Input);
@@ -969,11 +970,11 @@ void TEMSimulation::simulateCTEM(int detector, int binning, float doseperpix, fl
 	FourierTrans(clImageWaveFunction, clWaveFunction1[0], Direction::Inverse);
 
 	//abs for detected image
-	ABS.SetArg(0, clWaveFunction1[0], ArgumentType::InputOutput);
-	ABS.SetArg(1, Temp1, ArgumentType::Output);
-	ABS.SetArg(2, resolution);
-	ABS.SetArg(3, resolution);
-	ABS(Work);
+	ABS2.SetArg(0, clWaveFunction1[0], ArgumentType::InputOutput);
+	ABS2.SetArg(1, Temp1, ArgumentType::Output);
+	ABS2.SetArg(2, resolution);
+	ABS2.SetArg(3, resolution);
+	ABS2(Work);
 
 	//
 	// Dose stuff starts here!
@@ -994,15 +995,15 @@ void TEMSimulation::simulateCTEM(int detector, int binning, float doseperpix, fl
 	FourierTrans(clImageWaveFunction, Temp1, Direction::Inverse);
 
 	// what is this abs squared for?
-	ABS.SetArg(0,Temp1,ArgumentType::Input);
-	ABS.SetArg(1,clImageWaveFunction,ArgumentType::Output);
-	ABS.SetArg(2,resolution);
-	ABS.SetArg(3,resolution);
+	ABS.SetArg(0, Temp1, ArgumentType::Input);
+	//ABS.SetArg(1,clImageWaveFunction,ArgumentType::Output);
+	ABS.SetArg(1, resolution);
+	ABS.SetArg(2, resolution);
 	ABS(Work);
 
 	float Ntot = doseperpix*binning*binning; // Get this passed in, its dose per pixel i think.
 	
-	std::vector<cl_float2> compdata = clImageWaveFunction->CreateLocalCopy();
+	std::vector<cl_float2> compdata = Temp1->CreateLocalCopy();
 
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -1016,8 +1017,8 @@ void TEMSimulation::simulateCTEM(int detector, int binning, float doseperpix, fl
 		compdata[i].s[1] = 0;
 	}
 
-	clWaveFunction1[0]->Write(compdata);
-	FourierTrans(clWaveFunction1[0], Temp1, Direction::Forwards);
+	clImageWaveFunction->Write(compdata);
+	FourierTrans(clImageWaveFunction, Temp1, Direction::Forwards);
 
 	clEnqueueWriteBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), dqentfbuffer->GetBuffer(), CL_TRUE, 0, 725 * sizeof(float), ntfs[detector], 0, NULL, NULL);
 
@@ -1028,13 +1029,13 @@ void TEMSimulation::simulateCTEM(int detector, int binning, float doseperpix, fl
 	NTF.SetArg(4, binning);
 	NTF(Work);
 
-	FourierTrans(Temp1, clWaveFunction1[0], Direction::Inverse);
+	FourierTrans(Temp1, clImageWaveFunction, Direction::Inverse);
 
 	// might want to be sqrt (aka normal abs)
-	ABS.SetArg(0, clWaveFunction1[0], ArgumentType::Input);
-	ABS.SetArg(1, clImageWaveFunction, ArgumentType::Output);
+	ABS.SetArg(0, clImageWaveFunction, ArgumentType::Input);
+	//ABS.SetArg(1, clImageWaveFunction, ArgumentType::Output);
+	ABS.SetArg(1, resolution);
 	ABS.SetArg(2, resolution);
-	ABS.SetArg(3, resolution);
 	ABS(Work);
 };
 
