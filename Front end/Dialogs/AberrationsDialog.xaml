@@ -53,25 +53,25 @@
         <TextBlock Text="kV :" Grid.Column="2" Grid.Row="1" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0"/>
         <TextBox x:Name="txtVoltage" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="1" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Text="Aper :" Grid.Column="4" Grid.Row="1" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0"/>
         <TextBox x:Name="txtAperture" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="5" Grid.Row="1" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Text="α :" Grid.Column="6" Grid.Row="1" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0"/>
         <TextBox x:Name="txtBeta" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="7" Grid.Row="1" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Text="Δ :" Grid.Column="8" Grid.Row="1" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0"/>
         <TextBox x:Name="txtDelta" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="9" Grid.Row="1" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
 
@@ -83,7 +83,7 @@
         </TextBlock>
         <TextBox x:Name="txtC10" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="2" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Grid.Column="4" Grid.Row="2" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0">
@@ -96,10 +96,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC12Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC12Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"  />
         </Grid>
 
@@ -118,10 +118,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC21Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"  />
             <TextBox x:Name="txtC21Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -135,10 +135,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC23Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC23Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"  />
         </Grid>
 
@@ -152,7 +152,7 @@
         </TextBlock>
         <TextBox x:Name="txtC30" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="4" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Grid.Column="4" Grid.Row="4" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0">
@@ -165,10 +165,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC32Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC32Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -182,10 +182,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC34Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC34Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -205,10 +205,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC41Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC41Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -222,10 +222,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC43Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC43Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -239,10 +239,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC45Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC45Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -258,7 +258,7 @@
         </TextBlock>
         <TextBox x:Name="txtC50" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="6" VerticalAlignment="Center"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5, 2.5, 12.5, 2.5"  Width="{StaticResource ControlWidth}" />
 
         <TextBlock Grid.Column="4" Grid.Row="6" Foreground="{DynamicResource TextColourLight}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2.5,0">
@@ -271,10 +271,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC52Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC52Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -288,10 +288,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC54Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC54Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 
@@ -305,10 +305,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="txtC56Mag" Text="{Binding Path = SVal, Mode = TwoWay}" Grid.Column="0"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
             <TextBox x:Name="txtC56Ang" Text="{Binding Path = SVal, Mode = TwoWay}"  Grid.Column="2"
-                        controls:MaskedTextBox.Mask="^([+\-]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+\-]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True"   />
         </Grid>
 

@@ -45,7 +45,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
         <TextBox x:Name="txtStartX" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="1"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
         <Label Content="X end" Margin="20, 0, 7.5, 0"
@@ -53,7 +53,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
         <TextBox x:Name="txtEndX" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="5" Grid.Row="1"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
         <Label Content="Y start" Margin="20, 0, 7.5, 0"
@@ -61,7 +61,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
         <TextBox x:Name="txtStartY" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="3" Grid.Row="2"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5" Width="80" />
 
         <Label Content="Y end" Margin="20, 0, 7.5, 0"
@@ -69,7 +69,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center"  Foreground="{DynamicResource TextColourLight}" HorizontalContentAlignment="Right"/>
         <TextBox x:Name="txtEndY" Text="{Binding Path = SVal, Mode = TwoWay}"
                         Grid.Column="5" Grid.Row="2"
-                        controls:MaskedTextBox.Mask="^([+]?(?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
+                        controls:MaskedTextBox.Mask="^[+]?((?:0|[0-9]\d*)(?:\.\d*)?(?:[eE]([+\-]?\d+)?)?)*$" Height="{StaticResource ControlHeight}"
                         controls:TextBoxBehavior.SelectAllOnFocus="True" Margin="2.5"  Width="80" />
 
 
