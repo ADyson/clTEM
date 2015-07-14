@@ -135,7 +135,8 @@
       <AdditionalDependencies>OpenCL.lib; clFFT.lib; clWrapper.lib;</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CL" "$(SolutionDir)GPU TEM-STEM Simulation\bin\x64\Release\"  /s /i /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

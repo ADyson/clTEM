@@ -409,8 +409,13 @@ namespace SimulationGUI
                     // Make probles for all concurrent probe positions
                     for (var i = 1; i <= conPix; i++)
                     {
-                        _mCl.initialiseSTEMWaveFunction(((_lockedSettings.STEM.ScanArea.StartX + pixels[(currentPx + i - 1)].Item1 * xInterval - _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale),
-                            ((_lockedSettings.STEM.ScanArea.StartY + pixels[(currentPx + i - 1)].Item2 * yInterval - _lockedSettings.SimArea.StartY) / _lockedSettings.PixelScale), i);
+                        float a = ((_lockedSettings.STEM.ScanArea.StartX + pixels[(currentPx + i - 1)].Item1*xInterval -
+                                _lockedSettings.SimArea.StartX) / _lockedSettings.PixelScale);
+
+                        float b = ((_lockedSettings.STEM.ScanArea.StartY + pixels[(currentPx + i - 1)].Item2*yInterval -
+                                    _lockedSettings.SimArea.StartY)/_lockedSettings.PixelScale);
+
+                        _mCl.initialiseSTEMWaveFunction(a,b, i);
                     }
 
                     // Get number of slices in our multislice
