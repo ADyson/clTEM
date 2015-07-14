@@ -1,47 +1,34 @@
 #pragma once
 #include<complex>
 
-struct TEMParameters
+static struct Constants
 {
-	// Defocus
-	float C10;
-	//Two-fold astigmatism
-	std::complex<float> C12;
-	//Coma
-	std::complex<float> C21;
-	//Three-fold astigmatism
-	std::complex<float> C23;
-	//Spherical
-	float C30;
-
-	std::complex<float> C32;
-
-	std::complex<float> C34;
-
-	std::complex<float> C41;
-
-	std::complex<float> C43;
-
-	std::complex<float> C45;
-	//Fifth order spherical
-	float C50;
-
-	std::complex<float> C52;
-
-	std::complex<float> C54;
-
-	std::complex<float> C56;
-
-	float Voltage;
-	//Convergence angle
-	float Beta;
-	//Defocus spread
-	float Delta;
-	//Objective aperture size (mrad)
-	float Aperture;
+	static const float Pi;
+	// electron mass (kg)
+	static const float eMass;
+	// electron mass (keV)
+	static const float eMassEnergy;
+	// electron charge (C)
+	static const float eCharge;
+	// Planck's constant (Js)
+	static const float h;
+	// speed of light (m/s)
+	static const float c;
+	// Bohr radius (m)
+	static const float a0;
+	// Bohr radius (Anstrom)
+	static const float a0A;
 };
+const float Constants::Pi = 3.141592653589793238462643383279502884f;
+const float Constants::eMass = 9.10938291e-031f;
+const float Constants::eMassEnergy = 510.99906f;
+const float Constants::eCharge = 1.6021773e-019f;
+const float Constants::h = 6.6262e-034f;
+const float Constants::c = 299792458.0f;
+const float Constants::a0 = 52.9177e-012f;
+const float Constants::a0A = 52.9177e-002f;
 
-struct STEMParameters
+struct MicroscopeParameters
 {
 	// Defocus
 	float C10;
@@ -72,7 +59,20 @@ struct STEMParameters
 
 	std::complex<float> C56;
 
+	// Voltaage (kV)
 	float Voltage;
 	//Condenser aperture size (mrad)
 	float Aperture;
+
+	//Convergence angle (?)
+	float Beta;
+	//Defocus spread (?)
+	float Delta;
+
+	//Calculate wavelength (Angstrom)
+	float Wavelength()
+	{
+		return Constants::h*Constants::c / sqrt((Constants::eCharge * (Voltage * 1000) * (2 * Constants::eMass*Constants::c*Constants::c + Constants::eCharge * (Voltage * 1000)))) * 1e+010f;
+	}
+
 };
