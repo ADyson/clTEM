@@ -3,7 +3,6 @@
 #include "clWrapper.h"
 #include "CommonStructs.h"
 #include "MultisliceStructure.h"
-#include "UnmanagedOpenCL.h"
 
 //TODO: move all these to .cl files?
 #include "clKernelCodes2.h"
@@ -18,10 +17,10 @@ protected:
 
 	// these pointers can be made into smart objects later
 	//pointer to struct holding the needed parameters
-	MicroscopeParameters* mParams;
+	std::shared_ptr<MicroscopeParameters> mParams;
 
 	//Pointer to container of the structure
-	MultisliceStructure* AtomicStructure;
+	std::shared_ptr<MultisliceStructure> AtomicStructure;
 
 	//Is finite difference being used
 	bool isFD;
@@ -63,9 +62,9 @@ protected:
 
 	// Unknown
 
-	// store max/min values of images?
-	std::vector<float> diffmin;
-	std::vector<float> diffmax;
+	// store max/min values of diffraction patterns.
+	std::vector<float> diffMin;
+	std::vector<float> diffMax;
 
 	std::vector<float> clTDSk;
 
@@ -75,18 +74,21 @@ protected:
 	float FDdz; // slice thickness?
 	int NumberOfFDSlices; // number of slices?
 
-	MicroscopeSimulation() : FourierTrans(UnmanagedOpenCL::ctx, 1024, 1024)
+	MicroscopeSimulation() : FourierTrans(OCL::ctx, 1024, 1024)
 	{
 		//InitialiseSimulation(params, res, Structure, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
 	}
 
 public:
 
-	void InitialiseSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
+	void InitialiseSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
 	
 	void doMultisliceStep(int stepno, int steps, int waves);
 	void doMultisliceStepFD(int stepno, int waves);
 
 	void getDiffImage(float* data, int resolution, int wave);
 
+	int getFDSlices() { return NumberOfFDSlices; }
+	float getDiffractionMin(int i){ return diffMin[i]; }
+	float getDiffractionMax(int i){ return diffMax[i]; }
 };

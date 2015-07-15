@@ -1,10 +1,10 @@
 #include "MainSimulation.h"
 
-void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
+void MicroscopeSimulation::InitialiseSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
 {
 	//set some variables we need to keep
 	mParams = params;
-	isFD = FD;
+	isFD = FD; //already been set?
 	resolution = res;
 	AtomicStructure = Structure;
 	AtomicStructure->dz = dz;
@@ -37,7 +37,6 @@ void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, Mu
 
 
 	// Now we can set up frequencies and fourier transforms.
-
 
 	int imidx = floor(resolution / 2 + 0.5);
 	int imidy = floor(resolution / 2 + 0.5);
@@ -123,23 +122,23 @@ void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, Mu
 	// Set class variables
 	NumberOfFDSlices = nFDSlices;
 
-	clXFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float, Manual>(resolution);
-	clYFrequencies = UnmanagedOpenCL::ctx.CreateBuffer<float, Manual>(resolution);
+	clXFrequencies = OCL::ctx.CreateBuffer<float, Manual>(resolution);
+	clYFrequencies = OCL::ctx.CreateBuffer<float, Manual>(resolution);
 
 	clXFrequencies->Write(k0x);
 	clYFrequencies->Write(k0y);
 
 	// Setup Fourier Transforms
-	FourierTrans = clFourier(UnmanagedOpenCL::ctx, resolution, resolution);
+	FourierTrans = clFourier(OCL::ctx, resolution, resolution);
 
-	clTDSk.resize(resolution*resolution);
-	clImageWaveFunction = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
-	clPropagator = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
-	clPotential = UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
+	clTDSk.resize(resolution*resolution); // STEM?
+	clImageWaveFunction = OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
+	clPropagator = OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
+	clPotential = OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution);
 
-	SumReduction = clKernel(UnmanagedOpenCL::ctx, floatSumReductionsource2, 4, "clFloatSumReduction");
-	BandLimit = clKernel(UnmanagedOpenCL::ctx, BandLimitSource, 6, "clBandLimit");
-	fftShift = clKernel(UnmanagedOpenCL::ctx, fftShiftSource, 4, "clfftShift");
+	SumReduction = clKernel(OCL::ctx, floatSumReductionsource2, 4, "clFloatSumReduction"); // STEM?
+	BandLimit = clKernel(OCL::ctx, BandLimitSource, 6, "clBandLimit");
+	fftShift = clKernel(OCL::ctx, fftShiftSource, 4, "clfftShift");
 
 	//TODO: might need split here
 
@@ -161,15 +160,15 @@ void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, Mu
 
 	if (Full3D)
 	{
-		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx, opt2source, 27, "clBinnedAtomicPotentialOpt");
+		BinnedAtomicPotential = clKernel(OCL::ctx, opt2source, 27, "clBinnedAtomicPotentialOpt");
 	}
 	else if (isFD)
 	{
-		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx, fd2source, 26, "clBinnedAtomicPotentialOptFD");
+		BinnedAtomicPotential = clKernel(OCL::ctx, fd2source, 26, "clBinnedAtomicPotentialOptFD");
 	}
 	else
 	{
-		BinnedAtomicPotential = clKernel(UnmanagedOpenCL::ctx, conv2source, 26, "clBinnedAtomicPotentialConventional");
+		BinnedAtomicPotential = clKernel(OCL::ctx, conv2source, 26, "clBinnedAtomicPotentialConventional");
 	}
 
 	// Work out which blocks to load by ensuring we have the entire area around workgroup upto 5 angstroms away...
@@ -201,7 +200,7 @@ void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, Mu
 		BinnedAtomicPotential.SetArg(26, full3dints);
 
 	// Also need to generate propagator.
-	GeneratePropagator = clKernel(UnmanagedOpenCL::ctx, propsource, 8, "clGeneratePropagator");
+	GeneratePropagator = clKernel(OCL::ctx, propsource, 8, "clGeneratePropagator");
 
 	GeneratePropagator.SetArg(0, clPropagator, ArgumentType::Output);
 	GeneratePropagator.SetArg(1, clXFrequencies, ArgumentType::Input);
@@ -221,20 +220,18 @@ void MicroscopeSimulation::InitialiseSimulation(MicroscopeParameters* params, Mu
 	GeneratePropagator(WorkSize);
 
 	// And multiplication kernel
-	ComplexMultiply = clKernel(UnmanagedOpenCL::ctx, multisource, 5, "clComplexMultiply");
+	ComplexMultiply = clKernel(OCL::ctx, multisource, 5, "clComplexMultiply");
 	ComplexMultiply.SetArg(3, resolution);
 	ComplexMultiply.SetArg(4, resolution);
 
-	ewmin.resize(waves);
-	ewmax.resize(waves);
-	diffmin.resize(waves);
-	diffmax.resize(waves);
+	diffMin.resize(waves);
+	diffMax.resize(waves);
 
-	if (FD)
+	if (isFD)
 	{
 		// Need Grad Kernel and FiniteDifference also
-		GradKernel = clKernel(UnmanagedOpenCL::ctx, gradsource, 5, "clGrad");
-		FiniteDifference = clKernel(UnmanagedOpenCL::ctx, fdsource, 10, "clFiniteDifference");
+		GradKernel = clKernel(OCL::ctx, gradsource, 5, "clGrad");
+		FiniteDifference = clKernel(OCL::ctx, fdsource, 10, "clFiniteDifference");
 	}
 }
 
@@ -302,7 +299,7 @@ void MicroscopeSimulation::doMultisliceStep(int stepno, int steps, int waves)
 
 		FourierTrans(clWaveFunction2[i - 1], clWaveFunction1[i - 1], Direction::Inverse);
 	}
-	UnmanagedOpenCL::ctx.WaitForQueueFinish();
+	OCL::ctx.WaitForQueueFinish();
 };
 
 void MicroscopeSimulation::doMultisliceStepFD(int stepno, int waves)
@@ -382,10 +379,10 @@ void MicroscopeSimulation::doMultisliceStepFD(int stepno, int waves)
 		FourierTrans(clWaveFunction3[0], clWaveFunction1Plus[i - 1], Direction::Inverse);
 
 		// // Psi becomes PsiMinus
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1[i - 1]->GetBuffer(), clWaveFunction1Minus[i - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(OCL::ctx.GetIOQueue(), clWaveFunction1[i - 1]->GetBuffer(), clWaveFunction1Minus[i - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 		// // PsiPlus becomes Psi.
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1Plus[i - 1]->GetBuffer(), clWaveFunction1[i - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
+		clEnqueueCopyBuffer(OCL::ctx.GetIOQueue(), clWaveFunction1Plus[i - 1]->GetBuffer(), clWaveFunction1[i - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, nullptr, nullptr);
 
 		// // To maintain status with other versions resulting end arrays should still be as follows.
 		// // Finished wavefunction in real spaaaaaace in clWaveFunction1.
@@ -396,7 +393,7 @@ void MicroscopeSimulation::doMultisliceStepFD(int stepno, int waves)
 
 	}
 
-	UnmanagedOpenCL::ctx.WaitForQueueFinish();
+	OCL::ctx.WaitForQueueFinish();
 };
 
 void MicroscopeSimulation::getDiffImage(float* data, int resolution, int wave)
@@ -425,6 +422,6 @@ void MicroscopeSimulation::getDiffImage(float* data, int resolution, int wave)
 			minf = data[i];
 	}
 
-	diffmin[wave - 1] = minf;
-	diffmax[wave - 1] = maxf;
+	diffMin[wave - 1] = minf;
+	diffMax[wave - 1] = maxf;
 };

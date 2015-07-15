@@ -1,27 +1,28 @@
 #include "CBEDSimulation.h"
 
-void CBEDSimulation::initialiseProbeSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
+void CBEDSimulation::initialiseProbeSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
 {
-	clTDSDiff = UnmanagedOpenCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
+	isFD = FD;
+	clTDSDiff = OCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
 
 	// Initialise Wavefunctions and Create other buffers...
 	for (int i = 1; i <= waves; i++)
 	{
-		clWaveFunction1.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
-		clWaveFunction2.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
-		clWaveFunction4.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+		clWaveFunction1.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+		clWaveFunction2.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+		clWaveFunction4.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
 
 		if (isFD)
 		{
-			clWaveFunction1Minus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
-			clWaveFunction1Plus.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+			clWaveFunction1Minus.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+			clWaveFunction1Plus.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
 		}
 	}
-	clWaveFunction3.push_back(UnmanagedOpenCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
+	clWaveFunction3.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));
 
-	clTDSMaskDiff = UnmanagedOpenCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
+	clTDSMaskDiff = OCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
 
-	InitProbeWavefunction = clKernel(UnmanagedOpenCL::ctx, InitialiseSTEMWavefunctionSourceTest.c_str(), 24, "clInitProbeWavefunction");
+	InitProbeWavefunction = clKernel(OCL::ctx, InitialiseSTEMWavefunctionSourceTest.c_str(), 24, "clInitProbeWavefunction");
 
 	InitialiseSimulation(params, Structure, res, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
 }
@@ -67,6 +68,6 @@ void CBEDSimulation::initialiseProbeWaveFunction(float posx, float posy, int wav
 	if (isFD)
 	{
 		// Copy into both initialwavefunctions
-		clEnqueueCopyBuffer(UnmanagedOpenCL::ctx.GetIOQueue(), clWaveFunction1[wave - 1]->GetBuffer(), clWaveFunction1Minus[wave - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
+		clEnqueueCopyBuffer(OCL::ctx.GetIOQueue(), clWaveFunction1[wave - 1]->GetBuffer(), clWaveFunction1Minus[wave - 1]->GetBuffer(), 0, 0, resolution*resolution*sizeof(cl_float2), 0, 0, 0);
 	}
 };

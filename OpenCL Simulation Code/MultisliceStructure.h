@@ -4,6 +4,7 @@
 #include <vector>
 #include "CL\cl.h"
 #include "clWrapper.h"
+#include "CommonStructs.h"
 
 #pragma once
 

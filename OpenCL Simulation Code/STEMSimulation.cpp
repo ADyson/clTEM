@@ -1,9 +1,9 @@
 #include "STEMSimulation.h"
 
-void STEMSimulation::InitialiseSTEMSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
+void STEMSimulation::InitialiseSTEMSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
 {
 	initialiseProbeSimulation(params, Structure, resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
-	TDSMaskingAbsKernel = clKernel(UnmanagedOpenCL::ctx, floatabsbandPassSource, 8, "clFloatAbsBandPass");
+	TDSMaskingAbsKernel = clKernel(OCL::ctx, floatabsbandPassSource, 8, "clFloatAbsBandPass");
 }
 
 float STEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
@@ -49,7 +49,7 @@ float STEMSimulation::getSTEMPixel(float inner, float outer, float xc, float yc,
 
 float STEMSimulation::FloatSumReduction(clMemory<float, Manual>::Ptr Array, clWorkGroup globalSizeSum, clWorkGroup localSizeSum, int nGroups, int totalSize)
 {
-	clMemory<float, Manual>::Ptr outArray = UnmanagedOpenCL::ctx.CreateBuffer<float, Manual>(nGroups);
+	clMemory<float, Manual>::Ptr outArray = OCL::ctx.CreateBuffer<float, Manual>(nGroups);
 	SumReduction.SetArg(0, Array, ArgumentType::Input);
 
 	// Only really need to do these 3 once...

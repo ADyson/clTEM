@@ -1,7 +1,7 @@
 #include "MultisliceStructure.h"
 #include "clKernelCodes.h"
 #include <ctime>
-#include "UnmanagedOpenCL.h"
+//#include "UnmanagedOpenCL.h"
 
 MultisliceStructure::MultisliceStructure()
 {
@@ -162,13 +162,13 @@ int MultisliceStructure::SortAtoms(bool TDS)
 
 
 		//Alloc Device Memory
-		clAtomx = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
-		clAtomy = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
-		clAtomz = UnmanagedOpenCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
-		clAtomZ = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());;
+		clAtomx = OCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomy = OCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomz = OCL::ctx.CreateBuffer<float,Manual>(Atoms.size());
+		clAtomZ = OCL::ctx.CreateBuffer<int,Manual>(Atoms.size());;
 
-		clBlockIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
-		clZIDs = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
+		clBlockIDs = OCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
+		clZIDs = OCL::ctx.CreateBuffer<int,Manual>(Atoms.size());
 
 		clAtomx->Write(AtomXPos);
 		clAtomy->Write(AtomYPos);
@@ -176,7 +176,7 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomZ->Write(AtomZNum);
 
 		// Make Kernel and set parameters
-		clKernel clAtomSort = clKernel(UnmanagedOpenCL::ctx,AtomSortSource,16,"clAtomSort");
+		clKernel clAtomSort = clKernel(OCL::ctx,AtomSortSource,16,"clAtomSort");
 
 		// NOTE: DONT CHANGE UNLESS CHANGE ELSEWHERE ASWELL!
 		// Or fix it so they are all referencing same variable.
@@ -277,11 +277,11 @@ int MultisliceStructure::SortAtoms(bool TDS)
 		clAtomz->Write(AtomZPos);
 		clAtomZ->Write(AtomZNum);
 
-		clBlockStartPositions = UnmanagedOpenCL::ctx.CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
+		clBlockStartPositions = OCL::ctx.CreateBuffer<int,Manual>(nSlices*xBlocks*yBlocks+1);
 
 		clBlockStartPositions->Write(blockStartPositions);
 
-		UnmanagedOpenCL::ctx.WaitForIOQueueFinish();
+		OCL::ctx.WaitForIOQueueFinish();
 		sorted = true;
 	}
 	return 1;

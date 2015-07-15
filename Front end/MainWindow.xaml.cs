@@ -104,14 +104,15 @@ namespace SimulationGUI
         /// </summary>
         public MainWindow()
         {
-            // has to be created before gui is created to avoid errors
-            _settings = new SimulationSettings();
+
+            // This was to supress some warnings, might not be needed
+            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 
             // Initialise GPU
             InitializeComponent();
 
-            // This was to supress some warnings, might not be needed
-            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
+            // has to be created before gui is created to avoid errors
+            _settings = new SimulationSettings();
 
             //add event handlers here so they aren't called when creating controls
             txtCBEDx.TextChanged += CheckTboxValid;
@@ -271,14 +272,14 @@ namespace SimulationGUI
         {
             // Update amplitude
             _mCl.getEWImage(_ewAmplitudeDisplay.ImageData, _lockedSettings.Resolution);
-            _ewAmplitudeDisplay.Max = _mCl.getEWMax();
-            _ewAmplitudeDisplay.Min = _mCl.getEWMin();
+            _ewAmplitudeDisplay.Max = _mCl.getEWAbsoluteMax();
+            _ewAmplitudeDisplay.Min = _mCl.getEWAbsoluteMin();
             UpdateTabImage(_ewAmplitudeDisplay, x => x);
 
             // Update phase
             _mCl.getEWImage2(_ewPhaseDisplay.ImageData, _lockedSettings.Resolution);
-            _ewPhaseDisplay.Max = _mCl.getEWMax2();
-            _ewPhaseDisplay.Min = _mCl.getEWMin2();
+            _ewPhaseDisplay.Max = _mCl.getEWPhaseMax();
+            _ewPhaseDisplay.Min = _mCl.getEWPhaseMin();
             UpdateTabImage(_ewPhaseDisplay, x => x);
         }
 

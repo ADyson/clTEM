@@ -19,7 +19,6 @@ namespace ManagedOpenCLWrapper
 		void setCLdev(int i);
 		int getCLdevCount();
 		String^ getCLdevString(int i, bool getShort);
-		uint64_t getCLdevGlobalMemory();
 		int getCLMemoryUsed();
 
 		void importStructure(String^ filepath);
@@ -31,10 +30,8 @@ namespace ManagedOpenCLWrapper
 		void doMultisliceStep(int stepno, int steps);
 		void doMultisliceStep(int stepno, int steps, int waves);
 
-		void setCTEMParams(
+		void setMicroscopeParams(
 			float Voltage,
-			float Beta,
-			float Delta,
 			float Aperture,
 			float C10,
 			float C12Mag, float C12Ang,
@@ -49,10 +46,12 @@ namespace ManagedOpenCLWrapper
 			float C50,
 			float C52Mag, float C52Ang,
 			float C54Mag, float C54Ang,
-			float C56Mag, float C56Ang
+			float C56Mag, float C56Ang,
+			float Beta,
+			float Delta
 			);
 
-		void setSTEMParams(
+		void setMicroscopeParams(
 			float Voltage,
 			float Aperture,
 			float C10,
@@ -83,21 +82,19 @@ namespace ManagedOpenCLWrapper
 		void getCTEMImage(array<float>^ data, int resolution);
 
 		void getEWImage(array<float>^ data, int resolution);
-		void getEWImage(array<float>^ data, int resolution, int wave);
 		void getEWImage2(array<float>^ data, int resolution);
-		void getEWImage2(array<float>^ data, int resolution, int wave);
 		void getDiffImage(array<float>^ data, int resolution);
 		void getDiffImage(array<float>^ data, int resolution, int wave);
 
 		float getCTEMMax();
 		float getCTEMMin();
-		float getEWMax();
-		float getEWMin();
-		float getEWMax2();
-		float getEWMin2();
+		float getEWAbsoluteMax();
+		float getEWAbsoluteMin();
+		float getEWPhaseMax();
+		float getEWPhaseMin();
 		float getDiffMax();
-		float getDiffMax(int wave);
 		float getDiffMin();
+		float getDiffMax(int wave);
 		float getDiffMin(int wave);
 
 		float getSTEMPixel(float inner, float outer, float xc, float yc, int wave);

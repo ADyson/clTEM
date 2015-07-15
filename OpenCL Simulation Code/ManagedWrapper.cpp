@@ -7,17 +7,17 @@ namespace ManagedOpenCLWrapper
 	ManagedOpenCL::ManagedOpenCL()
 	{
 		_UMOpenCL = new UnmanagedOpenCL();
-	};
+	}
 
 	ManagedOpenCL::~ManagedOpenCL()
 	{
 		// do nothing
-	};
+	}
 
 	void ManagedOpenCL::setCLdev(int i)
 	{
 		_UMOpenCL->setCLdev(i);
-	};
+	}
 
 	int ManagedOpenCL::getCLdevCount()
 	{
@@ -30,11 +30,6 @@ namespace ManagedOpenCLWrapper
 		return clix::marshalString<clix::E_ANSI>(UMstring);
 	}
 
-	uint64_t ManagedOpenCL::getCLdevGlobalMemory()
-	{
-		return _UMOpenCL->getCLdevGlobalMemory();
-	}
-
 	int ManagedOpenCL::getCLMemoryUsed()
 	{
 		return _UMOpenCL->getCLMemoryUsed();
@@ -45,7 +40,7 @@ namespace ManagedOpenCLWrapper
 		using namespace clix;
 		std::string cfilename = marshalString<E_ANSI>(filepath);
 		_UMOpenCL->importStructure(cfilename);
-	};
+	}
 
 	void ManagedOpenCL::uploadParameterisation()
 	{
@@ -60,7 +55,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::getStructureDetails(Int32% Len, float% MinX, float% MinY, float% MinZ, float% MaxX, float% MaxY, float% MaxZ)
 	{
@@ -84,9 +79,10 @@ namespace ManagedOpenCLWrapper
 
 	void ManagedOpenCL::getNumberSlices(Int32% Slices, bool FD)
 	{
+		// TODO: could this be part of TS class?
 		if (FD)
 		{
-			int _NSlices = _UMOpenCL->TS->NumberOfFDSlices;
+			int _NSlices = _UMOpenCL->TS->getFDSlices();
 			Slices = _NSlices;
 		}
 		else
@@ -94,7 +90,7 @@ namespace ManagedOpenCLWrapper
 			int _NSlices = _UMOpenCL->Structure->nSlices;
 			Slices = _NSlices;
 		}
-	};
+	}
 
 	void ManagedOpenCL::sortStructure(bool tds)
 	{
@@ -110,7 +106,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::doMultisliceStep(int stepno, int steps)
 	{
@@ -125,7 +121,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::doMultisliceStep(int stepno, int steps, int waves)
 	{
@@ -140,12 +136,10 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
-	void ManagedOpenCL::setCTEMParams(
+	void ManagedOpenCL::setMicroscopeParams(
 		float Voltage,
-		float Beta,
-		float Delta,
 		float Aperture,
 		float C10,
 		float C12Mag, float C12Ang,
@@ -160,13 +154,13 @@ namespace ManagedOpenCLWrapper
 		float C50,
 		float C52Mag, float C52Ang,
 		float C54Mag, float C54Ang,
-		float C56Mag, float C56Ang
+		float C56Mag, float C56Ang,
+		float Beta,
+		float Delta
 		)
 	{
-		_UMOpenCL->setCTEMParams(
+		_UMOpenCL->setMicroscopeParams(
 				Voltage,
-				Beta,
-				Delta,
 				Aperture,
 				C10,
 				C12Mag, C12Ang,
@@ -181,11 +175,13 @@ namespace ManagedOpenCLWrapper
 				C50,
 				C52Mag, C52Ang,
 				C54Mag, C54Ang,
-				C56Mag, C56Ang
+				C56Mag, C56Ang,
+				Beta,
+				Delta
 				);
-	};
+	}
 
-	void ManagedOpenCL::setSTEMParams(
+	void ManagedOpenCL::setMicroscopeParams(
 		float Voltage,
 		float Aperture,
 		float C10,
@@ -204,7 +200,7 @@ namespace ManagedOpenCLWrapper
 		float C56Mag, float C56Ang
 		)
 	{
-		_UMOpenCL->setSTEMParams(
+		_UMOpenCL->setMicroscopeParams(
 			Voltage,
 			Aperture,
 			C10,
@@ -222,7 +218,7 @@ namespace ManagedOpenCLWrapper
 			C54Mag, C54Ang,
 			C56Mag, C56Ang
 			);
-	};
+	}
 
 	void ManagedOpenCL::initialiseCTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 	{
@@ -237,7 +233,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::initialiseSTEMSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
 	{
@@ -252,7 +248,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy)
 	{
@@ -267,7 +263,7 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 	
 	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy, int wave)
 	{
@@ -282,114 +278,102 @@ namespace ManagedOpenCLWrapper
 			System::String^ sys_str = gcnew System::String(message.c_str());
 			throw gcnew System::Exception(sys_str);
 		}
-	};
+	}
 
 	void ManagedOpenCL::simulateCTEM()
 	{
 		_UMOpenCL->TS->simulateCTEM();
-	};
+	}
 
 	void ManagedOpenCL::simulateCTEM(int detector, int binning, float doseperpix, float conversionfactor)
 	{
 		_UMOpenCL->TS->simulateCTEM(detector, binning, doseperpix, conversionfactor);
-	};
+	}
 
 	void ManagedOpenCL::getCTEMImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->getCTEMImage(pdata, resolution);
-	};
+	}
 
 	// possibly phase
 	void ManagedOpenCL::getEWImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->getEWImage(pdata, resolution, 1);
-	};
-
-	void ManagedOpenCL::getEWImage(array<float>^ data, int resolution, int wave)
-	{
-		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->getEWImage(pdata, resolution, wave);
-	};
+		_UMOpenCL->TS->getEWAbsoluteImage(pdata, resolution);
+	}
 
 	// possibly amplitude
 	void ManagedOpenCL::getEWImage2(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->getEWImage2(pdata, resolution, 1);
-	};
-
-	void ManagedOpenCL::getEWImage2(array<float>^ data, int resolution, int wave)
-	{
-		pin_ptr<float> pdata = &data[0];
-		_UMOpenCL->TS->getEWImage2(pdata, resolution, wave);
-	};
+		_UMOpenCL->TS->getEWPhaseImage(pdata, resolution);
+	}
 
 	void ManagedOpenCL::getDiffImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->getDiffImage(pdata, resolution, 1);
-	};
+	}
 
 	void ManagedOpenCL::getDiffImage(array<float>^ data, int resolution, int wave)
 	{
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->getDiffImage(pdata, resolution, wave);
-	};
+	}
 
 	float ManagedOpenCL::getCTEMMax()
 	{
-		return _UMOpenCL->TS->imagemax;
-	};
+		return _UMOpenCL->TS->getImageMax();
+	}
 
 	float ManagedOpenCL::getCTEMMin()
 	{
-		return _UMOpenCL->TS->imagemin;
-	};
+		return _UMOpenCL->TS->getImageMin();
+	}
 
-	float ManagedOpenCL::getEWMax()
+	float ManagedOpenCL::getEWAbsoluteMax()
 	{
-		return _UMOpenCL->TS->ewmax[0];
-	};
+		return _UMOpenCL->TS->getEWAbsoluteMax();
+	}
 
-	float ManagedOpenCL::getEWMin()
+	float ManagedOpenCL::getEWAbsoluteMin()
 	{
-		return _UMOpenCL->TS->ewmin[0];
-	};
+		return _UMOpenCL->TS->getEWAbsoluteMin();
+	}
 
-	float ManagedOpenCL::getEWMax2()
+	float ManagedOpenCL::getEWPhaseMax()
 	{
-		return _UMOpenCL->TS->ewmax2[0];
-	};
+		return _UMOpenCL->TS->getEWPhaseMax();
+	}
 
-	float ManagedOpenCL::getEWMin2()
+	float ManagedOpenCL::getEWPhaseMin()
 	{
-		return _UMOpenCL->TS->ewmin2[0];
-	};
+		return _UMOpenCL->TS->getEWPhaseMin();
+	}
 
 	float ManagedOpenCL::getDiffMax()
 	{
-		return _UMOpenCL->TS->diffmax[0];
-	};
-
-	float ManagedOpenCL::getDiffMax(int wave)
-	{
-		return _UMOpenCL->TS->diffmax[wave - 1];
-	};
+		return _UMOpenCL->TS->getDiffractionMax(0);
+	}
 
 	float ManagedOpenCL::getDiffMin()
 	{
-		return _UMOpenCL->TS->diffmin[0];
-	};
+		return _UMOpenCL->TS->getDiffractionMin(0);
+	}
+
+	float ManagedOpenCL::getDiffMax(int wave)
+	{
+		return _UMOpenCL->TS->getDiffractionMax(wave - 1);
+	}
 
 	float ManagedOpenCL::getDiffMin(int wave)
 	{
-		return _UMOpenCL->TS->diffmin[wave - 1];
-	};
+		return _UMOpenCL->TS->getDiffractionMin(wave - 1);
+	}
 
 	float ManagedOpenCL::getSTEMPixel(float inner, float outer, float xc, float yc, int wave)
 	{
 		return _UMOpenCL->TS->getSTEMPixel(inner, outer, xc, yc, wave);
-	};
+	}
 }

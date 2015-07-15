@@ -85,7 +85,7 @@ namespace SimulationGUI
                     }
 
                     // Just select the first tab for convenience
-                    //_lockedDetectorDisplay.Tab.IsSelected = true;
+                    //_lockedDetectorDisplay.Tab.IsSelected = true;e
                     SaveImageButton.IsEnabled = true;
                 }
                 else if (_lockedSettings.SimMode == 1)
@@ -147,29 +147,10 @@ namespace SimulationGUI
             var M = _lockedSettings.Microscope;
 
             // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(
+            _mCl.setMicroscopeParams(
                 M.Voltage.Val,
                 M.Alpha.Val,
                 M.Delta.Val,
-                M.Aperture.Val,
-                M.C10.Val,
-                M.C12Mag.Val, M.C12Ang.Val,
-                M.C21Mag.Val, M.C21Ang.Val,
-                M.C23Mag.Val, M.C23Ang.Val,
-                M.C30.Val,
-                M.C32Mag.Val, M.C32Ang.Val,
-                M.C34Mag.Val, M.C34Ang.Val,
-                M.C41Mag.Val, M.C41Ang.Val,
-                M.C43Mag.Val, M.C43Ang.Val,
-                M.C45Mag.Val, M.C45Ang.Val,
-                M.C50.Val,
-                M.C52Mag.Val, M.C52Ang.Val,
-                M.C54Mag.Val, M.C54Ang.Val,
-                M.C56Mag.Val, M.C56Ang.Val
-                );
-
-            _mCl.setSTEMParams(
-                M.Voltage.Val,
                 M.Aperture.Val,
                 M.C10.Val,
                 M.C12Mag.Val, M.C12Ang.Val,
@@ -505,7 +486,7 @@ namespace SimulationGUI
             var M = _ctemDisplay.SimParams.Microscope;
 
             // Upload Simulation Parameters to c++
-            _mCl.setCTEMParams(
+            _mCl.setMicroscopeParams(
                 M.Voltage.Val,
                 M.Alpha.Val,
                 M.Delta.Val,
