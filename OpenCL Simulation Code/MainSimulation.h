@@ -8,15 +8,20 @@
 //TODO: move all these to .cl files?
 #include "clKernelCodes2.h"
 
-class SimulationInitialisation
+
+// Class containing mthods for all/multiple simulation types.
+// The bulk of the code is in the initialisation, simulation specific initialisation is performed in their respective classes
+// (which should inherit from this)
+class MicroscopeSimulation
 {
 protected:
 
+	// these pointers can be made into smart objects later
 	//pointer to struct holding the needed parameters
-	std::unique_ptr<MicroscopeParameters> mParams;
+	MicroscopeParameters* mParams;
 
 	//Pointer to container of the structure
-	std::unique_ptr<MultisliceStructure> AtomicStructure;
+	MultisliceStructure* AtomicStructure;
 
 	//Is finite difference being used
 	bool isFD;
@@ -25,12 +30,11 @@ protected:
 	//Simulation pixel scale
 	float pixelscale;
 	//Wavelength for the voltage used
-	//float wavelength // Can be retrieved from params? (quickly?)
+	float wavelength; // Can be retrieved from params? (quickly?)
 	//upper value to mask above in reciprocal space
 	//float bandwidthkmax;
 
 	// OpenCL
-
 	std::vector<clMemory<cl_float2, Manual>::Ptr> clWaveFunction1;
 	std::vector<clMemory<cl_float2, Manual>::Ptr> clWaveFunction2;
 	std::vector<clMemory<cl_float2, Manual>::Ptr> clWaveFunction3;
@@ -52,16 +56,14 @@ protected:
 	clKernel BinnedAtomicPotential;
 	clKernel GeneratePropagator;
 	clKernel ComplexMultiply;
-
-
-
+	// FD Only
+	clKernel GradKernel;
+	clKernel FiniteDifference;
 
 
 	// Unknown
 
 	// store max/min values of images?
-	std::vector<float> ewmin;
-	std::vector<float> ewmax;
 	std::vector<float> diffmin;
 	std::vector<float> diffmax;
 
@@ -73,7 +75,18 @@ protected:
 	float FDdz; // slice thickness?
 	int NumberOfFDSlices; // number of slices?
 
+	MicroscopeSimulation() : FourierTrans(UnmanagedOpenCL::ctx, 1024, 1024)
+	{
+		//InitialiseSimulation(params, res, Structure, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
+	}
+
 public:
-	SimulationInitialisation() : FourierTrans(UnmanagedOpenCL::ctx, 1024, 1024){}
-	void InitialiseSimulation(MicroscopeParameters* params, int res, MultisliceStructure* Structure, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
+
+	void InitialiseSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
+	
+	void doMultisliceStep(int stepno, int steps, int waves);
+	void doMultisliceStepFD(int stepno, int waves);
+
+	void getDiffImage(float* data, int resolution, int wave);
+
 };

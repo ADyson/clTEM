@@ -3,7 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "TEMSimulation.h"
+//#include "TEMSimulation.h"
+#include "SimulationWrapper.h"
 #include "CommonStructs.h"
 #include "clWrapper.h"
 #include <memory>

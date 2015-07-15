@@ -1,22 +1,23 @@
 #pragma once
 
-#include "Initialisation.h"
+#include "MainSimulation.h"
 
 //TODO: split into STEM specific stuff too
-class CBEDSimulation : public virtual SimulationInitialisation
+class CBEDSimulation : public virtual MicroscopeSimulation
 {
+protected:
 	//Probe specific OpenCL stuff
 	clMemory<float, Manual>::Ptr clTDSDiff;
 
-	clKernel MultiplyCL;
-	clKernel MaskingKernel;
-	clKernel TDSMaskingKernel;
-	clKernel TDSMaskingAbsKernel;
-
-	clKernel InitialiseProbeWavefunction;
-	clKernel WFabsolute;
+	clKernel InitProbeWavefunction;
 
 	clMemory<float, Manual>::Ptr clTDSMaskDiff;
 
-	void initialiseProbeSimulation(int waves);
+	CBEDSimulation(){};
+public:
+
+	void initialiseProbeSimulation(MicroscopeParameters* params, MultisliceStructure* Structure, int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
+
+	void initialiseProbeWaveFunction(float posx, float posy, int wave);
+
 };
