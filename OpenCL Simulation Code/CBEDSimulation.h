@@ -7,7 +7,7 @@ class CBEDSimulation : public virtual MicroscopeSimulation
 {
 protected:
 	//Probe specific OpenCL stuff
-	clMemory<float, Manual>::Ptr clTDSDiff;
+	//clMemory<float, Manual>::Ptr clTDSDiff;
 
 	clKernel InitProbeWavefunction;
 

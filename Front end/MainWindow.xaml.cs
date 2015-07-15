@@ -104,15 +104,14 @@ namespace SimulationGUI
         /// </summary>
         public MainWindow()
         {
+            // has to be created before gui is created to avoid errors
+            _settings = new SimulationSettings();
 
             // This was to supress some warnings, might not be needed
             PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 
             // Initialise GPU
             InitializeComponent();
-
-            // has to be created before gui is created to avoid errors
-            _settings = new SimulationSettings();
 
             //add event handlers here so they aren't called when creating controls
             txtCBEDx.TextChanged += CheckTboxValid;

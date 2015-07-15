@@ -250,6 +250,21 @@ namespace ManagedOpenCLWrapper
 		}
 	}
 
+	void ManagedOpenCL::initialiseCBEDSimulation(int resolution, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves)
+	{
+		try
+		{
+			_UMOpenCL->initialiseCBEDSimulation(resolution, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
+		}
+		catch (std::exception ex)
+		{
+			// Get Message, pass onwards
+			std::string message = ex.what();
+			System::String^ sys_str = gcnew System::String(message.c_str());
+			throw gcnew System::Exception(sys_str);
+		}
+	}
+
 	void ManagedOpenCL::initialiseSTEMWaveFunction(float posx, float posy)
 	{
 		try
@@ -296,14 +311,14 @@ namespace ManagedOpenCLWrapper
 		_UMOpenCL->TS->getCTEMImage(pdata, resolution);
 	}
 
-	// possibly phase
+	// possibly amplitude
 	void ManagedOpenCL::getEWImage(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];
 		_UMOpenCL->TS->getEWAbsoluteImage(pdata, resolution);
 	}
 
-	// possibly amplitude
+	// possibly phase
 	void ManagedOpenCL::getEWImage2(array<float>^ data, int resolution)
 	{
 		pin_ptr<float> pdata = &data[0];

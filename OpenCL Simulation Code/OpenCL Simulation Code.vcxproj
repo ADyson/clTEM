@@ -76,8 +76,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\AMD APP SDK\2.9\include;C:\Program Files %28x86%29\AMD\clAmdFft\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\AMD APP SDK\2.9\lib\x86_64;C:\Program Files %28x86%29\AMD\clAmdFft\lib64\import;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(AMDAPPSDKROOT)\include;$(CLFFTROOT)\include;$(CLWRAPROOT)\include;$(BOOST_1_57_0);$(IncludePath)</IncludePath>
+    <LibraryPath>$(AMDAPPSDKROOT)\lib\x86_64;$(CLFFTROOT)\lib64;$(CLWRAPROOT)\lib64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -108,10 +108,11 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenCL.lib; clFFT.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenCL.lib; clFFT.lib; clWrapper.lib;</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CL" "$(SolutionDir)GPU TEM-STEM Simulation\bin\x64\Debug\"  /s /i /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -140,21 +141,30 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CBEDSimulation.h" />
     <ClInclude Include="clix.h" />
     <ClInclude Include="clKernelCodes.h" />
     <ClInclude Include="clKernelCodes2.h" />
     <ClInclude Include="CommonStructs.h" />
+    <ClInclude Include="CTEMSimulation.h" />
+    <ClInclude Include="MainSimulation.h" />
     <ClInclude Include="mtf.h" />
+    <ClInclude Include="SimulationWrapper.h" />
+    <ClInclude Include="STEMSimulation.h" />
     <ClInclude Include="stringFunc.h" />
     <ClInclude Include="ManagedWrapper.h" />
     <ClInclude Include="MultisliceStructure.h" />
-    <ClInclude Include="TEMSimulation.h" />
     <ClInclude Include="UnmanagedOpenCL.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBEDSimulation.cpp" />
+    <ClCompile Include="clKernelCodes2.cpp" />
+    <ClCompile Include="CommonStructs.cpp" />
+    <ClCompile Include="CTEMSimulation.cpp" />
+    <ClCompile Include="MainSimulation.cpp" />
     <ClCompile Include="ManagedWrapper.cpp" />
     <ClCompile Include="MultisliceStructure.cpp" />
-    <ClCompile Include="TEMSimulation.cpp" />
+    <ClCompile Include="STEMSimulation.cpp" />
     <ClCompile Include="UnmanagedOpenCL.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

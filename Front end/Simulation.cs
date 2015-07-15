@@ -246,7 +246,7 @@ namespace SimulationGUI
         private void SimulateCBED(ref ProgressReporter progressReporter, ref Stopwatch timer, ref CancellationToken ct)
         {
             // Initialise probe simulation
-            _mCl.initialiseSTEMSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
+            _mCl.initialiseCBEDSimulation(_lockedSettings.Resolution, _lockedSettings.SimArea.StartX, _lockedSettings.SimArea.StartY, _lockedSettings.SimArea.EndX, _lockedSettings.SimArea.EndY,
                                           _lockedSettings.IsFull3D, _lockedSettings.IsFiniteDiff, _lockedSettings.SliceThickness.Val, _lockedSettings.Integrals.Val, 1);
 
             // Correct probe position for when the simulation region has been changed
