@@ -3,6 +3,7 @@
 void CBEDSimulation::initialiseProbeSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves = 1)
 {
 	isFD = FD;
+	resolution = res;
 	//clTDSDiff = OCL::ctx.CreateBuffer<cl_float, Manual>(resolution*resolution);
 
 	// Initialise Wavefunctions and Create other buffers...

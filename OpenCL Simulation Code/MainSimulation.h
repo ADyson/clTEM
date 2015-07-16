@@ -74,7 +74,7 @@ protected:
 	float FDdz; // slice thickness?
 	int NumberOfFDSlices; // number of slices?
 
-	MicroscopeSimulation() : FourierTrans(OCL::ctx, 1024, 1024)
+	MicroscopeSimulation() : FourierTrans(OCL::ctx, 1024, 1024), mParams(new MicroscopeParameters)
 	{
 		//InitialiseSimulation(params, res, Structure, startx, starty, endx, endy, Full3D, FD, dz, full3dints, waves);
 	}
@@ -82,7 +82,12 @@ protected:
 public:
 
 	void InitialiseSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints, int waves);
-	
+
+	void updateParams(std::shared_ptr<MicroscopeParameters> params)
+	{
+		mParams = params;
+	}
+
 	void doMultisliceStep(int stepno, int steps, int waves);
 	void doMultisliceStepFD(int stepno, int waves);
 

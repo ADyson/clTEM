@@ -149,8 +149,6 @@ namespace SimulationGUI
             // Upload Simulation Parameters to c++
             _mCl.setMicroscopeParams(
                 M.Voltage.Val,
-                M.Alpha.Val,
-                M.Delta.Val,
                 M.Aperture.Val,
                 M.C10.Val,
                 M.C12Mag.Val, M.C12Ang.Val,
@@ -165,7 +163,9 @@ namespace SimulationGUI
                 M.C50.Val,
                 M.C52Mag.Val, M.C52Ang.Val,
                 M.C54Mag.Val, M.C54Ang.Val,
-                M.C56Mag.Val, M.C56Ang.Val
+                M.C56Mag.Val, M.C56Ang.Val,
+                M.Alpha.Val,
+                M.Delta.Val
                 );
 
             // Add Pixelscale to image tabs and diffraction then run simulation
@@ -488,8 +488,6 @@ namespace SimulationGUI
             // Upload Simulation Parameters to c++
             _mCl.setMicroscopeParams(
                 M.Voltage.Val,
-                M.Alpha.Val,
-                M.Delta.Val,
                 M.Aperture.Val,
                 M.C10.Val,
                 M.C12Mag.Val, M.C12Ang.Val,
@@ -504,7 +502,9 @@ namespace SimulationGUI
                 M.C50.Val,
                 M.C52Mag.Val, M.C52Ang.Val,
                 M.C54Mag.Val, M.C54Ang.Val,
-                M.C56Mag.Val, M.C56Ang.Val
+                M.C56Mag.Val, M.C56Ang.Val,
+                M.Alpha.Val,
+                M.Delta.Val
                 );
 
             // Calculate Dose Per Pixel

@@ -4,6 +4,8 @@
 
 void CTEMSimulation::initialiseCTEMSimulation(std::shared_ptr<MicroscopeParameters> params, std::shared_ptr<MultisliceStructure> Structure, int res, float startx, float starty, float endx, float endy, bool Full3D, bool FD, float dz, int full3dints)
 {
+	resolution = res;
+
 	isFD = FD;
 	// Initialise Wavefunctions and Create other buffers...
 	clWaveFunction1.push_back(OCL::ctx.CreateBuffer<cl_float2, Manual>(resolution*resolution));

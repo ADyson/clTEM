@@ -27,8 +27,6 @@ public:
 	UnmanagedOpenCL();
 	~UnmanagedOpenCL();
 
-	//static clContext ctx;
-
 	void setCLdev(int i); //SetDevice
 	int getCLdevCount();
 	std::string getCLdevString(int i, bool getShort);
